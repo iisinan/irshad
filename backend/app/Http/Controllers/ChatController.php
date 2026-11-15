@@ -37,6 +37,26 @@ class ChatController extends Controller
             ->values()
             ->all();
 
+        $quickResult = $chatbotService->quickPrecheck($cleanMessage, true);
+        if ($quickResult !== null) {
+            return response()->json([
+                'assistant_message' => [
+                    'id' => null,
+                    'role' => 'assistant',
+                    'content' => $quickResult['reply'],
+                    'metadata' => [
+                        'cited_symbols' => $quickResult['cited_symbols'],
+                        'matched_companies' => [],
+                        'matched_resources' => [],
+                        'suggested_followups' => $quickResult['suggested_followups'],
+                        'needs_human_support' => $quickResult['needs_human_support'],
+                        'provider' => $quickResult['provider'],
+                    ],
+                    'created_at' => now()->toISOString(),
+                ],
+            ]);
+        }
+
         $contextBundle = $contextService->buildPublic($cleanMessage);
         $aiResult = $chatbotService->replyPublic($cleanMessage, $history, $contextBundle);
 
@@ -126,8 +146,17 @@ class ChatController extends Controller
             'content' => $cleanMessage,
         ]);
 
-        $contextBundle = $contextService->build($user, $cleanMessage);
-        $aiResult = $chatbotService->reply($conversation, $cleanMessage, $contextBundle);
+        $quickResult = $chatbotService->quickPrecheck($cleanMessage, false);
+        if ($quickResult !== null) {
+            $contextBundle = [
+                'matched_companies' => [],
+                'matched_resources' => [],
+            ];
+            $aiResult = $quickResult;
+        } else {
+            $contextBundle = $contextService->build($user, $cleanMessage);
+            $aiResult = $chatbotService->reply($conversation, $cleanMessage, $contextBundle);
+        }
 
         $metadata = [
             'cited_symbols' => $aiResult['cited_symbols'],

@@ -135,7 +135,63 @@ class ChatAssistantTest extends TestCase
         $migration->up();
     }
 
-    public function test_authenticated_user_receives_grounded_stock_reply_and_persists_history(): void
+    public function test_authenticated_user_receives_grounded_kb_reply_and_persists_history(): void
+    {
+        Config::set('services.gemini.key', 'test-gemini-key');
+
+        Http::fake([
+            'generativelanguage.googleapis.com/*' => Http::response([
+                'candidates' => [
+                    [
+                        'content' => [
+                            'parts' => [
+                                [
+                                    'text' => json_encode([
+                                        'reply' => 'Under AAOIFI rules, the debt ratio must stay under 30% alongside business activity filters.',
+                                        'suggested_followups' => ['How do I purify dividends?'],
+                                        'needs_human_support' => false,
+                                    ]),
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ], 200),
+        ]);
+
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/v1/chat/message', [
+            'message' => 'Why does AAOIFI check both business activity and financial ratios?',
+        ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('user_message.role', 'user')
+            ->assertJsonPath('assistant_message.role', 'assistant')
+            ->assertJsonPath('assistant_message.metadata.cited_symbols', [])
+            ->assertJsonPath('assistant_message.metadata.provider', 'gemini');
+
+        Http::assertSent(function ($request) {
+            $systemText = $request['systemInstruction']['parts'][0]['text'] ?? '';
+
+            return str_contains($systemText, 'AAOIFI Shariah Screening Methodology')
+                && str_contains($systemText, 'STRICT COMPLIANCE POLICY');
+        });
+
+        $conversationId = $response->json('conversation.id');
+
+        $second = $this->postJson('/api/v1/chat/message', [
+            'conversation_id' => $conversationId,
+            'message' => 'What about Zakat when my Hawl arrives?',
+        ]);
+
+        $second->assertStatus(201);
+        $this->assertDatabaseCount('chat_conversations', 1);
+        $this->assertDatabaseCount('chat_messages', 4);
+    }
+
+    public function test_stock_compliance_questions_are_declined_without_calling_llm(): void
     {
         Config::set('services.gemini.key', 'test-gemini-key');
 
@@ -159,57 +215,21 @@ class ChatAssistantTest extends TestCase
             'final_status' => 'compliant',
         ]);
 
-        Http::fake([
-            'generativelanguage.googleapis.com/*' => Http::response([
-                'candidates' => [
-                    [
-                        'content' => [
-                            'parts' => [
-                                [
-                                    'text' => json_encode([
-                                        'reply' => 'MTN Nigeria (**MTNN**) is compliant under AAOIFI rules with a 18.25% debt ratio.',
-                                        'cited_symbols' => ['MTNN'],
-                                        'suggested_followups' => ['How do I purify MTNN dividends?'],
-                                        'needs_human_support' => false,
-                                    ]),
-                                ],
-                            ],
-                        ],
-                    ],
-                ],
-            ], 200),
-        ]);
+        Http::fake();
 
-        $user = User::factory()->create();
-        Sanctum::actingAs($user);
+        foreach (['Is MTN halal?', 'Is MTNN halal under AAOIFI?', 'Which NGX stocks are halal?', 'Check MTNN compliance status'] as $query) {
+            $res = $this->postJson('/api/v1/chat/public', ['message' => $query]);
 
-        $response = $this->postJson('/api/v1/chat/message', [
-            'message' => 'Is MTNN halal under AAOIFI?',
-        ]);
+            $res->assertStatus(200)
+                ->assertJsonPath('assistant_message.metadata.provider', 'policy')
+                ->assertJsonPath('assistant_message.metadata.cited_symbols', []);
 
-        $response->assertStatus(201)
-            ->assertJsonPath('user_message.role', 'user')
-            ->assertJsonPath('assistant_message.role', 'assistant')
-            ->assertJsonPath('assistant_message.metadata.cited_symbols.0', 'MTNN')
-            ->assertJsonPath('assistant_message.metadata.provider', 'gemini');
+            $content = $res->json('assistant_message.content');
+            $this->assertStringContainsString('Market Screener', $content);
+            $this->assertStringNotContainsString('18.25%', $content);
+        }
 
-        Http::assertSent(function ($request) {
-            $systemText = $request['systemInstruction']['parts'][0]['text'] ?? '';
-
-            return str_contains($systemText, 'MTN Nigeria Communications (MTNN)')
-                && str_contains($systemText, '18.25%');
-        });
-
-        $conversationId = $response->json('conversation.id');
-
-        $second = $this->postJson('/api/v1/chat/message', [
-            'conversation_id' => $conversationId,
-            'message' => 'Thanks, what about Zakat?',
-        ]);
-
-        $second->assertStatus(201);
-        $this->assertDatabaseCount('chat_conversations', 1);
-        $this->assertDatabaseCount('chat_messages', 4);
+        Http::assertNothingSent();
     }
 
     public function test_user_cannot_access_or_escalate_another_users_conversation(): void
@@ -272,16 +292,9 @@ class ChatAssistantTest extends TestCase
         Notification::assertSentTo($admin, AdminSuggestionNotification::class);
     }
 
-    public function test_public_visitor_receives_kb_and_stock_reply_without_db_persistence(): void
+    public function test_public_visitor_receives_kb_reply_without_db_persistence(): void
     {
         Config::set('services.gemini.key', 'test-gemini-key');
-
-        Company::create([
-            'name' => 'Presco Plc',
-            'symbol' => 'PRESCO',
-            'sector' => 'Agriculture',
-            'current_status' => 'compliant',
-        ]);
 
         Http::fake([
             'generativelanguage.googleapis.com/*' => Http::response([
@@ -291,9 +304,8 @@ class ChatAssistantTest extends TestCase
                             'parts' => [
                                 [
                                     'text' => json_encode([
-                                        'reply' => 'Presco Plc (**PRESCO**) is listed as compliant in our AAOIFI database.',
-                                        'cited_symbols' => ['PRESCO'],
-                                        'suggested_followups' => ['What plans does Irshad offer?'],
+                                        'reply' => 'Irshad offers Miftah (Free), Pro, and Max plans under Pricing.',
+                                        'suggested_followups' => ['How do Zakat & Hawl work?'],
                                         'needs_human_support' => false,
                                     ]),
                                 ],
@@ -305,7 +317,7 @@ class ChatAssistantTest extends TestCase
         ]);
 
         $response = $this->postJson('/api/v1/chat/public', [
-            'message' => 'Is PRESCO halal and how do plans work?',
+            'message' => 'Can you compare paid tiers and portfolio alerts?',
             'history' => [
                 ['role' => 'user', 'content' => 'Salam'],
                 ['role' => 'assistant', 'content' => 'As-salamu alaykum! How can I help?'],
@@ -314,14 +326,13 @@ class ChatAssistantTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonPath('assistant_message.role', 'assistant')
-            ->assertJsonPath('assistant_message.metadata.cited_symbols.0', 'PRESCO')
+            ->assertJsonPath('assistant_message.metadata.cited_symbols', [])
             ->assertJsonPath('assistant_message.metadata.provider', 'gemini');
 
         Http::assertSent(function ($request) {
             $systemText = $request['systemInstruction']['parts'][0]['text'] ?? '';
 
             return str_contains($systemText, 'VISITOR CONTEXT (PUBLIC)')
-                && str_contains($systemText, 'Presco Plc (PRESCO)')
                 && ! str_contains($systemText, 'Recorded Holdings');
         });
 

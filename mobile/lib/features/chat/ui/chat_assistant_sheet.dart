@@ -27,9 +27,9 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
 
   static const List<String> _starterPrompts = [
     'How does AAOIFI screening work?',
-    'Is MTNN Halal?',
     'How do Zakat & Hawl work?',
     'How does dividend purification work?',
+    'What plans & pricing does Irshad offer?',
     'I need billing or account help',
   ];
 
@@ -273,7 +273,7 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
                           ),
                         ),
                         Text(
-                          _showingHistory ? 'Tap a thread to continue' : 'AAOIFI, stocks, Zakat & support',
+                          _showingHistory ? 'Tap a thread to continue' : 'AAOIFI guide, Zakat & support',
                           style: TextStyle(fontSize: 11, color: context.textMuted, fontWeight: FontWeight.w600),
                         ),
                       ],
@@ -496,7 +496,7 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
                 border: Border.all(color: context.divider),
               ),
               child: Text(
-                'As-salamu alaykum! Ask me about any NGX stock’s Shariah compliance, AAOIFI ratios, Hawl & Zakat, dividend purification, or your account.',
+                'As-salamu alaykum! Ask me how AAOIFI screening works, Hawl & Zakat tracking, dividend purification, or your Irshad account.',
                 style: TextStyle(fontSize: 13.5, color: context.textDark, height: 1.5),
               ),
             ),

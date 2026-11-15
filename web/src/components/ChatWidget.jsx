@@ -30,9 +30,9 @@ import { toastSuccess, toastError } from '../utils/toast';
 
 const STARTER_PROMPTS = [
   'How does AAOIFI screening work?',
-  'Is MTNN Halal?',
   'How do Zakat & Hawl work?',
   'How does dividend purification work?',
+  'What plans & pricing does Irshad offer?',
   'I need billing or account help',
 ];
 
@@ -301,7 +301,7 @@ export default function ChatWidget() {
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>
                   {view === 'history'
                     ? 'Select a thread to continue'
-                    : 'AAOIFI, stocks, Zakat & support'}
+                    : 'AAOIFI guide, Zakat & support'}
                 </div>
               </div>
             </div>
@@ -436,7 +436,7 @@ export default function ChatWidget() {
                         color: 'var(--text-dark)',
                       }}
                     >
-                      As-salamu alaykum! Ask me about any NGX stock's Shariah compliance, AAOIFI ratios, Hawl & Zakat, dividend purification, or your account.
+                      As-salamu alaykum! Ask me how AAOIFI screening works, Hawl & Zakat tracking, dividend purification, or your Irshad account & billing.
                     </div>
                     <div style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-muted)', paddingLeft: '2px' }}>
                       QUICK QUESTIONS

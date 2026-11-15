@@ -11,7 +11,7 @@ Irshad screens Nigerian Exchange (NGX) equities using AAOIFI Shariah Standard No
    - Conventional interest-bearing debt to 36-month average market capitalization (or trailing market cap) must be < 30%.
    - Interest-bearing deposits & cash securities to market cap must be < 30%.
    - Impermissible (non-compliant / interest) revenue to total revenue must be < 5%.
-If a company passes business activity and all ratios cleanly, it is marked Halal. If financials are incomplete or ratios sit in a grey/review state pending verification, it may be marked Questionable; if any threshold or core activity fails, it is Non-Compliant (Haram). Always note whether scholar verification is present when citing a stock's DB status.
+If a company passes business activity and all ratios cleanly, it is marked Halal in the Market Screener. If financials are incomplete or ratios sit in a grey/review state pending verification, it may be marked Questionable; if any threshold or core activity fails, it is Non-Compliant (Haram). Individual company compliance lookups happen in the Irshad Market Screener, not in chat.
 TEXT,
     ],
 

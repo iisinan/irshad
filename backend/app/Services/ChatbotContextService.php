@@ -7,6 +7,7 @@ use App\Models\Holding;
 use App\Models\Resource;
 use App\Models\User;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class ChatbotContextService
 {
@@ -17,7 +18,8 @@ class ChatbotContextService
      *   prompt_context: string,
      *   matched_companies: array<int, array<string, mixed>>,
      *   matched_resources: array<int, array<string, mixed>>,
-     *   kb_sections: array<int, string>
+     *   kb_sections: array<int, string>,
+     *   has_company_mention: bool
      * }
      */
     public function build(User $user, string $message): array
@@ -26,7 +28,7 @@ class ChatbotContextService
     }
 
     /**
-     * Gather public-only KB, stock compliance, and educational resource context for unauthenticated visitors.
+     * Gather public-only KB and educational resource context for unauthenticated visitors.
      */
     public function buildPublic(string $message): array
     {
@@ -35,12 +37,12 @@ class ChatbotContextService
 
     private function formatContextBundle(?User $user, string $message): array
     {
-        $companies = $this->findRelevantCompanies($message);
+        $hasCompanyMention = $this->detectCompanyMention($message);
         $resources = $this->findRelevantResources($message);
         $kbSections = $this->matchKnowledgeBase($message);
         $userSummary = $user
             ? $this->summarizeUser($user)
-            : 'Public website visitor (not signed in). Do not assume account details; encourage creating a free account or signing in to manage holdings, Hawl dates, and full screenings.';
+            : 'Public website visitor (not signed in). Encourage signing in to use portfolio tracking, Zakat & Hawl reminders, and the Market Screener.';
 
         $blocks = [];
 
@@ -53,43 +55,9 @@ class ChatbotContextService
 
         $blocks[] = ($user ? '=== CURRENT USER CONTEXT (AUTHENTICATED) ===' : '=== VISITOR CONTEXT (PUBLIC) ===')."\n".$userSummary;
 
-        if ($companies->isNotEmpty()) {
-            $companyLines = $companies->map(function (Company $company) {
-                $status = $company->status?->status ?? $company->current_status ?? 'unscreened';
-                $verified = $company->status?->verified_by_scholar ? 'Yes' : 'No';
-                $screening = $company->aaoifiScreening;
-
-                $line = "- {$company->name} ({$company->symbol}) | Sector: ".($company->sector ?: 'N/A')
-                    ." | Compliance Status: {$status} | Scholar Verified: {$verified}";
-
-                if ($company->latest_price !== null) {
-                    $line .= ' | Latest Price: NGN '.number_format((float) $company->latest_price, 2);
-                }
-
-                if ($screening) {
-                    $line .= sprintf(
-                        ' | AAOIFI Business: %s | Debt Ratio: %.2f%% (<30%% limit) | Cash Ratio: %.2f%% (<30%% limit) | Impermissible Income: %.2f%% (<5%% limit) | Final Screening: %s',
-                        $screening->business_status ?? 'N/A',
-                        (float) ($screening->debt_ratio ?? 0),
-                        (float) ($screening->cash_ratio ?? 0),
-                        (float) ($screening->impermissible_income_ratio ?? 0),
-                        $screening->final_status ?? $status
-                    );
-                }
-
-                if (! empty($company->activity_reason)) {
-                    $line .= ' | Activity Note: '.$company->activity_reason;
-                }
-
-                return $line;
-            })->implode("\n");
-
-            $blocks[] = "=== MATCHED NGX STOCKS FROM IRSHAD DATABASE ===\n".$companyLines;
-        }
-
         if ($resources->isNotEmpty()) {
             $resourceLines = $resources->map(
-                fn (Resource $r) => "- [{$r->type}] {$r->title}".($r->scholar ? " by {$r->scholar}" : '').($r->category ? " ({$r->category})" : '')
+                fn (array $r) => "- [{$r['type']}] {$r['title']}".(! empty($r['scholar']) ? " by {$r['scholar']}" : '').(! empty($r['category']) ? " ({$r['category']})" : '')
             )->implode("\n");
 
             $blocks[] = "=== MATCHED EDUCATIONAL RESOURCES ===\n".$resourceLines;
@@ -97,89 +65,102 @@ class ChatbotContextService
 
         return [
             'prompt_context' => implode("\n\n", $blocks),
-            'matched_companies' => $companies->map(fn (Company $c) => [
-                'symbol' => $c->symbol,
-                'name' => $c->name,
-                'status' => $c->status?->status ?? $c->current_status ?? 'unknown',
-            ])->values()->all(),
-            'matched_resources' => $resources->map(fn (Resource $r) => [
-                'id' => $r->id,
-                'title' => $r->title,
-                'type' => $r->type,
-                'scholar' => $r->scholar,
-                'category' => $r->category,
-            ])->values()->all(),
+            'matched_companies' => [],
+            'matched_resources' => $resources->values()->all(),
             'kb_sections' => array_column($kbSections, 'title'),
+            'has_company_mention' => $hasCompanyMention,
         ];
     }
 
     /**
-     * Find up to 3 companies matching symbols or significant words in the user's message.
+     * Detect whether the message names a listed company or ticker (cached in memory/Redis/file for speed).
      */
-    private function findRelevantCompanies(string $message): Collection
+    private function detectCompanyMention(string $message): bool
     {
-        preg_match_all('/\b[A-Za-z][A-Za-z0-9]{1,11}\b/', $message, $matches);
+        preg_match_all('/\b[A-Za-z][A-Za-z0-9]{1,14}\b/', $message, $matches);
         $rawTokens = $matches[0] ?? [];
+        if (empty($rawTokens)) {
+            return false;
+        }
 
         $stopWords = [
-            'HALAL', 'HARAM', 'IS', 'ARE', 'THE', 'AND', 'FOR', 'WHAT', 'HOW', 'CAN', 'YOU',
+            'HALAL', 'HARAM', 'IS', 'ARE', 'WAS', 'THE', 'AND', 'FOR', 'WHAT', 'HOW', 'CAN', 'YOU',
             'ABOUT', 'TELL', 'CHECK', 'STATUS', 'STOCK', 'STOCKS', 'AAOIFI', 'ZAKAT', 'HAWL',
             'MY', 'DO', 'DOES', 'WHY', 'WITH', 'THIS', 'THAT', 'FROM', 'HAVE', 'PLS', 'PLEASE',
             'IRSHAD', 'PLAN', 'PRICING', 'HELP', 'NGX', 'BUY', 'SELL', 'PURIFY', 'PURIFICATION',
-            'DIVIDEND', 'DATE', 'DEBT', 'CASH', 'RATIO', 'COMPLIANT', 'SUPPORT', 'HUMAN', 'ADMIN',
+            'DIVIDEND', 'DIVIDENDS', 'DATE', 'DEBT', 'CASH', 'RATIO', 'COMPLIANT', 'SUPPORT',
+            'HUMAN', 'ADMIN', 'SHARIAH', 'SHARIA', 'SCREENING', 'SCREEN', 'WORK', 'WORKS',
+            'QUESTIONABLE', 'NON', 'INVEST', 'INVESTING', 'SHARES', 'SHARE', 'LIMITED', 'GROUP',
+            'NIGERIA', 'PLC', 'HOLDINGS', 'BANK', 'INDUSTRIES', 'COMPANY', 'INTERNATIONAL',
+            'CAPITAL', 'SERVICES', 'AFRICA', 'TRUST', 'ACCESS', 'FIRST', 'UNITED', 'UNION',
         ];
 
         $symbolCandidates = [];
-        $nameTokens = [];
-
+        $wordCandidates = [];
         foreach ($rawTokens as $token) {
             $upper = strtoupper($token);
             if (in_array($upper, $stopWords, true)) {
                 continue;
             }
-
-            if (strlen($upper) >= 2 && strlen($upper) <= 12) {
-                $symbolCandidates[] = $upper;
-            }
-            if (strlen($token) >= 4) {
-                $nameTokens[] = strtolower($token);
+            $symbolCandidates[] = $upper;
+            if (strlen($token) >= 3) {
+                $wordCandidates[] = strtolower($token);
             }
         }
 
-        $found = collect();
-
-        if (! empty($symbolCandidates)) {
-            $bySymbol = Company::with(['status:id,company_id,status,verified_by_scholar', 'aaoifiScreening'])
-                ->select(['id', 'name', 'symbol', 'sector', 'current_status', 'latest_price', 'activity_reason'])
-                ->whereIn('symbol', array_values(array_unique($symbolCandidates)))
-                ->limit(3)
-                ->get();
-            $found = $found->merge($bySymbol);
+        if (empty($symbolCandidates)) {
+            return false;
         }
 
-        if ($found->count() < 3 && ! empty($nameTokens)) {
-            $remaining = 3 - $found->count();
-            $existingIds = $found->pluck('id')->all();
+        // Common colloquial aliases investors type before checking exact tickers
+        $aliases = ['mtn', 'dangote', 'zenith', 'guaranty', 'seplat', 'airtel', 'oando', 'nestle', 'lafarge', 'geregu', 'transcorp', 'fbn', 'uba', 'fidelity', 'sterling', 'stanbic', 'flour', 'bua', 'apple', 'tesla', 'nvidia', 'microsoft', 'amazon', 'meta', 'google'];
+        foreach ($wordCandidates as $word) {
+            if (in_array($word, $aliases, true)) {
+                return true;
+            }
+        }
 
-            $byName = Company::with(['status:id,company_id,status,verified_by_scholar', 'aaoifiScreening'])
-                ->select(['id', 'name', 'symbol', 'sector', 'current_status', 'latest_price', 'activity_reason'])
-                ->when(! empty($existingIds), fn ($q) => $q->whereNotIn('id', $existingIds))
-                ->where(function ($q) use ($nameTokens) {
-                    foreach (array_slice(array_unique($nameTokens), 0, 5) as $word) {
-                        $q->orWhereRaw('LOWER(name) LIKE ?', ['%'.$word.'%']);
+        $index = Cache::remember('chatbot_company_index_v1', 3600, function () use ($stopWords) {
+            try {
+                $companies = Company::query()->select(['symbol', 'name'])->get();
+                $symbols = [];
+                $nameWords = [];
+
+                foreach ($companies as $company) {
+                    $sym = strtoupper(trim((string) $company->symbol));
+                    if ($sym !== '') {
+                        $symbols[$sym] = true;
                     }
-                })
-                ->limit($remaining)
-                ->get();
+                    preg_match_all('/\b[A-Za-z]{4,}\b/', strtolower((string) $company->name), $parts);
+                    foreach ($parts[0] ?? [] as $part) {
+                        if (! in_array(strtoupper($part), $stopWords, true)) {
+                            $nameWords[$part] = true;
+                        }
+                    }
+                }
 
-            $found = $found->merge($byName);
+                return ['symbols' => $symbols, 'words' => $nameWords];
+            } catch (\Throwable) {
+                return ['symbols' => [], 'words' => []];
+            }
+        });
+
+        foreach ($symbolCandidates as $sym) {
+            if (isset($index['symbols'][$sym])) {
+                return true;
+            }
+        }
+        foreach ($wordCandidates as $word) {
+            if (isset($index['words'][$word])) {
+                return true;
+            }
         }
 
-        return $found->take(3)->values();
+        return false;
     }
 
     /**
-     * Find up to 3 educational resources relevant to keywords in the message.
+     * Find up to 3 educational resources matching keywords using a cached index (zero per-request LIKE query).
      */
     private function findRelevantResources(string $message): Collection
     {
@@ -187,22 +168,47 @@ class ChatbotContextService
         $words = array_values(array_diff(array_unique($matches[0] ?? []), [
             'what', 'when', 'where', 'which', 'this', 'that', 'with', 'from', 'have',
             'about', 'please', 'could', 'would', 'should', 'explain', 'irshad', 'help',
+            'does', 'work', 'works', 'mean', 'means',
         ]));
 
         if (empty($words)) {
             return collect();
         }
 
-        return Resource::query()
-            ->where(function ($q) use ($words) {
-                foreach (array_slice($words, 0, 5) as $word) {
-                    $q->orWhereRaw('LOWER(title) LIKE ?', ['%'.$word.'%'])
-                        ->orWhereRaw('LOWER(category) LIKE ?', ['%'.$word.'%']);
+        $catalog = Cache::remember('chatbot_resources_index_v1', 600, function () {
+            try {
+                return Resource::query()
+                    ->select(['id', 'title', 'type', 'scholar', 'category'])
+                    ->latest()
+                    ->get()
+                    ->map(fn (Resource $r) => [
+                        'id' => $r->id,
+                        'title' => $r->title,
+                        'type' => $r->type,
+                        'scholar' => $r->scholar,
+                        'category' => $r->category,
+                    ])
+                    ->all();
+            } catch (\Throwable) {
+                return [];
+            }
+        });
+
+        $matched = [];
+        foreach ($catalog as $item) {
+            $haystack = strtolower(($item['title'] ?? '').' '.($item['category'] ?? ''));
+            foreach ($words as $word) {
+                if (str_contains($haystack, $word)) {
+                    $matched[] = $item;
+                    break;
                 }
-            })
-            ->latest()
-            ->limit(3)
-            ->get();
+            }
+            if (count($matched) >= 3) {
+                break;
+            }
+        }
+
+        return collect($matched);
     }
 
     /**
