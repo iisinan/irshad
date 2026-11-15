@@ -137,6 +137,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/directory', [DirectoryController::class, 'index']);
     });
 
+    Route::post('/chat/public', [ChatController::class, 'publicMessage'])->middleware('throttle:15,1');
+
     // Webhooks (No auth required)
     Route::post('/webhooks/squad', [\App\Http\Controllers\SubscriptionController::class, 'webhook']);
     Route::post('/webhooks/ses', [\App\Http\Controllers\SesWebhookController::class, 'handle']);

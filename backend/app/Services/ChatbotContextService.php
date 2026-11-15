@@ -22,10 +22,25 @@ class ChatbotContextService
      */
     public function build(User $user, string $message): array
     {
+        return $this->formatContextBundle($user, $message);
+    }
+
+    /**
+     * Gather public-only KB, stock compliance, and educational resource context for unauthenticated visitors.
+     */
+    public function buildPublic(string $message): array
+    {
+        return $this->formatContextBundle(null, $message);
+    }
+
+    private function formatContextBundle(?User $user, string $message): array
+    {
         $companies = $this->findRelevantCompanies($message);
         $resources = $this->findRelevantResources($message);
         $kbSections = $this->matchKnowledgeBase($message);
-        $userSummary = $this->summarizeUser($user);
+        $userSummary = $user
+            ? $this->summarizeUser($user)
+            : 'Public website visitor (not signed in). Do not assume account details; encourage creating a free account or signing in to manage holdings, Hawl dates, and full screenings.';
 
         $blocks = [];
 
@@ -36,7 +51,7 @@ class ChatbotContextService
             ));
         }
 
-        $blocks[] = "=== CURRENT USER CONTEXT (AUTHENTICATED) ===\n".$userSummary;
+        $blocks[] = ($user ? '=== CURRENT USER CONTEXT (AUTHENTICATED) ===' : '=== VISITOR CONTEXT (PUBLIC) ===')."\n".$userSummary;
 
         if ($companies->isNotEmpty()) {
             $companyLines = $companies->map(function (Company $company) {

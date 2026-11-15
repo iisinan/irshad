@@ -513,6 +513,11 @@ export const sendChatMessage = async (message, conversationId = null) => {
   return response.data;
 };
 
+export const sendPublicChatMessage = async (message, history = []) => {
+  const response = await api.post('/chat/public', { message, history });
+  return response.data;
+};
+
 export const submitChatFeedback = async (messageId, feedback) => {
   const response = await api.post(`/chat/messages/${messageId}/feedback`, { feedback });
   return response.data;

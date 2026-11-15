@@ -16,6 +16,48 @@ use Illuminate\Support\Str;
 
 class ChatController extends Controller
 {
+    public function publicMessage(
+        Request $request,
+        ChatbotContextService $contextService,
+        ChatbotService $chatbotService
+    ): JsonResponse {
+        $validated = $request->validate([
+            'message' => 'required|string|min:2|max:500',
+            'history' => 'nullable|array|max:6',
+            'history.*.role' => 'required_with:history|in:user,assistant',
+            'history.*.content' => 'required_with:history|string|max:600',
+        ]);
+
+        $cleanMessage = trim($validated['message']);
+        $history = collect($validated['history'] ?? [])
+            ->map(fn (array $turn) => [
+                'role' => $turn['role'],
+                'content' => trim((string) $turn['content']),
+            ])
+            ->values()
+            ->all();
+
+        $contextBundle = $contextService->buildPublic($cleanMessage);
+        $aiResult = $chatbotService->replyPublic($cleanMessage, $history, $contextBundle);
+
+        return response()->json([
+            'assistant_message' => [
+                'id' => null,
+                'role' => 'assistant',
+                'content' => $aiResult['reply'],
+                'metadata' => [
+                    'cited_symbols' => $aiResult['cited_symbols'],
+                    'matched_companies' => $contextBundle['matched_companies'],
+                    'matched_resources' => $contextBundle['matched_resources'],
+                    'suggested_followups' => $aiResult['suggested_followups'],
+                    'needs_human_support' => $aiResult['needs_human_support'],
+                    'provider' => $aiResult['provider'],
+                ],
+                'created_at' => now()->toISOString(),
+            ],
+        ]);
+    }
+
     public function conversations(Request $request): JsonResponse
     {
         $conversations = ChatConversation::where('user_id', $request->user()->id)

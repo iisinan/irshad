@@ -25,8 +25,25 @@ class ChatbotService
      */
     public function reply(ChatConversation $conversation, string $userMessage, array $contextBundle): array
     {
-        $systemInstruction = $this->buildSystemInstruction($contextBundle['prompt_context'] ?? '');
         $history = $this->loadRecentHistory($conversation);
+
+        return $this->generateReply($userMessage, $history, $contextBundle, false);
+    }
+
+    /**
+     * Generate a stateless public FAQ/stock reply for website visitors.
+     *
+     * @param  array<int, array{role: string, content: string}>  $history
+     * @param  array<string, mixed>  $contextBundle
+     */
+    public function replyPublic(string $userMessage, array $history, array $contextBundle): array
+    {
+        return $this->generateReply($userMessage, $history, $contextBundle, true);
+    }
+
+    private function generateReply(string $userMessage, array $history, array $contextBundle, bool $isPublic): array
+    {
+        $systemInstruction = $this->buildSystemInstruction($contextBundle['prompt_context'] ?? '', $isPublic);
 
         $geminiResult = $this->askGemini($systemInstruction, $history, $userMessage);
         if ($geminiResult !== null) {
@@ -38,11 +55,15 @@ class ChatbotService
             return $this->sanitizeOutput($perplexityResult, $contextBundle, 'perplexity');
         }
 
-        return $this->buildOfflineFallback($userMessage, $contextBundle);
+        return $this->buildOfflineFallback($userMessage, $contextBundle, $isPublic);
     }
 
-    private function buildSystemInstruction(string $groundedContext): string
+    private function buildSystemInstruction(string $groundedContext, bool $isPublic = false): string
     {
+        $supportRule = $isPublic
+            ? '4. If the user asks about personal billing, account recovery, missing stocks, or direct human help, set `"needs_human_support": true` and invite them to sign in or email support@irshad.app.'
+            : '4. If the user asks about billing disputes, double charges, missing stocks, broken features, account recovery, or explicitly asks to talk to a human/admin, set `"needs_human_support": true` and advise them they can tap **Send to Support Team** to route this chat to Irshad admins.';
+
         return <<<PROMPT
 You are **Irshad Assistant**, the official in-app AI support & Islamic finance assistant for **Irshad** (an AAOIFI-aligned Halal stock screening, portfolio purification, and Zakat platform focused on the Nigerian Exchange / NGX).
 
@@ -50,7 +71,7 @@ RULES & GUARDRAILS:
 1. Be warm, concise, structured (use clean markdown bullets where helpful), and accurate. Never mention "Qistal".
 2. ONLY cite exact stock statuses, ratios, prices, or user holdings that appear in the CONTEXT provided below. If a stock is not in the context or has incomplete ratios, say so honestly instead of guessing numbers.
 3. Never give personalized buy/sell investment advice or claim to issue a formal fatwa. Clarify that Irshad provides educational & AAOIFI-standard screening guidance.
-4. If the user asks about billing disputes, double charges, missing stocks, broken features, account recovery, or explicitly asks to talk to a human/admin, set `"needs_human_support": true` and advise them they can tap **Send to Support Team** to route this chat to Irshad admins.
+{$supportRule}
 5. Output ONLY a valid JSON object with these exact keys (no code fences):
 {
   "reply": "<markdown answer to the user>",
@@ -259,7 +280,7 @@ PROMPT;
         ];
     }
 
-    private function buildOfflineFallback(string $userMessage, array $contextBundle): array
+    private function buildOfflineFallback(string $userMessage, array $contextBundle, bool $isPublic = false): array
     {
         $companies = $contextBundle['matched_companies'] ?? [];
         $lower = strtolower($userMessage);
@@ -282,7 +303,9 @@ PROMPT;
             $lines[] = '- For Zakat & Hawl date questions, check **Portfolio → Zakat** or **Profile**.';
         }
 
-        $lines[] = "\nIf you need direct help from our team, tap **Send to Support Team** below.";
+        $lines[] = $isPublic
+            ? "\nIf you need direct help from our team, sign in or email **support@irshad.app**."
+            : "\nIf you need direct help from our team, tap **Send to Support Team** below.";
 
         return [
             'reply' => implode("\n", $lines),

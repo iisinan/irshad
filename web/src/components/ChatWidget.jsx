@@ -17,10 +17,12 @@ import {
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import {
   fetchChatConversations,
   fetchChatConversation,
   sendChatMessage,
+  sendPublicChatMessage,
   submitChatFeedback,
   escalateChatConversation,
 } from '../services/api';
@@ -36,6 +38,8 @@ const STARTER_PROMPTS = [
 
 export default function ChatWidget() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isAuthenticated = Boolean(user);
   const [open, setOpen] = useState(false);
   const [view, setView] = useState('chat'); // 'chat' | 'history'
   const [conversations, setConversations] = useState([]);
@@ -46,6 +50,14 @@ export default function ChatWidget() {
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [escalating, setEscalating] = useState(false);
   const messagesEndRef = useRef(null);
+
+  const userId = user?.id ?? null;
+  useEffect(() => {
+    setActiveConversation(null);
+    setConversations([]);
+    setMessages([]);
+    setView('chat');
+  }, [userId]);
 
   useEffect(() => {
     if (open && view === 'chat') {
@@ -106,12 +118,35 @@ export default function ChatWidget() {
     setSending(true);
 
     try {
-      const res = await sendChatMessage(text, activeConversation?.id ?? null);
-      setActiveConversation(res.conversation);
-      setMessages((prev) => {
-        const withoutTemp = prev.filter((m) => m.id !== optimisticUserMsg.id);
-        return [...withoutTemp, res.user_message, res.assistant_message];
-      });
+      if (isAuthenticated) {
+        const res = await sendChatMessage(text, activeConversation?.id ?? null);
+        setActiveConversation(res.conversation);
+        setMessages((prev) => {
+          const withoutTemp = prev.filter((m) => m.id !== optimisticUserMsg.id);
+          return [...withoutTemp, res.user_message, res.assistant_message];
+        });
+      } else {
+        const recentHistory = messages
+          .filter((m) => typeof m.id !== 'string' || !m.id.startsWith('temp-'))
+          .slice(-6)
+          .map((m) => ({
+            role: m.role === 'assistant' ? 'assistant' : 'user',
+            content: String(m.content || '').slice(0, 600),
+          }));
+        const res = await sendPublicChatMessage(text, recentHistory);
+        const persistedUserMsg = {
+          ...optimisticUserMsg,
+          id: `pub-u-${Date.now()}`,
+        };
+        const assistantMsg = {
+          ...res.assistant_message,
+          id: `pub-a-${Date.now()}`,
+        };
+        setMessages((prev) => {
+          const withoutTemp = prev.filter((m) => m.id !== optimisticUserMsg.id);
+          return [...withoutTemp, persistedUserMsg, assistantMsg];
+        });
+      }
     } catch (err) {
       setMessages((prev) => prev.filter((m) => m.id !== optimisticUserMsg.id));
       toastError(err?.response?.data?.message || 'Failed to send message. Please try again.');
@@ -283,15 +318,17 @@ export default function ChatWidget() {
                   >
                     <Plus size={16} />
                   </button>
-                  <button
-                    type="button"
-                    onClick={handleOpenHistory}
-                    title="Chat history"
-                    aria-label="Chat history"
-                    style={iconBtnStyle}
-                  >
-                    <History size={16} />
-                  </button>
+                  {isAuthenticated && (
+                    <button
+                      type="button"
+                      onClick={handleOpenHistory}
+                      title="Chat history"
+                      aria-label="Chat history"
+                      style={iconBtnStyle}
+                    >
+                      <History size={16} />
+                    </button>
+                  )}
                 </>
               )}
               <button
@@ -475,7 +512,7 @@ export default function ChatWidget() {
                                 key={sym}
                                 type="button"
                                 onClick={() => {
-                                  navigate(`/market/${sym}/aaoifi`);
+                                  navigate(isAuthenticated ? `/market/${sym}/aaoifi` : '/login');
                                   setOpen(false);
                                 }}
                                 style={{
@@ -506,7 +543,7 @@ export default function ChatWidget() {
                                 key={res.id}
                                 type="button"
                                 onClick={() => {
-                                  navigate('/portfolio#lectures');
+                                  navigate(isAuthenticated ? '/portfolio#lectures' : '/resources');
                                   setOpen(false);
                                 }}
                                 style={{
@@ -610,62 +647,99 @@ export default function ChatWidget() {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Escalation bar */}
-              {activeConversation?.id && hasAssistantMessages && (
-                <div
-                  style={{
-                    padding: '8px 14px',
-                    borderTop: '1px solid var(--border)',
-                    background: 'var(--bg-section)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '8px',
-                  }}
-                >
-                  {activeConversation.status === 'escalated' ? (
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        fontSize: '0.76rem',
-                        fontWeight: 700,
-                        color: 'var(--primary)',
-                      }}
-                    >
-                      <CheckCircle2 size={14} />
-                      <span>Sent to Irshad Support Team</span>
-                    </div>
-                  ) : (
-                    <>
-                      <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                        Need a human admin?
-                      </span>
-                      <button
-                        type="button"
-                        onClick={handleEscalate}
-                        disabled={escalating}
+              {/* Escalation / Sign-in bar */}
+              {hasAssistantMessages && (
+                isAuthenticated && activeConversation?.id ? (
+                  <div
+                    style={{
+                      padding: '8px 14px',
+                      borderTop: '1px solid var(--border)',
+                      background: 'var(--bg-section)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '8px',
+                    }}
+                  >
+                    {activeConversation.status === 'escalated' ? (
+                      <div
                         style={{
-                          display: 'inline-flex',
+                          display: 'flex',
                           alignItems: 'center',
-                          gap: '5px',
-                          padding: '5px 10px',
-                          borderRadius: '8px',
-                          border: '1px solid var(--border)',
-                          background: 'var(--bg)',
-                          color: 'var(--text-dark)',
-                          fontSize: '0.74rem',
+                          gap: '6px',
+                          fontSize: '0.76rem',
                           fontWeight: 700,
-                          cursor: escalating ? 'not-allowed' : 'pointer',
+                          color: 'var(--primary)',
                         }}
                       >
-                        <Headphones size={13} />
-                        <span>{escalating ? 'Sending...' : 'Send to Support'}</span>
-                      </button>
-                    </>
-                  )}
-                </div>
+                        <CheckCircle2 size={14} />
+                        <span>Sent to Irshad Support Team</span>
+                      </div>
+                    ) : (
+                      <>
+                        <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                          Need a human admin?
+                        </span>
+                        <button
+                          type="button"
+                          onClick={handleEscalate}
+                          disabled={escalating}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            padding: '5px 10px',
+                            borderRadius: '8px',
+                            border: '1px solid var(--border)',
+                            background: 'var(--bg)',
+                            color: 'var(--text-dark)',
+                            fontSize: '0.74rem',
+                            fontWeight: 700,
+                            cursor: escalating ? 'not-allowed' : 'pointer',
+                          }}
+                        >
+                          <Headphones size={13} />
+                          <span>{escalating ? 'Sending...' : 'Send to Support'}</span>
+                        </button>
+                      </>
+                    )}
+                  </div>
+                ) : !isAuthenticated ? (
+                  <div
+                    style={{
+                      padding: '8px 14px',
+                      borderTop: '1px solid var(--border)',
+                      background: 'var(--bg-section)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '8px',
+                    }}
+                  >
+                    <span style={{ fontSize: '0.73rem', color: 'var(--text-muted)' }}>
+                      Want full screening & support chat?
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigate('/login');
+                        setOpen(false);
+                      }}
+                      style={{
+                        padding: '5px 10px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        background: 'var(--primary)',
+                        color: '#fff',
+                        fontSize: '0.73rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Sign In
+                    </button>
+                  </div>
+                ) : null
               )}
 
               {/* Composer */}

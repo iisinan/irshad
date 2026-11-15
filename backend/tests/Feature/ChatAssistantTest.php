@@ -271,4 +271,61 @@ class ChatAssistantTest extends TestCase
 
         Notification::assertSentTo($admin, AdminSuggestionNotification::class);
     }
+
+    public function test_public_visitor_receives_kb_and_stock_reply_without_db_persistence(): void
+    {
+        Config::set('services.gemini.key', 'test-gemini-key');
+
+        Company::create([
+            'name' => 'Presco Plc',
+            'symbol' => 'PRESCO',
+            'sector' => 'Agriculture',
+            'current_status' => 'compliant',
+        ]);
+
+        Http::fake([
+            'generativelanguage.googleapis.com/*' => Http::response([
+                'candidates' => [
+                    [
+                        'content' => [
+                            'parts' => [
+                                [
+                                    'text' => json_encode([
+                                        'reply' => 'Presco Plc (**PRESCO**) is listed as compliant in our AAOIFI database.',
+                                        'cited_symbols' => ['PRESCO'],
+                                        'suggested_followups' => ['What plans does Irshad offer?'],
+                                        'needs_human_support' => false,
+                                    ]),
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ], 200),
+        ]);
+
+        $response = $this->postJson('/api/v1/chat/public', [
+            'message' => 'Is PRESCO halal and how do plans work?',
+            'history' => [
+                ['role' => 'user', 'content' => 'Salam'],
+                ['role' => 'assistant', 'content' => 'As-salamu alaykum! How can I help?'],
+            ],
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('assistant_message.role', 'assistant')
+            ->assertJsonPath('assistant_message.metadata.cited_symbols.0', 'PRESCO')
+            ->assertJsonPath('assistant_message.metadata.provider', 'gemini');
+
+        Http::assertSent(function ($request) {
+            $systemText = $request['systemInstruction']['parts'][0]['text'] ?? '';
+
+            return str_contains($systemText, 'VISITOR CONTEXT (PUBLIC)')
+                && str_contains($systemText, 'Presco Plc (PRESCO)')
+                && ! str_contains($systemText, 'Recorded Holdings');
+        });
+
+        $this->assertDatabaseCount('chat_conversations', 0);
+        $this->assertDatabaseCount('chat_messages', 0);
+    }
 }

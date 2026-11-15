@@ -9,6 +9,7 @@ import NotFound from './components/NotFound';
 import { useAuth } from './context/AuthContext';
 import { useTheme } from './context/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import ChatWidget from './components/ChatWidget';
 import { Toaster } from 'react-hot-toast';
 import './index.css';
 
@@ -319,6 +320,16 @@ const NavigateToAaoifi = () => {
   return <Navigate to={`/market/${symbol}/aaoifi`} replace />;
 };
 
+const CHAT_HIDDEN_PREFIXES = ['/admin', '/login', '/register', '/forgot', '/reset-password', '/verify-email', '/settings/billing/callback'];
+
+const GlobalChatWidget = () => {
+  const location = useLocation();
+  if (CHAT_HIDDEN_PREFIXES.some((prefix) => location.pathname.startsWith(prefix))) {
+    return null;
+  }
+  return <ChatWidget />;
+};
+
 function App() {
   const { loading: authLoading } = useAuth();
 
@@ -406,6 +417,7 @@ function App() {
                 </AnimatedRoutes>
               </Suspense>
             </main>
+            <GlobalChatWidget />
           </div>
       </ErrorBoundary>
     </>
