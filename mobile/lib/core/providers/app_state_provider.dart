@@ -68,6 +68,20 @@ class AppStateProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Synchronously merge `usage_summary` or single-key quota payloads from API responses.
+  void updateUsageSummary(Map<String, dynamic> partialSummary) {
+    if (_userProfile == null) return;
+    final updatedProfile = Map<String, dynamic>.from(_userProfile!);
+    final existingSummary = updatedProfile['usage_summary'];
+    final updatedSummary = existingSummary is Map
+        ? Map<String, dynamic>.from(existingSummary)
+        : <String, dynamic>{};
+    updatedSummary.addAll(partialSummary);
+    updatedProfile['usage_summary'] = updatedSummary;
+    _userProfile = updatedProfile;
+    notifyListeners();
+  }
+
   Future<void> _syncHawlDate(Map<String, dynamic> profile) async {
     try {
       dynamic prefsRaw = profile['preferences'];

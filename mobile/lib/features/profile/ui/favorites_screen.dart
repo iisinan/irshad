@@ -225,7 +225,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> with WidgetsBindingOb
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Upgrade to Rawdha (Pro) for up to 2 watchlist alerts, or Noor (Max) for unlimited real-time compliance & price alerts.',
+                    'Available on Rawdha (Pro) for up to 2 watchlist alerts, or Noor (Max) for unlimited real-time compliance & price alerts.',
                     style: TextStyle(fontSize: 13, color: context.textMuted, height: 1.5),
                     textAlign: TextAlign.center,
                   ),
@@ -238,7 +238,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> with WidgetsBindingOb
                         backgroundColor: Colors.transparent,
                         builder: (ctx) => const UpgradePaywallBottomSheet(
                           requiredTier: 'pro',
-                          message: 'Upgrade to Rawdha (Pro) or Noor (Max) to unlock watchlist tracking and price alerts.',
+                          message: 'Watchlist tracking and price alerts are included with Rawdha (Pro) and Noor (Max) memberships.',
                         ),
                       );
                     },
@@ -248,7 +248,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> with WidgetsBindingOb
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     ),
-                    child: const Text('Upgrade Plan', style: TextStyle(fontWeight: FontWeight.w800)),
+                    child: const Text('Membership Info', style: TextStyle(fontWeight: FontWeight.w800)),
                   ),
                 ],
               ),

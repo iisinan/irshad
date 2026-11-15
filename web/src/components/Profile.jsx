@@ -301,56 +301,117 @@ export default function Profile() {
                        (profileUser || user)?.tier?.slug === 'pro' ? 'You are on the Rawdha Pro tier.' : 
                        'You are on the basic free community tier.'}
                     </p>
-                    {(profileUser || user)?.active_subscription && (
-                      <div style={{ marginTop: '10px', display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                        {(profileUser || user)?.active_subscription?.billing_cycle && (
-                          <span style={{ 
-                            fontSize: '0.74rem', fontWeight: 800, padding: '3px 10px', borderRadius: '100px', 
-                            background: 'rgba(0, 107, 70, 0.1)', color: '#006B46', textTransform: 'capitalize', letterSpacing: '0.3px'
-                          }}>
-                            {(profileUser || user)?.active_subscription?.billing_cycle} Billing
-                          </span>
-                        )}
-                        {(profileUser || user)?.active_subscription?.renews_at && (
-                          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-                            Renews on {new Date((profileUser || user)?.active_subscription?.renews_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                          </span>
-                        )}
-                      </div>
-                    )}
+                    {(() => {
+                      const activeSub = (profileUser || user)?.active_subscription;
+                      if (!activeSub) return null;
+                      const status = (activeSub.status || 'active').toLowerCase();
+                      const isCanceled = status === 'canceled';
+                      const isPastDue = status === 'past_due';
+                      const endDateRaw = activeSub.ends_at || activeSub.renews_at;
+                      const formattedDate = endDateRaw
+                        ? new Date(endDateRaw).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+                        : null;
+                      const dateLabel = isPastDue
+                        ? `Grace period ends ${formattedDate}`
+                        : (isCanceled || !activeSub.auto_renew || activeSub.ends_at)
+                          ? `Access ends on ${formattedDate}`
+                          : `Renews on ${formattedDate}`;
+
+                      return (
+                        <div style={{ marginTop: '10px', display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                          {activeSub.billing_cycle && (
+                            <span style={{
+                              fontSize: '0.74rem', fontWeight: 800, padding: '3px 10px', borderRadius: '100px',
+                              background: 'rgba(0, 107, 70, 0.1)', color: '#006B46', textTransform: 'capitalize', letterSpacing: '0.3px'
+                            }}>
+                              {activeSub.billing_cycle} Billing
+                            </span>
+                          )}
+                          {isCanceled && (
+                            <span style={{
+                              fontSize: '0.74rem', fontWeight: 800, padding: '3px 10px', borderRadius: '100px',
+                              background: 'rgba(217, 119, 6, 0.12)', color: '#B45309', letterSpacing: '0.3px'
+                            }}>
+                              Canceled
+                            </span>
+                          )}
+                          {isPastDue && (
+                            <span style={{
+                              fontSize: '0.74rem', fontWeight: 800, padding: '3px 10px', borderRadius: '100px',
+                              background: 'rgba(220, 38, 38, 0.12)', color: '#DC2626', letterSpacing: '0.3px'
+                            }}>
+                              Payment Overdue
+                            </span>
+                          )}
+                          {!isCanceled && !isPastDue && !activeSub.auto_renew && (
+                            <span style={{
+                              fontSize: '0.74rem', fontWeight: 700, padding: '3px 10px', borderRadius: '100px',
+                              background: 'var(--border)', color: 'var(--text-muted)'
+                            }}>
+                              Auto-renew off
+                            </span>
+                          )}
+                          {formattedDate && (
+                            <span style={{ fontSize: '0.78rem', color: isPastDue ? '#DC2626' : 'var(--text-muted)', fontWeight: isPastDue ? 700 : 500 }}>
+                              {dateLabel}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                   <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
-                    {(profileUser || user)?.tier?.slug === 'pro' && (
+                    {((profileUser || user)?.tier?.slug === 'pro') && (
                       <button onClick={() => navigate('/pricing')} className="hover-lift" style={{ background: '#D9A05B', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '100px', fontWeight: 700, cursor: 'pointer' }}>
                         Upgrade to Noor
                       </button>
                     )}
-                    {(profileUser || user)?.tier?.slug === 'free' ? (
-                      <button onClick={() => navigate('/pricing')} className="hover-lift" style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '100px', fontWeight: 700, cursor: 'pointer' }}>
-                        Upgrade Plan
-                      </button>
-                    ) : (
-                      <button 
-                        onClick={async () => {
-                          if (await customConfirm('Are you sure you want to cancel your subscription? You will keep access until the end of your current billing period.')) {
-                            try {
-                              await api.post('/subscription/cancel');
-                              if (fetchUser) await fetchUser();
-                              const refreshed = await fetchProfile().catch(() => null);
-                              if (refreshed?.data) {
-                                setProfileUser(refreshed.data);
-                                localforage.setItem('irshad_profile_cache', refreshed.data);
+                    {(() => {
+                      const activeUser = profileUser || user;
+                      const activeSub = activeUser?.active_subscription;
+                      const subStatus = (activeSub?.status || 'active').toLowerCase();
+                      const isFree = activeUser?.tier?.slug === 'free' || !activeSub;
+                      if (isFree) {
+                        return (
+                          <button onClick={() => navigate('/pricing')} className="hover-lift" style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '100px', fontWeight: 700, cursor: 'pointer' }}>
+                            Upgrade Plan
+                          </button>
+                        );
+                      }
+                      if (subStatus === 'canceled' || subStatus === 'past_due' || !activeSub.auto_renew) {
+                        return (
+                          <button
+                            onClick={() => navigate(`/pricing?cycle=${activeSub.billing_cycle || 'quarterly'}`)}
+                            className="hover-lift"
+                            style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '100px', fontWeight: 700, cursor: 'pointer' }}
+                          >
+                            {subStatus === 'past_due' ? 'Renew Now' : 'Resubscribe'}
+                          </button>
+                        );
+                      }
+                      return (
+                        <button 
+                          onClick={async () => {
+                            if (await customConfirm('Are you sure you want to cancel your subscription? You will keep access until the end of your current billing period.')) {
+                              try {
+                                await api.post('/subscription/cancel');
+                                if (fetchUser) await fetchUser();
+                                const refreshed = await fetchProfile().catch(() => null);
+                                if (refreshed?.data) {
+                                  setProfileUser(refreshed.data);
+                                  localforage.setItem('irshad_profile_cache', refreshed.data);
+                                }
+                                await customAlert('Subscription canceled. You keep access until your billing period ends.');
+                              } catch (e) {
+                                await customAlert(e.response?.data?.message || 'Error canceling subscription. Please try again.');
                               }
-                              await customAlert('Subscription canceled. You keep access until your billing period ends.');
-                            } catch (e) {
-                              await customAlert(e.response?.data?.message || 'Error canceling subscription. Please try again.');
                             }
-                          }
-                        }}
-                        style={{ background: 'transparent', color: 'var(--non-compliant)', border: '1px solid var(--non-compliant)', padding: '10px 20px', borderRadius: '100px', fontWeight: 700, cursor: 'pointer' }}>
-                        Cancel Subscription
-                      </button>
-                    )}
+                          }}
+                          style={{ background: 'transparent', color: 'var(--non-compliant)', border: '1px solid var(--non-compliant)', padding: '10px 20px', borderRadius: '100px', fontWeight: 700, cursor: 'pointer' }}>
+                          Cancel Subscription
+                        </button>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>

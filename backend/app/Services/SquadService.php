@@ -202,13 +202,54 @@ class SquadService
 
                 // Attach card token if webhook delivered it after callback verification already activated the plan
                 if ($existingSub && $tokenId && empty($existingSub->squad_token_id)) {
-                    $existingSub->update(['squad_token_id' => $tokenId]);
+                    $existingSub->update([
+                        'squad_token_id' => $tokenId,
+                        'auto_renew'     => true,
+                    ]);
                 }
 
                 return $existingSub ?? Subscription::where('user_id', $lockedTx->user_id)->latest('id')->firstOrFail();
             }
 
             $paidAt = now();
+            $targetPlan = \App\Models\Plan::find($lockedTx->plan_id);
+            $previousUser = User::with('activeSubscription.plan')->find($lockedTx->user_id);
+            $previousSlug = $previousUser?->tier?->slug ?? 'free';
+
+            // Convert unused paid period on any active/grace subscription into credit days when upgrading/switching mid-cycle
+            $creditDays = 0;
+            $targetCyclePrice = $targetPlan ? (float) $targetPlan->priceForCycle($lockedTx->billing_cycle) : 0.0;
+            $targetCycleDays = $lockedTx->billing_cycle === 'yearly' ? 365 : 90;
+            if ($lockedTx->type !== 'renewal' && $targetCyclePrice > 0) {
+                $previousPaidSub = Subscription::with('plan')
+                    ->where('user_id', $lockedTx->user_id)
+                    ->whereIn('status', ['active', 'canceled'])
+                    ->where(function ($q) use ($paidAt) {
+                        $q->where('ends_at', '>', $paidAt)
+                          ->orWhere(function ($q2) use ($paidAt) {
+                              $q2->whereNull('ends_at')->where('renews_at', '>', $paidAt);
+                          });
+                    })
+                    ->latest('id')
+                    ->first();
+
+                if ($previousPaidSub && $previousPaidSub->plan && $previousPaidSub->plan->slug !== 'free') {
+                    $prevEnd = $previousPaidSub->ends_at ?? $previousPaidSub->renews_at;
+                    if ($prevEnd && $prevEnd->greaterThan($paidAt)) {
+                        $remainingDays = max(0, $paidAt->diffInSeconds($prevEnd, false)) / 86400;
+                        $prevCycleDays = $previousPaidSub->billing_cycle === 'yearly' ? 365 : 90;
+                        $prevPrice = (float) $previousPaidSub->plan->priceForCycle($previousPaidSub->billing_cycle);
+                        if ($prevPrice > 0 && $remainingDays > 0) {
+                            $unusedValue = $prevPrice * min(1.0, $remainingDays / $prevCycleDays);
+                            $newDailyRate = $targetCyclePrice / $targetCycleDays;
+                            if ($newDailyRate > 0) {
+                                $creditDays = (int) min($targetCycleDays, round($unusedValue / $newDailyRate));
+                            }
+                        }
+                    }
+                }
+            }
+
             $lockedTx->update([
                 'status'      => 'success',
                 'gateway_ref' => $gatewayRef ?? $lockedTx->gateway_ref,
@@ -228,6 +269,7 @@ class SquadService
 
             $existingSamePlan = Subscription::where('user_id', $lockedTx->user_id)
                 ->where('plan_id', $lockedTx->plan_id)
+                ->whereIn('status', ['active', 'past_due'])
                 ->latest('id')
                 ->first();
 
@@ -236,32 +278,47 @@ class SquadService
                 : $paidAt->copy();
 
             $renewsAt = $this->nextRenewalDate($renewalAnchor, $lockedTx->billing_cycle);
+            if ($creditDays > 0) {
+                $renewsAt->addDays($creditDays);
+            }
 
+            $hasReusableToken = !empty($tokenId);
             $subAttributes = [
+                'user_id'              => $lockedTx->user_id,
+                'plan_id'              => $lockedTx->plan_id,
                 'billing_cycle'        => $lockedTx->billing_cycle,
                 'gateway'              => 'squad',
+                'squad_token_id'       => $hasReusableToken ? $tokenId : null,
                 'last_transaction_ref' => $lockedTx->transaction_ref,
-                'auto_renew'           => true,
+                'auto_renew'           => $hasReusableToken,
                 'status'               => 'active',
                 'renews_at'            => $renewsAt,
                 'ends_at'              => null,
             ];
 
-            if ($tokenId) {
-                $subAttributes['squad_token_id'] = $tokenId;
+            if ($lockedTx->type === 'renewal' && $existingSamePlan) {
+                $existingSamePlan->update($subAttributes);
+                $sub = $existingSamePlan;
+            } else {
+                // Retire previous cycle on the same plan (e.g. Quarterly -> Yearly) cleanly while keeping audit history
+                Subscription::where('user_id', $lockedTx->user_id)
+                    ->where('plan_id', $lockedTx->plan_id)
+                    ->whereIn('status', ['active', 'past_due'])
+                    ->update([
+                        'status'     => 'canceled',
+                        'auto_renew' => false,
+                        'ends_at'    => $paidAt,
+                    ]);
+
+                $sub = Subscription::create($subAttributes);
             }
 
-            return Subscription::updateOrCreate(
-                ['user_id' => $lockedTx->user_id, 'plan_id' => $lockedTx->plan_id],
-                $subAttributes
-            );
-        });
+            if ($previousUser) {
+                \App\Services\SubscriptionService::syncUsageTrackingForPlanChange($previousUser, $previousSlug);
+            }
 
-        try {
-            Cache::tags(['users'])->forget("user.profile.{$transaction->user_id}");
-        } catch (\Throwable $e) {
-            // Cache store may not support tags
-        }
+            return $sub;
+        });
 
         return $subscription;
     }

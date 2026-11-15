@@ -27,16 +27,27 @@ class SubscriptionController extends Controller
         $user = $request->user();
 
         if ($plan->slug === 'free') {
-            $user->subscriptions()
-                ->where('status', 'active')
-                ->update([
-                    'status'         => 'canceled',
-                    'auto_renew'     => false,
-                    'squad_token_id' => null,
-                    'ends_at'        => now(),
-                ]);
+            $activeSub = $user->activeSubscription;
+            if (!$activeSub) {
+                return response()->json(['message' => 'You are already on the Miftah (Free) plan.', 'url' => null]);
+            }
 
-            return response()->json(['message' => 'Downgraded to free plan successfully', 'url' => null]);
+            $user->subscriptions()
+                ->whereIn('status', ['active', 'past_due'])
+                ->get()
+                ->each(function ($sub) {
+                    $sub->update([
+                        'status'         => 'canceled',
+                        'auto_renew'     => false,
+                        'squad_token_id' => null,
+                        'ends_at'        => $sub->ends_at ?? $sub->renews_at ?? now(),
+                    ]);
+                });
+
+            return response()->json([
+                'message' => 'Auto-renewal disabled. You will retain paid access until your current billing period ends.',
+                'url'     => null,
+            ]);
         }
 
         if (!$this->squad->isConfigured()) {

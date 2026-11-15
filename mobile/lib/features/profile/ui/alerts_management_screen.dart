@@ -63,7 +63,7 @@ class _AlertsManagementScreenState extends State<AlertsManagementScreen> {
                   Text('Alerts Locked', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark), textAlign: TextAlign.center),
                   const SizedBox(height: 8),
                   Text(
-                    'Upgrade to Rawdha (Pro) for up to 2 watchlist & price alerts, or Noor (Max) for unlimited real-time compliance & price alerts.',
+                    'Available on Rawdha (Pro) for up to 2 watchlist & price alerts, or Noor (Max) for unlimited real-time compliance & price alerts.',
                     style: TextStyle(fontSize: 13, color: context.textMuted, height: 1.5),
                     textAlign: TextAlign.center,
                   ),
@@ -76,7 +76,7 @@ class _AlertsManagementScreenState extends State<AlertsManagementScreen> {
                         backgroundColor: Colors.transparent,
                         builder: (ctx) => const UpgradePaywallBottomSheet(
                           requiredTier: 'pro',
-                          message: 'Upgrade to Rawdha (Pro) or Noor (Max) to unlock watchlist & price alerts.',
+                          message: 'Watchlist and price alerts are included with Rawdha (Pro) and Noor (Max) memberships.',
                         ),
                       );
                     },
@@ -86,7 +86,7 @@ class _AlertsManagementScreenState extends State<AlertsManagementScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     ),
-                    child: const Text('Upgrade Plan', style: TextStyle(fontWeight: FontWeight.w800)),
+                    child: const Text('Membership Info', style: TextStyle(fontWeight: FontWeight.w800)),
                   ),
                 ],
               ),

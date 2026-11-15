@@ -600,7 +600,7 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
                 ActionChip(
                   avatar: const Icon(Icons.workspace_premium_rounded, size: 15, color: Colors.white),
                   label: Text(
-                    requiredTier == 'max' ? 'Upgrade to Noor (Max)' : 'Upgrade Plan',
+                    requiredTier == 'max' ? 'Noor (Max) Feature' : 'Membership Info',
                     style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white),
                   ),
                   backgroundColor: context.primary,
@@ -612,7 +612,7 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
                       isScrollControlled: true,
                       backgroundColor: Colors.transparent,
                       builder: (_) => UpgradePaywallBottomSheet(
-                        message: msg['content']?.toString() ?? 'Upgrade your plan to unlock this feature.',
+                        message: msg['content']?.toString() ?? 'This feature requires an active membership tier.',
                         requiredTier: requiredTier == 'max' ? 'max' : 'pro',
                       ),
                     );

@@ -394,8 +394,34 @@ const StockDetails = ({ symbol: propSymbol }) => {
             </div>
           </div>
 
-          {/* Right: Actions & Trading Board Tag */}
+          {/* Right: Actions, Quota Badge & Trading Board Tag */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+            {(() => {
+              const liveScreenUsage = user?.usage_summary?.stock_screens_per_month || stock?.screen_usage;
+              if (!liveScreenUsage || liveScreenUsage.limit === -1) return null;
+              const isQuarterly = liveScreenUsage.period === 'quarter' || user?.tier?.slug === 'pro';
+              const isDepleted = liveScreenUsage.remaining === 0;
+              return (
+                <button
+                  type="button"
+                  onClick={() => setShowUpgradeModal(true)}
+                  title={isQuarterly ? 'Quarterly AAOIFI stock screen quota' : 'Monthly AAOIFI stock screen quota'}
+                  style={{
+                    padding: '9px 14px',
+                    borderRadius: '12px',
+                    background: isDepleted ? 'rgba(239, 68, 68, 0.2)' : 'rgba(201, 168, 76, 0.16)',
+                    border: `1px solid ${isDepleted ? 'rgba(239, 68, 68, 0.45)' : 'rgba(201, 168, 76, 0.45)'}`,
+                    color: isDepleted ? '#FCA5A5' : '#FDE68A',
+                    fontSize: '0.75rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {isQuarterly ? 'Quarterly' : 'Monthly'} Screens: {liveScreenUsage.used} / {liveScreenUsage.limit}
+                </button>
+              );
+            })()}
             {/* Trading Board Card */}
             {stock.trading_board && (
               <div style={{

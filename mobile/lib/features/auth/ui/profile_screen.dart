@@ -387,7 +387,7 @@ Color get cardBg => context.bgAlt;
         limitOf('watchlist_limit', slug == 'max' ? -1 : slug == 'pro' ? 2 : 0),
       ),
       (
-        'Custom Baskets',
+        slug == 'pro' ? 'Baskets (3 Curated + Custom)' : 'Custom Baskets',
         usedOf('baskets'),
         limitOf('baskets', slug == 'max' ? -1 : slug == 'pro' ? 3 : 0),
       ),
@@ -401,16 +401,26 @@ Color get cardBg => context.bgAlt;
     String buildSubscriptionSubtitle() {
       if (activeSub == null) return 'Free Community Plan';
       final rawCycle = activeSub['billing_cycle']?.toString().trim();
-      final status = (activeSub['status'] ?? 'active').toString().trim().toUpperCase();
+      final statusRaw = (activeSub['status'] ?? 'active').toString().trim().toLowerCase();
+      final autoRenew = activeSub['auto_renew'] == true;
+      final statusLabel = statusRaw == 'past_due'
+          ? 'PAST DUE'
+          : statusRaw == 'canceled'
+              ? 'CANCELED'
+              : (autoRenew ? 'ACTIVE • AUTO-RENEW' : 'ACTIVE • AUTO-RENEW OFF');
       final parts = <String>[
         if (rawCycle != null && rawCycle.isNotEmpty) '${rawCycle.toUpperCase()} BILLING',
-        status,
+        statusLabel,
       ];
       final dateRaw = (activeSub['ends_at'] ?? activeSub['renews_at'])?.toString();
       if (dateRaw != null && dateRaw.isNotEmpty) {
         try {
           final parsed = DateTime.parse(dateRaw).toLocal();
-          final prefix = activeSub['ends_at'] != null ? 'Ends' : 'Renews';
+          final prefix = statusRaw == 'past_due'
+              ? 'Grace ends'
+              : (statusRaw == 'canceled' || !autoRenew || activeSub['ends_at'] != null)
+                  ? 'Ends'
+                  : 'Renews';
           parts.add('$prefix ${DateFormat('MMM d, yyyy').format(parsed)}');
         } catch (_) {}
       }
@@ -440,7 +450,13 @@ Color get cardBg => context.bgAlt;
                     const SizedBox(height: 2),
                     Text(
                       buildSubscriptionSubtitle(),
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: context.textMuted),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: (activeSub?['status']?.toString().toLowerCase() == 'past_due')
+                            ? const Color(0xFFDC2626)
+                            : context.textMuted,
+                      ),
                     ),
                   ],
                 ),
@@ -455,8 +471,8 @@ Color get cardBg => context.bgAlt;
                       builder: (ctx) => UpgradePaywallBottomSheet(
                         requiredTier: slug == 'pro' ? 'max' : 'pro',
                         message: slug == 'pro'
-                            ? 'Upgrade to Noor (Max) for unlimited screens, holdings, Dividend Alerts, 90-Day Drift Tracking, and Monthly Spotlight.'
-                            : 'Upgrade to Rawdha (Pro) or Noor (Max) on the Irshad website to unlock higher quotas, Zakat, and Purification.',
+                            ? 'Noor (Max) includes unlimited screens, holdings, Dividend Alerts, 90-Day Drift Tracking, and Monthly Spotlight.'
+                            : 'Rawdha (Pro) and Noor (Max) memberships unlock higher quarterly/unlimited quotas, Zakat, and Purification.',
                       ),
                     );
                   },
@@ -465,7 +481,7 @@ Color get cardBg => context.bgAlt;
                     foregroundColor: context.primary,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                   ),
-                  child: Text(slug == 'pro' ? 'Go Noor' : 'Upgrade', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12)),
+                  child: const Text('Plan Info', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12)),
                 ),
             ],
           ),

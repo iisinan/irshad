@@ -869,7 +869,7 @@ class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with Sing
                               ),
                             );
                           },
-                          child: const Text('Upgrade Plan'),
+                          child: const Text('Membership Info'),
                         ),
                       ],
                     ),

@@ -44,8 +44,16 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => {
     const screenUsage = response?.data?.data?.screen_usage || response?.data?.screen_usage;
-    if (screenUsage && typeof screenUsage === 'object') {
-      window.dispatchEvent(new CustomEvent('quota:updated', { detail: { screenUsage } }));
+    const purificationUsage = response?.data?.data?.purification_usage || response?.data?.purification_usage;
+    const usageSummary = response?.data?.data?.usage_summary || response?.data?.usage_summary;
+    if (screenUsage || purificationUsage || usageSummary) {
+      window.dispatchEvent(new CustomEvent('quota:updated', {
+        detail: {
+          ...(screenUsage && typeof screenUsage === 'object' ? { screenUsage } : {}),
+          ...(purificationUsage && typeof purificationUsage === 'object' ? { purificationUsage } : {}),
+          ...(usageSummary && typeof usageSummary === 'object' ? { usageSummary } : {}),
+        },
+      }));
     }
     return response;
   },

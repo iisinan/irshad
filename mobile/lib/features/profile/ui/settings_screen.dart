@@ -222,19 +222,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _buildGroupedCard([
               _buildActionTile(
                 icon: Icons.help_outline_rounded,
-                title: 'Help Center',
-                onTap: () => _launchUrl('https://irshad.app/help'),
+                title: 'Resources & Help',
+                onTap: () => _launchUrl('https://iirshad.com/resources'),
               ),
               _buildActionTile(
                 icon: Icons.privacy_tip_outlined,
                 title: 'Privacy Policy',
-                onTap: () => _launchUrl('https://irshad.app/privacy'),
+                onTap: () => _launchUrl('https://iirshad.com/privacy'),
               ),
               _buildActionTile(
                 icon: Icons.info_outline_rounded,
                 title: 'About IRSHAD',
                 subtitle: 'Version 1.0.0',
-                onTap: () => _launchUrl('https://irshad.app/about'),
+                onTap: () => _launchUrl('https://iirshad.com/about'),
               ),
             ]),
 

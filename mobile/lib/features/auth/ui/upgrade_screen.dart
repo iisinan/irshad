@@ -85,7 +85,7 @@ class UpgradeScreen extends StatelessWidget {
                 context,
                 Icons.workspace_premium_rounded,
                 'Rawdha (Pro) — Active NGX Investor',
-                '30 screens/quarter, 7 holdings, 2 watchlist alerts, 3 curated baskets, 6 purifications/quarter & Zakat calculator',
+                '30 screens/quarter, 7 holdings, 2 watchlist alerts, 3 curated + 3 custom baskets, 6 purifications/quarter & Zakat calculator',
                 context.primary,
               ),
               _buildFeature(
@@ -114,7 +114,7 @@ class UpgradeScreen extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'Create a free account first to get started. Once registered, you can activate your premium plan.',
+                        'Create a free Miftah account to get started, or sign in to access an existing Rawdha or Noor membership. Paid plans cannot be purchased or modified inside this app.',
                         style: TextStyle(color: const Color(0xFF166534), fontSize: 13, height: 1.4),
                       ),
                     ),
@@ -178,7 +178,7 @@ class UpgradeScreen extends StatelessWidget {
                           decoration: TextDecoration.underline,
                         ),
                         recognizer: TapGestureRecognizer()
-                          ..onTap = () => launchUrl(Uri.parse('https://irshad.app/terms'), mode: LaunchMode.externalApplication),
+                          ..onTap = () => launchUrl(Uri.parse('https://iirshad.com/terms'), mode: LaunchMode.externalApplication),
                       ),
                       const TextSpan(text: '\nand '),
                       TextSpan(
@@ -189,7 +189,7 @@ class UpgradeScreen extends StatelessWidget {
                           decoration: TextDecoration.underline,
                         ),
                         recognizer: TapGestureRecognizer()
-                          ..onTap = () => launchUrl(Uri.parse('https://irshad.app/privacy'), mode: LaunchMode.externalApplication),
+                          ..onTap = () => launchUrl(Uri.parse('https://iirshad.com/privacy'), mode: LaunchMode.externalApplication),
                       ),
                       const TextSpan(text: '.'),
                     ],

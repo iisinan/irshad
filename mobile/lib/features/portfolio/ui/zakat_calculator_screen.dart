@@ -269,7 +269,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                       Text('Automated Zakat Locked', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark), textAlign: TextAlign.center),
                       const SizedBox(height: 8),
                       Text(
-                        'Upgrade to Rawdha (Pro) or Noor (Max) to unlock automated portfolio Zakat calculations, Hawl tracking, and Zakat statements.',
+                        'Available on Rawdha (Pro) and Noor (Max) for automated portfolio Zakat calculations, Hawl tracking, and Zakat statements.',
                         style: TextStyle(fontSize: 13, color: context.textMuted, height: 1.5),
                         textAlign: TextAlign.center,
                       ),
@@ -280,7 +280,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                             context: context,
                             isScrollControlled: true,
                             backgroundColor: Colors.transparent,
-                            builder: (ctx) => const UpgradePaywallBottomSheet(message: 'Upgrade to Rawdha (Pro) or Noor (Max) to unlock automated Zakat calculations.'),
+                            builder: (ctx) => const UpgradePaywallBottomSheet(message: 'Automated portfolio Zakat calculations are included with Rawdha (Pro) and Noor (Max) memberships.'),
                           );
                         },
                         style: ElevatedButton.styleFrom(
@@ -289,7 +289,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                         ),
-                        child: const Text('Upgrade Plan', style: TextStyle(fontWeight: FontWeight.w800)),
+                        child: const Text('Membership Info', style: TextStyle(fontWeight: FontWeight.w800)),
                       ),
                     ],
                   ),

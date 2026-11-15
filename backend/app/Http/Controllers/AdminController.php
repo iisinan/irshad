@@ -142,7 +142,8 @@ class AdminController extends Controller
             'note'          => 'nullable|string|max:255',
         ]);
 
-        $user = User::findOrFail($id);
+        $user = User::with('activeSubscription.plan')->findOrFail($id);
+        $previousSlug = $user->tier->slug ?? 'free';
         $adminName = $request->user()->name;
 
         // Cancel any existing active or past-due subscriptions
@@ -177,10 +178,7 @@ class AdminController extends Controller
             ]);
         }
 
-        // Bust profile cache so next request reflects new tier
-        try {
-            \Illuminate\Support\Facades\Cache::tags(['users'])->forget("user.profile.{$user->id}");
-        } catch (\Exception $e) { /* driver may not support tags */ }
+        \App\Services\SubscriptionService::syncUsageTrackingForPlanChange($user, $previousSlug);
 
         return response()->json([
             'message' => $expiresAt

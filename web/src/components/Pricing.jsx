@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CheckCircle2, Star, ShieldCheck, Monitor, Briefcase, Eye, PlaySquare, Globe, ShoppingBasket, FileText, Bell, HandCoins, LineChart, Megaphone, Check, Calculator, Minus } from 'lucide-react';
 import api from '../services/api';
 import Footer from './Footer';
@@ -31,11 +31,16 @@ const Pricing = ({ isModal = false, onClose }) => {
   const [error, setError] = useState('');
   const [livePlans, setLivePlans] = useState([]);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const requestedCycle = searchParams.get('cycle');
   const { user, fetchUser } = useAuth();
-  const [hasManualCycleSelection, setHasManualCycleSelection] = useState(false);
-  const [billingCycle, setBillingCycle] = useState(() =>
-    user?.active_subscription?.billing_cycle === 'yearly' ? 'yearly' : 'quarterly'
+  const [hasManualCycleSelection, setHasManualCycleSelection] = useState(
+    () => requestedCycle === 'quarterly' || requestedCycle === 'yearly'
   );
+  const [billingCycle, setBillingCycle] = useState(() => {
+    if (requestedCycle === 'quarterly' || requestedCycle === 'yearly') return requestedCycle;
+    return user?.active_subscription?.billing_cycle === 'yearly' ? 'yearly' : 'quarterly';
+  });
 
   useEffect(() => {
     const activeCycle = user?.active_subscription?.billing_cycle;
@@ -86,7 +91,7 @@ const Pricing = ({ isModal = false, onClose }) => {
   const isExactCurrentPlan = (slug) => {
     if (!user) return false;
     if (slug === 'free') return currentPlanSlug === 'free' && !hasPaid;
-    return currentPlanSlug === slug && hasPaid && (!currentBillingCycle || currentBillingCycle === billingCycle);
+    return currentPlanSlug === slug && hasPaid && Boolean(currentBillingCycle) && currentBillingCycle === billingCycle;
   };
 
   const getCtaLabel = (slug) => {
@@ -146,7 +151,7 @@ const Pricing = ({ isModal = false, onClose }) => {
       }
     } catch (err) {
       if (err.response?.status === 401) {
-        navigate('/login', { state: { returnTo: '/pricing' } });
+        navigate('/login', { state: { returnTo: `/pricing?cycle=${billingCycle}` } });
       } else {
         setError(err.response?.data?.error || err.response?.data?.message || 'Payment failed. Please try again.');
       }

@@ -76,8 +76,8 @@ class StockScreenCounterBadge extends StatelessWidget {
       onTap: () {
         final String requiredTier = tierSlug == 'pro' ? 'max' : 'pro';
         final String message = tierSlug == 'pro'
-            ? 'You have used $used of $limit quarterly stock screens on Rawdha (Pro). Upgrade to Noor (Max) for unlimited stock screenings.'
-            : 'You have used $used of $limit monthly stock screens on Miftah (Free). Upgrade to Rawdha (Pro) for 30 screens/quarter or Noor (Max) for unlimited.';
+            ? 'You have used $used of $limit quarterly stock screens on Rawdha (Pro). Noor (Max) members have unlimited stock screenings.'
+            : 'You have used $used of $limit monthly stock screens on Miftah (Free). Rawdha (Pro) includes 30 screens/quarter and Noor (Max) includes unlimited screenings.';
         showModalBottomSheet(
           context: context,
           isScrollControlled: true,

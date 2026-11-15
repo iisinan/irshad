@@ -879,7 +879,11 @@ class PortfolioController extends Controller
         if ($purifiedCount > 0) {
             Cache::forget("portfolio_data_" . $userId);
             \App\Services\SubscriptionService::recordFeatureUsage($user, 'purifications_per_month');
-            return $this->success(null, "Purification recorded successfully.");
+            $usageSummary = \App\Services\SubscriptionService::getUsageSummary($user);
+            return $this->success([
+                'purification_usage' => $usageSummary['purifications_per_month'],
+                'usage_summary'      => $usageSummary,
+            ], "Purification recorded successfully.");
         }
 
         return $this->success(null, "No holdings to purify.");

@@ -7,6 +7,9 @@ use App\Models\Subscription;
 use App\Models\UserNotification;
 use App\Services\SquadService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class ChargeSquadRenewals extends Command
@@ -37,6 +40,62 @@ class ChargeSquadRenewals extends Command
 
         if ($expiredNonRenewing > 0) {
             $this->info("Marked {$expiredNonRenewing} non-renewing subscription(s) as expired.");
+        }
+
+        // 2b. Remind upcoming expiring non-renewing subscriptions (cardless or canceled) 3 days prior
+        $windowEnd = now()->addDays(3);
+        $expiringSoon = Subscription::with(['user', 'plan'])
+            ->where(function ($q) use ($windowEnd) {
+                $q->where(function ($activeNoRenew) use ($windowEnd) {
+                    $activeNoRenew->where('status', 'active')
+                        ->where(function ($r) {
+                            $r->where('auto_renew', false)->orWhereNull('squad_token_id');
+                        })
+                        ->whereBetween('renews_at', [now(), $windowEnd]);
+                })->orWhere(function ($canceledEnding) use ($windowEnd) {
+                    $canceledEnding->where('status', 'canceled')
+                        ->whereNotNull('ends_at')
+                        ->whereBetween('ends_at', [now(), $windowEnd]);
+                });
+            })
+            ->get();
+
+        $pricingUrl = rtrim((string) config('app.frontend_url', 'https://iirshad.com'), '/') . '/pricing';
+        foreach ($expiringSoon as $sub) {
+            if (!$sub->user || !$sub->plan || $sub->plan->slug === 'free') {
+                continue;
+            }
+            $endDate = $sub->ends_at ?? $sub->renews_at;
+            if (!$endDate) {
+                continue;
+            }
+            $dedupKey = "sub_expiry_notice:{$sub->id}:{$endDate->toDateString()}";
+            if (!Cache::add($dedupKey, true, now()->addDays(4))) {
+                continue;
+            }
+
+            UserNotification::notify(
+                $sub->user_id,
+                'Subscription Expiring Soon',
+                "Your {$sub->plan->name} plan ends on {$endDate->toFormattedDateString()} and is not set to auto-renew. Renew anytime on {$pricingUrl} to avoid interruption.",
+                [
+                    'icon'         => '⏳',
+                    'category'     => 'billing',
+                    'action_url'   => '/pricing',
+                    'action_label' => 'Renew Plan',
+                ]
+            );
+
+            try {
+                Mail::raw(
+                    "Assalamu Alaikum {$sub->user->name},\n\nYour Irshad {$sub->plan->name} ({$sub->billing_cycle}) subscription will expire on {$endDate->toFormattedDateString()} and does not have auto-renewal enabled.\n\nTo keep uninterrupted access to your quotas and portfolio tools, you can renew your plan here:\n{$pricingUrl}?plan={$sub->plan->slug}&cycle={$sub->billing_cycle}\n\nThank you,\nThe Irshad Team",
+                    function ($message) use ($sub) {
+                        $message->to($sub->user->email)->subject("Your Irshad {$sub->plan->name} plan expires soon");
+                    }
+                );
+            } catch (\Throwable $e) {
+                Log::warning("Failed sending expiry reminder email for subscription #{$sub->id}: {$e->getMessage()}");
+            }
         }
 
         if (!$squad->isConfigured()) {
@@ -127,6 +186,17 @@ class ChargeSquadRenewals extends Command
                         'action_label' => 'Update Plan',
                     ]
                 );
+
+                try {
+                    Mail::raw(
+                        "Assalamu Alaikum {$sub->user->name},\n\nWe could not process the automatic renewal payment for your Irshad {$sub->plan->name} ({$sub->billing_cycle}) subscription.\n\nYour paid access remains active during a grace window until {$graceEndsAt->toFormattedDateString()}. Please complete payment to avoid interruption:\n{$pricingUrl}?plan={$sub->plan->slug}&cycle={$sub->billing_cycle}\n\nThank you,\nThe Irshad Team",
+                        function ($message) use ($sub) {
+                            $message->to($sub->user->email)->subject("Action required: Irshad {$sub->plan->name} renewal failed");
+                        }
+                    );
+                } catch (\Throwable $e) {
+                    Log::warning("Failed sending renewal failure email for subscription #{$sub->id}: {$e->getMessage()}");
+                }
 
                 $this->warn("Renewal failed for subscription #{$sub->id}: " . ($result['message'] ?? 'unknown error'));
             }

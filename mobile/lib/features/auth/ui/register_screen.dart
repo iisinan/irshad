@@ -468,7 +468,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                                     fontWeight: FontWeight.w700,
                                     decoration: TextDecoration.underline,
                                   ),
-                                  recognizer: TapGestureRecognizer()..onTap = () => _launchUrl('https://irshad.app/terms'),
+                                  recognizer: TapGestureRecognizer()..onTap = () => _launchUrl('https://iirshad.com/terms'),
                                 ),
                                 const TextSpan(text: ', '),
                                 TextSpan(
@@ -478,7 +478,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                                     fontWeight: FontWeight.w700,
                                     decoration: TextDecoration.underline,
                                   ),
-                                  recognizer: TapGestureRecognizer()..onTap = () => _launchUrl('https://irshad.app/privacy'),
+                                  recognizer: TapGestureRecognizer()..onTap = () => _launchUrl('https://iirshad.com/privacy'),
                                 ),
                                 const TextSpan(text: ', and acknowledge the '),
                                 TextSpan(
@@ -488,7 +488,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                                     fontWeight: FontWeight.w700,
                                     decoration: TextDecoration.underline,
                                   ),
-                                  recognizer: TapGestureRecognizer()..onTap = () => _launchUrl('https://irshad.app/shariah'),
+                                  recognizer: TapGestureRecognizer()..onTap = () => _launchUrl('https://iirshad.com/shariah'),
                                 ),
                                 const TextSpan(text: '.'),
                               ],

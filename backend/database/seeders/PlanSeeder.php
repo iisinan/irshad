@@ -43,7 +43,7 @@ class PlanSeeder extends Seeder
                     'stock_screens_per_month' => 30,
                     'portfolio_limit' => 7,
                     'watchlist_limit' => 2,
-                    'baskets' => 3, // 1 curated, 2 custom
+                    'baskets' => 3, // 3 curated + 3 custom
                     'statements' => true,
                     'purifications_per_month' => 6,
                     'zakat_calc' => true,

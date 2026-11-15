@@ -92,7 +92,7 @@ class ApiService {
               isScrollControlled: true,
               backgroundColor: Colors.transparent,
               builder: (context) => UpgradePaywallBottomSheet(
-                message: error.response?.data?['message'] ?? 'Please upgrade your plan on the Irshad website to unlock this feature.',
+                message: error.response?.data?['message'] ?? 'This feature requires an active Rawdha or Noor membership tier.',
                 requiredTier: error.response?.data?['required_tier']?.toString(),
               ),
             );
@@ -118,12 +118,29 @@ class ApiService {
     final dynamic rawUsage = payload is Map
         ? payload['screen_usage']
         : responseData['screen_usage'];
-    if (rawUsage is! Map) return;
+    final dynamic rawPurifyUsage = payload is Map
+        ? payload['purification_usage']
+        : responseData['purification_usage'];
+    final dynamic rawSummary = payload is Map
+        ? payload['usage_summary']
+        : responseData['usage_summary'];
+
+    if (rawUsage is! Map && rawPurifyUsage is! Map && rawSummary is! Map) return;
     final context = navigatorKey.currentContext;
     if (context == null) return;
     try {
-      Provider.of<AppStateProvider>(context, listen: false)
-          .updateScreenUsage(Map<String, dynamic>.from(rawUsage));
+      final appState = Provider.of<AppStateProvider>(context, listen: false);
+      if (rawSummary is Map) {
+        appState.updateUsageSummary(Map<String, dynamic>.from(rawSummary));
+      }
+      if (rawUsage is Map) {
+        appState.updateScreenUsage(Map<String, dynamic>.from(rawUsage));
+      }
+      if (rawPurifyUsage is Map) {
+        appState.updateUsageSummary({
+          'purifications_per_month': Map<String, dynamic>.from(rawPurifyUsage),
+        });
+      }
     } catch (_) {}
   }
 

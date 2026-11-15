@@ -223,7 +223,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                               fontWeight: FontWeight.w700,
                               decoration: TextDecoration.underline,
                             ),
-                            recognizer: TapGestureRecognizer()..onTap = () => _launchUrl('https://irshad.app/terms'),
+                            recognizer: TapGestureRecognizer()..onTap = () => _launchUrl('https://iirshad.com/terms'),
                           ),
                           const TextSpan(text: ' & '),
                           TextSpan(
@@ -233,7 +233,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                               fontWeight: FontWeight.w700,
                               decoration: TextDecoration.underline,
                             ),
-                            recognizer: TapGestureRecognizer()..onTap = () => _launchUrl('https://irshad.app/privacy'),
+                            recognizer: TapGestureRecognizer()..onTap = () => _launchUrl('https://iirshad.com/privacy'),
                           ),
                         ],
                       ),

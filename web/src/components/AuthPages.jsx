@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
@@ -62,13 +62,17 @@ export const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnTo = typeof location.state?.returnTo === 'string' && location.state.returnTo.startsWith('/')
+    ? location.state.returnTo
+    : '/portfolio';
 
   const handleGoogleSuccess = async (credentialResponse) => {
     setError('');
     setLoading(true);
     const res = await loginWithGoogle(credentialResponse.credential);
     if (res.success) {
-      navigate('/portfolio');
+      navigate(returnTo);
     } else {
       setError(res.error || 'Google login failed');
     }
@@ -82,7 +86,7 @@ export const LoginPage = () => {
     
     const res = await login({ email, password });
     if (res.success) {
-      navigate('/portfolio');
+      navigate(returnTo);
     } else {
       setError(res.error);
     }
@@ -164,7 +168,7 @@ export const LoginPage = () => {
 
         <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.79rem', marginTop: '24px' }}>
           Don't have an account?{' '}
-          <Link to="/register" style={{ color: 'var(--primary)', fontWeight: 700, textDecoration: 'none' }}>
+          <Link to="/register" state={location.state} style={{ color: 'var(--primary)', fontWeight: 700, textDecoration: 'none' }}>
             Sign up free
           </Link>
         </p>
@@ -190,13 +194,17 @@ export const RegisterPage = () => {
   const [loading, setLoading] = useState(false);
   const { register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnTo = typeof location.state?.returnTo === 'string' && location.state.returnTo.startsWith('/')
+    ? location.state.returnTo
+    : '/portfolio';
 
   const handleGoogleSuccess = async (credentialResponse) => {
     setError('');
     setLoading(true);
     const res = await loginWithGoogle(credentialResponse.credential);
     if (res.success) {
-      navigate('/portfolio');
+      navigate(returnTo);
     } else {
       setError(res.error || 'Google signup failed');
     }
@@ -235,7 +243,7 @@ export const RegisterPage = () => {
     });
     
     if (res.success) {
-      navigate('/portfolio');
+      navigate(returnTo);
     } else {
       setError(res.error);
     }

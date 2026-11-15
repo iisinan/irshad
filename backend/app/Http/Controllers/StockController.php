@@ -519,16 +519,19 @@ class StockController extends Controller
 
         $result = $aiService->analyzeCompliance($company, $financials, $statusStr);
 
-        if ($user) {
-            \App\Services\SubscriptionService::recordStockScreen($user, $symbol);
-        }
-
-        return $this->success([
+        $responsePayload = [
             'reasoning' => $result['reasoning'],
             'confidence_score' => $result['confidence_score'],
             'sources' => $result['sources'],
             'analysis' => $result['reasoning'],
-        ]);
+        ];
+
+        if ($user) {
+            \App\Services\SubscriptionService::recordStockScreen($user, $symbol);
+            $responsePayload['screen_usage'] = \App\Services\SubscriptionService::getUsageSummary($user)['stock_screens_per_month'];
+        }
+
+        return $this->success($responsePayload);
     }
 
     /**
@@ -548,11 +551,13 @@ class StockController extends Controller
 
         $answer = $aiService->chatAboutStock($company, $screening, $request->input('question'));
 
+        $responsePayload = ['answer' => $answer];
         if ($user) {
             \App\Services\SubscriptionService::recordStockScreen($user, $symbol);
+            $responsePayload['screen_usage'] = \App\Services\SubscriptionService::getUsageSummary($user)['stock_screens_per_month'];
         }
 
-        return $this->success(['answer' => $answer]);
+        return $this->success($responsePayload);
     }
 
     /**

@@ -195,6 +195,38 @@ class SubscriptionService
         return (int) $usage->used_count;
     }
 
+    public static function syncUsageTrackingForPlanChange(User $user, ?string $previousSlug = null): void
+    {
+        $user->unsetRelation('activeSubscription');
+        $user->unsetRelation('tier');
+
+        $newSlug = $user->tier->slug ?? 'free';
+        $ranks = ['free' => 0, 'pro' => 1, 'max' => 2];
+        $isUpgrade = ($ranks[$newSlug] ?? 0) > ($ranks[$previousSlug ?? 'free'] ?? 0);
+        $nextResetAt = self::nextResetAt($user);
+
+        $rows = UserUsage::where('user_id', $user->id)
+            ->where(function ($q) {
+                $q->whereIn('feature', ['stock_screens_per_month', 'purifications_per_month'])
+                    ->orWhere('feature', 'like', 'stock_screen:%');
+            })
+            ->get();
+
+        foreach ($rows as $row) {
+            if ($isUpgrade) {
+                $row->update([
+                    'used_count' => 0,
+                    'reset_at' => $nextResetAt,
+                ]);
+            } elseif ($previousSlug !== $newSlug) {
+                // Keep usage count intact on downgrades to prevent quota bypass, but align cadence
+                $row->update([
+                    'reset_at' => $nextResetAt,
+                ]);
+            }
+        }
+    }
+
     public static function getUsagePeriod(User $user): string
     {
         return ($user->tier->slug ?? 'free') === 'pro' ? 'quarter' : 'month';

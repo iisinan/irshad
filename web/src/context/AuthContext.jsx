@@ -174,16 +174,19 @@ export const AuthProvider = ({ children }) => {
     };
 
     const handleQuotaUpdated = (event) => {
-      const screenUsage = event?.detail?.screenUsage;
-      if (!screenUsage) return;
+      const { screenUsage, purificationUsage, usageSummary } = event?.detail || {};
+      if (!screenUsage && !purificationUsage && !usageSummary) return;
       setUser((prev) => {
         if (!prev) return prev;
+        const nextSummary = {
+          ...(prev.usage_summary || {}),
+          ...(usageSummary && typeof usageSummary === 'object' ? usageSummary : {}),
+          ...(screenUsage ? { stock_screens_per_month: screenUsage } : {}),
+          ...(purificationUsage ? { purifications_per_month: purificationUsage } : {}),
+        };
         const nextUser = {
           ...prev,
-          usage_summary: {
-            ...(prev.usage_summary || {}),
-            stock_screens_per_month: screenUsage,
-          },
+          usage_summary: nextSummary,
         };
         localStorage.setItem('auth_user', JSON.stringify(nextUser));
         return nextUser;

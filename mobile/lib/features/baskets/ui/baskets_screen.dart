@@ -238,7 +238,7 @@ class _BasketsScreenState extends State<BasketsScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Upgrade to Rawdha (Pro) for 3 curated + 3 custom baskets, or Noor (Max) for full thematic basket access and unlimited custom baskets.',
+                    'Available on Rawdha (Pro) for 3 curated + 3 custom baskets, or Noor (Max) for full thematic basket access and unlimited custom baskets.',
                     style: TextStyle(fontSize: 13, color: context.textMuted, height: 1.5),
                     textAlign: TextAlign.center,
                   ),
@@ -251,7 +251,7 @@ class _BasketsScreenState extends State<BasketsScreen> {
                         backgroundColor: Colors.transparent,
                         builder: (ctx) => const UpgradePaywallBottomSheet(
                           requiredTier: 'pro',
-                          message: 'Upgrade to Rawdha (Pro) or Noor (Max) to unlock thematic and custom investing baskets.',
+                          message: 'Rawdha (Pro) and Noor (Max) memberships include thematic and custom investing baskets.',
                         ),
                       );
                     },
@@ -261,7 +261,7 @@ class _BasketsScreenState extends State<BasketsScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     ),
-                    child: const Text('Upgrade Plan', style: TextStyle(fontWeight: FontWeight.w800)),
+                    child: const Text('Membership Info', style: TextStyle(fontWeight: FontWeight.w800)),
                   ),
                 ],
               ),
@@ -339,7 +339,7 @@ class _BasketsScreenState extends State<BasketsScreen> {
                                     backgroundColor: Colors.transparent,
                                     builder: (ctx) => UpgradePaywallBottomSheet(
                                       requiredTier: basket.requiredTier ?? 'pro',
-                                      message: 'Upgrade to $tier on the Irshad website to unlock "${basket.name}" and full curated baskets.',
+                                      message: '"${basket.name}" requires an active $tier membership tier.',
                                     ),
                                   );
                                   return;

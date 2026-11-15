@@ -35,7 +35,7 @@ class PurificationTab extends StatelessWidget {
                 Text('Automated Purification Locked', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark), textAlign: TextAlign.center),
                 const SizedBox(height: 8),
                 Text(
-                  'Upgrade to Rawdha (Pro) for 6 automated purification calculations per quarter, or Noor (Max) for unlimited access.',
+                  'Available on Rawdha (Pro) for 6 automated purification calculations per quarter, or Noor (Max) for unlimited access.',
                   style: TextStyle(fontSize: 13, color: context.textMuted, height: 1.5),
                   textAlign: TextAlign.center,
                 ),
@@ -46,7 +46,7 @@ class PurificationTab extends StatelessWidget {
                       context: context,
                       isScrollControlled: true,
                       backgroundColor: Colors.transparent,
-                      builder: (ctx) => const UpgradePaywallBottomSheet(message: 'Upgrade to Rawdha (Pro) or Noor (Max) to unlock automated dividend purification calculations.'),
+                      builder: (ctx) => const UpgradePaywallBottomSheet(message: 'Automated dividend purification calculations are included with Rawdha (Pro) and Noor (Max) memberships.'),
                     );
                   },
                   style: ElevatedButton.styleFrom(
@@ -55,7 +55,7 @@ class PurificationTab extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   ),
-                  child: const Text('Upgrade Plan', style: TextStyle(fontWeight: FontWeight.w800)),
+                  child: const Text('Membership Info', style: TextStyle(fontWeight: FontWeight.w800)),
                 ),
               ],
             ),
@@ -140,6 +140,35 @@ class PurificationTab extends StatelessWidget {
                               Text('Dividend Purification', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
                               const SizedBox(height: 2),
                               Text('Cleanse your portfolio of non-compliant income', style: TextStyle(fontSize: 13, color: context.textMuted, fontWeight: FontWeight.w500)),
+                              Builder(builder: (context) {
+                                final purifyUsage = Provider.of<AppStateProvider>(context).userProfile?['usage_summary']?['purifications_per_month'];
+                                final limitVal = purifyUsage is Map && purifyUsage['limit'] is num
+                                    ? (purifyUsage['limit'] as num).toInt()
+                                    : (purificationsLimit is num ? purificationsLimit.toInt() : 0);
+                                if (limitVal <= 0) return const SizedBox.shrink();
+                                final usedVal = purifyUsage is Map && purifyUsage['used'] is num
+                                    ? (purifyUsage['used'] as num).toInt()
+                                    : 0;
+                                final isQuarter = (purifyUsage is Map && purifyUsage['period'] == 'quarter') || tierSlug == 'pro';
+                                return Padding(
+                                  padding: const EdgeInsets.only(top: 8),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: context.primary.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      '$usedVal / $limitVal used this ${isQuarter ? 'quarter' : 'month'}',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w800,
+                                        color: context.primary,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }),
                             ],
                           ),
                         ),
