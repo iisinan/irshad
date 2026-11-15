@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:hive/hive.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/providers/app_state_provider.dart';
 import '../../../core/widgets/upgrade_paywall_bottom_sheet.dart';
 import '../providers/basket_provider.dart';
 import '../models/basket.dart';
@@ -149,7 +150,12 @@ class _BasketsScreenState extends State<BasketsScreen> {
     super.initState();
     _loadWaitlistState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<BasketProvider>().fetchBaskets();
+      final tier = context.read<AppStateProvider>().userProfile?['tier'];
+      final tierSlug = tier?['slug'] ?? 'free';
+      final basketsLimit = tier?['features']?['baskets'] ?? (tierSlug == 'max' ? -1 : tierSlug == 'pro' ? 3 : 0);
+      if (basketsLimit != 0) {
+        context.read<BasketProvider>().fetchBaskets();
+      }
     });
   }
 
@@ -202,6 +208,69 @@ class _BasketsScreenState extends State<BasketsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final tier = Provider.of<AppStateProvider>(context).userProfile?['tier'];
+    final tierSlug = tier?['slug'] ?? 'free';
+    final basketsLimit = tier?['features']?['baskets'] ?? (tierSlug == 'max' ? -1 : tierSlug == 'pro' ? 3 : 0);
+    final isBasketsLocked = tierSlug == 'free' || basketsLimit == 0;
+
+    if (isBasketsLocked) {
+      return Scaffold(
+        backgroundColor: context.bg,
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(28.0),
+            child: Container(
+              padding: const EdgeInsets.all(28),
+              decoration: BoxDecoration(
+                color: context.bg,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: context.divider),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.lock_outline_rounded, size: 42, color: context.primary),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Thematic Baskets Locked',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Upgrade to Rawdha (Pro) for 3 curated + 3 custom baskets, or Noor (Max) for full thematic basket access and unlimited custom baskets.',
+                    style: TextStyle(fontSize: 13, color: context.textMuted, height: 1.5),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (ctx) => const UpgradePaywallBottomSheet(
+                          requiredTier: 'pro',
+                          message: 'Upgrade to Rawdha (Pro) or Noor (Max) to unlock thematic and custom investing baskets.',
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: context.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                    child: const Text('Upgrade Plan', style: TextStyle(fontWeight: FontWeight.w800)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: context.bg,
       floatingActionButton: _buildFab(context),

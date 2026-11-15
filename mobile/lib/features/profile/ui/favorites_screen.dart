@@ -9,6 +9,7 @@ import 'package:irshad_mobile/core/theme/app_theme.dart';
 import 'package:irshad_mobile/core/widgets/company_avatar.dart';
 import 'package:irshad_mobile/features/profile/data/user_activity_repository.dart';
 import 'package:irshad_mobile/core/providers/app_state_provider.dart';
+import 'package:irshad_mobile/core/widgets/upgrade_paywall_bottom_sheet.dart';
 import 'package:irshad_mobile/features/profile/ui/widgets/alert_preferences_bottom_sheet.dart';
 import 'package:irshad_mobile/features/profile/ui/widgets/add_assets_bottom_sheet.dart';
 
@@ -51,9 +52,16 @@ class _FavoritesScreenState extends State<FavoritesScreen> with WidgetsBindingOb
     }
   }
 
+  bool _isWatchlistLocked(BuildContext context) {
+    final tier = Provider.of<AppStateProvider>(context, listen: false).userProfile?['tier'];
+    final tierSlug = tier?['slug'] ?? 'free';
+    final watchlistLimit = tier?['features']?['watchlist_limit'] ?? (tierSlug == 'max' ? -1 : tierSlug == 'pro' ? 2 : 0);
+    return tierSlug == 'free' || watchlistLimit == 0;
+  }
+
   Future<void> _syncDataSilently() async {
     final isAuth = Provider.of<AppStateProvider>(context, listen: false).isAuthenticated;
-    if (!isAuth) return;
+    if (!isAuth || _isWatchlistLocked(context)) return;
 
     final favs = await _activityRepository.getFavorites();
     final watchlists = await _activityRepository.getWatchlist();
@@ -69,7 +77,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> with WidgetsBindingOb
 
   Future<void> _fetchData() async {
     final isAuth = Provider.of<AppStateProvider>(context, listen: false).isAuthenticated;
-    if (!isAuth) {
+    if (!isAuth || _isWatchlistLocked(context)) {
       if (mounted) setState(() => _isLoading = false);
       return;
     }
@@ -179,6 +187,77 @@ class _FavoritesScreenState extends State<FavoritesScreen> with WidgetsBindingOb
 
   @override
   Widget build(BuildContext context) {
+    final tier = Provider.of<AppStateProvider>(context).userProfile?['tier'];
+    final tierSlug = tier?['slug'] ?? 'free';
+    final watchlistLimit = tier?['features']?['watchlist_limit'] ?? (tierSlug == 'max' ? -1 : tierSlug == 'pro' ? 2 : 0);
+    final isWatchlistLocked = tierSlug == 'free' || watchlistLimit == 0;
+
+    if (isWatchlistLocked) {
+      return Scaffold(
+        backgroundColor: context.bg,
+        appBar: widget.isTab
+            ? null
+            : AppBar(
+                title: Text('Watchlist & Alerts', style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
+                backgroundColor: context.bg,
+                elevation: 0,
+                centerTitle: false,
+              ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(28.0),
+            child: Container(
+              padding: const EdgeInsets.all(28),
+              decoration: BoxDecoration(
+                color: context.bg,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: context.divider),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.lock_outline_rounded, size: 42, color: context.primary),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Watchlist & Alerts Locked',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Upgrade to Rawdha (Pro) for up to 2 watchlist alerts, or Noor (Max) for unlimited real-time compliance & price alerts.',
+                    style: TextStyle(fontSize: 13, color: context.textMuted, height: 1.5),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (ctx) => const UpgradePaywallBottomSheet(
+                          requiredTier: 'pro',
+                          message: 'Upgrade to Rawdha (Pro) or Noor (Max) to unlock watchlist tracking and price alerts.',
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: context.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                    child: const Text('Upgrade Plan', style: TextStyle(fontWeight: FontWeight.w800)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: context.bg,
       appBar: widget.isTab ? null : AppBar(

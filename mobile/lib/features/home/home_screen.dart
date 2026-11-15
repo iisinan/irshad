@@ -159,10 +159,29 @@ class _HomeScreenState extends State<HomeScreen> {
                   unselectedLabelColor: context.textMuted,
                   labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                   unselectedLabelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                  tabs: const [
-                    Tab(text: 'Stocks'),
-                    Tab(text: 'Directory'),
-                    Tab(text: 'Baskets'),
+                  tabs: [
+                    const Tab(text: 'Stocks'),
+                    const Tab(text: 'Directory'),
+                    Tab(
+                      child: Builder(
+                        builder: (context) {
+                          final tier = Provider.of<AppStateProvider>(context).userProfile?['tier'];
+                          final tierSlug = tier?['slug'] ?? 'free';
+                          final basketsLimit = tier?['features']?['baskets'] ?? (tierSlug == 'max' ? -1 : tierSlug == 'pro' ? 3 : 0);
+                          final isLocked = tierSlug == 'free' || basketsLimit == 0;
+                          if (!isLocked) return const Text('Baskets');
+                          return Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Text('Baskets'),
+                              SizedBox(width: 4),
+                              Icon(Icons.lock_outline_rounded, size: 13),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
                   ],
                 ),
               ),

@@ -17,6 +17,7 @@ import '../../../core/notifications/notification_service.dart';
 
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 import '../../../core/api/api_service.dart';
+import '../../../core/widgets/upgrade_paywall_bottom_sheet.dart';
 import '../../../core/widgets/company_avatar.dart';
 import '../../profile/ui/widgets/add_assets_bottom_sheet.dart';
 import '../../portfolio/ui/tabs/portfolio_overview_tab.dart';
@@ -40,8 +41,21 @@ class StockDetailScreen extends StatefulWidget {
     );
 
     try {
-      final fullData = await repository.getStockDetails(symbol);
-      final cachedAaoifi = repository.getCachedDataForUrl('stocks/$symbol/aaoifi-screening');
+      final isMutualFund = initialStock['asset_class'] == 'mutual_fund';
+      final Map<String, dynamic>? fullData;
+      final Map<String, dynamic>? aaoifiData;
+
+      if (isMutualFund) {
+        fullData = await repository.getStockDetails(symbol, handleUpgradeManually: true);
+        aaoifiData = null;
+      } else {
+        final results = await Future.wait<Map<String, dynamic>?>([
+          repository.getStockDetails(symbol, handleUpgradeManually: true),
+          repository.fetchAaoifiScreening(symbol, handleUpgradeManually: true),
+        ]);
+        fullData = results[0];
+        aaoifiData = results[1];
+      }
 
       if (context.mounted) Navigator.pop(context);
 
@@ -50,8 +64,21 @@ class StockDetailScreen extends StatefulWidget {
           'prefetched': true,
           'needs_refresh': false,
           'stock': {...initialStock, ...(fullData ?? {})},
-          'aaoifiData': cachedAaoifi,
+          'aaoifiData': aaoifiData,
         });
+      }
+    } on UpgradeRequiredException catch (e) {
+      if (context.mounted) Navigator.pop(context);
+      if (context.mounted) {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (_) => UpgradePaywallBottomSheet(
+            message: e.message,
+            requiredTier: e.requiredTier,
+          ),
+        );
       }
     } catch (e) {
       if (context.mounted) Navigator.pop(context);
@@ -283,28 +310,60 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
         hasStaleData = true;
       }
       
-      // 2. Network fetch (do NOT auto-call aaoifi-screening here so we don't consume monthly screen quota on passive stock views)
-      final fullData = await _stockRepository.getStockDetails(symbol);
-      
+      // 2. Network fetch: enforce stock screening quota for non-mutual-fund equities
+      final isMutualFund = _currentStock['asset_class'] == 'mutual_fund';
+      final Map<String, dynamic>? fullData;
+      final Map<String, dynamic>? fetchedAaoifi;
+
+      if (isMutualFund) {
+        fullData = await _stockRepository.getStockDetails(symbol, handleUpgradeManually: true);
+        fetchedAaoifi = null;
+      } else {
+        final results = await Future.wait<Map<String, dynamic>?>([
+          _stockRepository.getStockDetails(symbol, handleUpgradeManually: true),
+          _stockRepository.fetchAaoifiScreening(symbol, handleUpgradeManually: true),
+        ]);
+        fullData = results[0];
+        fetchedAaoifi = results[1];
+      }
+
+      final effectiveAaoifi = fetchedAaoifi ?? cachedAaoifi;
+
       if (fullData != null && mounted) {
         setState(() {
           // Replace status entirely from fullData (never merge shallow list status)
-          _currentStock = {..._currentStock, ...fullData};
+          _currentStock = {..._currentStock, ...fullData!};
           if (fullData['status'] != null) {
             _currentStock['status'] = fullData['status'];
-            
-            // Inject the cached status reason from AAOIFI screening if previously run
-            if (cachedAaoifi != null && cachedAaoifi['status_reason'] != null) {
+
+            // Inject the status reason from AAOIFI screening when available
+            if (effectiveAaoifi != null && effectiveAaoifi['status_reason'] != null) {
               if (_currentStock['status'] is Map) {
-                _currentStock['status']['reason'] = cachedAaoifi['status_reason'];
+                _currentStock['status']['reason'] = effectiveAaoifi['status_reason'];
               }
             }
           }
-          _aaoifiData = cachedAaoifi;
+          _aaoifiData = effectiveAaoifi;
           _isLoadingDetails = false;
         });
       } else if (!hasStaleData) {
         if (mounted) setState(() => _isLoadingDetails = false);
+      }
+    } on UpgradeRequiredException catch (e) {
+      if (mounted) {
+        Navigator.pop(context);
+        final rootCtx = ApiService.navigatorKey.currentContext;
+        if (rootCtx != null) {
+          showModalBottomSheet(
+            context: rootCtx,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (_) => UpgradePaywallBottomSheet(
+              message: e.message,
+              requiredTier: e.requiredTier,
+            ),
+          );
+        }
       }
     } catch (e) {
       debugPrint('Failed to load full details: $e');
@@ -328,6 +387,22 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
   void _onFavorite() async {
     // Press animation
     _alertScaleController.forward().then((_) => _alertScaleController.reverse());
+
+    final tier = Provider.of<AppStateProvider>(context, listen: false).userProfile?['tier'];
+    final tierSlug = tier?['slug'] ?? 'free';
+    final watchlistLimit = tier?['features']?['watchlist_limit'] ?? (tierSlug == 'max' ? -1 : tierSlug == 'pro' ? 2 : 0);
+    if (tierSlug == 'free' || watchlistLimit == 0) {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (_) => const UpgradePaywallBottomSheet(
+          requiredTier: 'pro',
+          message: 'Watchlist tracking and price alerts require the Rawdha (Pro) or Noor (Max) plan.',
+        ),
+      );
+      return;
+    }
 
     if (_isAlreadyFavorited) {
       _showNotificationOptions();

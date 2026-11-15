@@ -9,6 +9,21 @@ import 'cache_interceptor.dart';
 import '../widgets/upgrade_paywall_bottom_sheet.dart';
 
 
+class UpgradeRequiredException implements Exception {
+  final String message;
+  final String? requiredTier;
+  final String? feature;
+
+  const UpgradeRequiredException({
+    required this.message,
+    this.requiredTier,
+    this.feature,
+  });
+
+  @override
+  String toString() => message;
+}
+
 /// Singleton ApiService — one Dio instance, one interceptor stack, everywhere.
 class ApiService {
   static final ApiService _instance = ApiService._internal();
@@ -54,8 +69,22 @@ class ApiService {
         return handler.next(options);
       },
 
+      onResponse: (response, handler) {
+        _syncScreenUsageFromResponse(response.data);
+        return handler.next(response);
+      },
+
       onError: (DioException error, handler) async {
-        if (error.response?.statusCode == 403 && error.response?.data?['error'] == 'Upgrade Required') {
+        final isUpgradeRequired = error.response?.statusCode == 403 &&
+            (error.response?.data?['error'] == 'Upgrade Required' ||
+                error.response?.data?['upgrade_required'] == true);
+        final handleManually = error.requestOptions.extra['handle_upgrade_manually'] == true;
+
+        if (isUpgradeRequired) {
+          _refreshProfileOnUpgradeRequired();
+        }
+
+        if (isUpgradeRequired && !handleManually) {
           final context = navigatorKey.currentContext;
           if (context != null) {
             showModalBottomSheet(
@@ -83,12 +112,39 @@ class ApiService {
     ));
   }
 
+  void _syncScreenUsageFromResponse(dynamic responseData) {
+    if (responseData is! Map) return;
+    final dynamic payload = responseData['data'];
+    final dynamic rawUsage = payload is Map
+        ? payload['screen_usage']
+        : responseData['screen_usage'];
+    if (rawUsage is! Map) return;
+    final context = navigatorKey.currentContext;
+    if (context == null) return;
+    try {
+      Provider.of<AppStateProvider>(context, listen: false)
+          .updateScreenUsage(Map<String, dynamic>.from(rawUsage));
+    } catch (_) {}
+  }
+
+  void _refreshProfileOnUpgradeRequired() {
+    final context = navigatorKey.currentContext;
+    if (context == null) return;
+    try {
+      Provider.of<AppStateProvider>(context, listen: false).loadProfile();
+    } catch (_) {}
+  }
+
   Future<Response> post(String path, dynamic data) async {
     return dio.post(path, data: data);
   }
 
-  Future<Response> get(String path, {Map<String, dynamic>? queryParameters}) async {
-    return dio.get(path, queryParameters: queryParameters);
+  Future<Response> get(String path, {Map<String, dynamic>? queryParameters, Map<String, dynamic>? extra}) async {
+    return dio.get(
+      path,
+      queryParameters: queryParameters,
+      options: extra != null ? Options(extra: extra) : null,
+    );
   }
 
   Future<Response> put(String path, dynamic data) async {

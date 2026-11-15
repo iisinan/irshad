@@ -3,6 +3,8 @@ import "dart:convert";
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
+import 'package:irshad_mobile/core/api/api_service.dart';
+import 'package:irshad_mobile/core/widgets/upgrade_paywall_bottom_sheet.dart';
 import '../data/stock_repository.dart';
 import 'dart:async';
 import 'package:url_launcher/url_launcher.dart';
@@ -19,6 +21,8 @@ class AaoifiScreeningScreen extends StatefulWidget {
 class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with SingleTickerProviderStateMixin {
   bool _isLoading = true;
   String? _error;
+  bool _isUpgradeRequired = false;
+  String? _requiredTier;
   Map<String, dynamic>? _report;
   
   int _currentStepIndex = 0;
@@ -67,7 +71,10 @@ class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with Sing
   Future<void> _fetchScreening() async {
     try {
       final repo = context.read<StockRepository>();
-      final result = await repo.fetchAaoifiScreening(widget.stock['symbol']);
+      final result = await repo.fetchAaoifiScreening(
+        widget.stock['symbol'],
+        handleUpgradeManually: true,
+      );
       if (!mounted) return;
       
       // Make sure we at least show the final step before revealing the report
@@ -81,6 +88,26 @@ class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with Sing
       setState(() {
         _report = result;
         _isLoading = false;
+      });
+    } on UpgradeRequiredException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isUpgradeRequired = true;
+        _requiredTier = e.requiredTier;
+        _error = e.message;
+        _isLoading = false;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (_) => UpgradePaywallBottomSheet(
+            message: e.message,
+            requiredTier: e.requiredTier,
+          ),
+        );
       });
     } catch (e) {
       if (!mounted) return;
@@ -225,6 +252,41 @@ class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with Sing
                 "AAOIFI Compliance Verdict",
                 style: TextStyle(color: Colors.grey, fontSize: 14, fontWeight: FontWeight.w600),
               ),
+              if (_report!['screen_usage'] is Map && (_report!['screen_usage']['limit'] ?? -1) != -1) ...[
+                const SizedBox(height: 12),
+                Builder(
+                  builder: (context) {
+                    final usage = _report!['screen_usage'] as Map;
+                    final used = usage['used'] ?? 0;
+                    final limit = usage['limit'] ?? 3;
+                    final remaining = usage['remaining'] ?? 0;
+                    final isQuarterly = usage['period']?.toString() == 'quarter' || limit == 30;
+                    final isExhausted = remaining == 0;
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: isExhausted
+                            ? Colors.red.withValues(alpha: 0.12)
+                            : const Color(0xFFD9A05B).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: isExhausted
+                              ? Colors.red.withValues(alpha: 0.35)
+                              : const Color(0xFFD9A05B).withValues(alpha: 0.4),
+                        ),
+                      ),
+                      child: Text(
+                        '${isQuarterly ? 'Quarterly' : 'Monthly'} Screens: $used / $limit',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          color: isExhausted ? Colors.red.shade700 : const Color(0xFFB45309),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
               const SizedBox(height: 20),
               Container(height: 1, color: statusColor.withValues(alpha: 0.3)),
               const SizedBox(height: 16),
@@ -790,7 +852,45 @@ class _AaoifiScreeningScreenState extends State<AaoifiScreeningScreen> with Sing
       body: _isLoading 
         ? _buildLoadingState() 
         : _error != null
-          ? Center(child: Text('Error: $_error', style: const TextStyle(color: Colors.red)))
+          ? (_isUpgradeRequired
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.lock_outline_rounded, size: 52, color: Color(0xFFD9A05B)),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Screening Limit Reached',
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          _error!,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.grey, fontSize: 14, height: 1.4),
+                        ),
+                        const SizedBox(height: 20),
+                        ElevatedButton(
+                          onPressed: () {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (_) => UpgradePaywallBottomSheet(
+                                message: _error!,
+                                requiredTier: _requiredTier,
+                              ),
+                            );
+                          },
+                          child: const Text('Upgrade Plan'),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : Center(child: Text('Error: $_error', style: const TextStyle(color: Colors.red))))
           : _buildReportState(),
     );
   }

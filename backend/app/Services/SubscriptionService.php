@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\UserUsage;
 use App\Models\Watchlist;
 use Carbon\Carbon;
+use Illuminate\Database\UniqueConstraintViolationException;
 
 class SubscriptionService
 {
@@ -114,9 +115,36 @@ class SubscriptionService
 
         $symbolFeatureKey = 'stock_screen:' . $normalized;
         $symbolUsage = self::getOrResetMonthlyUsage($user, $symbolFeatureKey);
-        $symbolUsage->update(['used_count' => 1]);
+        $claimed = UserUsage::where('id', $symbolUsage->id)
+            ->where('used_count', 0)
+            ->update(['used_count' => 1]);
 
-        self::recordFeatureUsage($user, 'stock_screens_per_month');
+        if ($claimed > 0) {
+            self::recordFeatureUsage($user, 'stock_screens_per_month');
+        }
+    }
+
+    public static function stockScreenLimitPayload(User $user, string $periodStyle = 'this'): array
+    {
+        $limit = $user->tier->features['stock_screens_per_month'] ?? 3;
+        $period = self::getUsagePeriod($user);
+        $periodLabel = $periodStyle === 'adjective'
+            ? ($period === 'quarter' ? 'quarterly' : 'monthly')
+            : ($period === 'quarter' ? 'this quarter' : 'this month');
+
+        $message = $periodStyle === 'adjective'
+            ? "You have reached your {$periodLabel} limit of {$limit} stock screenings. Please upgrade your plan."
+            : "You have reached your limit of {$limit} stock screenings {$periodLabel}. Please upgrade your plan.";
+
+        return [
+            'error' => 'Upgrade Required',
+            'upgrade_required' => true,
+            'feature' => 'stock_screens_per_month',
+            'limit' => $limit,
+            'period' => $period,
+            'required_tier' => ($user->tier->slug ?? 'free') === 'free' ? 'pro' : 'max',
+            'message' => $message,
+        ];
     }
 
     public static function hasScreenedSymbolThisMonth(User $user, string $symbol): bool
@@ -138,7 +166,7 @@ class SubscriptionService
         if ($usage->reset_at && Carbon::now()->greaterThanOrEqualTo($usage->reset_at)) {
             $usage->update([
                 'used_count' => 0,
-                'reset_at' => Carbon::now()->startOfMonth()->addMonth(),
+                'reset_at' => self::nextResetAt($user),
             ]);
             return false;
         }
@@ -159,7 +187,7 @@ class SubscriptionService
         if ($usage->reset_at && Carbon::now()->greaterThanOrEqualTo($usage->reset_at)) {
             $usage->update([
                 'used_count' => 0,
-                'reset_at' => Carbon::now()->startOfMonth()->addMonth(),
+                'reset_at' => self::nextResetAt($user),
             ]);
             return 0;
         }
@@ -167,9 +195,22 @@ class SubscriptionService
         return (int) $usage->used_count;
     }
 
+    public static function getUsagePeriod(User $user): string
+    {
+        return ($user->tier->slug ?? 'free') === 'pro' ? 'quarter' : 'month';
+    }
+
+    private static function nextResetAt(User $user): Carbon
+    {
+        return self::getUsagePeriod($user) === 'quarter'
+            ? Carbon::now()->firstOfQuarter()->addQuarter()
+            : Carbon::now()->startOfMonth()->addMonth();
+    }
+
     public static function getUsageSummary(User $user): array
     {
         $features = $user->tier->features ?? [];
+        $period = self::getUsagePeriod($user);
 
         $screensLimit = $features['stock_screens_per_month'] ?? 3;
         $screensUsed = self::getFeatureUsageCount($user, 'stock_screens_per_month');
@@ -191,11 +232,13 @@ class SubscriptionService
                 'used' => $screensUsed,
                 'limit' => $screensLimit,
                 'remaining' => $screensLimit === -1 ? -1 : max(0, $screensLimit - $screensUsed),
+                'period' => $period,
             ],
             'purifications_per_month' => [
                 'used' => $purificationsUsed,
                 'limit' => $purificationsLimit,
                 'remaining' => $purificationsLimit === -1 ? -1 : max(0, $purificationsLimit - $purificationsUsed),
+                'period' => $period,
             ],
             'portfolio_limit' => [
                 'used' => $portfolioUsed,
@@ -217,15 +260,21 @@ class SubscriptionService
 
     private static function getOrResetMonthlyUsage(User $user, string $featureKey): UserUsage
     {
-        $usage = UserUsage::firstOrCreate(
-            ['user_id' => $user->id, 'feature' => $featureKey],
-            ['used_count' => 0, 'reset_at' => Carbon::now()->startOfMonth()->addMonth()]
-        );
+        try {
+            $usage = UserUsage::firstOrCreate(
+                ['user_id' => $user->id, 'feature' => $featureKey],
+                ['used_count' => 0, 'reset_at' => self::nextResetAt($user)]
+            );
+        } catch (UniqueConstraintViolationException) {
+            $usage = UserUsage::where('user_id', $user->id)
+                ->where('feature', $featureKey)
+                ->firstOrFail();
+        }
 
         if ($usage->reset_at && Carbon::now()->greaterThanOrEqualTo($usage->reset_at)) {
             $usage->update([
                 'used_count' => 0,
-                'reset_at' => Carbon::now()->startOfMonth()->addMonth(),
+                'reset_at' => self::nextResetAt($user),
             ]);
         }
 

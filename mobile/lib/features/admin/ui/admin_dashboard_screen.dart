@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 import 'admin_users_screen.dart';
+import 'admin_finances_screen.dart';
 import 'admin_compliance_screen.dart';
 import 'admin_tickers_screen.dart';
 import 'admin_zakat_settings_screen.dart';
@@ -54,6 +55,10 @@ class AdminDashboardScreen extends StatelessWidget {
             const SizedBox(height: 16),
             _buildAdminCard(context, 'Users', 'Manage registered users and permissions', Icons.people_alt_rounded, () {
               Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminUsersScreen()));
+            }),
+            const SizedBox(height: 16),
+            _buildAdminCard(context, 'Finances', 'Track subscription payments, revenue & reconciliations', Icons.account_balance_wallet_rounded, () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminFinancesScreen()));
             }),
             const SizedBox(height: 16),
             _buildAdminCard(context, 'Compliance Queue', 'Review financial and shariah reports', Icons.fact_check_rounded, () {

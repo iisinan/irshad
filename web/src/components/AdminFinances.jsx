@@ -3,10 +3,18 @@ import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import {
   Wallet, Search, RefreshCw, Download, CheckCircle2, Clock, XCircle,
-  CreditCard, Users, TrendingUp, Eye, X, Copy, Check, ChevronLeft, ChevronRight
+  CreditCard, Users, TrendingUp, Eye, X, Copy, Check, ChevronLeft, ChevronRight,
+  BarChart3, ShieldCheck, Filter, Calendar, RotateCcw, AlertCircle
 } from 'lucide-react';
+import {
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+} from 'recharts';
 import { useAuth } from '../context/AuthContext';
-import { fetchAdminFinances } from '../services/api';
+import {
+  fetchAdminFinances,
+  exportAdminFinancesCsv,
+  verifyAdminFinanceTransaction,
+} from '../services/api';
 
 const fmtNaira = (amount) => {
   const num = Number(amount || 0);
@@ -14,6 +22,13 @@ const fmtNaira = (amount) => {
     minimumFractionDigits: num % 1 === 0 ? 0 : 2,
     maximumFractionDigits: 2,
   });
+};
+
+const fmtCompactNaira = (amount) => {
+  const num = Number(amount || 0);
+  if (num >= 1_000_000) return `₦${(num / 1_000_000).toFixed(1)}M`;
+  if (num >= 1_000) return `₦${Math.round(num / 1_000)}k`;
+  return `₦${num}`;
 };
 
 const fmtDate = (iso) => {
@@ -54,9 +69,9 @@ const STATUS_STYLE = {
 };
 
 const PLAN_STYLE = {
-  max: { bg: 'rgba(139, 92, 246, 0.12)', color: '#7C3AED', border: 'rgba(139, 92, 246, 0.3)' },
-  pro: { bg: 'rgba(16, 185, 129, 0.12)', color: '#059669', border: 'rgba(16, 185, 129, 0.3)' },
-  free: { bg: 'rgba(107, 114, 128, 0.12)', color: '#4B5563', border: 'rgba(107, 114, 128, 0.25)' },
+  max: { bg: 'rgba(139, 92, 246, 0.12)', color: '#7C3AED', border: 'rgba(139, 92, 246, 0.3)', bar: '#7C3AED' },
+  pro: { bg: 'rgba(16, 185, 129, 0.12)', color: '#059669', border: 'rgba(16, 185, 129, 0.3)', bar: '#059669' },
+  free: { bg: 'rgba(107, 114, 128, 0.12)', color: '#4B5563', border: 'rgba(107, 114, 128, 0.25)', bar: '#6B7280' },
 };
 
 const StatusBadge = ({ status }) => {
@@ -90,6 +105,34 @@ const StatusBadge = ({ status }) => {
   );
 };
 
+const ChartTooltip = ({ active, payload }) => {
+  if (!active || !payload?.length) return null;
+  const item = payload[0]?.payload;
+  if (!item) return null;
+  return (
+    <div
+      style={{
+        background: 'var(--bg-surface)',
+        border: '1px solid var(--border)',
+        borderRadius: '10px',
+        padding: '10px 12px',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+        fontSize: '0.8rem',
+      }}
+    >
+      <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>
+        {item.month}
+      </div>
+      <div style={{ color: '#059669', fontWeight: 800 }}>
+        {fmtNaira(item.revenue_ngn)}
+      </div>
+      <div style={{ color: 'var(--text-muted)', fontSize: '0.74rem', marginTop: '2px' }}>
+        {item.transactions} confirmed {item.transactions === 1 ? 'payment' : 'payments'}
+      </div>
+    </div>
+  );
+};
+
 const AdminFinances = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -98,19 +141,37 @@ const AdminFinances = () => {
   const [summary, setSummary] = useState({
     total_revenue_ngn: 0,
     revenue_30d_ngn: 0,
+    avg_ticket_ngn: 0,
+    success_rate: 0,
     success_count: 0,
     pending_count: 0,
     failed_count: 0,
     total_count: 0,
     paying_users_count: 0,
+    active_paid_subs: 0,
+    active_admin_overrides: 0,
   });
+  const [filteredTotals, setFilteredTotals] = useState({ count: 0, success_revenue_ngn: 0 });
+  const [charts, setCharts] = useState({
+    monthly_revenue: [],
+    by_plan: [],
+    by_cycle: [],
+  });
+
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
+  const [verifyingId, setVerifyingId] = useState(null);
   const [error, setError] = useState('');
+  const [toast, setToast] = useState(null);
 
   const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [planFilter, setPlanFilter] = useState('all');
+  const [cycleFilter, setCycleFilter] = useState('all');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -119,13 +180,17 @@ const AdminFinances = () => {
   const [selectedTx, setSelectedTx] = useState(null);
   const [copiedRef, setCopiedRef] = useState('');
 
+  const showToast = useCallback((type, text) => {
+    setToast({ type, text });
+    setTimeout(() => setToast(null), 4000);
+  }, []);
+
   useEffect(() => {
     if (user && user.role !== 'admin') {
       navigate('/portfolio');
     }
   }, [user, navigate]);
 
-  // Debounce search input
   useEffect(() => {
     const timer = setTimeout(() => {
       setPage(1);
@@ -134,6 +199,26 @@ const AdminFinances = () => {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
+  const currentFilters = useCallback(() => ({
+    search: searchQuery,
+    status: statusFilter,
+    type: typeFilter,
+    plan: planFilter,
+    billingCycle: cycleFilter,
+    dateFrom,
+    dateTo,
+  }), [searchQuery, statusFilter, typeFilter, planFilter, cycleFilter, dateFrom, dateTo]);
+
+  const hasActiveFilters = Boolean(
+    searchQuery ||
+    statusFilter !== 'all' ||
+    typeFilter !== 'all' ||
+    planFilter !== 'all' ||
+    cycleFilter !== 'all' ||
+    dateFrom ||
+    dateTo
+  );
+
   const loadFinances = useCallback(async () => {
     try {
       setLoading(true);
@@ -141,11 +226,11 @@ const AdminFinances = () => {
       const res = await fetchAdminFinances({
         page,
         perPage: 20,
-        search: searchQuery,
-        status: statusFilter,
-        type: typeFilter,
+        ...currentFilters(),
       });
       setSummary(res.summary || {});
+      setFilteredTotals(res.filtered_totals || { count: 0, success_revenue_ngn: 0 });
+      setCharts(res.charts || { monthly_revenue: [], by_plan: [], by_cycle: [] });
       const pager = res.transactions || {};
       setTransactions(pager.data || []);
       setTotalPages(pager.last_page || 1);
@@ -155,11 +240,23 @@ const AdminFinances = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, searchQuery, statusFilter, typeFilter]);
+  }, [page, currentFilters]);
 
   useEffect(() => {
     loadFinances();
   }, [loadFinances]);
+
+  const handleClearFilters = () => {
+    setSearchInput('');
+    setSearchQuery('');
+    setStatusFilter('all');
+    setTypeFilter('all');
+    setPlanFilter('all');
+    setCycleFilter('all');
+    setDateFrom('');
+    setDateTo('');
+    setPage(1);
+  };
 
   const handleCopy = (value) => {
     if (!value) return;
@@ -168,57 +265,74 @@ const AdminFinances = () => {
     setTimeout(() => setCopiedRef(''), 1800);
   };
 
-  const handleExportCsv = () => {
-    if (!transactions.length) return;
-    const headers = [
-      'ID',
-      'User Name',
-      'User Email',
-      'Plan',
-      'Billing Cycle',
-      'Amount (NGN)',
-      'Currency',
-      'Status',
-      'Type',
-      'Gateway',
-      'Transaction Ref',
-      'Gateway Ref',
-      'Paid At',
-      'Created At',
-    ];
-    const escapeCsv = (val) => {
-      const s = val == null ? '' : String(val);
-      return `"${s.replace(/"/g, '""')}"`;
-    };
-    const rows = transactions.map((tx) => [
-      tx.id,
-      tx.user?.name || '',
-      tx.user?.email || '',
-      tx.plan?.name || '',
-      tx.billing_cycle || '',
-      tx.amount_ngn ?? (tx.amount_kobo || 0) / 100,
-      tx.currency || 'NGN',
-      tx.status || '',
-      tx.type || '',
-      tx.gateway || '',
-      tx.transaction_ref || '',
-      tx.gateway_ref || '',
-      tx.paid_at || '',
-      tx.created_at || '',
-    ].map(escapeCsv).join(','));
-
-    const csv = [headers.map(escapeCsv).join(','), ...rows].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `irshad-finances-page-${page}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+  const handleExportCsv = async () => {
+    if (!filteredTotals.count) return;
+    try {
+      setExporting(true);
+      const blob = await exportAdminFinancesCsv(currentFilters());
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `irshad-finances-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('success', `Exported ${filteredTotals.count} payment record(s) to CSV.`);
+    } catch (err) {
+      showToast('error', err?.response?.data?.message || 'Failed to export CSV.');
+    } finally {
+      setExporting(false);
+    }
   };
 
+  const handleVerifyTransaction = async (tx) => {
+    if (!tx || verifyingId === tx.id) return;
+    try {
+      setVerifyingId(tx.id);
+      const res = await verifyAdminFinanceTransaction(tx.id);
+      showToast(res.status === 'failed' ? 'error' : 'success', res.message || 'Verification complete.');
+      if (selectedTx?.id === tx.id && res.transaction) {
+        setSelectedTx(res.transaction);
+      }
+      await loadFinances();
+    } catch (err) {
+      showToast('error', err?.response?.data?.message || 'Unable to verify payment with Squad.');
+    } finally {
+      setVerifyingId(null);
+    }
+  };
+
+  const totalPlanRevenue = (charts.by_plan || []).reduce((acc, p) => acc + Number(p.revenue_ngn || 0), 0);
+
   return (
-    <div style={{ padding: '24px 28px 48px', maxWidth: '1320px', margin: '0 auto' }}>
+    <div style={{ padding: '24px 28px 48px', maxWidth: '1340px', margin: '0 auto' }}>
+      {/* Toast Notification */}
+      {toast && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 24,
+            right: 24,
+            zIndex: 10000,
+            padding: '12px 18px',
+            borderRadius: '12px',
+            fontWeight: 700,
+            fontSize: '0.86rem',
+            background: toast.type === 'error' ? 'rgba(239, 68, 68, 0.14)' : 'rgba(16, 185, 129, 0.14)',
+            color: toast.type === 'error' ? '#DC2626' : '#059669',
+            border: `1px solid ${toast.type === 'error' ? 'rgba(239, 68, 68, 0.35)' : 'rgba(16, 185, 129, 0.35)'}`,
+            backdropFilter: 'blur(8px)',
+            boxShadow: '0 10px 28px rgba(0,0,0,0.14)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            maxWidth: '420px',
+          }}
+        >
+          {toast.type === 'error' ? <AlertCircle size={17} /> : <CheckCircle2 size={17} />}
+          <span>{toast.text}</span>
+        </div>
+      )}
+
       {/* Header */}
       <div
         style={{
@@ -227,7 +341,7 @@ const AdminFinances = () => {
           justifyContent: 'space-between',
           alignItems: 'flex-start',
           gap: '16px',
-          marginBottom: '24px',
+          marginBottom: '22px',
         }}
       >
         <div>
@@ -250,15 +364,15 @@ const AdminFinances = () => {
             Finances &amp; Payments
           </h1>
           <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: '6px 0 0' }}>
-            Track all subscription checkouts, recurring renewals, and payment statuses across Irshad.
+            Monitor subscription collections, revenue trends, plan splits, and reconcile pending Squad checkouts.
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
           <button
             type="button"
             onClick={handleExportCsv}
-            disabled={!transactions.length}
+            disabled={!filteredTotals.count || exporting}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -270,12 +384,12 @@ const AdminFinances = () => {
               color: 'var(--text-primary)',
               fontSize: '0.84rem',
               fontWeight: 600,
-              cursor: transactions.length ? 'pointer' : 'not-allowed',
-              opacity: transactions.length ? 1 : 0.5,
+              cursor: filteredTotals.count && !exporting ? 'pointer' : 'not-allowed',
+              opacity: filteredTotals.count ? 1 : 0.5,
             }}
           >
             <Download size={15} />
-            Export CSV
+            {exporting ? 'Exporting...' : `Export CSV${filteredTotals.count ? ` (${filteredTotals.count})` : ''}`}
           </button>
 
           <button
@@ -306,9 +420,9 @@ const AdminFinances = () => {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(225px, 1fr))',
           gap: '14px',
-          marginBottom: '22px',
+          marginBottom: '18px',
         }}
       >
         <div
@@ -320,13 +434,35 @@ const AdminFinances = () => {
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               Total Revenue
             </span>
             <Wallet size={17} style={{ color: 'var(--primary)' }} />
           </div>
           <div style={{ fontSize: '1.55rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
             {fmtNaira(summary.total_revenue_ngn)}
+          </div>
+          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+            {summary.active_paid_subs || 0} active paid subs &middot; {summary.active_admin_overrides || 0} overrides
+          </div>
+        </div>
+
+        <div
+          style={{
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border)',
+            borderRadius: '14px',
+            padding: '18px 20px',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Last 30 Days
+            </span>
+            <TrendingUp size={17} style={{ color: '#059669' }} />
+          </div>
+          <div style={{ fontSize: '1.55rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+            {fmtNaira(summary.revenue_30d_ngn)}
           </div>
           <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '4px' }}>
             From {summary.paying_users_count || 0} paying {summary.paying_users_count === 1 ? 'user' : 'users'}
@@ -342,16 +478,16 @@ const AdminFinances = () => {
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Last 30 Days
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Avg Payment / Success Rate
             </span>
-            <TrendingUp size={17} style={{ color: '#059669' }} />
+            <BarChart3 size={17} style={{ color: '#7C3AED' }} />
           </div>
           <div style={{ fontSize: '1.55rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-            {fmtNaira(summary.revenue_30d_ngn)}
+            {fmtNaira(summary.avg_ticket_ngn)}
           </div>
           <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-            Confirmed collections
+            {summary.success_rate || 0}% checkout completion rate
           </div>
         </div>
 
@@ -364,41 +500,166 @@ const AdminFinances = () => {
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Successful Payments
-            </span>
-            <CheckCircle2 size={17} style={{ color: '#059669' }} />
-          </div>
-          <div style={{ fontSize: '1.55rem', fontWeight: 800, color: '#059669', letterSpacing: '-0.02em' }}>
-            {summary.success_count || 0}
-          </div>
-          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-            Out of {summary.total_count || 0} total attempts
-          </div>
-        </div>
-
-        <div
-          style={{
-            background: 'var(--bg-surface)',
-            border: '1px solid var(--border)',
-            borderRadius: '14px',
-            padding: '18px 20px',
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Pending / Failed
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Payment Breakdown
             </span>
             <CreditCard size={17} style={{ color: '#D97706' }} />
           </div>
-          <div style={{ fontSize: '1.55rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-            <span style={{ color: '#D97706' }}>{summary.pending_count || 0}</span>
-            <span style={{ color: 'var(--text-muted)', fontSize: '1rem', margin: '0 6px' }}>/</span>
-            <span style={{ color: '#DC2626' }}>{summary.failed_count || 0}</span>
+          <div style={{ fontSize: '1.45rem', fontWeight: 800, letterSpacing: '-0.02em', display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+            <span style={{ color: '#059669' }} title="Successful">{summary.success_count || 0}</span>
+            <span style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>/</span>
+            <span style={{ color: '#D97706' }} title="Pending">{summary.pending_count || 0}</span>
+            <span style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>/</span>
+            <span style={{ color: '#DC2626' }} title="Failed">{summary.failed_count || 0}</span>
           </div>
           <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-            Awaiting verification or declined
+            Success &middot; Pending &middot; Failed ({summary.total_count || 0} total)
           </div>
+        </div>
+      </div>
+
+      {/* Analytics Row: 6-Month Chart & Plan / Cycle Breakdown */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gap: '14px',
+          marginBottom: '20px',
+        }}
+      >
+        {/* 6-Month Revenue Area Chart */}
+        <div
+          style={{
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border)',
+            borderRadius: '16px',
+            padding: '18px 20px',
+            gridColumn: 'span 1',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+            <div>
+              <h2 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                Monthly Revenue Trend
+              </h2>
+              <p style={{ margin: '2px 0 0', fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+                Confirmed payments over the last 6 months
+              </p>
+            </div>
+          </div>
+
+          <div style={{ width: '100%', height: '190px' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={charts.monthly_revenue || []} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="financesRevGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10B981" stopOpacity={0.28} />
+                    <stop offset="95%" stopColor="#10B981" stopOpacity={0.02} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                <XAxis
+                  dataKey="label"
+                  tick={{ fill: 'var(--text-muted)', fontSize: 11 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tickFormatter={fmtCompactNaira}
+                  tick={{ fill: 'var(--text-muted)', fontSize: 11 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip content={<ChartTooltip />} />
+                <Area
+                  type="monotone"
+                  dataKey="revenue_ngn"
+                  stroke="#059669"
+                  strokeWidth={2.5}
+                  fill="url(#financesRevGradient)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Plan & Billing Cycle Split */}
+        <div
+          style={{
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border)',
+            borderRadius: '16px',
+            padding: '18px 20px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            gap: '14px',
+          }}
+        >
+          <div>
+            <h2 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+              Revenue by Plan &amp; Billing Cycle
+            </h2>
+            <p style={{ margin: '2px 0 12px', fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+              Confirmed subscription collections across tiers
+            </p>
+
+            {(charts.by_plan || []).length === 0 ? (
+              <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', padding: '14px 0' }}>
+                No confirmed transactions recorded yet.
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {(charts.by_plan || []).map((item) => {
+                  const pct = totalPlanRevenue > 0 ? Math.round((item.revenue_ngn / totalPlanRevenue) * 100) : 0;
+                  const cfg = PLAN_STYLE[item.slug] || PLAN_STYLE.free;
+                  return (
+                    <div key={item.slug}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: '4px' }}>
+                        <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
+                          {item.name} <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>({item.count} tx)</span>
+                        </span>
+                        <span style={{ fontWeight: 800, color: 'var(--text-primary)' }}>
+                          {fmtNaira(item.revenue_ngn)} <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>({pct}%)</span>
+                        </span>
+                      </div>
+                      <div style={{ width: '100%', height: '7px', borderRadius: '999px', background: 'var(--bg-section)', overflow: 'hidden' }}>
+                        <div style={{ width: `${pct}%`, height: '100%', borderRadius: '999px', background: cfg.bar }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Billing Cycle Chips */}
+          {(charts.by_cycle || []).length > 0 && (
+            <div style={{ borderTop: '1px solid var(--border)', paddingTop: '12px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {(charts.by_cycle || []).map((c) => (
+                <div
+                  key={c.cycle}
+                  style={{
+                    flex: '1 1 130px',
+                    padding: '9px 12px',
+                    borderRadius: '10px',
+                    background: 'var(--bg-section)',
+                    border: '1px solid var(--border)',
+                  }}
+                >
+                  <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                    {c.cycle}
+                  </div>
+                  <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '2px' }}>
+                    {fmtNaira(c.revenue_ngn)}
+                  </div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                    {c.count} {c.count === 1 ? 'payment' : 'payments'}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -418,90 +679,186 @@ const AdminFinances = () => {
             borderBottom: '1px solid var(--border)',
             background: 'var(--bg-section)',
             display: 'flex',
-            flexWrap: 'wrap',
-            gap: '12px',
-            justifyContent: 'space-between',
-            alignItems: 'center',
+            flexDirection: 'column',
+            gap: '10px',
           }}
         >
-          <div style={{ position: 'relative', flex: '1 1 280px', maxWidth: '420px' }}>
-            <Search
-              size={15}
-              style={{
-                position: 'absolute',
-                left: '12px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: 'var(--text-muted)',
-              }}
-            />
-            <input
-              type="text"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Search user, email, or reference..."
-              style={{
-                width: '100%',
-                padding: '9px 12px 9px 36px',
-                borderRadius: '10px',
-                border: '1px solid var(--border)',
-                background: 'var(--bg-surface)',
-                color: 'var(--text-primary)',
-                fontSize: '0.86rem',
-                outline: 'none',
-              }}
-            />
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ position: 'relative', flex: '1 1 260px', maxWidth: '380px' }}>
+              <Search
+                size={15}
+                style={{
+                  position: 'absolute',
+                  left: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: 'var(--text-muted)',
+                }}
+              />
+              <input
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="Search user, email, or reference..."
+                style={{
+                  width: '100%',
+                  padding: '8px 12px 8px 36px',
+                  borderRadius: '10px',
+                  border: '1px solid var(--border)',
+                  background: 'var(--bg-surface)',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.84rem',
+                  outline: 'none',
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+              <select
+                value={planFilter}
+                onChange={(e) => { setPage(1); setPlanFilter(e.target.value); }}
+                aria-label="Filter by plan"
+                style={{
+                  padding: '8px 11px',
+                  borderRadius: '10px',
+                  border: '1px solid var(--border)',
+                  background: 'var(--bg-surface)',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                }}
+              >
+                <option value="all">All Plans</option>
+                <option value="pro">Rawdha</option>
+                <option value="max">Noor</option>
+              </select>
+
+              <select
+                value={cycleFilter}
+                onChange={(e) => { setPage(1); setCycleFilter(e.target.value); }}
+                aria-label="Filter by billing cycle"
+                style={{
+                  padding: '8px 11px',
+                  borderRadius: '10px',
+                  border: '1px solid var(--border)',
+                  background: 'var(--bg-surface)',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                }}
+              >
+                <option value="all">All Cycles</option>
+                <option value="quarterly">Quarterly</option>
+                <option value="yearly">Yearly</option>
+              </select>
+
+              <select
+                value={statusFilter}
+                onChange={(e) => { setPage(1); setStatusFilter(e.target.value); }}
+                aria-label="Filter by status"
+                style={{
+                  padding: '8px 11px',
+                  borderRadius: '10px',
+                  border: '1px solid var(--border)',
+                  background: 'var(--bg-surface)',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                }}
+              >
+                <option value="all">All Statuses</option>
+                <option value="success">Success</option>
+                <option value="pending">Pending</option>
+                <option value="failed">Failed</option>
+              </select>
+
+              <select
+                value={typeFilter}
+                onChange={(e) => { setPage(1); setTypeFilter(e.target.value); }}
+                aria-label="Filter by payment type"
+                style={{
+                  padding: '8px 11px',
+                  borderRadius: '10px',
+                  border: '1px solid var(--border)',
+                  background: 'var(--bg-surface)',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                }}
+              >
+                <option value="all">All Types</option>
+                <option value="initial">Initial</option>
+                <option value="renewal">Renewal</option>
+              </select>
+            </div>
           </div>
 
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>
-            <select
-              value={statusFilter}
-              onChange={(e) => {
-                setPage(1);
-                setStatusFilter(e.target.value);
-              }}
-              aria-label="Filter by status"
-              style={{
-                padding: '8px 12px',
-                borderRadius: '10px',
-                border: '1px solid var(--border)',
-                background: 'var(--bg-surface)',
-                color: 'var(--text-primary)',
-                fontSize: '0.84rem',
-                fontWeight: 600,
-              }}
-            >
-              <option value="all">All Statuses</option>
-              <option value="success">Success</option>
-              <option value="pending">Pending</option>
-              <option value="failed">Failed</option>
-            </select>
+          {/* Date Range + Filtered Totals Row */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+                <Calendar size={14} /> Date range:
+              </span>
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => { setPage(1); setDateFrom(e.target.value); }}
+                aria-label="Start date"
+                style={{
+                  padding: '6px 10px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border)',
+                  background: 'var(--bg-surface)',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.8rem',
+                }}
+              />
+              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>to</span>
+              <input
+                type="date"
+                value={dateTo}
+                onChange={(e) => { setPage(1); setDateTo(e.target.value); }}
+                aria-label="End date"
+                style={{
+                  padding: '6px 10px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border)',
+                  background: 'var(--bg-surface)',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.8rem',
+                }}
+              />
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={handleClearFilters}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '6px 10px',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border)',
+                    background: 'var(--bg-surface)',
+                    color: 'var(--text-secondary)',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <RotateCcw size={12} />
+                  Clear
+                </button>
+              )}
+            </div>
 
-            <select
-              value={typeFilter}
-              onChange={(e) => {
-                setPage(1);
-                setTypeFilter(e.target.value);
-              }}
-              aria-label="Filter by payment type"
-              style={{
-                padding: '8px 12px',
-                borderRadius: '10px',
-                border: '1px solid var(--border)',
-                background: 'var(--bg-surface)',
-                color: 'var(--text-primary)',
-                fontSize: '0.84rem',
-                fontWeight: 600,
-              }}
-            >
-              <option value="all">All Types</option>
-              <option value="initial">Initial</option>
-              <option value="renewal">Renewal</option>
-            </select>
-
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-              {totalRows} {totalRows === 1 ? 'record' : 'records'}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+              <Filter size={13} />
+              <span>
+                {filteredTotals.count} {filteredTotals.count === 1 ? 'record' : 'records'}
+                {hasActiveFilters ? ` · Confirmed: ${fmtNaira(filteredTotals.success_revenue_ngn)}` : ''}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -527,7 +884,7 @@ const AdminFinances = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)', background: 'var(--bg-section)' }}>
-                {['User', 'Plan', 'Amount', 'Type', 'Reference', 'Status', 'Date', ''].map((col) => (
+                {['User', 'Plan', 'Amount', 'Type', 'Reference', 'Status', 'Date', 'Actions'].map((col) => (
                   <th
                     key={col}
                     style={{
@@ -538,6 +895,7 @@ const AdminFinances = () => {
                       textTransform: 'uppercase',
                       letterSpacing: '0.05em',
                       whiteSpace: 'nowrap',
+                      textAlign: col === 'Actions' ? 'right' : 'left',
                     }}
                   >
                     {col}
@@ -701,26 +1059,53 @@ const AdminFinances = () => {
                       </td>
 
                       <td style={{ padding: '14px 16px', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedTx(tx)}
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '5px',
-                            padding: '6px 10px',
-                            borderRadius: '8px',
-                            border: '1px solid var(--border)',
-                            background: 'var(--bg-surface)',
-                            color: 'var(--text-primary)',
-                            fontSize: '0.78rem',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                          }}
-                        >
-                          <Eye size={13} />
-                          Details
-                        </button>
+                        <div style={{ display: 'inline-flex', gap: '6px', alignItems: 'center' }}>
+                          {tx.status === 'pending' && tx.gateway === 'squad' && (
+                            <button
+                              type="button"
+                              onClick={() => handleVerifyTransaction(tx)}
+                              disabled={verifyingId === tx.id}
+                              title="Verify status with Squad and activate if paid"
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                padding: '6px 10px',
+                                borderRadius: '8px',
+                                border: '1px solid rgba(16, 185, 129, 0.35)',
+                                background: 'rgba(16, 185, 129, 0.1)',
+                                color: '#059669',
+                                fontSize: '0.78rem',
+                                fontWeight: 700,
+                                cursor: verifyingId === tx.id ? 'wait' : 'pointer',
+                              }}
+                            >
+                              <ShieldCheck size={13} />
+                              {verifyingId === tx.id ? 'Verifying...' : 'Verify'}
+                            </button>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => setSelectedTx(tx)}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              padding: '6px 10px',
+                              borderRadius: '8px',
+                              border: '1px solid var(--border)',
+                              background: 'var(--bg-surface)',
+                              color: 'var(--text-primary)',
+                              fontSize: '0.78rem',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                            }}
+                          >
+                            <Eye size={13} />
+                            Details
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -743,7 +1128,7 @@ const AdminFinances = () => {
           }}
         >
           <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-            Page {page} of {totalPages}
+            Page {page} of {totalPages} &middot; {totalRows} shown
           </span>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button
@@ -883,8 +1268,31 @@ const AdminFinances = () => {
                 </div>
                 <div>
                   <div style={{ color: 'var(--text-muted)', fontSize: '0.74rem', fontWeight: 700 }}>STATUS</div>
-                  <div style={{ marginTop: '3px' }}>
+                  <div style={{ marginTop: '3px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <StatusBadge status={selectedTx.status} />
+                    {selectedTx.status === 'pending' && selectedTx.gateway === 'squad' && (
+                      <button
+                        type="button"
+                        onClick={() => handleVerifyTransaction(selectedTx)}
+                        disabled={verifyingId === selectedTx.id}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          padding: '4px 9px',
+                          borderRadius: '8px',
+                          border: '1px solid rgba(16, 185, 129, 0.35)',
+                          background: 'rgba(16, 185, 129, 0.1)',
+                          color: '#059669',
+                          fontSize: '0.74rem',
+                          fontWeight: 700,
+                          cursor: verifyingId === selectedTx.id ? 'wait' : 'pointer',
+                        }}
+                      >
+                        <ShieldCheck size={12} />
+                        {verifyingId === selectedTx.id ? 'Verifying...' : 'Verify with Squad'}
+                      </button>
+                    )}
                   </div>
                 </div>
                 <div>

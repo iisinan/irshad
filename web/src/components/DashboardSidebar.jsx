@@ -6,7 +6,7 @@ import {
   BarChart2, Activity, Briefcase, Layers,
   HeartHandshake, Calculator, BookOpen,
   User, LogOut, ChevronLeft, ChevronRight,
-  X, Moon, Sun, Shield, FileText, Bell, HelpCircle, Star, CreditCard
+  X, Moon, Sun, Shield, FileText, Bell, HelpCircle, Star, CreditCard, Lock
 } from 'lucide-react';
 
 const SidebarClock = () => {
@@ -28,14 +28,18 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
   const { user, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
 
+  const tierSlug = user?.tier?.slug || 'free';
+  const basketsLocked = tierSlug === 'free' || (user?.tier?.features?.baskets ?? 0) === 0;
+  const watchlistLocked = tierSlug === 'free' || (user?.tier?.features?.watchlist_limit ?? 0) === 0;
+
   const NAV_ITEMS = [
     { section: 'Main' },
     { label: 'Updates',          icon: Bell,           to: '/portfolio#updates', className: 'tour-updates-tab' },
     { label: 'Holdings',         icon: Activity,       to: '/portfolio#holdings', className: 'tour-portfolio-tab' },
     { label: 'Market Screener',  icon: BarChart2,      to: '/portfolio#market', className: 'tour-market-tab' },
-    { label: 'Investing Baskets', icon: Layers,         to: '/portfolio#baskets', className: 'tour-baskets-tab' },
+    { label: 'Investing Baskets', icon: Layers,         to: '/portfolio#baskets', className: 'tour-baskets-tab', locked: basketsLocked },
     { label: 'Halal Directory',  icon: Briefcase,      to: '/portfolio#funds', className: 'tour-funds-tab' },
-    { label: 'Alert',            icon: Star,           to: '/portfolio#watchlist' },
+    { label: 'Alert',            icon: Star,           to: '/portfolio#watchlist', locked: watchlistLocked },
     { section: 'Islamic Finance' },
     { label: 'Purification',     icon: HeartHandshake, to: '/portfolio#purification', className: 'tour-purification-tab' },
     { label: 'Zakat',            icon: Calculator,     to: '/portfolio#zakat', className: 'tour-zakat-tab' },
@@ -240,8 +244,11 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
                 }}
               />
               {!isCollapsed && <span style={{ flex: 1 }}>{item.label}</span>}
+              {!isCollapsed && item.locked && (
+                <Lock size={13} color="#d97706" style={{ flexShrink: 0 }} />
+              )}
               {/* Active dot */}
-              {!isCollapsed && active && (
+              {!isCollapsed && active && !item.locked && (
                 <div style={{
                   width: '5px', height: '5px', borderRadius: '50%',
                   background: 'var(--primary)', flexShrink: 0,

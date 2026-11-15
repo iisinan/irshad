@@ -15,6 +15,7 @@ class CacheInterceptor extends Interceptor {
   /// Stock list: 5 min. Stock details: 10 min.
   static Duration _ttlFor(String url) {
     if (url.contains('/aaoifi-screening')) return Duration.zero;
+    if (url.contains('/profile') || url.contains('/user') || url.contains('/subscription')) return Duration.zero; // Never cache quota/tier state
     if (url.contains('/portfolio')) return Duration.zero; // Never cache portfolio to ensure sync
     if (url.contains('/watchlist')) return Duration.zero; // Never cache watchlist so deletes reflect immediately
     if (url.contains('/favorites')) return Duration.zero; // Never cache favorites
@@ -22,7 +23,7 @@ class CacheInterceptor extends Interceptor {
     if (url.contains('/notifications')) return Duration.zero; // Never cache notifications for real-time delivery
     if (url.contains('/stocks/baskets')) return Duration.zero; // Never cache baskets so deletes reflect immediately
     if (url.contains('/stocks/ngx')) return const Duration(minutes: 5);
-    if (url.contains('/stocks/') && !url.contains('search')) return const Duration(minutes: 10);
+    if (url.contains('/stocks/') && !url.contains('search')) return Duration.zero;
     return const Duration(minutes: 2);
   }
 
@@ -81,8 +82,8 @@ class CacheInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    // On any network failure, always fall back to cache (even stale)
-    if (err.requestOptions.method.toUpperCase() == 'GET') {
+    // Only fall back to offline cache on transport/network failures, never on real HTTP responses (e.g., 401/403 paywalls)
+    if (err.response == null && err.requestOptions.method.toUpperCase() == 'GET') {
       try {
         final box = Hive.box(boxName);
         final url = err.requestOptions.uri.toString();

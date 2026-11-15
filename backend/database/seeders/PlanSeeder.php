@@ -40,12 +40,12 @@ class PlanSeeder extends Seeder
                 'price_yearly' => 25000,
                 'price_yearly_regular' => 30000,
                 'features' => [
-                    'stock_screens_per_month' => 10,
+                    'stock_screens_per_month' => 30,
                     'portfolio_limit' => 7,
                     'watchlist_limit' => 2,
                     'baskets' => 3, // 1 curated, 2 custom
                     'statements' => true,
-                    'purifications_per_month' => 2,
+                    'purifications_per_month' => 6,
                     'zakat_calc' => true,
                     'dividend_alerts' => false,
                     'drift_tracking' => false,

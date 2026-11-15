@@ -53,6 +53,21 @@ class AppStateProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Synchronously update `usage_summary.stock_screens_per_month` from any
+  /// screening response (`screen_usage`) so quota UI stays accurate across screens.
+  void updateScreenUsage(Map<String, dynamic> screenUsage) {
+    if (_userProfile == null) return;
+    final updatedProfile = Map<String, dynamic>.from(_userProfile!);
+    final existingSummary = updatedProfile['usage_summary'];
+    final updatedSummary = existingSummary is Map
+        ? Map<String, dynamic>.from(existingSummary)
+        : <String, dynamic>{};
+    updatedSummary['stock_screens_per_month'] = Map<String, dynamic>.from(screenUsage);
+    updatedProfile['usage_summary'] = updatedSummary;
+    _userProfile = updatedProfile;
+    notifyListeners();
+  }
+
   Future<void> _syncHawlDate(Map<String, dynamic> profile) async {
     try {
       dynamic prefsRaw = profile['preferences'];

@@ -490,12 +490,13 @@ class ChatbotContextService
     {
         $tierName = $tierInfo['name'] ?? 'Miftah';
         $tierSlug = $tierInfo['slug'] ?? 'free';
+        $screenPeriodLabel = $tierSlug === 'pro' ? 'Quarterly' : 'Monthly';
 
         return implode("\n", [
             '- User Name: '.$profile['name'],
             "- Detected Tier: {$tierName} ({$tierSlug})",
-            '- Tier Features: '.$this->formatFeaturesSummary($tierInfo['features'] ?? []),
-            '- Monthly Stock Screens Used: '.($profile['screens_limit'] === -1 ? 'unlimited' : "{$profile['screens_used']} / {$profile['screens_limit']}"),
+            '- Tier Features: '.$this->formatFeaturesSummary($tierInfo['features'] ?? [], $tierSlug),
+            "- {$screenPeriodLabel} Stock Screens Used: ".($profile['screens_limit'] === -1 ? 'unlimited' : "{$profile['screens_used']} / {$profile['screens_limit']}"),
             '- Email Verified: '.($profile['email_verified'] ? 'Yes' : 'No'),
             '- Zakat Hawl Date Set: '.($profile['hawl_date'] ?: 'Not configured yet'),
             "- Recorded Holdings ({$profile['holdings_count']}): {$profile['holdings_preview']}",
@@ -510,13 +511,14 @@ class ChatbotContextService
         ]);
     }
 
-    private function formatFeaturesSummary(array $features): string
+    private function formatFeaturesSummary(array $features, string $tierSlug = 'free'): string
     {
         $fmtLimit = fn (string $k) => ($features[$k] ?? 0) === -1 ? 'unlimited' : (string) ($features[$k] ?? 0);
         $fmtBool = fn (string $k) => ! empty($features[$k]) ? 'yes' : 'no';
+        $periodSuffix = $tierSlug === 'pro' ? 'qtr' : 'mo';
 
         return sprintf(
-            'stock_screens/mo=%s, portfolio=%s, watchlist=%s, baskets=%s, purifications/mo=%s, zakat_calc=%s, statements=%s, dividend_alerts=%s, drift_tracking=%s, monthly_spotlight=%s',
+            "stock_screens/{$periodSuffix}=%s, portfolio=%s, watchlist=%s, baskets=%s, purifications/{$periodSuffix}=%s, zakat_calc=%s, statements=%s, dividend_alerts=%s, drift_tracking=%s, monthly_spotlight=%s",
             $fmtLimit('stock_screens_per_month'),
             $fmtLimit('portfolio_limit'),
             $fmtLimit('watchlist_limit'),

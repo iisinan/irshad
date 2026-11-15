@@ -233,9 +233,36 @@ void main() async {
   unawaited(PushNotificationService().initialize());
 }
 
-class IrshadApp extends StatelessWidget {
+class IrshadApp extends StatefulWidget {
   final String initialRoute;
   const IrshadApp({super.key, this.initialRoute = '/onboarding'});
+
+  @override
+  State<IrshadApp> createState() => _IrshadAppState();
+}
+
+class _IrshadAppState extends State<IrshadApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      final appState = Provider.of<AppStateProvider>(context, listen: false);
+      if (appState.isAuthenticated) {
+        unawaited(appState.loadProfile());
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -247,7 +274,7 @@ class IrshadApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
-      initialRoute: initialRoute,
+      initialRoute: widget.initialRoute,
       onGenerateRoute: (settings) {
         if (settings.name == '/product_details') {
           final product = settings.arguments as Map<String, dynamic>;
@@ -441,6 +468,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   Widget _buildNavItem(int index, IconData iconOutlined, IconData iconFilled, String label) {
     final isSelected = _selectedIndex == index;
+    final tier = Provider.of<AppStateProvider>(context).userProfile?['tier'];
+    final tierSlug = tier?['slug'] ?? 'free';
+    final watchlistLimit = tier?['features']?['watchlist_limit'] ?? (tierSlug == 'max' ? -1 : tierSlug == 'pro' ? 2 : 0);
+    final isAlertsLocked = index == 2 && (tierSlug == 'free' || watchlistLimit == 0);
     return GestureDetector(
       onTap: () => setState(() => _selectedIndex = index),
       behavior: HitTestBehavior.opaque,
@@ -463,7 +494,17 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   color: isSelected ? context.primary : context.textMuted,
                   size: 22,
                 ),
-                if (index == 2 && _unreadAlertsCount > 0)
+                if (isAlertsLocked)
+                  Positioned(
+                    right: -5,
+                    top: -3,
+                    child: Icon(
+                      Icons.lock_rounded,
+                      size: 11,
+                      color: const Color(0xFFD97706),
+                    ),
+                  )
+                else if (index == 2 && _unreadAlertsCount > 0)
                   Positioned(
                     right: -2,
                     top: -2,

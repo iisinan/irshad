@@ -125,7 +125,7 @@ Color get cardBg => context.bgAlt;
                       _buildInfoCard(),
 
                       const SizedBox(height: 32),
-                      _buildSectionHeader('Plan & Monthly Usage'),
+                      _buildSectionHeader('Plan & Usage Limits'),
                       const SizedBox(height: 12),
                       _buildPlanUsageCard(user),
                       
@@ -366,11 +366,15 @@ Color get cardBg => context.bgAlt;
       return 0;
     }
 
+    final screenUsage = usage['stock_screens_per_month'];
+    final isQuarterly = slug == 'pro' ||
+        (screenUsage is Map && screenUsage['period']?.toString() == 'quarter');
+
     final rows = [
       (
-        'Stock Screens (Monthly)',
+        isQuarterly ? 'Stock Screens (Quarterly)' : 'Stock Screens (Monthly)',
         usedOf('stock_screens_per_month'),
-        limitOf('stock_screens_per_month', slug == 'max' ? -1 : slug == 'pro' ? 10 : 3),
+        limitOf('stock_screens_per_month', slug == 'max' ? -1 : slug == 'pro' ? 30 : 3),
       ),
       (
         'Portfolio Holdings',
@@ -388,9 +392,9 @@ Color get cardBg => context.bgAlt;
         limitOf('baskets', slug == 'max' ? -1 : slug == 'pro' ? 3 : 0),
       ),
       (
-        'Purification Runs (Monthly)',
+        isQuarterly ? 'Purification Runs (Quarterly)' : 'Purification Runs (Monthly)',
         usedOf('purifications_per_month'),
-        limitOf('purifications_per_month', slug == 'max' ? -1 : slug == 'pro' ? 2 : 0),
+        limitOf('purifications_per_month', slug == 'max' ? -1 : slug == 'pro' ? 6 : 0),
       ),
     ];
 

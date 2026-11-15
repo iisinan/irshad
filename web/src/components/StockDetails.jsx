@@ -36,15 +36,17 @@ const StockDetails = ({ symbol: propSymbol }) => {
   // Use optimistic data passed via router state for instant render
   const optimisticStock = location.state?.stock || null;
 
-  // React Query — uses cached data instantly on repeat visits, fetches fresh in background
-  const { data: stock, isLoading: queryLoading, isFetching } = useQuery({
+  // React Query — always verifies current quota and status on mount/focus
+  const { data: stock, error: stockError, isLoading: queryLoading, isFetching } = useQuery({
     queryKey: ['stock', symbol],
     queryFn: async () => {
       const r = await fetchStockDetails(symbol);
       return r?.data || r;
     },
-    staleTime: 5 * 60 * 1000,     // 5 min cache — repeat visits are instant
-    retry: 2,
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
+    retry: (failureCount, err) => err?.response?.status !== 403 && err?.response?.status !== 404 && failureCount < 2,
     retryDelay: 1500,
   });
 
@@ -117,7 +119,8 @@ const StockDetails = ({ symbol: propSymbol }) => {
       .catch(e => {
         console.error(e);
         if (e.response?.status === 403 || e.response?.data?.upgrade_required) {
-          const msg = e.response?.data?.message || 'You have reached your monthly stock screening limit. Upgrade your plan for more.';
+          const periodLabel = user?.tier?.slug === 'pro' ? 'quarterly' : 'monthly';
+          const msg = e.response?.data?.message || `You have reached your ${periodLabel} stock screening limit. Upgrade your plan for more.`;
           setAiError(msg);
           setAiUpgradeRequired(true);
           toastError(msg);
@@ -168,12 +171,22 @@ const StockDetails = ({ symbol: propSymbol }) => {
   }
 
   if (!stock) {
+    const isLimitError = stockError?.response?.status === 403 || Boolean(stockError?.response?.data?.upgrade_required);
     return (
       <div className="animate-fade-in" style={{ padding: '80px 0', textAlign: 'center' }}>
+        {showUpgradeModal && <PricingModal onClose={() => setShowUpgradeModal(false)} />}
         <BarChart2 size={48} strokeWidth={1} style={{ margin: '0 auto 20px', color: 'var(--text-light)' }} />
-        <h2 style={{ marginBottom: '8px' }}>Stock not found</h2>
-        <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>We couldn't load data for this symbol.</p>
-        <button onClick={() => window.history.back()} className="btn-primary">Go Back</button>
+        <h2 style={{ marginBottom: '8px' }}>{isLimitError ? 'Upgrade to Unlock' : 'Stock not found'}</h2>
+        <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>
+          {isLimitError
+            ? (stockError?.response?.data?.message || 'You have reached your monthly stock screening limit.')
+            : "We couldn't load data for this symbol."}
+        </p>
+        {isLimitError ? (
+          <button onClick={() => setShowUpgradeModal(true)} className="btn-primary">View Plans</button>
+        ) : (
+          <button onClick={() => window.history.back()} className="btn-primary">Go Back</button>
+        )}
       </div>
     );
   }

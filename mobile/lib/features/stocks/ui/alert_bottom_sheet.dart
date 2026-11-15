@@ -1,15 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/api/api_service.dart';
-
+import '../../../core/providers/app_state_provider.dart';
+import '../../../core/widgets/upgrade_paywall_bottom_sheet.dart';
 import '../../../core/notifications/notification_service.dart';
-
 import 'package:irshad_mobile/core/theme/app_theme.dart';
+
 class AlertBottomSheet extends StatefulWidget {
   final Map<String, dynamic> stock;
 
   const AlertBottomSheet({super.key, required this.stock});
 
   static void show(BuildContext context, Map<String, dynamic> stock) {
+    final tier = Provider.of<AppStateProvider>(context, listen: false).userProfile?['tier'];
+    final tierSlug = tier?['slug'] ?? 'free';
+    final watchlistLimit = tier?['features']?['watchlist_limit'] ?? (tierSlug == 'max' ? -1 : tierSlug == 'pro' ? 2 : 0);
+    if (tierSlug == 'free' || watchlistLimit == 0) {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (_) => const UpgradePaywallBottomSheet(
+          requiredTier: 'pro',
+          message: 'Price and compliance alerts require the Rawdha (Pro) or Noor (Max) plan.',
+        ),
+      );
+      return;
+    }
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

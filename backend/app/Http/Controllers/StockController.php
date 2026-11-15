@@ -90,8 +90,19 @@ class StockController extends Controller
     /**
      * Fetch stock details by symbol.
      */
-    public function show(string $symbol): JsonResponse
+    public function show(Request $request, string $symbol): JsonResponse
     {
+        $companyMeta = Company::where('symbol', $symbol)
+            ->select(['id', 'symbol', 'asset_class'])
+            ->firstOrFail();
+
+        $user = $request->user();
+        $isMutualFund = $companyMeta->asset_class === 'mutual_fund';
+
+        if ($user && !$isMutualFund && !\App\Services\SubscriptionService::canScreenStock($user, $symbol)) {
+            return response()->json(\App\Services\SubscriptionService::stockScreenLimitPayload($user), 403);
+        }
+
         $fullCacheKey = "stocks.show.full.{$symbol}";
 
         $stockArray = $this->safeTaggedCache(['stocks'])->remember($fullCacheKey, 300, function () use ($symbol) {
@@ -223,6 +234,11 @@ class StockController extends Controller
 
             return $stockArray;
         });
+
+        if ($user && !$isMutualFund) {
+            \App\Services\SubscriptionService::recordStockScreen($user, $symbol);
+            $stockArray['screen_usage'] = \App\Services\SubscriptionService::getUsageSummary($user)['stock_screens_per_month'];
+        }
 
         return $this->success($stockArray);
     }
@@ -493,15 +509,7 @@ class StockController extends Controller
     {
         $user = $request->user();
         if ($user && !\App\Services\SubscriptionService::canScreenStock($user, $symbol)) {
-            $limit = $user->tier->features['stock_screens_per_month'] ?? 3;
-            return response()->json([
-                'error' => 'Upgrade Required',
-                'upgrade_required' => true,
-                'feature' => 'stock_screens_per_month',
-                'limit' => $limit,
-                'required_tier' => ($user->tier->slug ?? 'free') === 'free' ? 'pro' : 'max',
-                'message' => "You have reached your monthly limit of {$limit} stock screenings. Please upgrade your plan.",
-            ], 403);
+            return response()->json(\App\Services\SubscriptionService::stockScreenLimitPayload($user, 'adjective'), 403);
         }
 
         $company = Company::with(['status', 'financials' => fn ($q) => $q->latest()])->where('symbol', $symbol)->firstOrFail();
@@ -530,15 +538,7 @@ class StockController extends Controller
     {
         $user = $request->user();
         if ($user && !\App\Services\SubscriptionService::canScreenStock($user, $symbol)) {
-            $limit = $user->tier->features['stock_screens_per_month'] ?? 3;
-            return response()->json([
-                'error' => 'Upgrade Required',
-                'upgrade_required' => true,
-                'feature' => 'stock_screens_per_month',
-                'limit' => $limit,
-                'required_tier' => ($user->tier->slug ?? 'free') === 'free' ? 'pro' : 'max',
-                'message' => "You have reached your monthly limit of {$limit} stock screenings. Please upgrade your plan.",
-            ], 403);
+            return response()->json(\App\Services\SubscriptionService::stockScreenLimitPayload($user, 'adjective'), 403);
         }
 
         $request->validate(['question' => 'required|string|max:500']);
@@ -562,15 +562,7 @@ class StockController extends Controller
     {
         $user = $request->user();
         if ($user && !\App\Services\SubscriptionService::canScreenStock($user, $symbol)) {
-            $limit = $user->tier->features['stock_screens_per_month'] ?? 3;
-            return response()->json([
-                'error' => 'Upgrade Required',
-                'upgrade_required' => true,
-                'feature' => 'stock_screens_per_month',
-                'limit' => $limit,
-                'required_tier' => ($user->tier->slug ?? 'free') === 'free' ? 'pro' : 'max',
-                'message' => "You have reached your limit of {$limit} stock screenings this month. Please upgrade your plan.",
-            ], 403);
+            return response()->json(\App\Services\SubscriptionService::stockScreenLimitPayload($user), 403);
         }
 
         $cacheKey = "aaoifi.screening.{$symbol}";

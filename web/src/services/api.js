@@ -40,10 +40,22 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401 Unauthorized responses globally
+// Keep client quota/profile synchronized globally across web actions
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const screenUsage = response?.data?.data?.screen_usage || response?.data?.screen_usage;
+    if (screenUsage && typeof screenUsage === 'object') {
+      window.dispatchEvent(new CustomEvent('quota:updated', { detail: { screenUsage } }));
+    }
+    return response;
+  },
   (error) => {
+    if (
+      error.response?.status === 403 &&
+      (error.response?.data?.upgrade_required || error.response?.data?.error === 'Upgrade Required')
+    ) {
+      window.dispatchEvent(new CustomEvent('quota:upgrade-required', { detail: error.response?.data }));
+    }
     if (error.response && error.response.status === 401) {
       // Avoid redirecting if already on auth pages
       const isAuthPage = window.location.pathname === '/login' || window.location.pathname === '/register';
@@ -79,7 +91,7 @@ export const registerUser = async (data) => {
 };
 
 export const fetchProfile = async () => {
-  const response = await api.get('/profile');
+  const response = await api.get('/profile', { params: { _cb: Date.now() } });
   return response.data;
 };
 
@@ -366,13 +378,58 @@ export const fetchAdminUserAnalytics = async (id) => {
   return response.data;
 };
 
-export const fetchAdminFinances = async ({ page = 1, perPage = 20, search = '', status = 'all', type = 'all', gateway = 'all' } = {}) => {
+export const fetchAdminFinances = async ({
+  page = 1,
+  perPage = 20,
+  search = '',
+  status = 'all',
+  type = 'all',
+  gateway = 'all',
+  plan = 'all',
+  billingCycle = 'all',
+  dateFrom = '',
+  dateTo = '',
+} = {}) => {
   const params = new URLSearchParams({ page: String(page), per_page: String(perPage) });
   if (search) params.set('search', search);
   if (status && status !== 'all') params.set('status', status);
   if (type && type !== 'all') params.set('type', type);
   if (gateway && gateway !== 'all') params.set('gateway', gateway);
+  if (plan && plan !== 'all') params.set('plan', plan);
+  if (billingCycle && billingCycle !== 'all') params.set('billing_cycle', billingCycle);
+  if (dateFrom) params.set('date_from', dateFrom);
+  if (dateTo) params.set('date_to', dateTo);
   const response = await api.get(`/admin/finances?${params.toString()}`);
+  return response.data;
+};
+
+export const exportAdminFinancesCsv = async ({
+  search = '',
+  status = 'all',
+  type = 'all',
+  gateway = 'all',
+  plan = 'all',
+  billingCycle = 'all',
+  dateFrom = '',
+  dateTo = '',
+} = {}) => {
+  const params = new URLSearchParams();
+  if (search) params.set('search', search);
+  if (status && status !== 'all') params.set('status', status);
+  if (type && type !== 'all') params.set('type', type);
+  if (gateway && gateway !== 'all') params.set('gateway', gateway);
+  if (plan && plan !== 'all') params.set('plan', plan);
+  if (billingCycle && billingCycle !== 'all') params.set('billing_cycle', billingCycle);
+  if (dateFrom) params.set('date_from', dateFrom);
+  if (dateTo) params.set('date_to', dateTo);
+  const response = await api.get(`/admin/finances/export?${params.toString()}`, {
+    responseType: 'blob',
+  });
+  return response.data;
+};
+
+export const verifyAdminFinanceTransaction = async (id) => {
+  const response = await api.post(`/admin/finances/${id}/verify`);
   return response.data;
 };
 

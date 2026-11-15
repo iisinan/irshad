@@ -354,15 +354,18 @@ export default function Profile() {
               </div>
               
               <div style={{ padding: '24px', background: 'var(--bg-section)', borderRadius: '16px', border: '1px solid var(--border)' }}>
-                <h4 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '16px' }}>Monthly Usage Limits & Benefits</h4>
+                <h4 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '16px' }}>Usage Limits &amp; Benefits</h4>
                 
                 {(() => {
                   const activeUser = profileUser || user;
                   const slug = activeUser?.tier?.slug || 'free';
                   const features = activeUser?.tier?.features || {};
-                  const usage = activeUser?.usage_summary || {};
+                  const usage = user?.usage_summary || activeUser?.usage_summary || {};
+                  const isQuarterly = slug === 'pro';
+                  const periodUnit = isQuarterly ? 'this quarter' : 'this month';
+                  const periodAdj = isQuarterly ? 'Quarterly' : 'Monthly';
 
-                  const stockLimit = features.stock_screens_per_month ?? (slug === 'max' ? -1 : slug === 'pro' ? 10 : 3);
+                  const stockLimit = features.stock_screens_per_month ?? (slug === 'max' ? -1 : slug === 'pro' ? 30 : 3);
                   const stockUsed = usage.stock_screens_per_month?.used ?? usage.stock_screens?.used ?? 0;
 
                   const portfolioLimit = features.portfolio_limit ?? (slug === 'max' ? -1 : slug === 'pro' ? 7 : 3);
@@ -374,7 +377,7 @@ export default function Profile() {
                   const basketsLimit = features.baskets ?? (slug === 'max' ? -1 : slug === 'pro' ? 3 : 0);
                   const basketsUsed = usage.baskets?.used ?? usage.custom_baskets?.used ?? 0;
 
-                  const purifyLimit = features.purifications_per_month ?? (slug === 'max' ? -1 : slug === 'pro' ? 2 : 0);
+                  const purifyLimit = features.purifications_per_month ?? (slug === 'max' ? -1 : slug === 'pro' ? 6 : 0);
                   const purifyUsed = usage.purifications_per_month?.used ?? usage.purifications?.used ?? 0;
 
                   const formatQuota = (used, limit, unitLabel = '') => {
@@ -384,7 +387,7 @@ export default function Profile() {
                   };
 
                   const quotaRows = [
-                    { label: 'Stock Screens (Monthly)', used: stockUsed, limit: stockLimit, text: formatQuota(stockUsed, stockLimit, 'this month') },
+                    { label: `Stock Screens (${periodAdj})`, used: stockUsed, limit: stockLimit, text: formatQuota(stockUsed, stockLimit, periodUnit) },
                     { label: 'Portfolio (Holdings)', used: portfolioUsed, limit: portfolioLimit, text: formatQuota(portfolioUsed, portfolioLimit, 'stocks') },
                     { label: 'Watchlist', used: watchlistUsed, limit: watchlistLimit, text: formatQuota(watchlistUsed, watchlistLimit, 'stocks') },
                     {
@@ -397,7 +400,7 @@ export default function Profile() {
                           ? `Limited access (3 system + ${basketsUsed}/${basketsLimit} custom)`
                           : 'Not included',
                     },
-                    { label: 'Automated Purification Calculation', used: purifyUsed, limit: purifyLimit, text: formatQuota(purifyUsed, purifyLimit, 'this month') },
+                    { label: `Automated Purification Calculation (${periodAdj})`, used: purifyUsed, limit: purifyLimit, text: formatQuota(purifyUsed, purifyLimit, periodUnit) },
                   ];
 
                   const boolRows = [

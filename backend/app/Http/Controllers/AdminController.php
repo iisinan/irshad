@@ -6,8 +6,11 @@ use App\Models\AdminAlert;
 use App\Models\Company;
 use App\Models\News;
 use App\Models\PaymentTransaction;
+use App\Models\Subscription;
 use App\Models\User;
+use App\Services\SquadService;
 use App\Traits\ApiResponder;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -485,12 +488,10 @@ class AdminController extends Controller
     }
 
     /**
-     * Get payment transaction ledger and revenue KPIs for the Admin Finances tab.
+     * Build the filtered payment transaction query shared by listing and CSV export.
      */
-    public function getFinances(Request $request)
+    private function buildFinancesQuery(Request $request)
     {
-        $perPage = min(max((int) $request->input('per_page', 20), 1), 100);
-
         $query = PaymentTransaction::with([
             'user:id,name,email',
             'plan:id,name,slug',
@@ -520,7 +521,50 @@ class AdminController extends Controller
             $query->where('gateway', $gateway);
         }
 
-        $transactions = $query
+        if (($planSlug = $request->input('plan')) && $planSlug !== 'all') {
+            $query->whereHas('plan', function ($pq) use ($planSlug) {
+                $pq->where('slug', $planSlug);
+            });
+        }
+
+        if (($billingCycle = $request->input('billing_cycle')) && $billingCycle !== 'all') {
+            $query->where('billing_cycle', $billingCycle);
+        }
+
+        if ($dateFrom = trim((string) $request->input('date_from', ''))) {
+            try {
+                $start = Carbon::parse($dateFrom)->startOfDay();
+                $query->whereRaw('COALESCE(paid_at, created_at) >= ?', [$start]);
+            } catch (\Throwable $e) {
+                // Ignore invalid date filter
+            }
+        }
+
+        if ($dateTo = trim((string) $request->input('date_to', ''))) {
+            try {
+                $end = Carbon::parse($dateTo)->endOfDay();
+                $query->whereRaw('COALESCE(paid_at, created_at) <= ?', [$end]);
+            } catch (\Throwable $e) {
+                // Ignore invalid date filter
+            }
+        }
+
+        return $query;
+    }
+
+    /**
+     * Get payment transaction ledger, revenue KPIs, and analytics charts for the Admin Finances tab.
+     */
+    public function getFinances(Request $request)
+    {
+        $perPage = min(max((int) $request->input('per_page', 20), 1), 100);
+
+        $baseQuery = $this->buildFinancesQuery($request);
+
+        $filteredCount = (clone $baseQuery)->count();
+        $filteredSuccessKobo = (int) (clone $baseQuery)->where('status', 'success')->sum('amount_kobo');
+
+        $transactions = (clone $baseQuery)
             ->orderByRaw('COALESCE(paid_at, created_at) DESC')
             ->orderByDesc('id')
             ->paginate($perPage);
@@ -541,21 +585,266 @@ class AdminController extends Controller
             ->groupBy('status')
             ->pluck('aggregate', 'status');
 
+        $successCount = (int) ($statusCounts['success'] ?? 0);
+        $pendingCount = (int) ($statusCounts['pending'] ?? 0);
+        $failedCount = (int) ($statusCounts['failed'] ?? 0);
+        $totalCount = (int) $statusCounts->sum();
+
+        $activePaidSubs = (int) Subscription::where('status', 'active')
+            ->where(function ($q) {
+                $q->whereNull('renews_at')->orWhere('renews_at', '>', now());
+            })
+            ->where('gateway', '!=', 'admin_override')
+            ->whereHas('plan', fn ($pq) => $pq->where('slug', '!=', 'free'))
+            ->count();
+
+        $activeAdminOverrides = (int) Subscription::where('status', 'active')
+            ->where(function ($q) {
+                $q->whereNull('renews_at')->orWhere('renews_at', '>', now());
+            })
+            ->where('gateway', 'admin_override')
+            ->whereHas('plan', fn ($pq) => $pq->where('slug', '!=', 'free'))
+            ->count();
+
+        // Monthly revenue chart for the last 6 months (computed in PHP for cross-DB compatibility)
+        $sixMonthsStart = now()->startOfMonth()->subMonths(5);
+        $monthlyBuckets = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $m = now()->startOfMonth()->subMonths($i);
+            $monthlyBuckets[$m->format('Y-m')] = [
+                'month'        => $m->format('M Y'),
+                'label'        => $m->format('M'),
+                'revenue_ngn'  => 0.0,
+                'transactions' => 0,
+            ];
+        }
+
+        $recentSuccessRows = PaymentTransaction::with('plan:id,name,slug')
+            ->where('status', 'success')
+            ->whereRaw('COALESCE(paid_at, created_at) >= ?', [$sixMonthsStart])
+            ->get(['id', 'plan_id', 'billing_cycle', 'amount_kobo', 'paid_at', 'created_at']);
+
+        foreach ($recentSuccessRows as $row) {
+            $ts = $row->paid_at ?? $row->created_at;
+            if (!$ts) {
+                continue;
+            }
+            $key = Carbon::parse($ts)->format('Y-m');
+            if (isset($monthlyBuckets[$key])) {
+                $monthlyBuckets[$key]['revenue_ngn'] = round(
+                    $monthlyBuckets[$key]['revenue_ngn'] + ($row->amount_kobo / 100),
+                    2
+                );
+                $monthlyBuckets[$key]['transactions']++;
+            }
+        }
+
+        // All-time breakdown by plan & billing cycle for successful payments
+        $byPlanRows = PaymentTransaction::with('plan:id,name,slug')
+            ->where('status', 'success')
+            ->select('plan_id', DB::raw('COUNT(*) as tx_count'), DB::raw('SUM(amount_kobo) as total_kobo'))
+            ->groupBy('plan_id')
+            ->get();
+
+        $byPlan = $byPlanRows->map(function ($r) {
+            return [
+                'slug'        => $r->plan?->slug ?? 'unknown',
+                'name'        => $r->plan?->name ?? 'Unknown',
+                'count'       => (int) $r->tx_count,
+                'revenue_ngn' => round(((int) $r->total_kobo) / 100, 2),
+            ];
+        })->sortByDesc('revenue_ngn')->values();
+
+        $byCycleRows = PaymentTransaction::where('status', 'success')
+            ->select('billing_cycle', DB::raw('COUNT(*) as tx_count'), DB::raw('SUM(amount_kobo) as total_kobo'))
+            ->groupBy('billing_cycle')
+            ->get();
+
+        $byCycle = $byCycleRows->map(function ($r) {
+            return [
+                'cycle'       => $r->billing_cycle ?: 'unknown',
+                'count'       => (int) $r->tx_count,
+                'revenue_ngn' => round(((int) $r->total_kobo) / 100, 2),
+            ];
+        })->sortByDesc('revenue_ngn')->values();
+
         $summary = [
-            'total_revenue_ngn'  => round($totalSuccessKobo / 100, 2),
-            'revenue_30d_ngn'    => round($last30dSuccessKobo / 100, 2),
-            'success_count'      => (int) ($statusCounts['success'] ?? 0),
-            'pending_count'      => (int) ($statusCounts['pending'] ?? 0),
-            'failed_count'       => (int) ($statusCounts['failed'] ?? 0),
-            'total_count'        => (int) $statusCounts->sum(),
-            'paying_users_count' => (int) PaymentTransaction::where('status', 'success')
+            'total_revenue_ngn'       => round($totalSuccessKobo / 100, 2),
+            'revenue_30d_ngn'         => round($last30dSuccessKobo / 100, 2),
+            'avg_ticket_ngn'          => $successCount > 0 ? round(($totalSuccessKobo / $successCount) / 100, 2) : 0,
+            'success_rate'            => $totalCount > 0 ? round(($successCount / $totalCount) * 100, 1) : 0,
+            'success_count'           => $successCount,
+            'pending_count'           => $pendingCount,
+            'failed_count'            => $failedCount,
+            'total_count'             => $totalCount,
+            'paying_users_count'      => (int) PaymentTransaction::where('status', 'success')
                 ->distinct('user_id')
                 ->count('user_id'),
+            'active_paid_subs'        => $activePaidSubs,
+            'active_admin_overrides'  => $activeAdminOverrides,
         ];
 
         return response()->json([
-            'summary'      => $summary,
-            'transactions' => $transactions,
+            'summary'         => $summary,
+            'filtered_totals' => [
+                'count'               => $filteredCount,
+                'success_revenue_ngn' => round($filteredSuccessKobo / 100, 2),
+            ],
+            'charts'          => [
+                'monthly_revenue' => array_values($monthlyBuckets),
+                'by_plan'         => $byPlan,
+                'by_cycle'        => $byCycle,
+            ],
+            'transactions'    => $transactions,
+        ]);
+    }
+
+    /**
+     * Stream all filtered payment transactions as a CSV download.
+     */
+    public function exportFinancesCsv(Request $request)
+    {
+        $rows = $this->buildFinancesQuery($request)
+            ->orderByRaw('COALESCE(paid_at, created_at) DESC')
+            ->orderByDesc('id')
+            ->get();
+
+        $filename = 'irshad-finances-' . now()->format('Y-m-d') . '.csv';
+
+        return response()->streamDownload(function () use ($rows) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, [
+                'ID',
+                'User Name',
+                'User Email',
+                'Plan',
+                'Plan Slug',
+                'Billing Cycle',
+                'Amount (NGN)',
+                'Currency',
+                'Status',
+                'Type',
+                'Gateway',
+                'Transaction Ref',
+                'Gateway Ref',
+                'Paid At',
+                'Created At',
+            ]);
+
+            foreach ($rows as $tx) {
+                fputcsv($handle, [
+                    $tx->id,
+                    $tx->user?->name ?? '',
+                    $tx->user?->email ?? '',
+                    $tx->plan?->name ?? '',
+                    $tx->plan?->slug ?? '',
+                    $tx->billing_cycle ?? '',
+                    number_format($tx->amount_kobo / 100, 2, '.', ''),
+                    $tx->currency ?? 'NGN',
+                    $tx->status ?? '',
+                    $tx->type ?? '',
+                    $tx->gateway ?? '',
+                    $tx->transaction_ref ?? '',
+                    $tx->gateway_ref ?? '',
+                    $tx->paid_at?->toIso8601String() ?? '',
+                    $tx->created_at?->toIso8601String() ?? '',
+                ]);
+            }
+
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
+
+    /**
+     * Manually reconcile a pending transaction against Squad and activate subscription if paid.
+     */
+    public function verifyFinanceTransaction(int $id, SquadService $squad)
+    {
+        $tx = PaymentTransaction::with(['user:id,name,email', 'plan:id,name,slug'])->find($id);
+        if (!$tx) {
+            return response()->json(['message' => 'Payment transaction not found.'], 404);
+        }
+
+        if ($tx->status === 'success') {
+            $tx->amount_ngn = round($tx->amount_kobo / 100, 2);
+            return response()->json([
+                'status'      => 'success',
+                'message'     => 'Transaction is already marked as successful.',
+                'transaction' => $tx,
+            ]);
+        }
+
+        if ($tx->gateway !== 'squad') {
+            return response()->json(['message' => 'Gateway verification is only supported for Squad transactions.'], 422);
+        }
+
+        if (!$squad->isConfigured()) {
+            return response()->json(['message' => 'Squad payment gateway is not configured.'], 503);
+        }
+
+        $data = $squad->verifyTransaction($tx->transaction_ref);
+        if (!$data) {
+            return response()->json([
+                'status'      => 'pending',
+                'message'     => 'Squad did not return a confirmed status yet. Transaction remains pending.',
+                'transaction' => $tx,
+            ]);
+        }
+
+        $gatewayStatus = strtolower((string) ($data['transaction_status'] ?? ''));
+        $paidAmountKobo = (int) ($data['transaction_amount'] ?? 0);
+
+        if ($gatewayStatus === 'success') {
+            if ($paidAmountKobo < $tx->amount_kobo) {
+                $tx->update(['status' => 'failed', 'raw_payload' => $data]);
+                $tx->refresh()->load(['user:id,name,email', 'plan:id,name,slug']);
+                $tx->amount_ngn = round($tx->amount_kobo / 100, 2);
+
+                return response()->json([
+                    'status'      => 'failed',
+                    'message'     => 'Paid amount mismatch detected from Squad; marked transaction as failed.',
+                    'transaction' => $tx,
+                ], 422);
+            }
+
+            $sub = $squad->activateFromTransaction($tx, $data);
+            $tx->refresh()->load(['user:id,name,email', 'plan:id,name,slug']);
+            $tx->amount_ngn = round($tx->amount_kobo / 100, 2);
+
+            return response()->json([
+                'status'       => 'success',
+                'message'      => 'Payment verified with Squad and user subscription activated.',
+                'transaction'  => $tx,
+                'subscription' => [
+                    'id'        => $sub->id,
+                    'status'    => $sub->status,
+                    'renews_at' => $sub->renews_at?->toDateString(),
+                ],
+            ]);
+        }
+
+        if (in_array($gatewayStatus, ['failed', 'abandoned', 'declined'], true)) {
+            $tx->update(['status' => 'failed', 'raw_payload' => $data]);
+            $tx->refresh()->load(['user:id,name,email', 'plan:id,name,slug']);
+            $tx->amount_ngn = round($tx->amount_kobo / 100, 2);
+
+            return response()->json([
+                'status'      => 'failed',
+                'message'     => 'Squad reported transaction as ' . $gatewayStatus . '; marked as failed.',
+                'transaction' => $tx,
+            ]);
+        }
+
+        $tx->update(['raw_payload' => $data]);
+        $tx->refresh()->load(['user:id,name,email', 'plan:id,name,slug']);
+        $tx->amount_ngn = round($tx->amount_kobo / 100, 2);
+
+        return response()->json([
+            'status'      => 'pending',
+            'message'     => 'Squad still shows this payment as processing (' . ($gatewayStatus ?: 'pending') . ').',
+            'transaction' => $tx,
         ]);
     }
 }

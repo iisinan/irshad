@@ -87,6 +87,16 @@ class PriceAlertController extends Controller
         $condition = $targetPrice > $currentPrice ? 'above' : 'below';
 
         $user = $request->user() ?? auth()->user();
+        $watchlistLimit = $user ? ($user->tier->features['watchlist_limit'] ?? 0) : 0;
+        if ($watchlistLimit === 0) {
+            return response()->json([
+                'error' => 'Upgrade Required',
+                'upgrade_required' => true,
+                'feature' => 'watchlist_limit',
+                'required_tier' => 'pro',
+                'message' => 'Price and compliance alerts are available on Rawdha (Pro) and Noor (Max) plans. Please upgrade to set stock alerts.',
+            ], 403);
+        }
 
         // Update existing active alert or create new one
         $alert = PriceAlert::updateOrCreate(

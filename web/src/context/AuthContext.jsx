@@ -162,6 +162,53 @@ export const AuthProvider = ({ children }) => {
     return null;
   }, []);
 
+  useEffect(() => {
+    let lastSyncAt = 0;
+    const syncQuotaOnReturn = () => {
+      if (document.visibilityState === 'hidden') return;
+      if (!localStorage.getItem('auth_token')) return;
+      const now = Date.now();
+      if (now - lastSyncAt < 1500) return;
+      lastSyncAt = now;
+      fetchUser();
+    };
+
+    const handleQuotaUpdated = (event) => {
+      const screenUsage = event?.detail?.screenUsage;
+      if (!screenUsage) return;
+      setUser((prev) => {
+        if (!prev) return prev;
+        const nextUser = {
+          ...prev,
+          usage_summary: {
+            ...(prev.usage_summary || {}),
+            stock_screens_per_month: screenUsage,
+          },
+        };
+        localStorage.setItem('auth_user', JSON.stringify(nextUser));
+        return nextUser;
+      });
+    };
+
+    const handleUpgradeRequired = () => {
+      if (localStorage.getItem('auth_token')) {
+        fetchUser();
+      }
+    };
+
+    window.addEventListener('focus', syncQuotaOnReturn);
+    document.addEventListener('visibilitychange', syncQuotaOnReturn);
+    window.addEventListener('quota:updated', handleQuotaUpdated);
+    window.addEventListener('quota:upgrade-required', handleUpgradeRequired);
+
+    return () => {
+      window.removeEventListener('focus', syncQuotaOnReturn);
+      document.removeEventListener('visibilitychange', syncQuotaOnReturn);
+      window.removeEventListener('quota:updated', handleQuotaUpdated);
+      window.removeEventListener('quota:upgrade-required', handleUpgradeRequired);
+    };
+  }, [fetchUser]);
+
   const logout = () => {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_user');

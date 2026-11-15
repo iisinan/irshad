@@ -15,7 +15,7 @@ class PurificationTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final tier = Provider.of<AppStateProvider>(context).userProfile?['tier'];
     final tierSlug = tier?['slug'] ?? 'free';
-    final purificationsLimit = tier?['features']?['purifications_per_month'] ?? (tierSlug == 'max' ? -1 : tierSlug == 'pro' ? 2 : 0);
+    final purificationsLimit = tier?['features']?['purifications_per_month'] ?? (tierSlug == 'max' ? -1 : tierSlug == 'pro' ? 6 : 0);
     if (purificationsLimit == 0) {
       return Center(
         child: Padding(
@@ -35,7 +35,7 @@ class PurificationTab extends StatelessWidget {
                 Text('Automated Purification Locked', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark), textAlign: TextAlign.center),
                 const SizedBox(height: 8),
                 Text(
-                  'Upgrade to Rawdha (Pro) for 2 automated purification calculations per month, or Noor (Max) for unlimited access.',
+                  'Upgrade to Rawdha (Pro) for 6 automated purification calculations per quarter, or Noor (Max) for unlimited access.',
                   style: TextStyle(fontSize: 13, color: context.textMuted, height: 1.5),
                   textAlign: TextAlign.center,
                 ),

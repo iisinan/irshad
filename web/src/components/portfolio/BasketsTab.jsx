@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import {
-  Layers, Search, ArrowLeft, Plus, Check, X, Wallet, Edit2, Trash2,
+  Layers, Search, ArrowLeft, ArrowRight, Plus, Check, X, Wallet, Edit2, Trash2,
   ShieldCheck, Sparkles, TrendingUp, TrendingDown, Info,
   ChevronRight, Award, Leaf, Zap, ShoppingBag, Hammer, Coins,
   ExternalLink, CheckCircle2, RefreshCw, Lock
@@ -361,8 +361,11 @@ const IrshadThematicBlurredSection = ({ isWaitlisted, onToggleWaitlist }) => {
 };
 
 /* ─── Main Component ──────────────────────────────────────────────────────── */
-export default function BasketsTab({ onUpgrade }) {
+export default function BasketsTab({ data, onUpgrade }) {
   const { user } = useAuth();
+  const tierSlug = user?.tier?.slug || 'free';
+  const basketsLimit = user?.tier?.features?.baskets ?? (tierSlug === 'max' ? -1 : tierSlug === 'pro' ? 3 : 0);
+  const isBasketsLocked = data?.tier_locks?.baskets_locked ?? (tierSlug === 'free' || basketsLimit === 0);
 
   const [baskets, setBaskets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -462,9 +465,13 @@ export default function BasketsTab({ onUpgrade }) {
   };
 
   useEffect(() => {
-    loadData();
+    if (!isBasketsLocked) {
+      loadData();
+    } else {
+      setLoading(false);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isBasketsLocked]);
 
   // Compute stats
   const curatedCount = useMemo(() => baskets.filter(b => b.user_id === null).length, [baskets]);
@@ -698,6 +705,27 @@ export default function BasketsTab({ onUpgrade }) {
       setInvestAmount(val.toString());
     }
   };
+
+  if (isBasketsLocked) {
+    return (
+      <div className="animate-fade-in" style={{ paddingBottom: '60px' }}>
+        <div style={{ background: 'var(--bg)', borderRadius: '24px', padding: '56px 32px', textAlign: 'center', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
+          <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: 'rgba(217, 119, 6, 0.12)', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+            <Lock size={28} />
+          </div>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-dark)', margin: '0 0 10px' }}>Thematic &amp; Investing Baskets</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', maxWidth: '500px', margin: '0 auto 24px', lineHeight: 1.6 }}>
+            Access curated AAOIFI-screened thematic portfolios, build custom Halal baskets, and invest with one click. Available on <strong>Rawdha (Pro)</strong> (3 curated + 3 custom baskets) and <strong>Noor (Max)</strong> (full + unlimited access).
+          </p>
+          {onUpgrade && (
+            <button onClick={onUpgrade} style={{ padding: '14px 28px', borderRadius: '14px', background: 'var(--primary)', color: 'white', border: 'none', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              Upgrade to Unlock <ArrowRight size={16} />
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
+import 'package:irshad_mobile/core/providers/app_state_provider.dart';
+import 'package:irshad_mobile/core/widgets/upgrade_paywall_bottom_sheet.dart';
 import '../providers/alerts_provider.dart';
 
 class AlertsManagementScreen extends StatefulWidget {
@@ -15,12 +17,85 @@ class _AlertsManagementScreenState extends State<AlertsManagementScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AlertsProvider>().fetchAlerts();
+      final tier = context.read<AppStateProvider>().userProfile?['tier'];
+      final tierSlug = tier?['slug'] ?? 'free';
+      final watchlistLimit = tier?['features']?['watchlist_limit'] ?? (tierSlug == 'max' ? -1 : tierSlug == 'pro' ? 2 : 0);
+      if (tierSlug != 'free' && watchlistLimit != 0) {
+        context.read<AlertsProvider>().fetchAlerts();
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final tier = Provider.of<AppStateProvider>(context).userProfile?['tier'];
+    final tierSlug = tier?['slug'] ?? 'free';
+    final watchlistLimit = tier?['features']?['watchlist_limit'] ?? (tierSlug == 'max' ? -1 : tierSlug == 'pro' ? 2 : 0);
+    final isAlertsLocked = tierSlug == 'free' || watchlistLimit == 0;
+
+    if (isAlertsLocked) {
+      return Scaffold(
+        backgroundColor: context.bg,
+        appBar: AppBar(
+          title: Text('Active Alerts', style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
+          backgroundColor: context.bg,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios_new_rounded, color: context.textDark, size: 20),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(28.0),
+            child: Container(
+              padding: const EdgeInsets.all(28),
+              decoration: BoxDecoration(
+                color: context.bg,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: context.divider),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.lock_outline_rounded, size: 42, color: context.primary),
+                  const SizedBox(height: 16),
+                  Text('Alerts Locked', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark), textAlign: TextAlign.center),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Upgrade to Rawdha (Pro) for up to 2 watchlist & price alerts, or Noor (Max) for unlimited real-time compliance & price alerts.',
+                    style: TextStyle(fontSize: 13, color: context.textMuted, height: 1.5),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (ctx) => const UpgradePaywallBottomSheet(
+                          requiredTier: 'pro',
+                          message: 'Upgrade to Rawdha (Pro) or Noor (Max) to unlock watchlist & price alerts.',
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: context.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                    child: const Text('Upgrade Plan', style: TextStyle(fontWeight: FontWeight.w800)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     final provider = context.watch<AlertsProvider>();
     final _alerts = provider.alerts;
     return Scaffold(

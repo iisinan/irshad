@@ -173,19 +173,21 @@ class ChatbotService
             default => '**Miftah (Free)**',
         };
 
+        $periodUnit = $tierSlug === 'pro' ? 'quarter' : 'month';
+        $periodTitle = $tierSlug === 'pro' ? 'Quarterly' : 'Monthly';
         $screensLimit = (int) ($features['stock_screens_per_month'] ?? 3);
         $screensUsed = (int) ($profile['screens_used'] ?? 0);
-        $screensText = $screensLimit === -1 ? 'Unlimited' : "{$screensUsed} / {$screensLimit} used this month";
+        $screensText = $screensLimit === -1 ? 'Unlimited' : "{$screensUsed} / {$screensLimit} used this {$periodUnit}";
         $portfolioLimit = (int) ($features['portfolio_limit'] ?? 3);
         $holdingsCount = (int) ($profile['holdings_count'] ?? 0);
         $holdingsText = $portfolioLimit === -1 ? "{$holdingsCount} (Unlimited)" : "{$holdingsCount} / {$portfolioLimit} limit";
 
         $lines = [
             "You are currently on the {$tierLabel} plan.",
-            "- **Monthly Stock Screens:** {$screensText}",
+            "- **{$periodTitle} Stock Screens:** {$screensText}",
             "- **Portfolio Holdings:** {$holdingsText}",
             '- **Zakat Calculator & Hawl:** '.(! empty($features['zakat_calc']) ? 'Included' : 'Requires Rawdha (Pro) or Noor (Max)'),
-            '- **Purifications / Month:** '.(((int) ($features['purifications_per_month'] ?? 0)) === -1 ? 'Unlimited' : (((int) ($features['purifications_per_month'] ?? 0)) > 0 ? $features['purifications_per_month'] : 'Requires Rawdha (Pro) or Noor (Max)')),
+            "- **Purifications / {$periodTitle}:** ".(((int) ($features['purifications_per_month'] ?? 0)) === -1 ? 'Unlimited' : (((int) ($features['purifications_per_month'] ?? 0)) > 0 ? $features['purifications_per_month'] : 'Requires Rawdha (Pro) or Noor (Max)')),
             '- **Monthly Spotlight & Drift Tracking:** '.(! empty($features['monthly_spotlight']) ? 'Included' : 'Requires Noor (Max)'),
         ];
 
@@ -257,12 +259,12 @@ PROMPT;
         $stockGate = (array) ($contextBundle['stock_gate'] ?? ['allowed' => true]);
         $lower = $this->normalizeQuestion($message);
 
-        // 1. Monthly stock screen gate (Guest has 0 screens, Miftah has 3/mo, Rawdha has 10/mo, Noor is unlimited)
+        // 1. Stock screen gate (Guest has 0 screens, Miftah has 3/mo, Rawdha has 30/quarter, Noor is unlimited)
         if (! ($stockGate['allowed'] ?? true)) {
             $symbol = $stockGate['blocked_symbol'] ?? 'that stock';
             if (($stockGate['reason'] ?? '') === 'guest') {
                 return $this->upgradeResponse(
-                    "You're currently browsing as a **Guest (not signed in)**. Individual stock compliance screenings (such as **{$symbol}**) are available once you sign in:\n- **Miftah (Free):** 3 stock screens/month\n- **Rawdha (Pro):** 10 stock screens/month, Zakat, Purification & Watchlist\n- **Noor (Max):** Unlimited screens, Drift Tracking & Monthly Spotlight",
+                    "You're currently browsing as a **Guest (not signed in)**. Individual stock compliance screenings (such as **{$symbol}**) are available once you sign in:\n- **Miftah (Free):** 3 stock screens/month\n- **Rawdha (Pro):** 30 stock screens/quarter, Zakat, Purification & Watchlist\n- **Noor (Max):** Unlimited screens, Drift Tracking & Monthly Spotlight",
                     'login',
                     'stock_screens_per_month',
                     ['What plans & pricing does Irshad offer?', 'How does AAOIFI screening work?']
@@ -270,11 +272,13 @@ PROMPT;
             }
 
             $limit = (int) ($stockGate['limit'] ?? 3);
+            $periodWord = $tierSlug === 'pro' ? 'quarter' : 'month';
+            $periodAdj = $tierSlug === 'pro' ? 'quarterly' : 'monthly';
             $targetTier = ($tierSlug === 'free') ? 'pro' : 'max';
-            $targetLabel = $targetTier === 'pro' ? '**Rawdha (Pro)** (10 screens/month) or **Noor (Max)** (unlimited)' : '**Noor (Max)** (unlimited stock screens)';
+            $targetLabel = $targetTier === 'pro' ? '**Rawdha (Pro)** (30 screens/quarter) or **Noor (Max)** (unlimited)' : '**Noor (Max)** (unlimited stock screens)';
 
             return $this->upgradeResponse(
-                "You've reached your monthly limit of **{$limit} stock screenings** on the **{$tierName}** plan (checking **{$symbol}** is beyond your current tier allowance).\n\nPlease upgrade to {$targetLabel} on Pricing to continue screening additional stocks this month.",
+                "You've reached your {$periodAdj} limit of **{$limit} stock screenings** on the **{$tierName}** plan (checking **{$symbol}** is beyond your current tier allowance).\n\nPlease upgrade to {$targetLabel} on Pricing to continue screening additional stocks this {$periodWord}.",
                 $targetTier,
                 'stock_screens_per_month',
                 ['What plans & pricing does Irshad offer?', 'I need billing or account help']
@@ -331,14 +335,15 @@ PROMPT;
             $purifLimit = (int) ($features['purifications_per_month'] ?? 0);
             if ($purifLimit === 0) {
                 return $this->upgradeResponse(
-                    "Automated **Dividend Purification** calculations are available on **Rawdha (Pro)** (2/month) and **Noor (Max)** (unlimited), beyond your current **{$tierName}** tier.\n\nUpgrade on Pricing to run purification calculations automatically.",
+                    "Automated **Dividend Purification** calculations are available on **Rawdha (Pro)** (6/quarter) and **Noor (Max)** (unlimited), beyond your current **{$tierName}** tier.\n\nUpgrade on Pricing to run purification calculations automatically.",
                     $tierSlug === 'guest' ? 'login' : 'pro',
                     'purifications_per_month'
                 );
             }
             if ($purifLimit > 0 && $user && ! $this->safeCanUseFeature($user, 'purifications_per_month')) {
+                $purifPeriod = $tierSlug === 'pro' ? 'quarterly' : 'monthly';
                 return $this->upgradeResponse(
-                    "You've used all **{$purifLimit} monthly purification calculations** on your **{$tierName}** plan.\n\nUpgrade to **Noor (Max)** for unlimited dividend purifications.",
+                    "You've used all **{$purifLimit} {$purifPeriod} purification calculations** on your **{$tierName}** plan.\n\nUpgrade to **Noor (Max)** for unlimited dividend purifications.",
                     'max',
                     'purifications_per_month'
                 );

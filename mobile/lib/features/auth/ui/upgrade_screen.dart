@@ -85,7 +85,7 @@ class UpgradeScreen extends StatelessWidget {
                 context,
                 Icons.workspace_premium_rounded,
                 'Rawdha (Pro) — Active NGX Investor',
-                '10 screens/mo, 7 holdings, 2 watchlist alerts, 3 curated baskets, 2 purifications/mo & Zakat calculator',
+                '30 screens/quarter, 7 holdings, 2 watchlist alerts, 3 curated baskets, 6 purifications/quarter & Zakat calculator',
                 context.primary,
               ),
               _buildFeature(

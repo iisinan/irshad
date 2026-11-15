@@ -40,12 +40,15 @@ class BasketController extends Controller
             $isLocked = false;
             $requiredTier = null;
 
-            if (!$isCustom) {
+            if ($basketsLimit === 0) {
+                $isLocked = true;
+                $requiredTier = 'pro';
+                if (!$isCustom) {
+                    $curatedIndex++;
+                }
+            } elseif (!$isCustom) {
                 $curatedIndex++;
-                if ($basketsLimit === 0) {
-                    $isLocked = true;
-                    $requiredTier = 'pro';
-                } elseif ($basketsLimit > 0 && $curatedIndex > $basketsLimit) {
+                if ($basketsLimit > 0 && $curatedIndex > $basketsLimit) {
                     $isLocked = true;
                     $requiredTier = 'max';
                 }
@@ -177,6 +180,18 @@ class BasketController extends Controller
     {
         if ($basket->user_id !== auth('sanctum')->id()) {
             return $this->error('Unauthorized', 403);
+        }
+
+        $user = auth('sanctum')->user();
+        $limit = $user ? ($user->tier->features['baskets'] ?? 0) : 0;
+        if ($limit === 0) {
+            return response()->json([
+                'error' => 'Upgrade Required',
+                'upgrade_required' => true,
+                'feature' => 'baskets',
+                'required_tier' => 'pro',
+                'message' => 'Custom and thematic baskets are available on Rawdha (Pro) and Noor (Max) plans.',
+            ], 403);
         }
 
         $validated = $request->validate([

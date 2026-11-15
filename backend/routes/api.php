@@ -44,7 +44,7 @@ use App\Http\Controllers\SuggestionController;
 
 Route::prefix('v1')->group(function () {
     // ── Public Auth ──────────────────────────────────────────────────────
-    Route::middleware('throttle:60,1')->group(function () {
+    Route::middleware('throttle:20,1')->group(function () {
         Route::post('/register', [AuthController::class, 'register']);
         Route::post('/login', [AuthController::class, 'login']);
         Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink']);
@@ -381,6 +381,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
             // Admin Finances / Payment Ledger
             Route::get('/admin/finances', [AdminController::class, 'getFinances']);
+            Route::get('/admin/finances/export', [AdminController::class, 'exportFinancesCsv']);
+            Route::post('/admin/finances/{id}/verify', [AdminController::class, 'verifyFinanceTransaction']);
 
             // Admin Alerts
             Route::get('/admin/alerts', [AdminController::class, 'getAlerts']);

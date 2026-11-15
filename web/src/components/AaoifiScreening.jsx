@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { createPortal } from 'react-dom';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
@@ -240,14 +240,19 @@ const AaoifiScreening = () => {
   const { data:res, isLoading:queryLoading, error:queryError, isFetching } = useQuery({
     queryKey:['aaoifi',symbol],
     queryFn: ()=>fetchAaoifiScreening(symbol),
-    staleTime:5*60*1000,
-    placeholderData: keepPreviousData,
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
+    retry: (failureCount, err) => err?.response?.status !== 403 && err?.response?.status !== 404 && failureCount < 2,
     refetchInterval:(q)=>q.state.data?.status==='processing'?10000:false,
   });
   const { data:stockRes, isFetching: isStockFetching } = useQuery({
     queryKey:['stock',symbol],
     queryFn: ()=>fetchStockDetails(symbol),
-    staleTime:5*60*1000,
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
+    retry: (failureCount, err) => err?.response?.status !== 403 && err?.response?.status !== 404 && failureCount < 2,
     enabled: !!symbol,
   });
   const { data: allStocksRes } = useQuery({
@@ -409,7 +414,7 @@ const AaoifiScreening = () => {
 
   /* ── Error ── */
   if(error) {
-    const isLimitError = error.toLowerCase().includes('limit');
+    const isLimitError = queryError?.response?.status === 403 || Boolean(queryError?.response?.data?.upgrade_required) || error.toLowerCase().includes('limit') || error.toLowerCase().includes('upgrade');
     return (
       <div style={{ maxWidth:520,margin:'80px auto',padding:48,textAlign:'center',background:'var(--bg-section)',borderRadius:28,border:'1px solid var(--border)' }}>
         {showUpgradeModal && <PricingModal onClose={() => setShowUpgradeModal(false)} />}
@@ -750,17 +755,22 @@ const AaoifiScreening = () => {
             </div>
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              {report?.screen_usage && report.screen_usage.limit !== -1 && (
-                <div
-                  onClick={() => setShowUpgradeModal(true)}
-                  title="Monthly AAOIFI stock screen quota"
-                  style={{ padding: '6px 12px', background: report.screen_usage.remaining === 0 ? 'rgba(220,38,38,0.08)' : 'rgba(217,160,91,0.12)', borderRadius: '8px', border: `1px solid ${report.screen_usage.remaining === 0 ? 'rgba(220,38,38,0.25)' : 'rgba(217,160,91,0.3)'}`, display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}
-                >
-                  <span style={{ fontSize: '0.68rem', fontWeight: 700, color: report.screen_usage.remaining === 0 ? '#dc2626' : '#b45309' }}>
-                    Monthly Screens: {report.screen_usage.used} / {report.screen_usage.limit}
-                  </span>
-                </div>
-              )}
+              {(() => {
+                const liveScreenUsage = user?.usage_summary?.stock_screens_per_month || report?.screen_usage;
+                if (!liveScreenUsage || liveScreenUsage.limit === -1) return null;
+                const isQuarterly = liveScreenUsage.period === 'quarter' || user?.tier?.slug === 'pro';
+                return (
+                  <div
+                    onClick={() => setShowUpgradeModal(true)}
+                    title={isQuarterly ? 'Quarterly AAOIFI stock screen quota' : 'Monthly AAOIFI stock screen quota'}
+                    style={{ padding: '6px 12px', background: liveScreenUsage.remaining === 0 ? 'rgba(220,38,38,0.08)' : 'rgba(217,160,91,0.12)', borderRadius: '8px', border: `1px solid ${liveScreenUsage.remaining === 0 ? 'rgba(220,38,38,0.25)' : 'rgba(217,160,91,0.3)'}`, display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}
+                  >
+                    <span style={{ fontSize: '0.68rem', fontWeight: 700, color: liveScreenUsage.remaining === 0 ? '#dc2626' : '#b45309' }}>
+                      {isQuarterly ? 'Quarterly' : 'Monthly'} Screens: {liveScreenUsage.used} / {liveScreenUsage.limit}
+                    </span>
+                  </div>
+                );
+              })()}
               {stock?.trading_board && (
                 <div style={{ padding: '6px 12px', background: 'rgba(69, 165, 138,0.06)', borderRadius: '8px', border: '1px solid rgba(69, 165, 138,0.15)', display: 'flex', alignItems: 'baseline', gap: '4px' }}>
                   <span style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--primary)' }}>Trading Board:</span>

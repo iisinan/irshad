@@ -580,7 +580,7 @@ function PurificationCard({ h, onPurify, onStatClick }) {
 export default function PurificationTab({ data, initialSymbol, refreshData, onClearInitialSymbol, onUpgrade }) {
   const { user } = useAuth();
   const tierSlug = user?.tier?.slug || 'free';
-  const purificationsLimit = user?.tier?.features?.purifications_per_month ?? (tierSlug === 'max' ? -1 : tierSlug === 'pro' ? 2 : 0);
+  const purificationsLimit = user?.tier?.features?.purifications_per_month ?? (tierSlug === 'max' ? -1 : tierSlug === 'pro' ? 6 : 0);
   const isPurificationLocked = data?.tier_locks?.purification_locked ?? (purificationsLimit === 0);
   const purificationUsage = data?.usage_summary?.purifications_per_month;
   const lockedHoldingsCount = data?.summary?.purification_holdings_count ?? (data?.holdings || []).filter(h => h.purification_required).length;
@@ -675,7 +675,7 @@ export default function PurificationTab({ data, initialSymbol, refreshData, onCl
             {lockedHoldingsCount > 0
               ? `You currently have ${lockedHoldingsCount} holding${lockedHoldingsCount > 1 ? 's' : ''} requiring dividend purification.`
               : 'Automatically calculate exact dividend purification amounts based on each company’s AAOIFI impure income ratio.'}{' '}
-            Upgrade to <strong>Rawdha (Pro)</strong> for 2 calculations per month or <strong>Noor (Max)</strong> for unlimited automated purification.
+            Upgrade to <strong>Rawdha (Pro)</strong> for 6 calculations per quarter or <strong>Noor (Max)</strong> for unlimited automated purification.
           </p>
           {onUpgrade && (
             <button onClick={onUpgrade} style={{ padding: '14px 28px', borderRadius: '14px', background: 'var(--primary)', color: 'white', border: 'none', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
@@ -740,7 +740,7 @@ export default function PurificationTab({ data, initialSymbol, refreshData, onCl
                 Cleanse your portfolio of non-compliant income
                 {purificationUsage && purificationUsage.limit !== -1 && (
                   <span style={{ marginLeft: '10px', padding: '2px 10px', borderRadius: '12px', background: 'var(--primary-50)', color: 'var(--primary)', fontWeight: 800, fontSize: '0.75rem' }}>
-                    {purificationUsage.used} / {purificationUsage.limit} used this month
+                    {purificationUsage.used} / {purificationUsage.limit} used this {purificationUsage.period === 'quarter' || tierSlug === 'pro' ? 'quarter' : 'month'}
                   </span>
                 )}
               </p>

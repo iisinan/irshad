@@ -1,7 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/api/api_service.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/upgrade_paywall_bottom_sheet.dart';
 import '../providers/stock_provider.dart';
 
 class CreateBasketScreen extends StatefulWidget {
@@ -92,6 +94,25 @@ class _CreateBasketScreenState extends State<CreateBasketScreen> {
         }
       } else {
         _showError('Failed to create basket.');
+      }
+    } on DioException catch (e) {
+      if (mounted) {
+        final data = e.response?.data;
+        if (e.response?.statusCode == 403 &&
+            data is Map &&
+            (data['upgrade_required'] == true || data['error'] == 'Upgrade Required')) {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (_) => UpgradePaywallBottomSheet(
+              message: data['message']?.toString() ?? 'Upgrade to Rawdha (Pro) or Noor (Max) to create custom baskets.',
+              requiredTier: data['required_tier']?.toString() ?? 'pro',
+            ),
+          );
+        } else {
+          _showError((data is Map ? data['message']?.toString() : null) ?? 'Failed to create basket.');
+        }
       }
     } catch (e) {
       _showError('Error: $e');

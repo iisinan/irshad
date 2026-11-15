@@ -412,6 +412,7 @@ class PortfolioController extends Controller
             'purification_locked' => $purificationLocked,
             'statements_locked' => !$statementsAllowed,
             'zakat_locked' => !$zakatAllowed,
+            'baskets_locked' => ($features['baskets'] ?? 0) === 0,
             'drift_tracking_locked' => !$driftTrackingAllowed,
             'history_days' => $historyDays,
         ];
@@ -738,15 +739,17 @@ class PortfolioController extends Controller
         $user = Auth::user();
         if (!\App\Services\SubscriptionService::canUseFeature($user, 'purifications_per_month')) {
             $limit = $user->tier->features['purifications_per_month'] ?? 0;
+            $periodWord = \App\Services\SubscriptionService::getUsagePeriod($user) === 'quarter' ? 'quarterly' : 'monthly';
             return response()->json([
                 'error' => 'Upgrade Required',
                 'upgrade_required' => true,
                 'feature' => 'purifications_per_month',
                 'limit' => $limit,
+                'period' => \App\Services\SubscriptionService::getUsagePeriod($user),
                 'required_tier' => $limit === 0 ? 'pro' : 'max',
                 'message' => $limit === 0
                     ? 'Automated purification calculation is available on Rawdha (Pro) and Noor (Max) plans.'
-                    : "You have reached your monthly limit of {$limit} purification calculations. Upgrade to Noor (Max) for unlimited purifications.",
+                    : "You have reached your {$periodWord} limit of {$limit} purification calculations. Upgrade to Noor (Max) for unlimited purifications.",
             ], 403);
         }
 

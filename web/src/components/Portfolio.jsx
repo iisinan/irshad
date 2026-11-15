@@ -442,7 +442,7 @@ export default function Portfolio() {
           )}
           {mountedTabs.includes('baskets') && (
             <div style={{ display: activeTab === 'baskets' ? 'block' : 'none' }}>
-              <BasketsTab onUpgrade={() => setShowUpgradeModal(true)} />
+              <BasketsTab data={data} onUpgrade={() => setShowUpgradeModal(true)} />
             </div>
           )}
           {mountedTabs.includes('watchlist') && (

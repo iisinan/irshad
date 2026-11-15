@@ -19,6 +19,78 @@ class AdminProvider with ChangeNotifier {
   Map<String, dynamic> _zakatSettings = {'goldPrice': 125000.0, 'silverPrice': 1500.0};
   Map<String, dynamic> get zakatSettings => _zakatSettings;
 
+  bool _isLoadingFinances = false;
+  bool get isLoadingFinances => _isLoadingFinances;
+
+  String? _financesError;
+  String? get financesError => _financesError;
+
+  Map<String, dynamic> _financesSummary = {};
+  Map<String, dynamic> get financesSummary => _financesSummary;
+
+  Map<String, dynamic> _financesCharts = {};
+  Map<String, dynamic> get financesCharts => _financesCharts;
+
+  List<Map<String, dynamic>> _financesTransactions = [];
+  List<Map<String, dynamic>> get financesTransactions => _financesTransactions;
+
+  int _financesPage = 1;
+  int get financesPage => _financesPage;
+
+  int _financesLastPage = 1;
+  int get financesLastPage => _financesLastPage;
+
+  Future<void> fetchFinances({
+    int page = 1,
+    String search = '',
+    String status = 'all',
+    String type = 'all',
+    String plan = 'all',
+  }) async {
+    _isLoadingFinances = true;
+    _financesError = null;
+    notifyListeners();
+    try {
+      final params = <String, dynamic>{'page': page, 'per_page': 20};
+      if (search.trim().isNotEmpty) params['search'] = search.trim();
+      if (status != 'all') params['status'] = status;
+      if (type != 'all') params['type'] = type;
+      if (plan != 'all') params['plan'] = plan;
+
+      final response = await _api.get('admin/finances', queryParameters: params);
+      final data = response.data as Map<String, dynamic>? ?? {};
+
+      _financesSummary = Map<String, dynamic>.from(data['summary'] ?? {});
+      _financesCharts = Map<String, dynamic>.from(data['charts'] ?? {});
+
+      final pager = data['transactions'] as Map<String, dynamic>? ?? {};
+      _financesPage = (pager['current_page'] as num?)?.toInt() ?? 1;
+      _financesLastPage = (pager['last_page'] as num?)?.toInt() ?? 1;
+      final rawList = pager['data'] as List? ?? [];
+      _financesTransactions = rawList
+          .whereType<Map>()
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList();
+    } catch (e) {
+      debugPrint('Error fetching admin finances: $e');
+      _financesError = 'Unable to load payment records.';
+    } finally {
+      _isLoadingFinances = false;
+      notifyListeners();
+    }
+  }
+
+  Future<Map<String, dynamic>?> verifyFinanceTransaction(int id) async {
+    try {
+      final response = await _api.post('admin/finances/$id/verify', {});
+      final data = response.data is Map ? Map<String, dynamic>.from(response.data) : <String, dynamic>{};
+      return data;
+    } catch (e) {
+      debugPrint('Error verifying finance transaction $id: $e');
+      rethrow;
+    }
+  }
+
   Future<void> fetchUsers() async {
     _isLoading = true;
     notifyListeners();

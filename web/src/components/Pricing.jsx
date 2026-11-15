@@ -11,7 +11,21 @@ const DEFAULT_PRICES = {
   max: { quarterly: 8500, yearly: 33000, stdQuarterly: 10000, stdYearly: 40000 },
 };
 
-const Pricing = ({ isModal, onClose }) => {
+const COMPARISON_FEATURES = [
+  ['Billing Cycles', 'Free forever', 'Quarterly & Yearly', 'Quarterly & Yearly'],
+  ['Stock Screens', '3 / month', '30 / quarter', 'Unlimited'],
+  ['Portfolio Holdings', 'Up to 3 stocks', 'Up to 7 stocks', 'Unlimited'],
+  ['Watchlist & Alerts', '—', 'Up to 2 stocks', 'Unlimited'],
+  ['Thematic Baskets', '—', '3 curated + 3 custom', 'Full + Unlimited custom'],
+  ['Purification Calculator', '—', '6 / quarter', 'Unlimited'],
+  ['Automated Zakat Calculator', '—', 'Included', 'Unlimited'],
+  ['Broker Statements & History', '—', 'Included', 'Included'],
+  ['Dividend Alerts', '—', '—', 'Unlimited'],
+  ['90-Day Drift Tracking', '—', '—', '90-day tracking'],
+  ['Monthly Spotlight Insights', '—', '—', 'Full insights'],
+];
+
+const Pricing = ({ isModal = false, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -60,6 +74,7 @@ const Pricing = ({ isModal, onClose }) => {
   }, [livePlans]);
 
   const isExactCurrentPlan = (slug) => {
+    if (!user) return false;
     if (slug === 'free') return currentPlanSlug === 'free' && !hasPaid;
     return currentPlanSlug === slug && hasPaid && (!currentBillingCycle || currentBillingCycle === billingCycle);
   };
@@ -131,84 +146,71 @@ const Pricing = ({ isModal, onClose }) => {
 
   return (
     <>
-      <div className="animate-fade-in page-wrapper" style={{ paddingBottom: '80px', background: 'var(--bg)' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 20px' }}>
+      <div className={`animate-fade-in page-wrapper pricing-page-shell ${isModal ? 'pricing-page-shell--modal' : ''}`}>
+        <div className="pricing-inner">
           
           {/* Header */}
-          <div style={{ textAlign: 'center', marginBottom: '40px', paddingTop: '40px' }}>
-            <h1 style={{ fontSize: 'clamp(2rem, 5vw, 2.6rem)', fontWeight: 600, color: '#1F2937', letterSpacing: '-0.5px', marginBottom: '16px' }}>
+          <div className={`pricing-header ${isModal ? 'pricing-header--modal' : ''}`}>
+            <h1 className="pricing-title">
               Choose your plan
             </h1>
             
             {/* Billing Toggle */}
-            <div style={{ 
-              display: 'inline-flex', background: 'var(--bg-alt)', borderRadius: '100px', padding: '4px', margin: '10px auto 30px',
-              border: '1px solid var(--border)'
-            }}>
-              <button 
+            <div className="pricing-toggle" role="tablist" aria-label="Billing cycle">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={billingCycle === 'quarterly'}
                 onClick={() => setBillingCycle('quarterly')}
-                style={{ 
-                  padding: '8px 24px', borderRadius: '100px', border: 'none', 
-                  background: billingCycle === 'quarterly' ? '#fff' : 'transparent',
-                  color: billingCycle === 'quarterly' ? 'var(--text-dark)' : '#4B5563',
-                  fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer',
-                  boxShadow: billingCycle === 'quarterly' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                  transition: 'all 0.2s'
-                }}
+                className={`pricing-toggle-btn ${billingCycle === 'quarterly' ? 'is-active' : ''}`}
               >
                 Quarterly
               </button>
-              <button 
+              <button
+                type="button"
+                role="tab"
+                aria-selected={billingCycle === 'yearly'}
                 onClick={() => setBillingCycle('yearly')}
-                style={{ 
-                  padding: '8px 24px', borderRadius: '100px', border: 'none', 
-                  background: billingCycle === 'yearly' ? '#fff' : 'transparent',
-                  color: billingCycle === 'yearly' ? 'var(--text-dark)' : '#4B5563',
-                  fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer',
-                  boxShadow: billingCycle === 'yearly' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                  transition: 'all 0.2s',
-                  display: 'inline-flex', alignItems: 'center', gap: '8px'
-                }}
+                className={`pricing-toggle-btn ${billingCycle === 'yearly' ? 'is-active' : ''}`}
               >
                 <span>Yearly</span>
-                <span style={{ 
-                  background: '#10B981', color: '#fff', fontSize: '0.65rem', 
-                  fontWeight: 800, padding: '2px 8px', borderRadius: '100px',
-                  textTransform: 'uppercase'
-                }}>Save More</span>
+                <span className="pricing-save-badge">Save More</span>
               </button>
             </div>
           </div>
 
           {error && (
-            <div style={{ background: '#FEE2E2', color: '#B91C1C', padding: '16px', borderRadius: '8px', textAlign: 'center', marginBottom: '32px', fontWeight: 600 }}>
+            <div style={{ background: 'var(--non-compliant-bg)', color: 'var(--non-compliant)', border: '1px solid var(--non-compliant-border)', padding: '14px 16px', borderRadius: '12px', textAlign: 'center', marginBottom: '24px', fontWeight: 600, fontSize: '0.9rem' }}>
               {error}
             </div>
           )}
 
           {/* Pricing Grid */}
-          <div className="pricing-grid stagger-fade-in" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '64px', alignItems: 'stretch' }}>
+          <div className="pricing-grid stagger-fade-in">
             
             {/* MIFTAH */}
-            <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid #E5E7EB', padding: '32px 24px', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ marginBottom: '24px' }}>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: 500, color: 'var(--text-dark)', marginBottom: '12px' }}>Miftah (Free)</h3>
-                <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.5, height: '44px' }}>Get everyday help with fundamental Islamic finance screening.</p>
+            <div className="pricing-card">
+              <div className="pricing-card-head">
+                <div className="pricing-tier-eyebrow-spacer" aria-hidden="true" />
+                <h3 className="pricing-tier-name">Miftah (Free)</h3>
+                <p className="pricing-card-desc">Get everyday help with fundamental Islamic finance screening.</p>
               </div>
 
-              <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-dark)' }}>NGN</span>
-                <span style={{ fontSize: '2.4rem', fontWeight: 500, color: 'var(--text-dark)', lineHeight: 1 }}>0</span>
-                <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>/forever</span>
+              <div className="pricing-price-block">
+                <div className="pricing-price-row">
+                  <span className="pricing-currency">NGN</span>
+                  <span className="pricing-amount">0</span>
+                  <span className="pricing-period">/forever</span>
+                </div>
               </div>
 
               {isExactCurrentPlan('free')
-                ? <div style={{ width: '100%', padding: '10px', borderRadius: '100px', background: 'var(--bg-alt)', border: '1px solid #D1D5DB', color: 'var(--text-muted)', fontWeight: 700, fontSize: '0.95rem', textAlign: 'center', marginBottom: '32px' }}>✓ Your current plan</div>
-                : <button onClick={() => handleSubscribe('free')} disabled={loading} style={{ width: '100%', padding: '10px', borderRadius: '100px', background: 'transparent', border: '1px solid #D1D5DB', color: 'var(--text-dark)', fontWeight: 600, fontSize: '0.95rem', cursor: loading ? 'not-allowed' : 'pointer', marginBottom: '32px', transition: 'all 0.2s' }} className="hover-bg-gray">{getCtaLabel('free')}</button>
+                ? <div className="pricing-current-pill">✓ Your current plan</div>
+                : <button type="button" onClick={() => handleSubscribe('free')} disabled={loading} className="hover-bg-gray pricing-cta-btn pricing-cta-btn--free">{getCtaLabel('free')}</button>
               }
 
               <div style={{ flex: 1 }}>
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                <ul className="pricing-feature-list">
                   <FeatureRow icon="Screen" title="Stock screens" text="3 per month" />
                   <FeatureRow icon="Briefcase" title="Portfolio (holdings)" text="3 stocks" />
                   <FeatureRow icon="Video" title="Resources" text="(video/docs)" />
@@ -218,59 +220,59 @@ const Pricing = ({ isModal, onClose }) => {
             </div>
 
             {/* RAWDHA */}
-            <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid #E5E7EB', padding: '32px 24px', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ marginBottom: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#006B46' }}>Most Popular</span>
+            <div className="pricing-card pricing-card--pro pricing-pro-card">
+              <div className="pricing-card-head">
+                <div className="pricing-tier-top-row">
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#006B46' }}>Most Popular</span>
                   <span style={{ 
                     fontSize: '0.68rem', fontWeight: 800, color: '#006B46', background: 'rgba(0, 107, 70, 0.1)', 
-                    padding: '2px 8px', borderRadius: '100px', textTransform: 'uppercase', letterSpacing: '0.3px' 
+                    padding: '3px 9px', borderRadius: '100px', textTransform: 'uppercase', letterSpacing: '0.3px', whiteSpace: 'nowrap'
                   }}>Promo Entry Price</span>
                 </div>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: 500, color: 'var(--text-dark)', marginBottom: '12px' }}>Rawdha (Pro)</h3>
-                <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.5, height: '44px' }}>Get more access to custom baskets and deeper portfolio tracking.</p>
+                <h3 className="pricing-tier-name">Rawdha (Pro)</h3>
+                <p className="pricing-card-desc">Get more access to custom baskets and deeper portfolio tracking.</p>
               </div>
 
-              <div style={{ marginBottom: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#006B46' }}>NGN</span>
-                  <span style={{ fontSize: '2.4rem', fontWeight: 500, color: '#006B46', lineHeight: 1 }}>
+              <div className="pricing-price-block">
+                <div className="pricing-price-row">
+                  <span className="pricing-currency" style={{ color: '#006B46' }}>NGN</span>
+                  <span className="pricing-amount" style={{ color: '#006B46' }}>
                     {(billingCycle === 'quarterly' ? prices.pro.quarterly : prices.pro.yearly).toLocaleString()}
                   </span>
-                  <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                  <span className="pricing-period">
                     /{billingCycle === 'quarterly' ? 'quarter' : 'year'}
                   </span>
-                  <span style={{ fontSize: '1.05rem', color: '#9CA3AF', textDecoration: 'line-through', fontWeight: 500, marginLeft: '4px' }}>
+                  <span className="pricing-strike-price">
                     ₦{(billingCycle === 'quarterly' ? prices.pro.stdQuarterly : prices.pro.stdYearly).toLocaleString()}
                   </span>
                 </div>
                 {billingCycle === 'yearly' ? (
-                  <div style={{ fontSize: '0.78rem', color: '#006B46', fontWeight: 600, marginTop: '6px' }}>
+                  <div className="pricing-promo-note" style={{ color: '#006B46' }}>
                     Equivalent to ₦{Math.round(prices.pro.yearly / 4).toLocaleString()}/quarter • Save ₦{(prices.pro.stdYearly - prices.pro.yearly).toLocaleString()} off standard
                   </div>
                 ) : (
-                  <div style={{ fontSize: '0.78rem', color: '#006B46', fontWeight: 600, marginTop: '6px' }}>
+                  <div className="pricing-promo-note" style={{ color: '#006B46' }}>
                     Save ₦{(prices.pro.stdQuarterly - prices.pro.quarterly).toLocaleString()} with promo entry price
                   </div>
                 )}
               </div>
 
               {isExactCurrentPlan('pro')
-                ? <div style={{ width: '100%', padding: '10px', borderRadius: '100px', background: '#E6F4EE', border: '2px solid #006B46', color: '#006B46', fontWeight: 700, fontSize: '0.95rem', textAlign: 'center', marginBottom: '24px' }}>✓ Your current plan</div>
-                : <button onClick={() => handleSubscribe('pro')} disabled={loading} style={{ width: '100%', padding: '10px', borderRadius: '100px', background: '#006B46', border: 'none', color: 'white', fontWeight: 600, fontSize: '0.95rem', cursor: loading ? 'not-allowed' : 'pointer', marginBottom: '24px', transition: 'all 0.2s' }} className="hover-lift">{getCtaLabel('pro')}</button>
+                ? <div className="pricing-current-pill pricing-current-pill--pro">✓ Your current plan</div>
+                : <button type="button" onClick={() => handleSubscribe('pro')} disabled={loading} className="hover-lift pricing-cta-btn pricing-cta-btn--pro">{getCtaLabel('pro')}</button>
               }
 
               <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-dark)', marginBottom: '16px' }}>
-                  <CheckCircle2 size={16} color="#006B46" /> Everything in free and:
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-dark)', marginBottom: '14px' }}>
+                  <CheckCircle2 size={16} color="#006B46" style={{ flexShrink: 0 }} /> Everything in free and:
                 </div>
-                <div style={{ borderTop: '1px solid #F3F4F6', margin: '0 0 16px 0' }}></div>
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                  <FeatureRow icon="Screen" title="Stock screens" text="10 per month" />
+                <div style={{ borderTop: '1px solid var(--border)', margin: '0 0 14px 0' }}></div>
+                <ul className="pricing-feature-list">
+                  <FeatureRow icon="Screen" title="Stock screens" text="30 per quarter" />
                   <FeatureRow icon="Briefcase" title="Portfolio (holdings)" text="Up to 7 stocks" />
                   <FeatureRow icon="Eye" title="Watchlist" text="Up to 2 stocks" />
                   <FeatureRow icon="Basket" title="Thematic baskets" text="Limited access" />
-                  <FeatureRow icon="HandCoin" title="Automated purification calculation" text="2 per month" />
+                  <FeatureRow icon="HandCoin" title="Automated purification calculation" text="6 per quarter" />
                   <FeatureRow icon="Calculator" title="Automated zakat calculation" text="Included" />
                   <FeatureRow icon="Doc" title="Statements" text="History tracking" />
                 </ul>
@@ -278,54 +280,54 @@ const Pricing = ({ isModal, onClose }) => {
             </div>
 
             {/* NOOR */}
-            <div style={{ background: 'var(--bg)', borderRadius: '24px', border: '1px solid #E5E7EB', padding: '32px 24px', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ marginBottom: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#D9A05B' }}>Best Value</span>
+            <div className="pricing-card pricing-card--max">
+              <div className="pricing-card-head">
+                <div className="pricing-tier-top-row">
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#D9A05B' }}>Best Value</span>
                   <span style={{ 
                     fontSize: '0.68rem', fontWeight: 800, color: '#B8860B', background: 'rgba(217, 160, 91, 0.15)', 
-                    padding: '2px 8px', borderRadius: '100px', textTransform: 'uppercase', letterSpacing: '0.3px' 
+                    padding: '3px 9px', borderRadius: '100px', textTransform: 'uppercase', letterSpacing: '0.3px', whiteSpace: 'nowrap'
                   }}>Promo Entry Price</span>
                 </div>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: 500, color: 'var(--text-dark)', marginBottom: '12px' }}>Noor (Max)</h3>
-                <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.5, height: '44px' }}>Unlock the highest level of access and exclusive premium features.</p>
+                <h3 className="pricing-tier-name">Noor (Max)</h3>
+                <p className="pricing-card-desc">Unlock the highest level of access and exclusive premium features.</p>
               </div>
 
-              <div style={{ marginBottom: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#D9A05B' }}>NGN</span>
-                  <span style={{ fontSize: '2.4rem', fontWeight: 500, color: '#D9A05B', lineHeight: 1 }}>
+              <div className="pricing-price-block">
+                <div className="pricing-price-row">
+                  <span className="pricing-currency" style={{ color: '#D9A05B' }}>NGN</span>
+                  <span className="pricing-amount" style={{ color: '#D9A05B' }}>
                     {(billingCycle === 'quarterly' ? prices.max.quarterly : prices.max.yearly).toLocaleString()}
                   </span>
-                  <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                  <span className="pricing-period">
                     /{billingCycle === 'quarterly' ? 'quarter' : 'year'}
                   </span>
-                  <span style={{ fontSize: '1.05rem', color: '#9CA3AF', textDecoration: 'line-through', fontWeight: 500, marginLeft: '4px' }}>
+                  <span className="pricing-strike-price">
                     ₦{(billingCycle === 'quarterly' ? prices.max.stdQuarterly : prices.max.stdYearly).toLocaleString()}
                   </span>
                 </div>
                 {billingCycle === 'yearly' ? (
-                  <div style={{ fontSize: '0.78rem', color: '#B8860B', fontWeight: 600, marginTop: '6px' }}>
+                  <div className="pricing-promo-note" style={{ color: '#B8860B' }}>
                     Equivalent to ₦{Math.round(prices.max.yearly / 4).toLocaleString()}/quarter • Save ₦{(prices.max.stdYearly - prices.max.yearly).toLocaleString()} off standard
                   </div>
                 ) : (
-                  <div style={{ fontSize: '0.78rem', color: '#B8860B', fontWeight: 600, marginTop: '6px' }}>
+                  <div className="pricing-promo-note" style={{ color: '#B8860B' }}>
                     Save ₦{(prices.max.stdQuarterly - prices.max.quarterly).toLocaleString()} with promo entry price
                   </div>
                 )}
               </div>
 
               {isExactCurrentPlan('max')
-                ? <div style={{ width: '100%', padding: '10px', borderRadius: '100px', background: '#FEF5E7', border: '2px solid #D9A05B', color: '#B8860B', fontWeight: 700, fontSize: '0.95rem', textAlign: 'center', marginBottom: '24px' }}>✓ Your current plan</div>
-                : <button onClick={() => handleSubscribe('max')} disabled={loading} style={{ width: '100%', padding: '10px', borderRadius: '100px', background: '#D9A05B', border: 'none', color: 'white', fontWeight: 600, fontSize: '0.95rem', cursor: loading ? 'not-allowed' : 'pointer', marginBottom: '24px', transition: 'all 0.2s' }} className="hover-lift">{getCtaLabel('max')}</button>
+                ? <div className="pricing-current-pill pricing-current-pill--max">✓ Your current plan</div>
+                : <button type="button" onClick={() => handleSubscribe('max')} disabled={loading} className="hover-lift pricing-cta-btn pricing-cta-btn--max">{getCtaLabel('max')}</button>
               }
 
               <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-dark)', marginBottom: '16px' }}>
-                  <CheckCircle2 size={16} color="#D9A05B" /> Everything in Pro and:
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-dark)', marginBottom: '14px' }}>
+                  <CheckCircle2 size={16} color="#D9A05B" style={{ flexShrink: 0 }} /> Everything in Pro and:
                 </div>
-                <div style={{ borderTop: '1px solid #F3F4F6', margin: '0 0 16px 0' }}></div>
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                <div style={{ borderTop: '1px solid var(--border)', margin: '0 0 14px 0' }}></div>
+                <ul className="pricing-feature-list">
                   <FeatureRow icon="Screen" title="Stock screens" text="Unlimited" />
                   <FeatureRow icon="Briefcase" title="Portfolio (holdings)" text="Unlimited" />
                   <FeatureRow icon="Eye" title="Watchlist" text="Unlimited" />
@@ -342,38 +344,36 @@ const Pricing = ({ isModal, onClose }) => {
           </div>
 
           {/* Feature Comparison Matrix */}
-          <div style={{ marginBottom: '44px', border: '1px solid #E5E7EB', borderRadius: '20px', overflow: 'hidden', background: 'var(--bg)' }}>
-            <div style={{ padding: '18px 24px', borderBottom: '1px solid #E5E7EB', background: 'var(--bg-alt)' }}>
-              <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-dark)' }}>Compare all plan features</h3>
+          <div className="pricing-matrix-card">
+            <div className="pricing-matrix-head">
+              <h3>Compare all plan features</h3>
             </div>
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.86rem' }}>
+
+            {/* Desktop & Tablet Table */}
+            <div className="pricing-comparison-desktop" style={{ overflowX: 'auto' }}>
+              <table className="pricing-comparison-table">
                 <thead>
-                  <tr style={{ borderBottom: '1px solid #E5E7EB', background: 'var(--bg)' }}>
-                    <th style={{ textAlign: 'left', padding: '14px 20px', color: 'var(--text-muted)', fontWeight: 600 }}>Feature</th>
-                    <th style={{ textAlign: 'center', padding: '14px 16px', color: 'var(--text-dark)', fontWeight: 700 }}>Miftah (Free)</th>
-                    <th style={{ textAlign: 'center', padding: '14px 16px', color: '#006B46', fontWeight: 700 }}>Rawdha (Pro)</th>
-                    <th style={{ textAlign: 'center', padding: '14px 16px', color: '#B8860B', fontWeight: 700 }}>Noor (Max)</th>
+                  <tr>
+                    <th>Feature</th>
+                    <th style={{ textAlign: 'center', color: 'var(--text-dark)' }}>Miftah (Free)</th>
+                    <th style={{ textAlign: 'center', color: '#006B46' }}>Rawdha (Pro)</th>
+                    <th style={{ textAlign: 'center', color: '#B8860B' }}>Noor (Max)</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {[
-                    ['Billing Cycles', 'Free forever', 'Quarterly & Yearly', 'Quarterly & Yearly'],
-                    ['Monthly Stock Screens', '3 / month', '10 / month', 'Unlimited'],
-                    ['Portfolio Holdings', 'Up to 3 stocks', 'Up to 7 stocks', 'Unlimited'],
-                    ['Watchlist & Alerts', '—', 'Up to 2 stocks', 'Unlimited'],
-                    ['Thematic Baskets', '—', '3 curated + 3 custom', 'Full + Unlimited custom'],
-                    ['Purification Calculator', '—', '2 / month', 'Unlimited'],
-                    ['Automated Zakat Calculator', '—', 'Included', 'Unlimited'],
-                    ['Broker Statements & History', '—', 'Included', 'Included'],
-                    ['Dividend Alerts', '—', '—', 'Unlimited'],
-                    ['90-Day Drift Tracking', '—', '—', '90-day tracking'],
-                    ['Monthly Spotlight Insights', '—', '—', 'Full insights'],
-                  ].map(([feature, freeVal, proVal, maxVal], idx) => (
-                    <tr key={feature} style={{ borderBottom: idx === 10 ? 'none' : '1px solid #F3F4F6' }}>
-                      <td style={{ padding: '12px 20px', fontWeight: 600, color: 'var(--text-dark)' }}>{feature}</td>
+                  {COMPARISON_FEATURES.map(([feature, freeVal, proVal, maxVal], idx) => (
+                    <tr key={feature} style={{ borderBottom: idx === COMPARISON_FEATURES.length - 1 ? 'none' : '1px solid var(--border)' }}>
+                      <td className="pricing-table-feature">{feature}</td>
                       {[freeVal, proVal, maxVal].map((val, colIdx) => (
-                        <td key={colIdx} style={{ textAlign: 'center', padding: '12px 16px', color: val === '—' ? '#9CA3AF' : colIdx === 1 ? '#006B46' : colIdx === 2 ? '#B8860B' : 'var(--text-dark)', fontWeight: val === '—' ? 500 : 600 }}>
+                        <td
+                          key={colIdx}
+                          style={{
+                            textAlign: 'center',
+                            padding: '12px 16px',
+                            color: val === '—' ? 'var(--text-muted)' : colIdx === 1 ? '#006B46' : colIdx === 2 ? '#B8860B' : 'var(--text-dark)',
+                            fontWeight: val === '—' ? 500 : 600,
+                          }}
+                        >
                           {val === '—' ? <Minus size={14} style={{ opacity: 0.45 }} /> : val}
                         </td>
                       ))}
@@ -382,10 +382,34 @@ const Pricing = ({ isModal, onClose }) => {
                 </tbody>
               </table>
             </div>
+
+            {/* Mobile Stacked Feature Cards (zero horizontal overflow) */}
+            <div className="pricing-comparison-mobile">
+              {COMPARISON_FEATURES.map(([feature, freeVal, proVal, maxVal]) => (
+                <div key={feature} className="pricing-mobile-feature-card">
+                  <div className="pricing-mobile-feature-title">{feature}</div>
+                  <div className="pricing-mobile-tier-grid">
+                    {[
+                      { label: 'Miftah', val: freeVal, tone: 'free' },
+                      { label: 'Rawdha', val: proVal, tone: 'pro' },
+                      { label: 'Noor', val: maxVal, tone: 'max' },
+                    ].map(({ label, val, tone }) => (
+                      <div key={label} className={`pricing-mobile-tier-pill pricing-mobile-tier-pill--${tone}`}>
+                        <span className="pricing-mobile-tier-label">{label}</span>
+                        <span className={`pricing-mobile-tier-val ${val === '—' ? 'is-empty' : ''}`}>
+                          {val}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div style={{ textAlign: 'center', marginBottom: '40px', fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-            <ShieldCheck size={16} color="#10B981" /> Secure payments powered by Squad
+          <div className="pricing-trust-note">
+            <ShieldCheck size={16} color="#10B981" style={{ flexShrink: 0 }} />
+            <span>Secure payments powered by Squad</span>
           </div>
         </div>
       </div>

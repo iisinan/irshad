@@ -30,16 +30,35 @@ class StockRepository {
     ).toList();
   }
 
-  Future<Map<String, dynamic>?> getStockDetails(String symbol) async {
+  UpgradeRequiredException? _extractUpgradeException(DioException e) {
+    final data = e.response?.data;
+    if (e.response?.statusCode == 403 &&
+        data is Map &&
+        (data['error'] == 'Upgrade Required' || data['upgrade_required'] == true)) {
+      return UpgradeRequiredException(
+        message: data['message']?.toString() ?? 'You have reached your plan screening limit. Please upgrade to continue.',
+        requiredTier: data['required_tier']?.toString(),
+        feature: data['feature']?.toString(),
+      );
+    }
+    return null;
+  }
+
+  Future<Map<String, dynamic>?> getStockDetails(String symbol, {bool handleUpgradeManually = false}) async {
     try {
-      final response = await _apiService.get('stocks/$symbol');
+      final response = await _apiService.get(
+        'stocks/$symbol',
+        extra: handleUpgradeManually ? {'handle_upgrade_manually': true} : null,
+      );
       if (response.statusCode == 200) {
         final data = response.data['data'];
         await _cacheStock(data);
         return data;
       }
     } on DioException catch (e) {
-       throw e.response?.data['message'] ?? 'Failed to fetch stock details';
+      final upgrade = _extractUpgradeException(e);
+      if (upgrade != null) throw upgrade;
+      throw e.response?.data['message'] ?? 'Failed to fetch stock details';
     }
     return null;
   }
@@ -105,13 +124,18 @@ class StockRepository {
     return null;
   }
 
-  Future<Map<String, dynamic>?> fetchAaoifiScreening(String symbol) async {
+  Future<Map<String, dynamic>?> fetchAaoifiScreening(String symbol, {bool handleUpgradeManually = false}) async {
     try {
-      final response = await _apiService.get('stocks/$symbol/aaoifi-screening');
+      final response = await _apiService.get(
+        'stocks/$symbol/aaoifi-screening',
+        extra: handleUpgradeManually ? {'handle_upgrade_manually': true} : null,
+      );
       if (response.statusCode == 200) {
         return response.data['data'];
       }
     } on DioException catch (e) {
+      final upgrade = _extractUpgradeException(e);
+      if (upgrade != null) throw upgrade;
       throw e.response?.data['message'] ?? 'Failed to fetch AAOIFI screening';
     }
     return null;

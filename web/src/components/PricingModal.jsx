@@ -1,36 +1,37 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
 import Pricing from './Pricing';
 
 const PricingModal = ({ onClose }) => {
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape' && onClose) onClose();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [onClose]);
+
   return (
-    <div style={{
-      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      background: 'rgba(0,0,0,0.5)', zIndex: 9999,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: '20px'
-    }}>
-      <div style={{
-        background: 'var(--bg)', borderRadius: '24px',
-        width: '100%', maxWidth: '1100px', maxHeight: '90vh',
-        overflowY: 'auto', position: 'relative',
-        boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
-      }}>
-        <button 
+    <div
+      className="pricing-modal-backdrop"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Choose your plan"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && onClose) onClose();
+      }}
+    >
+      <div className="pricing-modal-dialog">
+        <button
+          type="button"
           onClick={onClose}
-          style={{
-            position: 'absolute', top: '24px', right: '24px',
-            background: 'rgba(0,0,0,0.05)', border: 'none',
-            width: '40px', height: '40px', borderRadius: '50%',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', zIndex: 10
-          }}
+          aria-label="Close pricing dialog"
+          className="pricing-modal-close"
         >
-          <X size={20} color="#333" />
+          <X size={20} />
         </button>
-        
-        {/* Pass a prop to hide footer in modal if possible, but for now just wrap it */}
-        <div className="pricing-modal-wrapper" style={{ padding: '20px 0' }}>
+
+        <div className="pricing-modal-wrapper">
           <Pricing isModal={true} onClose={onClose} />
         </div>
       </div>
