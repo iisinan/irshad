@@ -453,4 +453,89 @@ class ChatAssistantTest extends TestCase
         $this->assertDatabaseCount('chat_conversations', 0);
         $this->assertDatabaseCount('chat_messages', 0);
     }
+
+    public function test_admin_user_on_miftah_tier_is_detected_as_miftah_and_not_noor(): void
+    {
+        $adminOnMiftah = User::factory()->create(['role' => 'admin']);
+        Sanctum::actingAs($adminOnMiftah);
+
+        $first = $this->postJson('/api/v1/chat/message', [
+            'message' => 'whats my plan on irshad',
+        ])->assertStatus(201)
+            ->assertJsonPath('assistant_message.metadata.provider', 'account')
+            ->assertJsonPath('assistant_message.metadata.tier_slug', 'free')
+            ->assertJsonPath('assistant_message.metadata.tier_name', 'Miftah');
+
+        $this->assertStringContainsString('Miftah (Free)', $first->json('assistant_message.content'));
+        $this->assertStringNotContainsString('currently on the **Noor', $first->json('assistant_message.content'));
+
+        $convId = $first->json('conversation.id');
+
+        $followUp = $this->postJson('/api/v1/chat/message', [
+            'conversation_id' => $convId,
+            'message' => 'check again',
+        ])->assertStatus(201)
+            ->assertJsonPath('assistant_message.metadata.provider', 'account');
+
+        $this->assertStringContainsString('Miftah (Free)', $followUp->json('assistant_message.content'));
+
+        // Still enforces Miftah tier gate when requesting a paid feature
+        $this->postJson('/api/v1/chat/message', [
+            'conversation_id' => $convId,
+            'message' => 'Calculate my Zakat',
+        ])->assertStatus(201)
+            ->assertJsonPath('assistant_message.metadata.provider', 'tier_gate')
+            ->assertJsonPath('assistant_message.metadata.upgrade_required', true)
+            ->assertJsonPath('assistant_message.metadata.required_tier', 'pro');
+    }
+
+    public function test_chatboard_answers_from_smart_local_engine_when_ai_tokens_are_exhausted(): void
+    {
+        Config::set('services.gemini.key', 'exhausted-key');
+
+        Http::fake([
+            '*' => Http::response(['error' => ['code' => 429, 'message' => 'Quota exceeded']], 429),
+        ]);
+
+        $company = Company::create([
+            'name' => 'MTN Nigeria Communications',
+            'symbol' => 'MTNN',
+            'sector' => 'Telecommunications',
+            'current_status' => 'compliant',
+            'latest_price' => 245.50,
+        ]);
+
+        AaoifiScreening::create([
+            'company_id' => $company->id,
+            'business_status' => 'PASS',
+            'debt_ratio' => 18.25,
+            'debt_status' => 'PASS',
+            'cash_ratio' => 9.10,
+            'cash_status' => 'PASS',
+            'impermissible_income_ratio' => 0.45,
+            'impermissible_income_status' => 'PASS',
+            'final_status' => 'compliant',
+        ]);
+
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        // Stock check within Miftah limit still gives full AAOIFI ratios locally when Gemini 429s
+        $stockRes = $this->postJson('/api/v1/chat/message', [
+            'message' => 'Is MTNN halal?',
+        ])->assertStatus(201)
+            ->assertJsonPath('assistant_message.metadata.provider', 'local_kb')
+            ->assertJsonPath('assistant_message.metadata.cited_symbols.0', 'MTNN');
+
+        $this->assertStringContainsString('18.25%', $stockRes->json('assistant_message.content'));
+        $this->assertStringContainsString('COMPLIANT', $stockRes->json('assistant_message.content'));
+
+        // General KB questions (e.g. Questionable status) still get direct rich answers from KB
+        $kbRes = $this->postJson('/api/v1/chat/public', [
+            'message' => 'What does Questionable status mean?',
+        ])->assertStatus(200)
+            ->assertJsonPath('assistant_message.metadata.provider', 'local_kb');
+
+        $this->assertStringContainsString('Questionable', $kbRes->json('assistant_message.content'));
+    }
 }

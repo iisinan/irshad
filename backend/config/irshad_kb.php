@@ -49,6 +49,16 @@ TEXT,
 TEXT,
     ],
 
+    'questionable_status' => [
+        'keywords' => ['questionable', 'review', 'unscreened', 'pending', 'grey', 'gray', 'scholar', 'verified', 'verification', 'non-compliant', 'haram', 'grace', 'grace period'],
+        'title' => 'Understanding Halal, Questionable & Non-Compliant Statuses',
+        'content' => <<<'TEXT'
+- Halal (Compliant): Passed both the qualitative business activity screen and all AAOIFI quantitative limits (<30% debt, <30% cash/deposits, <5% impermissible income).
+- Questionable: Financial data may be incomplete, borderline, or awaiting scholar verification. Investors seeking stricter certainty should wait for scholar confirmation or hold verified Halal stocks.
+- Non-Compliant (Haram): Failed the core business activity screen or exceeded an AAOIFI financial ratio limit. If an existing Halal holding turns Non-Compliant, Irshad tracks a grace period before exit and purification guidance applies.
+TEXT,
+    ],
+
     'account_billing' => [
         'keywords' => ['plan', 'pricing', 'upgrade', 'pro', 'max', 'miftah', 'rawdha', 'noor', 'free', 'billing', 'payment', 'squad', 'subscription', 'cancel', 'password', 'verify', 'email', 'login', 'bug', 'error', 'support', 'human', 'admin', 'tier', 'spotlight', 'drift'],
         'title' => 'Account, Plans, Billing & Support',

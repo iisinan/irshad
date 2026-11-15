@@ -62,8 +62,9 @@ class ChatbotContextService
 
         $resources = $this->findRelevantResources($message);
         $kbSections = $this->matchKnowledgeBase($message);
+        $userProfileData = $user ? $this->buildUserProfileData($user, $tierInfo) : null;
         $userSummary = $user
-            ? $this->summarizeUser($user, $tierInfo)
+            ? $this->summarizeUser($userProfileData, $tierInfo)
             : $this->summarizeGuest($tierInfo);
 
         $blocks = [];
@@ -77,27 +78,46 @@ class ChatbotContextService
 
         $blocks[] = ($user ? '=== CURRENT USER & TIER CONTEXT (AUTHENTICATED) ===' : '=== VISITOR & TIER CONTEXT (PUBLIC GUEST) ===')."\n".$userSummary;
 
+        $companyDetails = [];
         if ($companies->isNotEmpty()) {
-            $companyLines = $companies->map(function (Company $company) {
-                $status = $company->status?->status ?? $company->current_status ?? 'unscreened';
-                $verified = $company->status?->verified_by_scholar ? 'Yes' : 'No';
+            $companyLines = $companies->map(function (Company $company) use (&$companyDetails) {
                 $screening = $company->aaoifiScreening;
+                $status = $company->status?->status ?? $screening?->final_status ?? $company->current_status ?? 'unscreened';
+                $verified = (bool) ($company->status?->verified_by_scholar ?? false);
 
-                $line = "- {$company->name} ({$company->symbol}) | Sector: ".($company->sector ?: 'N/A')
-                    ." | Compliance Status: {$status} | Scholar Verified: {$verified}";
+                $detail = [
+                    'symbol' => $company->symbol,
+                    'name' => $company->name,
+                    'sector' => $company->sector ?: 'N/A',
+                    'status' => $status,
+                    'verified_by_scholar' => $verified,
+                    'latest_price' => $company->latest_price !== null ? (float) $company->latest_price : null,
+                    'activity_reason' => $company->activity_reason,
+                    'screening' => $screening ? [
+                        'business_status' => $screening->business_status ?? 'N/A',
+                        'debt_ratio' => (float) ($screening->debt_ratio ?? 0),
+                        'cash_ratio' => (float) ($screening->cash_ratio ?? 0),
+                        'impermissible_income_ratio' => (float) ($screening->impermissible_income_ratio ?? 0),
+                        'final_status' => $screening->final_status ?? $status,
+                    ] : null,
+                ];
+                $companyDetails[] = $detail;
 
-                if ($company->latest_price !== null) {
-                    $line .= ' | Latest Price: NGN '.number_format((float) $company->latest_price, 2);
+                $line = "- {$company->name} ({$company->symbol}) | Sector: {$detail['sector']}"
+                    ." | Compliance Status: {$status} | Scholar Verified: ".($verified ? 'Yes' : 'No');
+
+                if ($detail['latest_price'] !== null) {
+                    $line .= ' | Latest Price: NGN '.number_format($detail['latest_price'], 2);
                 }
 
-                if ($screening) {
+                if ($detail['screening']) {
                     $line .= sprintf(
                         ' | AAOIFI Business: %s | Debt Ratio: %.2f%% (<30%% limit) | Cash Ratio: %.2f%% (<30%% limit) | Impermissible Income: %.2f%% (<5%% limit) | Final Screening: %s',
-                        $screening->business_status ?? 'N/A',
-                        (float) ($screening->debt_ratio ?? 0),
-                        (float) ($screening->cash_ratio ?? 0),
-                        (float) ($screening->impermissible_income_ratio ?? 0),
-                        $screening->final_status ?? $status
+                        $detail['screening']['business_status'],
+                        $detail['screening']['debt_ratio'],
+                        $detail['screening']['cash_ratio'],
+                        $detail['screening']['impermissible_income_ratio'],
+                        $detail['screening']['final_status']
                     );
                 }
 
@@ -124,18 +144,21 @@ class ChatbotContextService
             'matched_companies' => $companies->map(fn (Company $c) => [
                 'symbol' => $c->symbol,
                 'name' => $c->name,
-                'status' => $c->status?->status ?? $c->current_status ?? 'unknown',
+                'status' => $c->status?->status ?? $c->aaoifiScreening?->final_status ?? $c->current_status ?? 'unknown',
             ])->values()->all(),
+            'company_details' => $companyDetails,
             'matched_resources' => $resources->values()->all(),
             'kb_sections' => array_column($kbSections, 'title'),
+            'kb_matched_sections' => $kbSections,
             'tier' => $tierInfo,
             'stock_gate' => $stockGate,
+            'user_profile' => $userProfileData,
             'user_id' => $user?->id,
         ];
     }
 
     /**
-     * Resolve effective tier name, slug, and feature limits cleanly.
+     * Resolve effective subscription tier name, slug, and feature limits cleanly from $user->tier.
      *
      * @return array<string, mixed>
      */
@@ -161,26 +184,7 @@ class ChatbotContextService
             ];
         }
 
-        if (($user->role ?? 'user') === 'admin') {
-            return [
-                'slug' => 'max',
-                'name' => 'Admin (Noor Unlimited)',
-                'is_admin' => true,
-                'features' => [
-                    'stock_screens_per_month' => -1,
-                    'portfolio_limit' => -1,
-                    'watchlist_limit' => -1,
-                    'baskets' => -1,
-                    'statements' => true,
-                    'purifications_per_month' => -1,
-                    'zakat_calc' => true,
-                    'dividend_alerts' => true,
-                    'drift_tracking' => true,
-                    'monthly_spotlight' => true,
-                ],
-            ];
-        }
-
+        $user->loadMissing('activeSubscription.plan');
         $tier = $user->tier;
 
         return [
@@ -448,10 +452,11 @@ class ChatbotContextService
         return array_map(fn ($item) => $item['section'], array_slice($scored, 0, 3));
     }
 
-    private function summarizeUser(User $user, array $tierInfo): string
+    /**
+     * @return array<string, mixed>
+     */
+    private function buildUserProfileData(User $user, array $tierInfo): array
     {
-        $tierName = $tierInfo['name'] ?? 'Miftah';
-        $tierSlug = $tierInfo['slug'] ?? 'free';
         $hawlDate = $user->preferences['zakat_hawl_date'] ?? null;
 
         $holdings = Holding::where('user_id', $user->id)
@@ -459,17 +464,41 @@ class ChatbotContextService
             ->limit(15)
             ->get();
 
-        $holdingSummary = $holdings->isEmpty()
-            ? 'None recorded yet'
-            : $holdings->map(fn ($h) => "{$h->symbol} (".rtrim(rtrim((string) $h->shares, '0'), '.').' shares)')->implode(', ');
+        $screensUsed = 0;
+        try {
+            if (Schema::hasTable('user_usages')) {
+                $screensUsed = SubscriptionService::getFeatureUsageCount($user, 'stock_screens_per_month');
+            }
+        } catch (\Throwable) {
+            $screensUsed = 0;
+        }
+
+        return [
+            'name' => $user->name ?: 'Investor',
+            'email_verified' => (bool) $user->email_verified_at,
+            'hawl_date' => $hawlDate,
+            'holdings_count' => $holdings->count(),
+            'holdings_preview' => $holdings->isEmpty()
+                ? 'None recorded yet'
+                : $holdings->map(fn ($h) => "{$h->symbol} (".rtrim(rtrim((string) $h->shares, '0'), '.').' shares)')->implode(', '),
+            'screens_used' => $screensUsed,
+            'screens_limit' => (int) ($tierInfo['features']['stock_screens_per_month'] ?? 3),
+        ];
+    }
+
+    private function summarizeUser(array $profile, array $tierInfo): string
+    {
+        $tierName = $tierInfo['name'] ?? 'Miftah';
+        $tierSlug = $tierInfo['slug'] ?? 'free';
 
         return implode("\n", [
-            '- User Name: '.($user->name ?: 'Investor'),
+            '- User Name: '.$profile['name'],
             "- Detected Tier: {$tierName} ({$tierSlug})",
             '- Tier Features: '.$this->formatFeaturesSummary($tierInfo['features'] ?? []),
-            '- Email Verified: '.($user->email_verified_at ? 'Yes' : 'No'),
-            '- Zakat Hawl Date Set: '.($hawlDate ?: 'Not configured yet'),
-            "- Recorded Holdings ({$holdings->count()}): {$holdingSummary}",
+            '- Monthly Stock Screens Used: '.($profile['screens_limit'] === -1 ? 'unlimited' : "{$profile['screens_used']} / {$profile['screens_limit']}"),
+            '- Email Verified: '.($profile['email_verified'] ? 'Yes' : 'No'),
+            '- Zakat Hawl Date Set: '.($profile['hawl_date'] ?: 'Not configured yet'),
+            "- Recorded Holdings ({$profile['holdings_count']}): {$profile['holdings_preview']}",
         ]);
     }
 

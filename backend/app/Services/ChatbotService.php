@@ -56,6 +56,11 @@ class ChatbotService
             return $tierUpgrade;
         }
 
+        $accountReply = $this->matchAccountStatusReply($userMessage, $history, $contextBundle, $isPublic);
+        if ($accountReply !== null) {
+            return $accountReply;
+        }
+
         $instant = $this->matchInstantReply($userMessage, $isPublic);
         if ($instant !== null) {
             return $instant;
@@ -68,7 +73,7 @@ class ChatbotService
             && ! preg_match('/\b(my\s+(?:tier|plan|subscription|portfolio|holding|holdings|hawl|zakat|account|dividend|dividends|watchlist|basket)|i\s+(?:have|own|hold|bought|sold|paid|was\s+charged)|account|subscription|billing|refund|charge|charged|password|login|verify)\b/i', $userMessage);
 
         $tierSlug = (string) ($contextBundle['tier']['slug'] ?? ($isPublic ? 'guest' : 'free'));
-        $cacheKey = 'chatbot_faq_v3:'.sha1($tierSlug.':'.$this->normalizeQuestion($userMessage));
+        $cacheKey = 'chatbot_faq_v4:'.sha1($tierSlug.':'.$this->normalizeQuestion($userMessage));
         if ($canCacheFaq && ($cached = Cache::get($cacheKey)) && is_array($cached)) {
             return $cached;
         }
@@ -79,7 +84,17 @@ class ChatbotService
         if ($geminiResult !== null) {
             $output = $this->sanitizeOutput($geminiResult, $contextBundle, 'gemini');
             if ($canCacheFaq && ! empty($output['reply']) && ! ($output['upgrade_required'] ?? false)) {
-                Cache::put($cacheKey, $output, 1800);
+                Cache::put($cacheKey, $output, 21600);
+            }
+
+            return $output;
+        }
+
+        $groqResult = $this->askGroq($systemInstruction, $history, $userMessage);
+        if ($groqResult !== null) {
+            $output = $this->sanitizeOutput($groqResult, $contextBundle, 'groq');
+            if ($canCacheFaq && ! empty($output['reply']) && ! ($output['upgrade_required'] ?? false)) {
+                Cache::put($cacheKey, $output, 21600);
             }
 
             return $output;
@@ -89,13 +104,102 @@ class ChatbotService
         if ($perplexityResult !== null) {
             $output = $this->sanitizeOutput($perplexityResult, $contextBundle, 'perplexity');
             if ($canCacheFaq && ! empty($output['reply']) && ! ($output['upgrade_required'] ?? false)) {
-                Cache::put($cacheKey, $output, 1800);
+                Cache::put($cacheKey, $output, 21600);
             }
 
             return $output;
         }
 
-        return $this->buildOfflineFallback($userMessage, $contextBundle, $isPublic);
+        return $this->buildSmartLocalAnswer($userMessage, $contextBundle, $isPublic);
+    }
+
+    /**
+     * Deterministically answer questions about the user's current detected tier, plan quotas, Hawl, or holdings.
+     *
+     * @param  array<int, array{role: string, content: string}>  $history
+     * @return array<string, mixed>|null
+     */
+    private function matchAccountStatusReply(string $userMessage, array $history, array $contextBundle, bool $isPublic): ?array
+    {
+        if ($isPublic) {
+            return null;
+        }
+
+        $lower = $this->normalizeQuestion($userMessage);
+        $asksPlanOrAccount = preg_match('/\b(what(?:\s+is|s)?\s+my\s+(?:plan|tier|subscription|quota|limit)|which\s+(?:plan|tier)\s+am\s+i|am\s+i\s+on\s+(?:miftah|rawdha|noor|free|pro|max)|check\s+my\s+(?:plan|tier|subscription|account)|my\s+current\s+(?:plan|tier))\b/i', $lower) === 1;
+
+        if (! $asksPlanOrAccount && preg_match('/\b(check\s+again|recheck|refresh|sure|really)\b/i', $lower) && ! empty($history)) {
+            $lastUser = '';
+            for ($i = count($history) - 1; $i >= 0; $i--) {
+                if (($history[$i]['role'] ?? '') === 'user') {
+                    $lastUser = $this->normalizeQuestion((string) ($history[$i]['content'] ?? ''));
+                    break;
+                }
+            }
+            if (preg_match('/\b(plan|tier|subscription|miftah|rawdha|noor|quota)\b/i', $lastUser)) {
+                $asksPlanOrAccount = true;
+            }
+        }
+
+        if (! $asksPlanOrAccount) {
+            return null;
+        }
+
+        return [
+            'reply' => $this->formatAccountStatusMarkdown($contextBundle),
+            'cited_symbols' => [],
+            'suggested_followups' => [
+                'What plans & pricing does Irshad offer?',
+                'Is MTNN Halal?',
+            ],
+            'needs_human_support' => false,
+            'upgrade_required' => false,
+            'required_tier' => null,
+            'provider' => 'account',
+        ];
+    }
+
+    private function formatAccountStatusMarkdown(array $contextBundle): string
+    {
+        $tier = $contextBundle['tier'] ?? [];
+        $profile = $contextBundle['user_profile'] ?? [];
+        $tierSlug = (string) ($tier['slug'] ?? 'free');
+        $tierName = (string) ($tier['name'] ?? 'Miftah');
+        $features = (array) ($tier['features'] ?? []);
+
+        $tierLabel = match ($tierSlug) {
+            'max' => '**Noor (Max)**',
+            'pro' => '**Rawdha (Pro)**',
+            default => '**Miftah (Free)**',
+        };
+
+        $screensLimit = (int) ($features['stock_screens_per_month'] ?? 3);
+        $screensUsed = (int) ($profile['screens_used'] ?? 0);
+        $screensText = $screensLimit === -1 ? 'Unlimited' : "{$screensUsed} / {$screensLimit} used this month";
+        $portfolioLimit = (int) ($features['portfolio_limit'] ?? 3);
+        $holdingsCount = (int) ($profile['holdings_count'] ?? 0);
+        $holdingsText = $portfolioLimit === -1 ? "{$holdingsCount} (Unlimited)" : "{$holdingsCount} / {$portfolioLimit} limit";
+
+        $lines = [
+            "You are currently on the {$tierLabel} plan.",
+            "- **Monthly Stock Screens:** {$screensText}",
+            "- **Portfolio Holdings:** {$holdingsText}",
+            '- **Zakat Calculator & Hawl:** '.(! empty($features['zakat_calc']) ? 'Included' : 'Requires Rawdha (Pro) or Noor (Max)'),
+            '- **Purifications / Month:** '.(((int) ($features['purifications_per_month'] ?? 0)) === -1 ? 'Unlimited' : (((int) ($features['purifications_per_month'] ?? 0)) > 0 ? $features['purifications_per_month'] : 'Requires Rawdha (Pro) or Noor (Max)')),
+            '- **Monthly Spotlight & Drift Tracking:** '.(! empty($features['monthly_spotlight']) ? 'Included' : 'Requires Noor (Max)'),
+        ];
+
+        if (! empty($profile['hawl_date'])) {
+            $lines[] = "- **Your Hawl Date:** {$profile['hawl_date']}";
+        }
+
+        if ($tierSlug === 'free') {
+            $lines[] = "\nUpgrade to **Rawdha (Pro)** or **Noor (Max)** on **Pricing Plans** whenever you're ready for higher limits and automated Zakat, purification, and alerts.";
+        } elseif ($tierSlug === 'pro') {
+            $lines[] = "\nUpgrade to **Noor (Max)** on **Pricing Plans** for unlimited quotas, Compliance Drift Tracking, Dividend Alerts, and Monthly Spotlight.";
+        }
+
+        return implode("\n", $lines);
     }
 
     private function buildSystemInstruction(string $groundedContext, bool $isPublic = false): string
@@ -368,7 +472,7 @@ PROMPT;
     private function loadRecentHistory(ChatConversation $conversation): array
     {
         $messages = $conversation->messages()
-            ->orderByDesc('id')
+            ->reorder('id', 'desc')
             ->limit(11)
             ->get()
             ->reverse()
@@ -410,7 +514,7 @@ PROMPT;
             $startIndex = 0;
         }
 
-        $models = ['gemini-3.1-flash-lite', 'gemini-flash-lite-latest'];
+        $models = ['gemini-3.1-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.5-flash-lite'];
         $keyCount = count($apiKeys);
 
         foreach ($models as $model) {
@@ -461,6 +565,47 @@ PROMPT;
                     break;
                 }
             }
+        }
+
+        return null;
+    }
+
+    private function askGroq(string $systemInstruction, array $history, string $userMessage): ?array
+    {
+        $apiKey = trim((string) env('GROQ_API_KEY', ''));
+        if ($apiKey === '') {
+            return null;
+        }
+
+        $messages = [
+            ['role' => 'system', 'content' => $systemInstruction],
+        ];
+        foreach ($history as $turn) {
+            $messages[] = [
+                'role' => $turn['role'],
+                'content' => $turn['content'],
+            ];
+        }
+        $messages[] = ['role' => 'user', 'content' => $userMessage];
+
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer '.$apiKey,
+                'Content-Type' => 'application/json',
+            ])->timeout(8)->post('https://api.groq.com/openai/v1/chat/completions', [
+                'model' => env('GROQ_MODEL', 'llama-3.1-8b-instant'),
+                'messages' => $messages,
+                'temperature' => 0.25,
+                'max_tokens' => 480,
+            ]);
+
+            if ($response->successful()) {
+                $content = $response->json('choices.0.message.content', '');
+
+                return $this->parseModelPayload($content);
+            }
+        } catch (\Throwable $e) {
+            Log::warning('ChatbotService Groq exception: '.$e->getMessage());
         }
 
         return null;
@@ -566,36 +711,87 @@ PROMPT;
         ];
     }
 
-    private function buildOfflineFallback(string $userMessage, array $contextBundle, bool $isPublic = false): array
+    /**
+     * Resilient deterministic local answer engine so the chatboard always answers accurately even when all LLM tokens are exhausted.
+     */
+    private function buildSmartLocalAnswer(string $userMessage, array $contextBundle, bool $isPublic = false): array
     {
+        $companyDetails = $contextBundle['company_details'] ?? [];
         $companies = $contextBundle['matched_companies'] ?? [];
+        $kbSections = $contextBundle['kb_matched_sections'] ?? [];
+        $resources = $contextBundle['matched_resources'] ?? [];
+        $lower = strtolower($userMessage);
+
         $lines = [];
-        if (! empty($companies)) {
-            $lines[] = 'Here is what I found in the Irshad database right now:';
-            foreach ($companies as $company) {
-                $lines[] = "- **{$company['name']} ({$company['symbol']})**: Status is **".strtoupper((string) $company['status']).'**. Open its AAOIFI Screening page to inspect the full ratio breakdown.';
+        $followups = [
+            'How does AAOIFI screening work?',
+            'What plans & pricing does Irshad offer?',
+        ];
+        $needsSupport = false;
+
+        if (! empty($companyDetails)) {
+            foreach ($companyDetails as $c) {
+                $statusLabel = strtoupper((string) ($c['status'] ?? 'unscreened'));
+                $verifiedText = ! empty($c['verified_by_scholar']) ? 'Scholar-verified' : 'Automated AAOIFI screening';
+                $priceText = $c['latest_price'] !== null ? ' · NGN '.number_format((float) $c['latest_price'], 2) : '';
+
+                $lines[] = "**{$c['name']} ({$c['symbol']})**{$priceText}";
+                $lines[] = "- **Status:** **{$statusLabel}** ({$verifiedText})";
+                if (! empty($c['screening'])) {
+                    $s = $c['screening'];
+                    $lines[] = sprintf(
+                        '- **AAOIFI Ratios:** Business: **%s** | Debt: **%.2f%%** (<30%%) | Cash: **%.2f%%** (<30%%) | Impermissible Income: **%.2f%%** (<5%%)',
+                        $s['business_status'],
+                        $s['debt_ratio'],
+                        $s['cash_ratio'],
+                        $s['impermissible_income_ratio']
+                    );
+                }
+                if (! empty($c['activity_reason'])) {
+                    $lines[] = "- **Note:** {$c['activity_reason']}";
+                }
             }
+            $followups = ['How does dividend purification work?', 'How do Zakat & Hawl work?'];
+        } elseif (! $isPublic && preg_match('/\b(my\s+(?:plan|tier|subscription|hawl|holdings|portfolio|quota|limit)|what\s+tier|which\s+plan)\b/i', $lower)) {
+            $lines[] = $this->formatAccountStatusMarkdown($contextBundle);
+        } elseif (! empty($kbSections)) {
+            foreach (array_slice($kbSections, 0, 2) as $idx => $section) {
+                if ($idx > 0) {
+                    $lines[] = '';
+                }
+                $lines[] = "**{$section['title']}**";
+                $lines[] = trim((string) $section['content']);
+            }
+            $needsSupport = (bool) preg_match('/\b(support|human|admin|bug|error|refund|charged|billing dispute|broken|reset)\b/i', $lower);
         } else {
-            $lines[] = "I'm currently operating in quick offline knowledge mode.";
-            $lines[] = '- **AAOIFI Screening:** Evaluates business activities plus ratios (<30% debt, <30% cash/deposits, <5% impermissible income).';
-            $lines[] = '- **Plans:** **Miftah** (Free, 3 screens/mo), **Rawdha** (Pro, 10 screens/mo + Zakat/Purification/Watchlist), **Noor** (Max, unlimited + Drift Tracking & Monthly Spotlight).';
+            $lines[] = "Here is what I can help with directly right now:";
+            $lines[] = '- **NGX Stock Screening:** Ask about a ticker/company (within your plan\'s monthly screen quota) for its AAOIFI status and ratios.';
+            $lines[] = '- **Zakat, Hawl & Purification:** Ask how AAOIFI Standard No. 21, Hawl tracking, or dividend cleansing work.';
+            $lines[] = '- **Plans & Account:** Ask about your active tier (**Miftah**, **Rawdha Pro**, **Noor Max**) or support help.';
+            $needsSupport = true;
         }
 
-        $lines[] = $isPublic
-            ? "\nIf you need direct help from our team, sign in or email **support@irshad.app**."
-            : "\nIf you need direct help from our team, tap **Send to Support Team** below.";
+        if (! empty($resources)) {
+            $lines[] = "\n**Related Irshad Resources:**";
+            foreach (array_slice($resources, 0, 2) as $r) {
+                $lines[] = "- [{$r['type']}] {$r['title']}".(! empty($r['scholar']) ? " — {$r['scholar']}" : '');
+            }
+        }
+
+        if ($needsSupport) {
+            $lines[] = $isPublic
+                ? "\nNeed direct assistance? Sign in or email **support@irshad.app**."
+                : "\nNeed direct help from an admin? Tap **Send to Support Team** below.";
+        }
 
         return [
             'reply' => implode("\n", $lines),
             'cited_symbols' => array_column($companies, 'symbol'),
-            'suggested_followups' => [
-                'How does AAOIFI screening work?',
-                'What plans & pricing does Irshad offer?',
-            ],
-            'needs_human_support' => empty($companies),
+            'suggested_followups' => $followups,
+            'needs_human_support' => $needsSupport,
             'upgrade_required' => false,
             'required_tier' => null,
-            'provider' => 'fallback',
+            'provider' => 'local_kb',
         ];
     }
 }
