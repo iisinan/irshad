@@ -161,8 +161,13 @@ export default function AdminInbox() {
                 </div>
                 <div style={{ flex: 1, overflow: 'hidden' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                    <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-dark)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {conv.user.name || conv.user.first_name || 'Anonymous User'}
+                    <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-dark)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{conv.user.name || conv.user.first_name || 'Anonymous User'}</span>
+                      {conv.messages?.some(m => m.chat_conversation_id) && (
+                        <span style={{ fontSize: '0.62rem', fontWeight: 800, padding: '2px 6px', borderRadius: '999px', background: 'var(--primary-50)', color: 'var(--primary)', flexShrink: 0 }}>
+                          AI Chat
+                        </span>
+                      )}
                     </div>
                     {conv.has_unread && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--non-compliant)' }} />}
                   </div>

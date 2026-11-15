@@ -81,6 +81,7 @@ class SuggestionController extends Controller
                 'messages' => $userSuggestions->map(function ($s) {
                     return [
                         'id' => $s->id,
+                        'chat_conversation_id' => $s->chat_conversation_id,
                         'message' => $s->message,
                         'status' => $s->status,
                         'is_admin_reply' => (bool)$s->is_admin_reply,

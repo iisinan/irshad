@@ -8,6 +8,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BasketController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\BrokerageController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\DirectoryController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\HistoryController;
@@ -233,6 +234,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Suggestions
         Route::post('/suggestions', [SuggestionController::class, 'store']);
+
+        // AI Chatboard
+        Route::get('/chat/conversations', [ChatController::class, 'conversations']);
+        Route::get('/chat/conversations/{id}', [ChatController::class, 'show']);
+        Route::post('/chat/message', [ChatController::class, 'sendMessage'])->middleware('throttle:20,1');
+        Route::post('/chat/messages/{messageId}/feedback', [ChatController::class, 'feedback']);
+        Route::post('/chat/conversations/{conversationId}/escalate', [ChatController::class, 'escalate']);
 
 
                 // Utils

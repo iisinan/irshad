@@ -1,4 +1,5 @@
 import '../../../../core/utils/suggest_modal_util.dart';
+import '../../../chat/ui/chat_assistant_sheet.dart';
 
 import 'package:flutter/material.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
@@ -623,6 +624,7 @@ class _GuideTabState extends State<GuideTab> {
         Text('We\'re here to help. Choose how you\'d like to reach us.', style: TextStyle(fontSize: 14, color: context.textMuted)),
         const SizedBox(height: 24),
         
+        _buildSupportCard(Icons.auto_awesome_rounded, 'Ask Irshad AI Assistant', 'Get instant answers about NGX stocks, AAOIFI screening, Zakat, Hawl, or your account.', 'Open Chatboard', context.primary, () => ChatAssistantSheet.show(context)),
         _buildSupportCard(Icons.warning_rounded, 'Report an Issue', 'Found a bug or incorrect compliance data? Let us know immediately.', 'Report Issue', context.haram, 'mailto:support@irshad.app?subject=Bug Report'),
         _buildSupportCard(Icons.lightbulb_rounded, 'Suggest a Feature', 'Have an idea that would make Irshad better for Muslim investors?', 'Submit Suggestion', context.questionable, () => SuggestModalUtil.show(context)),
         _buildSupportCard(Icons.mail_rounded, 'Contact Support', 'For general inquiries, account help, or any other questions.', 'Email Support', context.primary, 'mailto:support@irshad.app'),

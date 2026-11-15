@@ -8,6 +8,7 @@ import 'tabs/portfolio_overview_tab.dart';
 import 'tabs/purification_tab.dart';
 import 'tabs/updates/updates_inbox_tab.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
+import '../../chat/ui/chat_assistant_sheet.dart';
 import '../providers/portfolio_provider.dart';
 import 'zakat_calculator_screen.dart';
 
@@ -75,6 +76,11 @@ class _PortfolioScreenState extends State<PortfolioScreen> with WidgetsBindingOb
           title: Text('Portfolio', style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
           backgroundColor: context.bg,
           actions: [
+            IconButton(
+              tooltip: 'Ask Irshad AI',
+              icon: Icon(Icons.auto_awesome_rounded, color: context.primary),
+              onPressed: () => ChatAssistantSheet.show(context),
+            ),
             Padding(
               padding: const EdgeInsets.only(right: 8.0),
               child: IconButton(

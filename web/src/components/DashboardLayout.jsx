@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, AlertCircle } from 'lucide-react';
 import DashboardSidebar from './DashboardSidebar';
+import ChatWidget from './ChatWidget';
 import { useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -139,6 +140,7 @@ export default function DashboardLayout({ children }) {
 
         {children}
       </main>
+      <ChatWidget />
     </div>
   );
 }

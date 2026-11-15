@@ -492,3 +492,36 @@ export const deleteNotification = async (id) => {
   return response.data;
 };
 
+// ==========================================
+// AI CHATBOARD — Assistant & Support
+// ==========================================
+
+export const fetchChatConversations = async () => {
+  const response = await api.get('/chat/conversations');
+  return response.data;
+};
+
+export const fetchChatConversation = async (id) => {
+  const response = await api.get(`/chat/conversations/${id}`);
+  return response.data;
+};
+
+export const sendChatMessage = async (message, conversationId = null) => {
+  const payload = { message };
+  if (conversationId) payload.conversation_id = conversationId;
+  const response = await api.post('/chat/message', payload);
+  return response.data;
+};
+
+export const submitChatFeedback = async (messageId, feedback) => {
+  const response = await api.post(`/chat/messages/${messageId}/feedback`, { feedback });
+  return response.data;
+};
+
+export const escalateChatConversation = async (conversationId, note = '') => {
+  const response = await api.post(`/chat/conversations/${conversationId}/escalate`, { note });
+  window.dispatchEvent(new Event('suggestions-updated'));
+  return response.data;
+};
+
+
