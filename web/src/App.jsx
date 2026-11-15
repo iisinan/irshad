@@ -1,6 +1,6 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import { Routes, Route, Link, useLocation, Navigate, useParams } from 'react-router-dom';
-import { Shield, Home, Scale, Info, BookOpen, Settings, LayoutDashboard, Moon, Sun } from 'lucide-react';
+import { Shield, Home, Scale, Info, BookOpen, Settings, LayoutDashboard, Moon, Sun, CreditCard } from 'lucide-react';
 import DashboardLayout from './components/DashboardLayout';
 import AdminLayout from './components/AdminLayout';
 import { LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage } from './components/AuthPages';
@@ -129,6 +129,7 @@ const DocumentTitleUpdater = () => {
     else if (path.startsWith('/login')) title = 'Login | Irshad';
     else if (path.startsWith('/register')) title = 'Register | Irshad';
     else if (path.startsWith('/shariah')) title = 'Shariah Framework | Irshad';
+    else if (path.startsWith('/pricing')) title = 'Pricing | Irshad';
     else if (path.startsWith('/resources')) title = 'Resources | Irshad';
     else if (path.startsWith('/about')) title = 'About Us | Irshad';
     else if (path.startsWith('/terms')) title = 'Terms of Service | Irshad';
@@ -202,6 +203,7 @@ const TopNavbar = () => {
         <div className="nav-links">
           <Link to="/" className={navLinkClass('/')}>Home</Link>
           <Link to="/shariah" className={navLinkClass('/shariah')}>Shariah Framework</Link>
+          <Link to="/pricing" className={navLinkClass('/pricing')}>Pricing</Link>
           <Link to="/resources" className={navLinkClass('/resources')}>Resources</Link>
           <Link to="/about" className={navLinkClass('/about')}>About Us</Link>
           {user && (
@@ -262,11 +264,14 @@ const TopNavbar = () => {
         <Link to="/shariah" className={navLinkClass('/shariah')} onClick={() => setMenuOpen(false)}>
           <Scale size={18} /> Shariah Framework
         </Link>
-        <Link to="/about" className={navLinkClass('/about')} onClick={() => setMenuOpen(false)}>
-          <Info size={18} /> About Us
+        <Link to="/pricing" className={navLinkClass('/pricing')} onClick={() => setMenuOpen(false)}>
+          <CreditCard size={18} /> Pricing
         </Link>
         <Link to="/resources" className={navLinkClass('/resources')} onClick={() => setMenuOpen(false)}>
           <BookOpen size={18} /> Resources
+        </Link>
+        <Link to="/about" className={navLinkClass('/about')} onClick={() => setMenuOpen(false)}>
+          <Info size={18} /> About Us
         </Link>
         <div style={{ padding: '16px 24px' }}>
           <ThemeToggle />
