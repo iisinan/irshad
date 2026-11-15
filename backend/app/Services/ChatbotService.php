@@ -439,7 +439,7 @@ PROMPT;
                 'support' => false,
             ],
             'how does dividend purification work' => [
-                'reply' => "**Dividend Purification** removes the small (<5%) impermissible income portion embedded in an eligible Halal company's dividends by multiplying the impermissible income ratio by your dividend to calculate what to donate to charity.\n\nAutomated purification calculations are included on **Rawdha (Pro)** (2/month) and **Noor (Max)** (unlimited) under **Portfolio → Purification**.",
+                'reply' => "**Dividend Purification** removes the small (<5%) impermissible income portion embedded in an eligible Halal company's dividends by multiplying the impermissible income ratio by your dividend to calculate what to donate to charity.\n\nAutomated purification calculations are included on **Rawdha (Pro)** (6/quarter) and **Noor (Max)** (unlimited) under **Portfolio → Purification**.",
                 'followups' => ['How do Zakat & Hawl work?', 'What plans & pricing does Irshad offer?'],
                 'support' => false,
             ],

@@ -43,6 +43,55 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
   List<Map<String, dynamic>> _messages = [];
   List<Map<String, dynamic>> _conversations = [];
 
+  static final RegExp _sensitiveAssistantTerms = RegExp(
+    r'\b(upgrade|upgrading|pricing|subscribe|subscription|billing|membership|memberships|plan|plans|rawdha|noor|miftah|unlocked|unlock)\b',
+    caseSensitive: false,
+  );
+
+  String _sanitizeAssistantReply(String raw, bool upgradeRequired) {
+    if (upgradeRequired) {
+      return 'This feature has reached its limit or is currently unavailable on your current account.';
+    }
+    if (!_sensitiveAssistantTerms.hasMatch(raw)) {
+      return raw;
+    }
+
+    final keptLines = <String>[];
+    for (final line in raw.split('\n')) {
+      final trimmed = line.trim();
+      if (trimmed.isEmpty) {
+        if (keptLines.isNotEmpty && keptLines.last.isNotEmpty) {
+          keptLines.add('');
+        }
+        continue;
+      }
+      if (!_sensitiveAssistantTerms.hasMatch(trimmed)) {
+        keptLines.add(line);
+        continue;
+      }
+      // Keep non-commercial sentences on the same line if present
+      final sentences = trimmed.split(RegExp(r'(?<=[.!?])\s+'));
+      final cleanSentences = sentences
+          .where((s) => s.trim().isNotEmpty && !_sensitiveAssistantTerms.hasMatch(s))
+          .toList();
+      if (cleanSentences.isNotEmpty) {
+        keptLines.add(cleanSentences.join(' '));
+      }
+    }
+
+    final result = keptLines.join('\n').trim();
+    return result.isNotEmpty
+        ? result
+        : 'I can help you with NGX stock screening, AAOIFI ratios, Zakat, and dividend purification.';
+  }
+
+  List<String> _filterFollowups(List<dynamic>? rawFollowups) {
+    return (rawFollowups ?? [])
+        .map((e) => e.toString())
+        .where((q) => !_sensitiveAssistantTerms.hasMatch(q))
+        .toList();
+  }
+
   @override
   void dispose() {
     _inputController.dispose();
@@ -557,9 +606,12 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
         final isUser = msg['role'] == 'user';
         final metadata = msg['metadata'] is Map ? Map<String, dynamic>.from(msg['metadata'] as Map) : <String, dynamic>{};
         final citedSymbols = (metadata['cited_symbols'] as List<dynamic>? ?? []).map((e) => e.toString()).toList();
-        final followups = (metadata['suggested_followups'] as List<dynamic>? ?? []).map((e) => e.toString()).toList();
+        final followups = _filterFollowups(metadata['suggested_followups'] as List<dynamic>?);
         final upgradeRequired = metadata['upgrade_required'] == true;
         final requiredTier = metadata['required_tier']?.toString();
+        final upgradeFeature = metadata['upgrade_feature']?.toString();
+        final rawContent = msg['content']?.toString() ?? '';
+        final assistantContent = isUser ? rawContent : _sanitizeAssistantReply(rawContent, upgradeRequired);
         final isLastMessage = index == _messages.length - 1;
         final msgId = msg['id'];
 
@@ -587,7 +639,7 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
                         style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.45),
                       )
                     : MarkdownBody(
-                        data: msg['content']?.toString() ?? '',
+                        data: assistantContent,
                         styleSheet: MarkdownStyleSheet(
                           p: TextStyle(color: context.textDark, fontSize: 13.8, height: 1.45),
                           listBullet: TextStyle(color: context.textDark, fontSize: 13.8),
@@ -612,8 +664,10 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
                       isScrollControlled: true,
                       backgroundColor: Colors.transparent,
                       builder: (_) => UpgradePaywallBottomSheet(
-                        message: msg['content']?.toString() ?? 'This feature has reached its limit on your current account.',
+                        message: 'This feature has reached its limit on your current account.',
                         requiredTier: requiredTier == 'max' ? 'max' : 'pro',
+                        featureKey: upgradeFeature,
+                        notifyThreshold: false,
                       ),
                     );
                   },

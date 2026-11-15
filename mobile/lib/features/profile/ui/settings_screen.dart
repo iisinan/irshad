@@ -233,7 +233,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildActionTile(
                 icon: Icons.info_outline_rounded,
                 title: 'About IRSHAD',
-                subtitle: 'Version 1.0.0',
+                subtitle: 'Version 2.0.4',
                 onTap: () => _launchUrl('https://iirshad.com/about'),
               ),
             ]),
