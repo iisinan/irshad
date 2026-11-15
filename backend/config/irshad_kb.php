@@ -11,7 +11,7 @@ Irshad screens Nigerian Exchange (NGX) equities using AAOIFI Shariah Standard No
    - Conventional interest-bearing debt to 36-month average market capitalization (or trailing market cap) must be < 30%.
    - Interest-bearing deposits & cash securities to market cap must be < 30%.
    - Impermissible (non-compliant / interest) revenue to total revenue must be < 5%.
-If a company passes business activity and all ratios cleanly, it is marked Halal in the Market Screener. If financials are incomplete or ratios sit in a grey/review state pending verification, it may be marked Questionable; if any threshold or core activity fails, it is Non-Compliant (Haram). Individual company compliance lookups happen in the Irshad Market Screener, not in chat.
+If a company passes business activity and all ratios cleanly, it is marked Halal. If financials are incomplete or ratios sit in a grey/review state pending verification, it may be marked Questionable; if any threshold or core activity fails, it is Non-Compliant (Haram). Always note whether scholar verification is present when citing a stock's DB status.
 TEXT,
     ],
 
@@ -50,10 +50,13 @@ TEXT,
     ],
 
     'account_billing' => [
-        'keywords' => ['plan', 'pricing', 'upgrade', 'pro', 'max', 'miftah', 'noor', 'free', 'billing', 'payment', 'squad', 'subscription', 'cancel', 'password', 'verify', 'email', 'login', 'bug', 'error', 'support', 'human', 'admin'],
+        'keywords' => ['plan', 'pricing', 'upgrade', 'pro', 'max', 'miftah', 'rawdha', 'noor', 'free', 'billing', 'payment', 'squad', 'subscription', 'cancel', 'password', 'verify', 'email', 'login', 'bug', 'error', 'support', 'human', 'admin', 'tier', 'spotlight', 'drift'],
         'title' => 'Account, Plans, Billing & Support',
         'content' => <<<'TEXT'
-- Plans: Miftah (Free) includes limited monthly stock screens and portfolio holdings; paid plans (Pro / Max) unlock higher or unlimited screening, purification, Zakat calculator, watchlist/drift alerts, and statements. Users can compare or upgrade under Pricing Plans.
+- Plans & Tiers:
+  - Miftah (Free): 3 stock screens/month, up to 3 portfolio holdings, no watchlist/baskets/Zakat calculator/purification/statements/alerts.
+  - Rawdha (Pro — NGN 6,500/qtr or NGN 25,000/yr): 10 stock screens/month, 7 portfolio holdings, 2 watchlist stocks, 3 baskets, 2 purifications/month, automated Zakat calculator, and broker statement imports.
+  - Noor (Max — NGN 8,500/qtr or NGN 33,000/yr): Unlimited stock screens, holdings, watchlist, baskets, and purifications, plus Dividend Alerts, 90-day Compliance Drift Tracking, and Monthly Spotlight full insights.
 - Verification & Password Reset: If a user experiences login, email verification, or unexpected password-reset issues, advise them to check account security, avoid clicking unrecognized links, and offer escalation to the Irshad Support Team if they need an admin check.
 - Billing disputes, missing stocks, or technical bugs: Encourage escalating the conversation to the Irshad Support Team so an admin can review directly in Admin Inbox.
 TEXT,

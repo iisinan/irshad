@@ -23,66 +23,52 @@ class ChatbotService
      *   provider: string
      * }
      */
-    public function reply(ChatConversation $conversation, string $userMessage, array $contextBundle): array
+    public function reply(ChatConversation $conversation, string $userMessage, array $contextBundle, ?\App\Models\User $user = null): array
     {
         $history = $this->loadRecentHistory($conversation);
 
-        return $this->generateReply($userMessage, $history, $contextBundle, false);
+        return $this->generateReply($userMessage, $history, $contextBundle, false, $user);
     }
 
     /**
-     * Generate a stateless public FAQ/stock reply for website visitors.
+     * Generate a stateless public FAQ/tier-aware reply for website visitors.
      *
      * @param  array<int, array{role: string, content: string}>  $history
      * @param  array<string, mixed>  $contextBundle
      */
     public function replyPublic(string $userMessage, array $history, array $contextBundle): array
     {
-        return $this->generateReply($userMessage, $history, $contextBundle, true);
+        return $this->generateReply($userMessage, $history, $contextBundle, true, null);
     }
 
     /**
-     * Fast pre-DB check for stock-compliance policy blocks, greetings, and exact FAQ starters (<1ms).
+     * Fast pre-DB check ONLY for greetings and general starter FAQs (<1ms).
      */
     public function quickPrecheck(string $userMessage, bool $isPublic = false): ?array
     {
-        if ($this->isStockComplianceQuestion($userMessage, false)) {
-            return $this->complianceDeclinePayload();
-        }
-
-        return $this->matchInstantReply($userMessage, [], $isPublic);
+        return $this->matchInstantReply($userMessage, $isPublic);
     }
 
-    private function complianceDeclinePayload(): array
+    private function generateReply(string $userMessage, array $history, array $contextBundle, bool $isPublic, ?\App\Models\User $user): array
     {
-        return [
-            'reply' => "I cannot answer stock compliance questions or state whether a specific company (such as MTN/MTNN or others) is Halal, Questionable, or Non-Compliant.\n\nTo view AAOIFI screening statuses and financial ratios for any listed stock, please use the **Market Screener** directly inside Irshad. You can still ask me how AAOIFI Standard No. 21 works in general, or about Zakat, Hawl, dividend purification, and your account.",
-            'cited_symbols' => [],
-            'suggested_followups' => [
-                'How does AAOIFI screening work?',
-                'How do Zakat & Hawl work?',
-            ],
-            'needs_human_support' => false,
-            'provider' => 'policy',
-        ];
-    }
-
-    private function generateReply(string $userMessage, array $history, array $contextBundle, bool $isPublic): array
-    {
-        if ($this->isStockComplianceQuestion($userMessage, (bool) ($contextBundle['has_company_mention'] ?? false))) {
-            return $this->complianceDeclinePayload();
+        $tierUpgrade = $this->detectTierUpgrade($userMessage, $contextBundle, $user);
+        if ($tierUpgrade !== null) {
+            return $tierUpgrade;
         }
 
-        $instant = $this->matchInstantReply($userMessage, $contextBundle, $isPublic);
+        $instant = $this->matchInstantReply($userMessage, $isPublic);
         if ($instant !== null) {
             return $instant;
         }
 
+        $hasStocks = ! empty($contextBundle['matched_companies']);
         $canCacheFaq = empty($history)
+            && ! $hasStocks
             && ! app()->runningUnitTests()
-            && ! preg_match('/\b(my\s+(?:portfolio|holding|holdings|hawl|zakat|account|plan|subscription|dividend|dividends)|i\s+(?:have|own|hold|bought|sold|paid|was\s+charged)|account|subscription|billing|refund|charge|charged|password|login|verify)\b/i', $userMessage);
+            && ! preg_match('/\b(my\s+(?:tier|plan|subscription|portfolio|holding|holdings|hawl|zakat|account|dividend|dividends|watchlist|basket)|i\s+(?:have|own|hold|bought|sold|paid|was\s+charged)|account|subscription|billing|refund|charge|charged|password|login|verify)\b/i', $userMessage);
 
-        $cacheKey = 'chatbot_faq_v2:'.sha1(($isPublic ? 'pub:' : 'auth:').$this->normalizeQuestion($userMessage));
+        $tierSlug = (string) ($contextBundle['tier']['slug'] ?? ($isPublic ? 'guest' : 'free'));
+        $cacheKey = 'chatbot_faq_v3:'.sha1($tierSlug.':'.$this->normalizeQuestion($userMessage));
         if ($canCacheFaq && ($cached = Cache::get($cacheKey)) && is_array($cached)) {
             return $cached;
         }
@@ -91,8 +77,8 @@ class ChatbotService
 
         $geminiResult = $this->askGemini($systemInstruction, $history, $userMessage);
         if ($geminiResult !== null) {
-            $output = $this->sanitizeOutput($geminiResult, 'gemini');
-            if ($canCacheFaq && ! empty($output['reply'])) {
+            $output = $this->sanitizeOutput($geminiResult, $contextBundle, 'gemini');
+            if ($canCacheFaq && ! empty($output['reply']) && ! ($output['upgrade_required'] ?? false)) {
                 Cache::put($cacheKey, $output, 1800);
             }
 
@@ -101,15 +87,15 @@ class ChatbotService
 
         $perplexityResult = $this->askPerplexity($systemInstruction, $history, $userMessage);
         if ($perplexityResult !== null) {
-            $output = $this->sanitizeOutput($perplexityResult, 'perplexity');
-            if ($canCacheFaq && ! empty($output['reply'])) {
+            $output = $this->sanitizeOutput($perplexityResult, $contextBundle, 'perplexity');
+            if ($canCacheFaq && ! empty($output['reply']) && ! ($output['upgrade_required'] ?? false)) {
                 Cache::put($cacheKey, $output, 1800);
             }
 
             return $output;
         }
 
-        return $this->buildOfflineFallback($userMessage, $isPublic);
+        return $this->buildOfflineFallback($userMessage, $contextBundle, $isPublic);
     }
 
     private function buildSystemInstruction(string $groundedContext, bool $isPublic = false): string
@@ -119,18 +105,21 @@ class ChatbotService
             : '4. If the user asks about billing disputes, double charges, missing stocks, broken features, account recovery, or explicitly asks to talk to a human/admin, set `"needs_human_support": true` and advise them they can tap **Send to Support Team** to route this chat to Irshad admins.';
 
         return <<<PROMPT
-You are **Irshad Assistant**, the fast in-app AI support & Islamic finance assistant for **Irshad** (an AAOIFI-aligned Halal stock screening, portfolio purification, and Zakat platform).
+You are **Irshad Assistant**, the fast in-app AI support & Islamic finance assistant for **Irshad** (an AAOIFI-aligned Halal stock screening, portfolio purification, and Zakat platform focused on the NGX).
 
 RULES & GUARDRAILS:
-1. Keep replies crisp, structured, and concise (under 110 words using short markdown bullets unless detailed steps are requested). Never mention "Qistal".
-2. STRICT COMPLIANCE POLICY: NEVER tell the user whether any specific company, ticker, or stock (e.g. MTN, MTNN, Dangote, GTCO, Zenith, etc.) is Halal, Haram, Permissible, Questionable, or Compliant/Non-Compliant, NEVER share company-specific debt/cash/impermissible ratios, and NEVER list/recommend Halal stocks. Always decline stock compliance queries politely and direct the user to check inside the Irshad **Market Screener**.
-3. Never give personalized buy/sell investment advice or issue formal fatwas. Keep guidance educational and aligned with the CONTEXT below.
+1. Keep replies crisp, warm, structured, and concise (under 120 words using clean markdown bullets unless detail is asked). Never mention "Qistal".
+2. TIER AWARENESS: Check the user's **Detected Tier & Features** in CONTEXT. Answer any question that is within their tier (including exact company AAOIFI status/ratios/price from CONTEXT when present). Only if a requested capability/quota is beyond their detected tier, politely state their current tier and advise upgrading to **Rawdha (Pro)** or **Noor (Max)** (and set `"upgrade_required": true` with `"required_tier": "pro"` or `"max"`).
+3. Only cite stock statuses, ratios, prices, or holdings present in CONTEXT; never guess numbers or issue formal fatwas / buy-sell advice.
 {$supportRule}
 5. Output ONLY a valid JSON object with these exact keys (no code fences):
 {
   "reply": "<concise markdown answer>",
+  "cited_symbols": ["<UPPERCASE ticker symbols referenced from CONTEXT, or empty array>"],
   "suggested_followups": ["<2 short natural next questions>"],
-  "needs_human_support": false
+  "needs_human_support": false,
+  "upgrade_required": false,
+  "required_tier": null
 }
 
 CONTEXT:
@@ -146,70 +135,184 @@ PROMPT;
         return trim(preg_replace('/\s+/', ' ', $clean) ?? $clean);
     }
 
-    private function isStockComplianceQuestion(string $message, bool $hasCompanyMention): bool
+    /**
+     * Detect if the user's question requires a feature or monthly quota beyond their current tier.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function detectTierUpgrade(string $message, array $contextBundle, ?\App\Models\User $user): ?array
     {
+        $tier = $contextBundle['tier'] ?? [];
+        if ($tier['is_admin'] ?? false) {
+            return null;
+        }
+
+        $tierSlug = (string) ($tier['slug'] ?? 'free');
+        $tierName = (string) ($tier['name'] ?? 'Miftah');
+        $features = (array) ($tier['features'] ?? []);
+        $stockGate = (array) ($contextBundle['stock_gate'] ?? ['allowed' => true]);
         $lower = $this->normalizeQuestion($message);
 
-        // Allow pure general AAOIFI / purification methodology questions with no company mention
-        if (! $hasCompanyMention && preg_match('/^(how (does|do|are)|what (is|are)|explain)\s+(the\s+)?(aaoifi|shariah screening|stock screening|halal screening|screening methodology|dividend purification|purification|zakat|hawl)/i', $lower)) {
-            return false;
+        // 1. Monthly stock screen gate (Guest has 0 screens, Miftah has 3/mo, Rawdha has 10/mo, Noor is unlimited)
+        if (! ($stockGate['allowed'] ?? true)) {
+            $symbol = $stockGate['blocked_symbol'] ?? 'that stock';
+            if (($stockGate['reason'] ?? '') === 'guest') {
+                return $this->upgradeResponse(
+                    "You're currently browsing as a **Guest (not signed in)**. Individual stock compliance screenings (such as **{$symbol}**) are available once you sign in:\n- **Miftah (Free):** 3 stock screens/month\n- **Rawdha (Pro):** 10 stock screens/month, Zakat, Purification & Watchlist\n- **Noor (Max):** Unlimited screens, Drift Tracking & Monthly Spotlight",
+                    'login',
+                    'stock_screens_per_month',
+                    ['What plans & pricing does Irshad offer?', 'How does AAOIFI screening work?']
+                );
+            }
+
+            $limit = (int) ($stockGate['limit'] ?? 3);
+            $targetTier = ($tierSlug === 'free') ? 'pro' : 'max';
+            $targetLabel = $targetTier === 'pro' ? '**Rawdha (Pro)** (10 screens/month) or **Noor (Max)** (unlimited)' : '**Noor (Max)** (unlimited stock screens)';
+
+            return $this->upgradeResponse(
+                "You've reached your monthly limit of **{$limit} stock screenings** on the **{$tierName}** plan (checking **{$symbol}** is beyond your current tier allowance).\n\nPlease upgrade to {$targetLabel} on Pricing to continue screening additional stocks this month.",
+                $targetTier,
+                'stock_screens_per_month',
+                ['What plans & pricing does Irshad offer?', 'I need billing or account help']
+            );
         }
 
-        // Block requests asking for lists/recommendations of halal or compliant stocks
-        if (preg_match('/\b(which|what|list|show|give|find|recommend|suggest|best|top|any)\b.*\b(stock|stocks|company|companies|share|shares|equity|equities|ticker|tickers)\b.*\b(halal|haram|compliant|non[\s-]*compliant|shariah|sharia|permissible|questionable)\b/i', $lower)
-            || preg_match('/\b(halal|shariah[\s-]*compliant|compliant)\s+(stock|stocks|company|companies|share|shares|pick|picks|list)\b/i', $lower)) {
-            return true;
-        }
-
-        // Block "is <company/asset> halal / haram / compliant / permissible / questionable?"
-        if (preg_match('/\b(?:is|are|check|verify|whether|tell me if)\s+([a-z0-9&.\-\s]{2,35}?)\s+(?:is\s+)?(?:halal|haram|permissible|impermissible|shariah[\s-]*compliant|sharia[\s-]*compliant|compliant|non[\s-]*compliant|questionable|allowed)\b/i', $lower, $m)) {
-            $subject = trim($m[1]);
-            $nonCompanySubjects = [
-                'aaoifi', 'aaoifi screening', 'investing', 'stock investing', 'it', 'that', 'this',
-                'the platform', 'irshad', 'dividend', 'dividends', 'zakat', 'capital gains', 'purification',
-                'what makes a stock', 'why a stock', 'when a stock', 'how a stock',
-            ];
-            if (! in_array($subject, $nonCompanySubjects, true)) {
-                return true;
+        // Unlisted stock check by a Guest (e.g. "Is Apple halal?")
+        if ($tierSlug === 'guest' && preg_match('/\b(?:is|are|check)\s+[a-z0-9&.\-\s]{2,30}?\s+(?:halal|haram|compliant|shariah[\s-]*compliant)\b/i', $lower)) {
+            if (! preg_match('/\b(aaoifi|dividend|dividends|zakat|investing|stocks\s+in\s+general)\b/i', $lower)) {
+                return $this->upgradeResponse(
+                    "You're browsing as a **Guest (not signed in)**. Sign in with a free **Miftah** account (3 stock screens/month) or upgrade to **Rawdha (Pro)** / **Noor (Max)** to screen specific stocks.",
+                    'login',
+                    'stock_screens_per_month',
+                    ['What plans & pricing does Irshad offer?', 'How does AAOIFI screening work?']
+                );
             }
         }
 
-        // Block direct "<TICKER/NAME> halal / compliance / status / debt ratio" queries
-        if (preg_match('/\b([a-z0-9]{2,14})\s+(?:halal|haram|shariah|sharia|compliant|compliance|aaoifi\s+status|compliance\s+status|screening\s+status|debt\s+ratio|cash\s+ratio)\b/i', $lower, $m)) {
-            $token = $m[1];
-            $excludedPrevWords = [
-                'not', 'are', 'is', 'was', 'does', 'do', 'make', 'makes', 'mean', 'means',
-                'become', 'becomes', 'stay', 'stays', 'considered', 'marked', 'still', 'into',
-                'stocks', 'stock', 'investing', 'aaoifi', 'shariah', 'sharia', 'halal', 'haram',
-                'non', 'what', 'why', 'how', 'for', 'about', 'with', 'this', 'that', 'from',
-                'dividend', 'dividends', 'portfolio', 'your', 'my', 'their', 'the', 'and', 'be',
-            ];
-            if (! in_array($token, $excludedPrevWords, true)) {
-                return true;
+        // 2. Noor (Max)-exclusive capabilities
+        if (preg_match('/\b(monthly\s+spotlight|spotlight\s+(?:insight|insights|digest|report))\b/i', $lower) && empty($features['monthly_spotlight'])) {
+            return $this->upgradeResponse(
+                "**Monthly Spotlight** full insights and digests are exclusive to the **Noor (Max)** plan, which is beyond your current **{$tierName}** tier.\n\nUpgrade to **Noor (Max)** on Pricing to unlock Monthly Spotlight insights along with unlimited screens and compliance drift tracking.",
+                'max',
+                'monthly_spotlight'
+            );
+        }
+
+        if (preg_match('/\b(drift\s+track(?:ing)?|compliance\s+drift|drift\s+alert|drift\s+alerts|notify\s+me\s+when.*changes|alert\s+when.*non[\s-]*compliant)\b/i', $lower) && empty($features['drift_tracking'])) {
+            return $this->upgradeResponse(
+                "**90-day Compliance Drift Tracking & Alerts** are exclusive to the **Noor (Max)** plan and beyond your current **{$tierName}** tier.\n\nUpgrade to **Noor (Max)** to monitor holding compliance changes automatically.",
+                'max',
+                'drift_tracking'
+            );
+        }
+
+        if (preg_match('/\b(dividend\s+alert|dividend\s+alerts|notify\s+.*dividend|alert\s+.*dividend)\b/i', $lower) && empty($features['dividend_alerts'])) {
+            return $this->upgradeResponse(
+                "**Dividend Alerts** require the **Noor (Max)** plan and are beyond your current **{$tierName}** tier.\n\nUpgrade to **Noor (Max)** on Pricing to receive dividend notifications.",
+                'max',
+                'dividend_alerts'
+            );
+        }
+
+        // 3. Rawdha (Pro) / Noor (Max) gated capabilities
+        if (preg_match('/\b(calculate\s+(?:my\s+)?zakat|my\s+zakat|zakat\s+calculator|zakat\s+due|how\s+much\s+zakat|track\s+(?:my\s+)?hawl|set\s+(?:my\s+)?hawl|hawl\s+tracker)\b/i', $lower) && empty($features['zakat_calc'])) {
+            return $this->upgradeResponse(
+                "Automated **Zakat calculation & Hawl tracking** are available on **Rawdha (Pro)** and **Noor (Max)** plans, which is beyond your current **{$tierName}** tier.\n\nUpgrade on Pricing to unlock automated portfolio Zakat calculations.",
+                $tierSlug === 'guest' ? 'login' : 'pro',
+                'zakat_calc'
+            );
+        }
+
+        if (preg_match('/\b(purify\s+my|calculate\s+(?:my\s+)?purification|my\s+purification|purification\s+calculator|how\s+much\s+(?:should\s+i|to)\s+purify|purification\s+amount)\b/i', $lower)) {
+            $purifLimit = (int) ($features['purifications_per_month'] ?? 0);
+            if ($purifLimit === 0) {
+                return $this->upgradeResponse(
+                    "Automated **Dividend Purification** calculations are available on **Rawdha (Pro)** (2/month) and **Noor (Max)** (unlimited), beyond your current **{$tierName}** tier.\n\nUpgrade on Pricing to run purification calculations automatically.",
+                    $tierSlug === 'guest' ? 'login' : 'pro',
+                    'purifications_per_month'
+                );
+            }
+            if ($purifLimit > 0 && $user && ! $this->safeCanUseFeature($user, 'purifications_per_month')) {
+                return $this->upgradeResponse(
+                    "You've used all **{$purifLimit} monthly purification calculations** on your **{$tierName}** plan.\n\nUpgrade to **Noor (Max)** for unlimited dividend purifications.",
+                    'max',
+                    'purifications_per_month'
+                );
             }
         }
 
-        // If message mentions an actual company/ticker alongside any compliance/investment-verdict word
-        if ($hasCompanyMention && preg_match('/\b(halal|haram|compliant|compliance|shariah|sharia|permissible|impermissible|questionable|status|ratio|debt|cash|screen|screening|purify|buy|invest)\b/i', $lower)) {
-            return true;
+        if (preg_match('/\b(my\s+watchlist|add\s+to\s+watchlist|watchlist\s+track|use\s+watchlist)\b/i', $lower) && ((int) ($features['watchlist_limit'] ?? 0) === 0)) {
+            return $this->upgradeResponse(
+                "**Watchlist tracking** is included on **Rawdha (Pro)** (2 stocks) and **Noor (Max)** (unlimited), beyond your current **{$tierName}** tier.\n\nUpgrade on Pricing to build and track a watchlist.",
+                $tierSlug === 'guest' ? 'login' : 'pro',
+                'watchlist_limit'
+            );
         }
 
-        return false;
+        if (preg_match('/\b(thematic\s+basket|custom\s+basket|investing\s+basket|halal\s+basket|my\s+baskets|create\s+.*basket)\b/i', $lower) && ((int) ($features['baskets'] ?? 0) === 0)) {
+            return $this->upgradeResponse(
+                "**Curated & custom investing baskets** require **Rawdha (Pro)** (3 baskets) or **Noor (Max)** (unlimited), beyond your current **{$tierName}** tier.\n\nUpgrade on Pricing to access thematic Halal baskets.",
+                $tierSlug === 'guest' ? 'login' : 'pro',
+                'baskets'
+            );
+        }
+
+        if (preg_match('/\b(import\s+.*statement|broker\s+statement|upload\s+statement|statement\s+import)\b/i', $lower) && empty($features['statements'])) {
+            return $this->upgradeResponse(
+                "**Broker statement imports** require **Rawdha (Pro)** or **Noor (Max)**, beyond your current **{$tierName}** tier.\n\nUpgrade on Pricing to import statements and history.",
+                $tierSlug === 'guest' ? 'login' : 'pro',
+                'statements'
+            );
+        }
+
+        return null;
     }
 
-    private function matchInstantReply(string $userMessage, array $contextBundle, bool $isPublic): ?array
+    private function safeCanUseFeature(\App\Models\User $user, string $featureKey): bool
+    {
+        try {
+            if (! \Illuminate\Support\Facades\Schema::hasTable('user_usages')) {
+                return true;
+            }
+
+            return SubscriptionService::canUseFeature($user, $featureKey);
+        } catch (\Throwable) {
+            return true;
+        }
+    }
+
+    private function upgradeResponse(string $reply, string $requiredTier, string $feature, ?array $followups = null): array
+    {
+        return [
+            'reply' => $reply,
+            'cited_symbols' => [],
+            'suggested_followups' => $followups ?? [
+                'What plans & pricing does Irshad offer?',
+                'How does AAOIFI screening work?',
+            ],
+            'needs_human_support' => false,
+            'upgrade_required' => true,
+            'required_tier' => $requiredTier,
+            'upgrade_feature' => $feature,
+            'provider' => 'tier_gate',
+        ];
+    }
+
+    private function matchInstantReply(string $userMessage, bool $isPublic): ?array
     {
         $norm = $this->normalizeQuestion($userMessage);
 
         if (in_array($norm, ['hi', 'hello', 'hey', 'salam', 'salams', 'assalamu alaikum', 'as salamu alaykum'], true)) {
             return [
-                'reply' => "As-salamu alaykum! How can I help you today? You can ask me about **AAOIFI screening rules**, **Zakat & Hawl**, **dividend purification**, or **Irshad account & billing**.",
+                'reply' => "As-salamu alaykum! How can I help you today? You can ask me about **NGX stock compliance**, **AAOIFI screening rules**, **Zakat & Hawl**, **dividend purification**, or your **Irshad plan & billing**.",
                 'cited_symbols' => [],
                 'suggested_followups' => [
                     'How does AAOIFI screening work?',
-                    'How do Zakat & Hawl work?',
+                    'Is MTNN Halal?',
                 ],
                 'needs_human_support' => false,
+                'upgrade_required' => false,
+                'required_tier' => null,
                 'provider' => 'instant',
             ];
         }
@@ -217,29 +320,28 @@ PROMPT;
         $kb = config('irshad_kb', []);
         $starters = [
             'how does aaoifi screening work' => [
-                'reply' => "Irshad applies **AAOIFI Shariah Standard No. 21** across two stages:\n- **Business Activity Screen:** Excludes companies with core revenue from prohibited sectors (conventional interest banking/insurance, alcohol, gambling, tobacco, pork, adult entertainment, prohibited weapons).\n- **Financial Ratio Screen:** Requires conventional debt < **30%** of market cap, interest-bearing cash/deposits < **30%** of market cap, and impermissible income < **5%** of total revenue.\n\nTo look up an individual company's breakdown, use the **Market Screener** inside Irshad.",
-                'followups' => ['How does dividend purification work?', 'How do Zakat & Hawl work?'],
+                'reply' => "Irshad applies **AAOIFI Shariah Standard No. 21** across two stages:\n- **Business Activity Screen:** Excludes companies with core revenue from prohibited sectors (conventional interest banking/insurance, alcohol, gambling, tobacco, pork, adult entertainment, prohibited weapons).\n- **Financial Ratio Screen:** Requires conventional debt < **30%** of market cap, interest-bearing cash/deposits < **30%** of market cap, and impermissible income < **5%** of total revenue.",
+                'followups' => ['Is MTNN Halal?', 'How do Zakat & Hawl work?'],
                 'support' => false,
             ],
             'how do zakat hawl work' => [
-                'reply' => "Irshad calculates your **2.5% annual Zakat** once wealth remains above **Nisab** for one full lunar year (**Hawl**):\n- Set your Hawl date once under **Profile** or **Portfolio → Zakat** and it applies across your portfolio.\n- Live **gold & silver Nisab** benchmarks and Zakat breakdowns are available in **Portfolio → Zakat**.",
+                'reply' => "Irshad supports **2.5% annual Zakat** once wealth remains above **Nisab** for one full lunar year (**Hawl**):\n- Set your Hawl date once under **Profile** or **Portfolio → Zakat**.\n- Automated Zakat calculation and Hawl tracking are unlocked on **Rawdha (Pro)** and **Noor (Max)** plans.",
                 'followups' => ['How does dividend purification work?', 'What plans & pricing does Irshad offer?'],
                 'support' => false,
             ],
             'how does dividend purification work' => [
-                'reply' => "**Dividend Purification** removes the small (<5%) impermissible income portion embedded in an eligible Halal company's dividends:\n- Open **Portfolio → Purification** to log dividends or run calculations for your holdings.\n- Irshad multiplies the company's impermissible income ratio by your dividend so you know the exact amount to donate to charity to cleanse your wealth.",
-                'followups' => ['How do Zakat & Hawl work?', 'How does AAOIFI screening work?'],
+                'reply' => "**Dividend Purification** removes the small (<5%) impermissible income portion embedded in an eligible Halal company's dividends by multiplying the impermissible income ratio by your dividend to calculate what to donate to charity.\n\nAutomated purification calculations are included on **Rawdha (Pro)** (2/month) and **Noor (Max)** (unlimited) under **Portfolio → Purification**.",
+                'followups' => ['How do Zakat & Hawl work?', 'What plans & pricing does Irshad offer?'],
                 'support' => false,
             ],
             'what plans pricing does irshad offer' => [
-                'reply' => $kb['account_billing']['content'] ?? "Irshad offers **Miftah (Free)** for getting started, alongside paid **Pro** and **Max** tiers with higher screening allowances, Zakat & purification tools, alerts, and statements. View details on the **Pricing** page.",
+                'reply' => $kb['account_billing']['content'] ?? "Irshad offers **Miftah (Free)**, **Rawdha (Pro)**, and **Noor (Max)**. Visit **Pricing** to compare plans or upgrade.",
                 'followups' => ['How does AAOIFI screening work?', 'I need billing or account help'],
                 'support' => false,
             ],
         ];
 
-        $lookupKey = str_replace('zakat & hawl', 'zakat hawl', $norm);
-        $lookupKey = str_replace('plans & pricing', 'plans pricing', $lookupKey);
+        $lookupKey = str_replace(['zakat & hawl', 'plans & pricing'], ['zakat hawl', 'plans pricing'], $norm);
 
         if (isset($starters[$lookupKey])) {
             $item = $starters[$lookupKey];
@@ -249,6 +351,8 @@ PROMPT;
                 'cited_symbols' => [],
                 'suggested_followups' => $item['followups'],
                 'needs_human_support' => $item['support'],
+                'upgrade_required' => false,
+                'required_tier' => null,
                 'provider' => 'instant',
             ];
         }
@@ -433,8 +537,19 @@ PROMPT;
         ];
     }
 
-    private function sanitizeOutput(array $parsed, string $provider): array
+    private function sanitizeOutput(array $parsed, array $contextBundle, string $provider): array
     {
+        $knownSymbols = array_column($contextBundle['matched_companies'] ?? [], 'symbol');
+
+        $cited = array_values(array_unique(array_filter(
+            array_map(fn ($s) => strtoupper(trim((string) $s)), (array) ($parsed['cited_symbols'] ?? [])),
+            fn ($s) => in_array($s, $knownSymbols, true)
+        )));
+
+        if (empty($cited) && ! empty($knownSymbols)) {
+            $cited = $knownSymbols;
+        }
+
         $followups = array_values(array_slice(array_filter(
             array_map(fn ($q) => trim((string) $q), (array) ($parsed['suggested_followups'] ?? [])),
             fn ($q) => $q !== ''
@@ -442,32 +557,44 @@ PROMPT;
 
         return [
             'reply' => trim((string) ($parsed['reply'] ?? '')),
-            'cited_symbols' => [],
+            'cited_symbols' => $cited,
             'suggested_followups' => $followups,
             'needs_human_support' => (bool) ($parsed['needs_human_support'] ?? false),
+            'upgrade_required' => (bool) ($parsed['upgrade_required'] ?? false),
+            'required_tier' => $parsed['required_tier'] ?? null,
             'provider' => $provider,
         ];
     }
 
-    private function buildOfflineFallback(string $userMessage, bool $isPublic = false): array
+    private function buildOfflineFallback(string $userMessage, array $contextBundle, bool $isPublic = false): array
     {
-        $lines = [
-            "I'm currently operating in quick offline knowledge mode.",
-            '- **AAOIFI Screening:** Evaluates business activities plus ratios (<30% debt, <30% cash/deposits, <5% impermissible income). Check individual stocks in the **Market Screener**.',
-            '- **Zakat & Hawl:** View your Hawl date and 2.5% calculation under **Portfolio → Zakat**.',
-            $isPublic
-                ? "\nIf you need direct help from our team, sign in or email **support@irshad.app**."
-                : "\nIf you need direct help from our team, tap **Send to Support Team** below.",
-        ];
+        $companies = $contextBundle['matched_companies'] ?? [];
+        $lines = [];
+        if (! empty($companies)) {
+            $lines[] = 'Here is what I found in the Irshad database right now:';
+            foreach ($companies as $company) {
+                $lines[] = "- **{$company['name']} ({$company['symbol']})**: Status is **".strtoupper((string) $company['status']).'**. Open its AAOIFI Screening page to inspect the full ratio breakdown.';
+            }
+        } else {
+            $lines[] = "I'm currently operating in quick offline knowledge mode.";
+            $lines[] = '- **AAOIFI Screening:** Evaluates business activities plus ratios (<30% debt, <30% cash/deposits, <5% impermissible income).';
+            $lines[] = '- **Plans:** **Miftah** (Free, 3 screens/mo), **Rawdha** (Pro, 10 screens/mo + Zakat/Purification/Watchlist), **Noor** (Max, unlimited + Drift Tracking & Monthly Spotlight).';
+        }
+
+        $lines[] = $isPublic
+            ? "\nIf you need direct help from our team, sign in or email **support@irshad.app**."
+            : "\nIf you need direct help from our team, tap **Send to Support Team** below.";
 
         return [
             'reply' => implode("\n", $lines),
-            'cited_symbols' => [],
+            'cited_symbols' => array_column($companies, 'symbol'),
             'suggested_followups' => [
                 'How does AAOIFI screening work?',
-                'How do Zakat & Hawl work?',
+                'What plans & pricing does Irshad offer?',
             ],
-            'needs_human_support' => true,
+            'needs_human_support' => empty($companies),
+            'upgrade_required' => false,
+            'required_tier' => null,
             'provider' => 'fallback',
         ];
     }

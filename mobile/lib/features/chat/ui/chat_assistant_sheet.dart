@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
+import 'package:irshad_mobile/core/widgets/upgrade_paywall_bottom_sheet.dart';
 import '../../stocks/ui/stock_detail_screen.dart';
 import '../services/chat_service.dart';
 
@@ -27,9 +28,9 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
 
   static const List<String> _starterPrompts = [
     'How does AAOIFI screening work?',
+    'Is MTNN Halal?',
     'How do Zakat & Hawl work?',
     'How does dividend purification work?',
-    'What plans & pricing does Irshad offer?',
     'I need billing or account help',
   ];
 
@@ -273,7 +274,7 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
                           ),
                         ),
                         Text(
-                          _showingHistory ? 'Tap a thread to continue' : 'AAOIFI guide, Zakat & support',
+                          _showingHistory ? 'Tap a thread to continue' : 'AAOIFI, stocks, Zakat & support',
                           style: TextStyle(fontSize: 11, color: context.textMuted, fontWeight: FontWeight.w600),
                         ),
                       ],
@@ -496,7 +497,7 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
                 border: Border.all(color: context.divider),
               ),
               child: Text(
-                'As-salamu alaykum! Ask me how AAOIFI screening works, Hawl & Zakat tracking, dividend purification, or your Irshad account.',
+                'As-salamu alaykum! Ask me about any NGX stock’s Shariah compliance, AAOIFI ratios, Hawl & Zakat, dividend purification, or your account.',
                 style: TextStyle(fontSize: 13.5, color: context.textDark, height: 1.5),
               ),
             ),
@@ -557,6 +558,8 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
         final metadata = msg['metadata'] is Map ? Map<String, dynamic>.from(msg['metadata'] as Map) : <String, dynamic>{};
         final citedSymbols = (metadata['cited_symbols'] as List<dynamic>? ?? []).map((e) => e.toString()).toList();
         final followups = (metadata['suggested_followups'] as List<dynamic>? ?? []).map((e) => e.toString()).toList();
+        final upgradeRequired = metadata['upgrade_required'] == true;
+        final requiredTier = metadata['required_tier']?.toString();
         final isLastMessage = index == _messages.length - 1;
         final msgId = msg['id'];
 
@@ -592,6 +595,30 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
                         ),
                       ),
               ),
+              if (!isUser && upgradeRequired) ...[
+                const SizedBox(height: 6),
+                ActionChip(
+                  avatar: const Icon(Icons.workspace_premium_rounded, size: 15, color: Colors.white),
+                  label: Text(
+                    requiredTier == 'max' ? 'Upgrade to Noor (Max)' : 'Upgrade Plan',
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white),
+                  ),
+                  backgroundColor: context.primary,
+                  side: BorderSide.none,
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () {
+                    showModalBottomSheet<void>(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (_) => UpgradePaywallBottomSheet(
+                        message: msg['content']?.toString() ?? 'Upgrade your plan to unlock this feature.',
+                        requiredTier: requiredTier == 'max' ? 'max' : 'pro',
+                      ),
+                    );
+                  },
+                ),
+              ],
               if (!isUser && citedSymbols.isNotEmpty) ...[
                 const SizedBox(height: 6),
                 Wrap(

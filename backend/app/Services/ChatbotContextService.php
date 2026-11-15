@@ -8,18 +8,21 @@ use App\Models\Resource;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 
 class ChatbotContextService
 {
     /**
-     * Gather grounded database & knowledge-base context for the user's message.
+     * Gather tier-aware grounded database & knowledge-base context for the user's message.
      *
      * @return array{
      *   prompt_context: string,
      *   matched_companies: array<int, array<string, mixed>>,
      *   matched_resources: array<int, array<string, mixed>>,
      *   kb_sections: array<int, string>,
-     *   has_company_mention: bool
+     *   tier: array<string, mixed>,
+     *   stock_gate: array<string, mixed>,
+     *   user_id: int|null
      * }
      */
     public function build(User $user, string $message): array
@@ -28,7 +31,7 @@ class ChatbotContextService
     }
 
     /**
-     * Gather public-only KB and educational resource context for unauthenticated visitors.
+     * Gather public-only KB and guest-tier context for unauthenticated visitors.
      */
     public function buildPublic(string $message): array
     {
@@ -37,12 +40,31 @@ class ChatbotContextService
 
     private function formatContextBundle(?User $user, string $message): array
     {
-        $hasCompanyMention = $this->detectCompanyMention($message);
+        $tierInfo = $this->resolveTierInfo($user);
+        $matchedCandidates = $this->matchCompanyCandidates($message);
+        $stockGate = $this->evaluateStockGate($user, $tierInfo, $matchedCandidates);
+
+        $companies = collect();
+        if (! empty($matchedCandidates) && ($stockGate['allowed'] ?? false)) {
+            $ids = array_column($matchedCandidates, 'id');
+            $companies = Company::with(['status:id,company_id,status,verified_by_scholar', 'aaoifiScreening'])
+                ->select(['id', 'name', 'symbol', 'sector', 'current_status', 'latest_price', 'activity_reason'])
+                ->whereIn('id', $ids)
+                ->limit(3)
+                ->get();
+
+            if ($user && ! ($tierInfo['is_admin'] ?? false)) {
+                foreach ($companies as $company) {
+                    $this->safeRecordStockScreen($user, (string) $company->symbol);
+                }
+            }
+        }
+
         $resources = $this->findRelevantResources($message);
         $kbSections = $this->matchKnowledgeBase($message);
         $userSummary = $user
-            ? $this->summarizeUser($user)
-            : 'Public website visitor (not signed in). Encourage signing in to use portfolio tracking, Zakat & Hawl reminders, and the Market Screener.';
+            ? $this->summarizeUser($user, $tierInfo)
+            : $this->summarizeGuest($tierInfo);
 
         $blocks = [];
 
@@ -53,7 +75,41 @@ class ChatbotContextService
             ));
         }
 
-        $blocks[] = ($user ? '=== CURRENT USER CONTEXT (AUTHENTICATED) ===' : '=== VISITOR CONTEXT (PUBLIC) ===')."\n".$userSummary;
+        $blocks[] = ($user ? '=== CURRENT USER & TIER CONTEXT (AUTHENTICATED) ===' : '=== VISITOR & TIER CONTEXT (PUBLIC GUEST) ===')."\n".$userSummary;
+
+        if ($companies->isNotEmpty()) {
+            $companyLines = $companies->map(function (Company $company) {
+                $status = $company->status?->status ?? $company->current_status ?? 'unscreened';
+                $verified = $company->status?->verified_by_scholar ? 'Yes' : 'No';
+                $screening = $company->aaoifiScreening;
+
+                $line = "- {$company->name} ({$company->symbol}) | Sector: ".($company->sector ?: 'N/A')
+                    ." | Compliance Status: {$status} | Scholar Verified: {$verified}";
+
+                if ($company->latest_price !== null) {
+                    $line .= ' | Latest Price: NGN '.number_format((float) $company->latest_price, 2);
+                }
+
+                if ($screening) {
+                    $line .= sprintf(
+                        ' | AAOIFI Business: %s | Debt Ratio: %.2f%% (<30%% limit) | Cash Ratio: %.2f%% (<30%% limit) | Impermissible Income: %.2f%% (<5%% limit) | Final Screening: %s',
+                        $screening->business_status ?? 'N/A',
+                        (float) ($screening->debt_ratio ?? 0),
+                        (float) ($screening->cash_ratio ?? 0),
+                        (float) ($screening->impermissible_income_ratio ?? 0),
+                        $screening->final_status ?? $status
+                    );
+                }
+
+                if (! empty($company->activity_reason)) {
+                    $line .= ' | Activity Note: '.$company->activity_reason;
+                }
+
+                return $line;
+            })->implode("\n");
+
+            $blocks[] = "=== MATCHED NGX STOCKS FROM IRSHAD DATABASE ===\n".$companyLines;
+        }
 
         if ($resources->isNotEmpty()) {
             $resourceLines = $resources->map(
@@ -65,22 +121,87 @@ class ChatbotContextService
 
         return [
             'prompt_context' => implode("\n\n", $blocks),
-            'matched_companies' => [],
+            'matched_companies' => $companies->map(fn (Company $c) => [
+                'symbol' => $c->symbol,
+                'name' => $c->name,
+                'status' => $c->status?->status ?? $c->current_status ?? 'unknown',
+            ])->values()->all(),
             'matched_resources' => $resources->values()->all(),
             'kb_sections' => array_column($kbSections, 'title'),
-            'has_company_mention' => $hasCompanyMention,
+            'tier' => $tierInfo,
+            'stock_gate' => $stockGate,
+            'user_id' => $user?->id,
         ];
     }
 
     /**
-     * Detect whether the message names a listed company or ticker (cached in memory/Redis/file for speed).
+     * Resolve effective tier name, slug, and feature limits cleanly.
+     *
+     * @return array<string, mixed>
      */
-    private function detectCompanyMention(string $message): bool
+    private function resolveTierInfo(?User $user): array
+    {
+        if (! $user) {
+            return [
+                'slug' => 'guest',
+                'name' => 'Guest (Not Signed In)',
+                'is_admin' => false,
+                'features' => [
+                    'stock_screens_per_month' => 0,
+                    'portfolio_limit' => 0,
+                    'watchlist_limit' => 0,
+                    'baskets' => 0,
+                    'statements' => false,
+                    'purifications_per_month' => 0,
+                    'zakat_calc' => false,
+                    'dividend_alerts' => false,
+                    'drift_tracking' => false,
+                    'monthly_spotlight' => false,
+                ],
+            ];
+        }
+
+        if (($user->role ?? 'user') === 'admin') {
+            return [
+                'slug' => 'max',
+                'name' => 'Admin (Noor Unlimited)',
+                'is_admin' => true,
+                'features' => [
+                    'stock_screens_per_month' => -1,
+                    'portfolio_limit' => -1,
+                    'watchlist_limit' => -1,
+                    'baskets' => -1,
+                    'statements' => true,
+                    'purifications_per_month' => -1,
+                    'zakat_calc' => true,
+                    'dividend_alerts' => true,
+                    'drift_tracking' => true,
+                    'monthly_spotlight' => true,
+                ],
+            ];
+        }
+
+        $tier = $user->tier;
+
+        return [
+            'slug' => (string) ($tier->slug ?? 'free'),
+            'name' => (string) ($tier->name ?? 'Miftah'),
+            'is_admin' => false,
+            'features' => (array) ($tier->features ?? []),
+        ];
+    }
+
+    /**
+     * Fast in-memory match against cached company symbols & distinctive names (0 SQL queries on general chat).
+     *
+     * @return array<int, array{id: int, symbol: string}>
+     */
+    private function matchCompanyCandidates(string $message): array
     {
         preg_match_all('/\b[A-Za-z][A-Za-z0-9]{1,14}\b/', $message, $matches);
         $rawTokens = $matches[0] ?? [];
         if (empty($rawTokens)) {
-            return false;
+            return [];
         }
 
         $stopWords = [
@@ -93,6 +214,8 @@ class ChatbotContextService
             'QUESTIONABLE', 'NON', 'INVEST', 'INVESTING', 'SHARES', 'SHARE', 'LIMITED', 'GROUP',
             'NIGERIA', 'PLC', 'HOLDINGS', 'BANK', 'INDUSTRIES', 'COMPANY', 'INTERNATIONAL',
             'CAPITAL', 'SERVICES', 'AFRICA', 'TRUST', 'ACCESS', 'FIRST', 'UNITED', 'UNION',
+            'TIER', 'UPGRADE', 'RAWDA', 'RAWDHA', 'NOOR', 'MIFTAH', 'SPOTLIGHT', 'DRIFT',
+            'WATCHLIST', 'BASKET', 'BASKETS', 'STATEMENT', 'STATEMENTS', 'CALC', 'CALCULATE',
         ];
 
         $symbolCandidates = [];
@@ -104,59 +227,138 @@ class ChatbotContextService
             }
             $symbolCandidates[] = $upper;
             if (strlen($token) >= 3) {
-                $wordCandidates[] = strtolower($token);
+                $wordCandidates[] = $upper;
             }
         }
 
         if (empty($symbolCandidates)) {
-            return false;
+            return [];
         }
 
-        // Common colloquial aliases investors type before checking exact tickers
-        $aliases = ['mtn', 'dangote', 'zenith', 'guaranty', 'seplat', 'airtel', 'oando', 'nestle', 'lafarge', 'geregu', 'transcorp', 'fbn', 'uba', 'fidelity', 'sterling', 'stanbic', 'flour', 'bua', 'apple', 'tesla', 'nvidia', 'microsoft', 'amazon', 'meta', 'google'];
-        foreach ($wordCandidates as $word) {
-            if (in_array($word, $aliases, true)) {
-                return true;
-            }
-        }
-
-        $index = Cache::remember('chatbot_company_index_v1', 3600, function () use ($stopWords) {
+        $catalog = Cache::remember('chatbot_company_lookup_v2', 3600, function () use ($stopWords) {
             try {
-                $companies = Company::query()->select(['symbol', 'name'])->get();
-                $symbols = [];
-                $nameWords = [];
+                return Company::query()
+                    ->select(['id', 'symbol', 'name'])
+                    ->get()
+                    ->map(function (Company $c) use ($stopWords) {
+                        preg_match_all('/\b[A-Za-z]{3,}\b/', strtoupper((string) $c->name), $parts);
+                        $nameWords = array_values(array_diff($parts[0] ?? [], $stopWords));
 
-                foreach ($companies as $company) {
-                    $sym = strtoupper(trim((string) $company->symbol));
-                    if ($sym !== '') {
-                        $symbols[$sym] = true;
-                    }
-                    preg_match_all('/\b[A-Za-z]{4,}\b/', strtolower((string) $company->name), $parts);
-                    foreach ($parts[0] ?? [] as $part) {
-                        if (! in_array(strtoupper($part), $stopWords, true)) {
-                            $nameWords[$part] = true;
-                        }
-                    }
-                }
-
-                return ['symbols' => $symbols, 'words' => $nameWords];
+                        return [
+                            'id' => (int) $c->id,
+                            'symbol' => strtoupper(trim((string) $c->symbol)),
+                            'words' => $nameWords,
+                        ];
+                    })
+                    ->all();
             } catch (\Throwable) {
-                return ['symbols' => [], 'words' => []];
+                return [];
             }
         });
 
-        foreach ($symbolCandidates as $sym) {
-            if (isset($index['symbols'][$sym])) {
-                return true;
-            }
-        }
-        foreach ($wordCandidates as $word) {
-            if (isset($index['words'][$word])) {
-                return true;
+        $matched = [];
+        $symbolSet = array_flip(array_unique($symbolCandidates));
+        $wordSet = array_flip(array_unique($wordCandidates));
+
+        // 1. Exact ticker symbol match first
+        foreach ($catalog as $row) {
+            if ($row['symbol'] !== '' && isset($symbolSet[$row['symbol']])) {
+                $matched[$row['id']] = ['id' => $row['id'], 'symbol' => $row['symbol']];
+                if (count($matched) >= 3) {
+                    return array_values($matched);
+                }
             }
         }
 
-        return false;
+        // 2. Distinctive company-name token match (e.g. "MTN" -> "MTNN", "Dangote" -> "DANGCEM")
+        foreach ($catalog as $row) {
+            if (isset($matched[$row['id']])) {
+                continue;
+            }
+            foreach ($row['words'] as $w) {
+                if (isset($wordSet[$w])) {
+                    $matched[$row['id']] = ['id' => $row['id'], 'symbol' => $row['symbol']];
+                    if (count($matched) >= 3) {
+                        return array_values($matched);
+                    }
+                    break;
+                }
+            }
+        }
+
+        return array_values($matched);
+    }
+
+    /**
+     * Evaluate whether the user's tier permits screening matched company symbols.
+     *
+     * @param  array<int, array{id: int, symbol: string}>  $candidates
+     * @return array<string, mixed>
+     */
+    private function evaluateStockGate(?User $user, array $tierInfo, array $candidates): array
+    {
+        if (empty($candidates)) {
+            return ['allowed' => true, 'blocked_symbol' => null];
+        }
+
+        if (! $user) {
+            return [
+                'allowed' => false,
+                'reason' => 'guest',
+                'blocked_symbol' => $candidates[0]['symbol'],
+                'required_tier' => 'login',
+                'limit' => 0,
+            ];
+        }
+
+        if ($tierInfo['is_admin'] ?? false) {
+            return ['allowed' => true, 'blocked_symbol' => null];
+        }
+
+        $limit = (int) ($tierInfo['features']['stock_screens_per_month'] ?? 3);
+        if ($limit === -1) {
+            return ['allowed' => true, 'blocked_symbol' => null];
+        }
+
+        foreach ($candidates as $candidate) {
+            if (! $this->safeCanScreenStock($user, $candidate['symbol'])) {
+                return [
+                    'allowed' => false,
+                    'reason' => 'limit_reached',
+                    'blocked_symbol' => $candidate['symbol'],
+                    'required_tier' => ($tierInfo['slug'] ?? 'free') === 'free' ? 'pro' : 'max',
+                    'limit' => $limit,
+                ];
+            }
+        }
+
+        return ['allowed' => true, 'blocked_symbol' => null];
+    }
+
+    private function safeCanScreenStock(User $user, string $symbol): bool
+    {
+        try {
+            if (! Schema::hasTable('user_usages')) {
+                return true;
+            }
+
+            return SubscriptionService::canScreenStock($user, $symbol);
+        } catch (\Throwable) {
+            return true;
+        }
+    }
+
+    private function safeRecordStockScreen(User $user, string $symbol): void
+    {
+        try {
+            if (! Schema::hasTable('user_usages')) {
+                return;
+            }
+
+            SubscriptionService::recordStockScreen($user, $symbol);
+        } catch (\Throwable) {
+            // Non-blocking metrics recording
+        }
     }
 
     /**
@@ -246,10 +448,10 @@ class ChatbotContextService
         return array_map(fn ($item) => $item['section'], array_slice($scored, 0, 3));
     }
 
-    private function summarizeUser(User $user): string
+    private function summarizeUser(User $user, array $tierInfo): string
     {
-        $tierName = $user->tier->name ?? 'Miftah';
-        $tierSlug = $user->tier->slug ?? 'free';
+        $tierName = $tierInfo['name'] ?? 'Miftah';
+        $tierSlug = $tierInfo['slug'] ?? 'free';
         $hawlDate = $user->preferences['zakat_hawl_date'] ?? null;
 
         $holdings = Holding::where('user_id', $user->id)
@@ -263,10 +465,39 @@ class ChatbotContextService
 
         return implode("\n", [
             '- User Name: '.($user->name ?: 'Investor'),
-            "- Current Plan: {$tierName} ({$tierSlug})",
+            "- Detected Tier: {$tierName} ({$tierSlug})",
+            '- Tier Features: '.$this->formatFeaturesSummary($tierInfo['features'] ?? []),
             '- Email Verified: '.($user->email_verified_at ? 'Yes' : 'No'),
             '- Zakat Hawl Date Set: '.($hawlDate ?: 'Not configured yet'),
             "- Recorded Holdings ({$holdings->count()}): {$holdingSummary}",
         ]);
+    }
+
+    private function summarizeGuest(array $tierInfo): string
+    {
+        return implode("\n", [
+            "- Detected Tier: {$tierInfo['name']} ({$tierInfo['slug']})",
+            '- Tier Features: General platform & AAOIFI educational FAQs only. Sign in for Miftah (Free: 3 stock screens/month, 3 holdings) or upgrade to Rawdha (Pro) / Noor (Max) for automated Zakat, purification, watchlist, baskets, statements, dividend alerts, drift tracking, and Monthly Spotlight.',
+        ]);
+    }
+
+    private function formatFeaturesSummary(array $features): string
+    {
+        $fmtLimit = fn (string $k) => ($features[$k] ?? 0) === -1 ? 'unlimited' : (string) ($features[$k] ?? 0);
+        $fmtBool = fn (string $k) => ! empty($features[$k]) ? 'yes' : 'no';
+
+        return sprintf(
+            'stock_screens/mo=%s, portfolio=%s, watchlist=%s, baskets=%s, purifications/mo=%s, zakat_calc=%s, statements=%s, dividend_alerts=%s, drift_tracking=%s, monthly_spotlight=%s',
+            $fmtLimit('stock_screens_per_month'),
+            $fmtLimit('portfolio_limit'),
+            $fmtLimit('watchlist_limit'),
+            $fmtLimit('baskets'),
+            $fmtLimit('purifications_per_month'),
+            $fmtBool('zakat_calc'),
+            $fmtBool('statements'),
+            $fmtBool('dividend_alerts'),
+            $fmtBool('drift_tracking'),
+            $fmtBool('monthly_spotlight')
+        );
     }
 }

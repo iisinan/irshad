@@ -5,8 +5,11 @@ namespace Tests\Feature;
 use App\Models\AaoifiScreening;
 use App\Models\ChatConversation;
 use App\Models\Company;
+use App\Models\Plan;
+use App\Models\Subscription;
 use App\Models\Suggestion;
 use App\Models\User;
+use App\Models\UserUsage;
 use App\Notifications\AdminSuggestionNotification;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Config;
@@ -131,67 +134,21 @@ class ChatAssistantTest extends TestCase
             $table->timestamps();
         });
 
+        Schema::create('user_usages', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->string('feature');
+            $table->integer('used_count')->default(0);
+            $table->timestamp('reset_at')->nullable();
+            $table->timestamps();
+            $table->unique(['user_id', 'feature']);
+        });
+
         $migration = require database_path('migrations/2026_11_15_100000_create_chat_tables.php');
         $migration->up();
     }
 
-    public function test_authenticated_user_receives_grounded_kb_reply_and_persists_history(): void
-    {
-        Config::set('services.gemini.key', 'test-gemini-key');
-
-        Http::fake([
-            'generativelanguage.googleapis.com/*' => Http::response([
-                'candidates' => [
-                    [
-                        'content' => [
-                            'parts' => [
-                                [
-                                    'text' => json_encode([
-                                        'reply' => 'Under AAOIFI rules, the debt ratio must stay under 30% alongside business activity filters.',
-                                        'suggested_followups' => ['How do I purify dividends?'],
-                                        'needs_human_support' => false,
-                                    ]),
-                                ],
-                            ],
-                        ],
-                    ],
-                ],
-            ], 200),
-        ]);
-
-        $user = User::factory()->create();
-        Sanctum::actingAs($user);
-
-        $response = $this->postJson('/api/v1/chat/message', [
-            'message' => 'Why does AAOIFI check both business activity and financial ratios?',
-        ]);
-
-        $response->assertStatus(201)
-            ->assertJsonPath('user_message.role', 'user')
-            ->assertJsonPath('assistant_message.role', 'assistant')
-            ->assertJsonPath('assistant_message.metadata.cited_symbols', [])
-            ->assertJsonPath('assistant_message.metadata.provider', 'gemini');
-
-        Http::assertSent(function ($request) {
-            $systemText = $request['systemInstruction']['parts'][0]['text'] ?? '';
-
-            return str_contains($systemText, 'AAOIFI Shariah Screening Methodology')
-                && str_contains($systemText, 'STRICT COMPLIANCE POLICY');
-        });
-
-        $conversationId = $response->json('conversation.id');
-
-        $second = $this->postJson('/api/v1/chat/message', [
-            'conversation_id' => $conversationId,
-            'message' => 'What about Zakat when my Hawl arrives?',
-        ]);
-
-        $second->assertStatus(201);
-        $this->assertDatabaseCount('chat_conversations', 1);
-        $this->assertDatabaseCount('chat_messages', 4);
-    }
-
-    public function test_stock_compliance_questions_are_declined_without_calling_llm(): void
+    public function test_authenticated_user_within_tier_gets_grounded_stock_reply_and_persists_history(): void
     {
         Config::set('services.gemini.key', 'test-gemini-key');
 
@@ -215,21 +172,172 @@ class ChatAssistantTest extends TestCase
             'final_status' => 'compliant',
         ]);
 
-        Http::fake();
+        Http::fake([
+            'generativelanguage.googleapis.com/*' => Http::response([
+                'candidates' => [
+                    [
+                        'content' => [
+                            'parts' => [
+                                [
+                                    'text' => json_encode([
+                                        'reply' => 'MTN Nigeria (**MTNN**) is compliant under AAOIFI rules with an 18.25% debt ratio.',
+                                        'cited_symbols' => ['MTNN'],
+                                        'suggested_followups' => ['How do I purify MTNN dividends?'],
+                                        'needs_human_support' => false,
+                                        'upgrade_required' => false,
+                                        'required_tier' => null,
+                                    ]),
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ], 200),
+        ]);
 
-        foreach (['Is MTN halal?', 'Is MTNN halal under AAOIFI?', 'Which NGX stocks are halal?', 'Check MTNN compliance status'] as $query) {
-            $res = $this->postJson('/api/v1/chat/public', ['message' => $query]);
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
 
-            $res->assertStatus(200)
-                ->assertJsonPath('assistant_message.metadata.provider', 'policy')
-                ->assertJsonPath('assistant_message.metadata.cited_symbols', []);
+        $response = $this->postJson('/api/v1/chat/message', [
+            'message' => 'Is MTNN halal?',
+        ]);
 
-            $content = $res->json('assistant_message.content');
-            $this->assertStringContainsString('Market Screener', $content);
-            $this->assertStringNotContainsString('18.25%', $content);
-        }
+        $response->assertStatus(201)
+            ->assertJsonPath('user_message.role', 'user')
+            ->assertJsonPath('assistant_message.role', 'assistant')
+            ->assertJsonPath('assistant_message.metadata.cited_symbols.0', 'MTNN')
+            ->assertJsonPath('assistant_message.metadata.provider', 'gemini')
+            ->assertJsonPath('assistant_message.metadata.upgrade_required', false);
 
-        Http::assertNothingSent();
+        Http::assertSent(function ($request) {
+            $systemText = $request['systemInstruction']['parts'][0]['text'] ?? '';
+
+            return str_contains($systemText, 'MTN Nigeria Communications (MTNN)')
+                && str_contains($systemText, '18.25%')
+                && str_contains($systemText, 'TIER AWARENESS');
+        });
+
+        $conversationId = $response->json('conversation.id');
+
+        $second = $this->postJson('/api/v1/chat/message', [
+            'conversation_id' => $conversationId,
+            'message' => 'What about Zakat when my Hawl arrives?',
+        ]);
+
+        $second->assertStatus(201);
+        $this->assertDatabaseCount('chat_conversations', 1);
+        $this->assertDatabaseCount('chat_messages', 4);
+    }
+
+    public function test_chat_detects_tier_and_prompts_upgrade_only_when_question_is_beyond_tier(): void
+    {
+        Config::set('services.gemini.key', 'test-gemini-key');
+
+        $proPlan = Plan::create([
+            'slug' => 'pro',
+            'name' => 'Rawdha',
+            'features' => [
+                'stock_screens_per_month' => 10,
+                'portfolio_limit' => 7,
+                'watchlist_limit' => 2,
+                'baskets' => 3,
+                'statements' => true,
+                'purifications_per_month' => 2,
+                'zakat_calc' => true,
+                'dividend_alerts' => false,
+                'drift_tracking' => false,
+                'monthly_spotlight' => false,
+            ],
+        ]);
+
+        $maxPlan = Plan::create([
+            'slug' => 'max',
+            'name' => 'Noor',
+            'features' => [
+                'stock_screens_per_month' => -1,
+                'portfolio_limit' => -1,
+                'watchlist_limit' => -1,
+                'baskets' => -1,
+                'statements' => true,
+                'purifications_per_month' => -1,
+                'zakat_calc' => true,
+                'dividend_alerts' => true,
+                'drift_tracking' => true,
+                'monthly_spotlight' => true,
+            ],
+        ]);
+
+        Company::create([
+            'name' => 'Presco Plc',
+            'symbol' => 'PRESCO',
+            'sector' => 'Agriculture',
+            'current_status' => 'compliant',
+        ]);
+
+        Http::fake([
+            'generativelanguage.googleapis.com/*' => Http::response([
+                'candidates' => [
+                    [
+                        'content' => [
+                            'parts' => [
+                                [
+                                    'text' => json_encode([
+                                        'reply' => 'Here is the analysis within your tier.',
+                                        'cited_symbols' => [],
+                                        'suggested_followups' => [],
+                                        'needs_human_support' => false,
+                                        'upgrade_required' => false,
+                                        'required_tier' => null,
+                                    ]),
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ], 200),
+        ]);
+
+        // 1. Free (Miftah) user asking beyond monthly stock limit -> upgrade to Pro
+        $freeUser = User::factory()->create();
+        UserUsage::create([
+            'user_id' => $freeUser->id,
+            'feature' => 'stock_screens_per_month',
+            'used_count' => 3,
+            'reset_at' => now()->addMonth(),
+        ]);
+        Sanctum::actingAs($freeUser);
+
+        $this->postJson('/api/v1/chat/message', ['message' => 'Is PRESCO halal?'])
+            ->assertStatus(201)
+            ->assertJsonPath('assistant_message.metadata.provider', 'tier_gate')
+            ->assertJsonPath('assistant_message.metadata.upgrade_required', true)
+            ->assertJsonPath('assistant_message.metadata.required_tier', 'pro');
+
+        // 2. Pro (Rawdha) user can calculate Zakat (in-tier), but Monthly Spotlight prompts upgrade to Noor (Max)
+        $proUser = User::factory()->create();
+        Subscription::create(['user_id' => $proUser->id, 'plan_id' => $proPlan->id, 'status' => 'active']);
+        Sanctum::actingAs($proUser);
+
+        $this->postJson('/api/v1/chat/message', ['message' => 'Calculate my Zakat'])
+            ->assertStatus(201)
+            ->assertJsonPath('assistant_message.metadata.provider', 'gemini')
+            ->assertJsonPath('assistant_message.metadata.upgrade_required', false);
+
+        $this->postJson('/api/v1/chat/message', ['message' => 'Show me Monthly Spotlight insights'])
+            ->assertStatus(201)
+            ->assertJsonPath('assistant_message.metadata.provider', 'tier_gate')
+            ->assertJsonPath('assistant_message.metadata.upgrade_required', true)
+            ->assertJsonPath('assistant_message.metadata.required_tier', 'max');
+
+        // 3. Max (Noor) user gets Monthly Spotlight answered directly without upgrade gate
+        $maxUser = User::factory()->create();
+        Subscription::create(['user_id' => $maxUser->id, 'plan_id' => $maxPlan->id, 'status' => 'active']);
+        Sanctum::actingAs($maxUser);
+
+        $this->postJson('/api/v1/chat/message', ['message' => 'Show me Monthly Spotlight insights'])
+            ->assertStatus(201)
+            ->assertJsonPath('assistant_message.metadata.provider', 'gemini')
+            ->assertJsonPath('assistant_message.metadata.upgrade_required', false);
     }
 
     public function test_user_cannot_access_or_escalate_another_users_conversation(): void
@@ -332,9 +440,15 @@ class ChatAssistantTest extends TestCase
         Http::assertSent(function ($request) {
             $systemText = $request['systemInstruction']['parts'][0]['text'] ?? '';
 
-            return str_contains($systemText, 'VISITOR CONTEXT (PUBLIC)')
+            return str_contains($systemText, 'VISITOR & TIER CONTEXT (PUBLIC GUEST)')
                 && ! str_contains($systemText, 'Recorded Holdings');
         });
+
+        $this->postJson('/api/v1/chat/public', ['message' => 'Is MTN halal?'])
+            ->assertStatus(200)
+            ->assertJsonPath('assistant_message.metadata.provider', 'tier_gate')
+            ->assertJsonPath('assistant_message.metadata.upgrade_required', true)
+            ->assertJsonPath('assistant_message.metadata.required_tier', 'login');
 
         $this->assertDatabaseCount('chat_conversations', 0);
         $this->assertDatabaseCount('chat_messages', 0);

@@ -44,14 +44,11 @@ class ChatController extends Controller
                     'id' => null,
                     'role' => 'assistant',
                     'content' => $quickResult['reply'],
-                    'metadata' => [
-                        'cited_symbols' => $quickResult['cited_symbols'],
+                    'metadata' => $this->buildMetadata($quickResult, [
                         'matched_companies' => [],
                         'matched_resources' => [],
-                        'suggested_followups' => $quickResult['suggested_followups'],
-                        'needs_human_support' => $quickResult['needs_human_support'],
-                        'provider' => $quickResult['provider'],
-                    ],
+                        'tier' => ['slug' => 'guest', 'name' => 'Guest'],
+                    ]),
                     'created_at' => now()->toISOString(),
                 ],
             ]);
@@ -65,14 +62,7 @@ class ChatController extends Controller
                 'id' => null,
                 'role' => 'assistant',
                 'content' => $aiResult['reply'],
-                'metadata' => [
-                    'cited_symbols' => $aiResult['cited_symbols'],
-                    'matched_companies' => $contextBundle['matched_companies'],
-                    'matched_resources' => $contextBundle['matched_resources'],
-                    'suggested_followups' => $aiResult['suggested_followups'],
-                    'needs_human_support' => $aiResult['needs_human_support'],
-                    'provider' => $aiResult['provider'],
-                ],
+                'metadata' => $this->buildMetadata($aiResult, $contextBundle),
                 'created_at' => now()->toISOString(),
             ],
         ]);
@@ -155,17 +145,10 @@ class ChatController extends Controller
             $aiResult = $quickResult;
         } else {
             $contextBundle = $contextService->build($user, $cleanMessage);
-            $aiResult = $chatbotService->reply($conversation, $cleanMessage, $contextBundle);
+            $aiResult = $chatbotService->reply($conversation, $cleanMessage, $contextBundle, $user);
         }
 
-        $metadata = [
-            'cited_symbols' => $aiResult['cited_symbols'],
-            'matched_companies' => $contextBundle['matched_companies'],
-            'matched_resources' => $contextBundle['matched_resources'],
-            'suggested_followups' => $aiResult['suggested_followups'],
-            'needs_human_support' => $aiResult['needs_human_support'],
-            'provider' => $aiResult['provider'],
-        ];
+        $metadata = $this->buildMetadata($aiResult, $contextBundle);
 
         $assistantMessage = ChatMessage::create([
             'conversation_id' => $conversation->id,
@@ -261,5 +244,29 @@ class ChatController extends Controller
             'status' => 'escalated',
             'suggestion_id' => $suggestion->id,
         ]);
+    }
+
+    /**
+     * Build normalized metadata attached to assistant chat responses.
+     *
+     * @return array<string, mixed>
+     */
+    private function buildMetadata(array $aiResult, array $contextBundle): array
+    {
+        $tier = $contextBundle['tier'] ?? null;
+
+        return [
+            'cited_symbols' => $aiResult['cited_symbols'] ?? [],
+            'matched_companies' => $contextBundle['matched_companies'] ?? [],
+            'matched_resources' => $contextBundle['matched_resources'] ?? [],
+            'suggested_followups' => $aiResult['suggested_followups'] ?? [],
+            'needs_human_support' => (bool) ($aiResult['needs_human_support'] ?? false),
+            'upgrade_required' => (bool) ($aiResult['upgrade_required'] ?? false),
+            'required_tier' => $aiResult['required_tier'] ?? null,
+            'upgrade_feature' => $aiResult['upgrade_feature'] ?? null,
+            'tier_slug' => $tier['slug'] ?? null,
+            'tier_name' => $tier['name'] ?? null,
+            'provider' => $aiResult['provider'] ?? 'unknown',
+        ];
     }
 }

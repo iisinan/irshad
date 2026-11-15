@@ -30,9 +30,9 @@ import { toastSuccess, toastError } from '../utils/toast';
 
 const STARTER_PROMPTS = [
   'How does AAOIFI screening work?',
+  'Is MTNN Halal?',
   'How do Zakat & Hawl work?',
   'How does dividend purification work?',
-  'What plans & pricing does Irshad offer?',
   'I need billing or account help',
 ];
 
@@ -301,7 +301,7 @@ export default function ChatWidget() {
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>
                   {view === 'history'
                     ? 'Select a thread to continue'
-                    : 'AAOIFI guide, Zakat & support'}
+                    : 'AAOIFI, stocks, Zakat & support'}
                 </div>
               </div>
             </div>
@@ -436,7 +436,7 @@ export default function ChatWidget() {
                         color: 'var(--text-dark)',
                       }}
                     >
-                      As-salamu alaykum! Ask me how AAOIFI screening works, Hawl & Zakat tracking, dividend purification, or your Irshad account & billing.
+                      As-salamu alaykum! Ask me about any NGX stock's Shariah compliance, AAOIFI ratios, Hawl & Zakat, dividend purification, or your account.
                     </div>
                     <div style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-muted)', paddingLeft: '2px' }}>
                       QUICK QUESTIONS
@@ -471,6 +471,8 @@ export default function ChatWidget() {
                     const citedSymbols = meta.cited_symbols || [];
                     const resources = meta.matched_resources || [];
                     const followups = meta.suggested_followups || [];
+                    const upgradeRequired = Boolean(meta.upgrade_required);
+                    const requiredTier = meta.required_tier || null;
 
                     return (
                       <div
@@ -504,6 +506,40 @@ export default function ChatWidget() {
                             </div>
                           )}
                         </div>
+
+                        {!isUser && upgradeRequired && (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', maxWidth: '88%' }}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigate(requiredTier === 'login' && !isAuthenticated ? '/login' : '/pricing');
+                                setOpen(false);
+                              }}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                                padding: '6px 12px',
+                                borderRadius: '999px',
+                                border: 'none',
+                                background: 'var(--primary)',
+                                color: '#fff',
+                                fontSize: '0.75rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                              }}
+                            >
+                              <span>
+                                {requiredTier === 'login' && !isAuthenticated
+                                  ? 'Sign In / View Plans'
+                                  : requiredTier === 'max'
+                                    ? 'Upgrade to Noor (Max)'
+                                    : 'Upgrade Plan'}
+                              </span>
+                              <ArrowUpRight size={13} />
+                            </button>
+                          </div>
+                        )}
 
                         {!isUser && citedSymbols.length > 0 && (
                           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', maxWidth: '88%' }}>
