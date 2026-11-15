@@ -106,7 +106,8 @@ class _CreateBasketScreenState extends State<CreateBasketScreen> {
             isScrollControlled: true,
             backgroundColor: Colors.transparent,
             builder: (_) => UpgradePaywallBottomSheet(
-              message: data['message']?.toString() ?? 'Upgrade to Rawdha (Pro) or Noor (Max) to create custom baskets.',
+              featureKey: 'baskets',
+              message: data['message']?.toString() ?? 'Custom baskets are unavailable on your current account.',
               requiredTier: data['required_tier']?.toString() ?? 'pro',
             ),
           );

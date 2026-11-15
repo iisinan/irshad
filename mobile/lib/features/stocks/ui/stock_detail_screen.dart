@@ -78,6 +78,8 @@ class StockDetailScreen extends StatefulWidget {
           builder: (_) => UpgradePaywallBottomSheet(
             message: e.message,
             requiredTier: e.requiredTier,
+            featureKey: e.feature,
+            notifyThreshold: false,
           ),
         );
       }
@@ -362,6 +364,8 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
             builder: (_) => UpgradePaywallBottomSheet(
               message: e.message,
               requiredTier: e.requiredTier,
+              featureKey: e.feature,
+              notifyThreshold: false,
             ),
           );
         }
@@ -399,7 +403,8 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
         backgroundColor: Colors.transparent,
         builder: (_) => const UpgradePaywallBottomSheet(
           requiredTier: 'pro',
-          message: 'Watchlist tracking and price alerts require the Rawdha (Pro) or Noor (Max) plan.',
+          featureKey: 'watchlist',
+          message: 'Watchlist tracking is unavailable on your current account.',
         ),
       );
       return;

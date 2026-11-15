@@ -14,7 +14,10 @@ use App\Services\SubscriptionService;
 use Carbon\Carbon;
 use Database\Seeders\PlanSeeder;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Mail\Events\MessageSending;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
@@ -33,6 +36,7 @@ class SubscriptionTransitionsAndQuotasTest extends TestCase
         Config::set('app.frontend_url', 'https://iirshad.com');
 
         Schema::dropIfExists('user_notifications');
+        Schema::dropIfExists('favorites');
         Schema::dropIfExists('payment_transactions');
         Schema::dropIfExists('baskets');
         Schema::dropIfExists('watchlists');
@@ -134,6 +138,8 @@ class SubscriptionTransitionsAndQuotasTest extends TestCase
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('symbol');
+            $table->timestamp('grace_period_ends_at')->nullable();
+            $table->boolean('grace_period_notified')->default(false);
             $table->timestamps();
         });
 
@@ -141,6 +147,14 @@ class SubscriptionTransitionsAndQuotasTest extends TestCase
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('symbol');
+            $table->timestamps();
+        });
+
+        Schema::create('favorites', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->string('type');
+            $table->unsignedBigInteger('reference_id');
             $table->timestamps();
         });
 
@@ -409,5 +423,72 @@ class SubscriptionTransitionsAndQuotasTest extends TestCase
         $sub = Subscription::where('user_id', $user->id)->firstOrFail();
         $this->assertSame('canceled', $sub->status);
         $this->assertTrue($sub->ends_at->isFuture());
+    }
+
+    public function test_threshold_exhaustion_automatically_sends_deduplicated_upgrade_email(): void
+    {
+        Cache::flush();
+
+        $sentMessages = [];
+        Event::listen(MessageSending::class, function (MessageSending $event) use (&$sentMessages) {
+            $sentMessages[] = [
+                'to' => array_map(fn ($address) => $address->getAddress(), $event->message->getTo()),
+                'subject' => $event->message->getSubject(),
+                'body' => $event->message->getTextBody() ?: (string) $event->message->getHtmlBody(),
+            ];
+            return false; // Prevent real SMTP delivery in unit test
+        });
+
+        $user = User::create([
+            'name' => 'Miftah Threshold User',
+            'email' => 'miftah-limit@example.com',
+            'password' => bcrypt('secret'),
+        ]);
+        $user->markEmailAsVerified();
+
+        foreach (['MTNN', 'DANGCEM', 'ZENITHBANK', 'PRESCO'] as $symbol) {
+            $company = Company::create(['symbol' => $symbol, 'name' => $symbol . ' Plc', 'is_active' => true]);
+            \App\Models\StockStatus::create(['company_id' => $company->id, 'status' => 'halal', 'verified_by_scholar' => true]);
+            \App\Models\AaoifiScreening::create(['company_id' => $company->id, 'final_status' => 'halal']);
+        }
+
+        Sanctum::actingAs($user);
+
+        // First 3 unique stocks succeed and send no upgrade email
+        $this->getJson('/api/v1/stocks/MTNN/aaoifi-screening')->assertOk();
+        $this->getJson('/api/v1/stocks/DANGCEM/aaoifi-screening')->assertOk();
+        $this->getJson('/api/v1/stocks/ZENITHBANK/aaoifi-screening')->assertOk();
+        $this->assertCount(0, $sentMessages);
+
+        // 4th stock exhausts Miftah 3/3 threshold -> 403 + automatic email
+        $this->getJson('/api/v1/stocks/PRESCO/aaoifi-screening')
+            ->assertStatus(403)
+            ->assertJsonPath('upgrade_required', true)
+            ->assertJsonPath('feature', 'stock_screens_per_month');
+
+        $this->assertCount(1, $sentMessages);
+        $this->assertContains('miftah-limit@example.com', $sentMessages[0]['to']);
+        $this->assertStringContainsString('https://iirshad.com/pricing', $sentMessages[0]['body']);
+
+        // Repeating the 4th attempt same day is deduplicated
+        $this->getJson('/api/v1/stocks/PRESCO/aaoifi-screening')->assertStatus(403);
+        $this->assertCount(1, $sentMessages);
+
+        // Direct telemetry ping for another feature sends 1 email and deduplicates repeat
+        $this->postJson('/api/v1/subscription/threshold-hit', [
+            'feature' => 'zakat_calc',
+            'required_tier' => 'pro',
+            'reason' => 'Zakat calculator limit reached',
+        ])->assertOk()->assertJsonPath('dispatched', true);
+
+        $this->assertCount(2, $sentMessages);
+        $this->assertContains('miftah-limit@example.com', $sentMessages[1]['to']);
+
+        $this->postJson('/api/v1/subscription/threshold-hit', [
+            'feature' => 'zakat_calc',
+            'required_tier' => 'pro',
+        ])->assertOk()->assertJsonPath('dispatched', false);
+
+        $this->assertCount(2, $sentMessages);
     }
 }

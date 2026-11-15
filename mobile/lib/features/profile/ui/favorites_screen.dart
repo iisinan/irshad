@@ -219,13 +219,13 @@ class _FavoritesScreenState extends State<FavoritesScreen> with WidgetsBindingOb
                   Icon(Icons.lock_outline_rounded, size: 42, color: context.primary),
                   const SizedBox(height: 16),
                   Text(
-                    'Watchlist & Alerts Locked',
+                    'Watchlist & Alerts Unavailable',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Available on Rawdha (Pro) for up to 2 watchlist alerts, or Noor (Max) for unlimited real-time compliance & price alerts.',
+                    'Watchlist tracking and alerts are not enabled on your current account.',
                     style: TextStyle(fontSize: 13, color: context.textMuted, height: 1.5),
                     textAlign: TextAlign.center,
                   ),
@@ -237,8 +237,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> with WidgetsBindingOb
                         isScrollControlled: true,
                         backgroundColor: Colors.transparent,
                         builder: (ctx) => const UpgradePaywallBottomSheet(
+                          featureKey: 'watchlist_limit',
                           requiredTier: 'pro',
-                          message: 'Watchlist tracking and price alerts are included with Rawdha (Pro) and Noor (Max) memberships.',
+                          message: 'Watchlist tracking and price alerts are currently unavailable on your account.',
                         ),
                       );
                     },
@@ -248,7 +249,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> with WidgetsBindingOb
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     ),
-                    child: const Text('Membership Info', style: TextStyle(fontWeight: FontWeight.w800)),
+                    child: const Text('Account Info', style: TextStyle(fontWeight: FontWeight.w800)),
                   ),
                 ],
               ),

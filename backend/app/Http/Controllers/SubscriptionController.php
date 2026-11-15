@@ -335,4 +335,20 @@ class SubscriptionController extends Controller
 
         return response()->json(['message' => 'Magic link sent successfully. Check your email!']);
     }
+
+    public function recordThresholdHit(Request $request)
+    {
+        $validated = $request->validate([
+            'feature'       => 'nullable|string|max:80',
+            'required_tier' => 'nullable|in:pro,max',
+        ]);
+
+        $sent = \App\Services\SubscriptionService::sendThresholdUpgradeEmail(
+            $request->user(),
+            $validated['feature'] ?? 'general',
+            $validated['required_tier'] ?? null
+        );
+
+        return response()->json(['dispatched' => $sent]);
+    }
 }

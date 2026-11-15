@@ -319,6 +319,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/subscription/status', [\App\Http\Controllers\SubscriptionController::class, 'status']);
             Route::get('/subscription/transactions', [\App\Http\Controllers\SubscriptionController::class, 'transactions']);
             Route::post('/subscription/magic-link', [\App\Http\Controllers\SubscriptionController::class, 'sendMagicLink']);
+            Route::post('/subscription/threshold-hit', [\App\Http\Controllers\SubscriptionController::class, 'recordThresholdHit'])->withoutMiddleware(['verified']);
 
             // History
             Route::get('/history', [HistoryController::class, 'index']);

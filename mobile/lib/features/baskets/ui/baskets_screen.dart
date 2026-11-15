@@ -232,13 +232,13 @@ class _BasketsScreenState extends State<BasketsScreen> {
                   Icon(Icons.lock_outline_rounded, size: 42, color: context.primary),
                   const SizedBox(height: 16),
                   Text(
-                    'Thematic Baskets Locked',
+                    'Thematic Baskets Unavailable',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Available on Rawdha (Pro) for 3 curated + 3 custom baskets, or Noor (Max) for full thematic basket access and unlimited custom baskets.',
+                    'Thematic and custom baskets are not enabled on your current account.',
                     style: TextStyle(fontSize: 13, color: context.textMuted, height: 1.5),
                     textAlign: TextAlign.center,
                   ),
@@ -250,8 +250,9 @@ class _BasketsScreenState extends State<BasketsScreen> {
                         isScrollControlled: true,
                         backgroundColor: Colors.transparent,
                         builder: (ctx) => const UpgradePaywallBottomSheet(
+                          featureKey: 'baskets',
                           requiredTier: 'pro',
-                          message: 'Rawdha (Pro) and Noor (Max) memberships include thematic and custom investing baskets.',
+                          message: 'Thematic and custom investing baskets are currently unavailable on your account.',
                         ),
                       );
                     },
@@ -261,7 +262,7 @@ class _BasketsScreenState extends State<BasketsScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     ),
-                    child: const Text('Membership Info', style: TextStyle(fontWeight: FontWeight.w800)),
+                    child: const Text('Account Info', style: TextStyle(fontWeight: FontWeight.w800)),
                   ),
                 ],
               ),
@@ -332,14 +333,14 @@ class _BasketsScreenState extends State<BasketsScreen> {
                               basket: basket,
                               onTap: () async {
                                 if (basket.isLocked) {
-                                  final tier = basket.requiredTier == 'max' ? 'Noor (Max)' : 'Rawdha (Pro)';
                                   showModalBottomSheet(
                                     context: context,
                                     isScrollControlled: true,
                                     backgroundColor: Colors.transparent,
                                     builder: (ctx) => UpgradePaywallBottomSheet(
                                       requiredTier: basket.requiredTier ?? 'pro',
-                                      message: '"${basket.name}" requires an active $tier membership tier.',
+                                      featureKey: 'baskets',
+                                      message: '"${basket.name}" is unavailable on your current account.',
                                     ),
                                   );
                                   return;

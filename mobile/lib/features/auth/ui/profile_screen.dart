@@ -8,7 +8,6 @@ import '../../portfolio/ui/zakat_calculator_screen.dart';
 import '../../portfolio/providers/portfolio_provider.dart';
 
 import 'package:irshad_mobile/core/theme/app_theme.dart';
-import 'package:irshad_mobile/core/widgets/upgrade_paywall_bottom_sheet.dart';
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -125,7 +124,7 @@ Color get cardBg => context.bgAlt;
                       _buildInfoCard(),
 
                       const SizedBox(height: 32),
-                      _buildSectionHeader('Plan & Usage Limits'),
+                      _buildSectionHeader('Account Usage'),
                       const SizedBox(height: 12),
                       _buildPlanUsageCard(user),
                       
@@ -399,28 +398,23 @@ Color get cardBg => context.bgAlt;
     ];
 
     String buildSubscriptionSubtitle() {
-      if (activeSub == null) return 'Free Community Plan';
+      if (activeSub == null) return 'Standard Access';
       final rawCycle = activeSub['billing_cycle']?.toString().trim();
       final statusRaw = (activeSub['status'] ?? 'active').toString().trim().toLowerCase();
-      final autoRenew = activeSub['auto_renew'] == true;
       final statusLabel = statusRaw == 'past_due'
-          ? 'PAST DUE'
+          ? 'Attention Needed'
           : statusRaw == 'canceled'
-              ? 'CANCELED'
-              : (autoRenew ? 'ACTIVE • AUTO-RENEW' : 'ACTIVE • AUTO-RENEW OFF');
+              ? 'Ending Soon'
+              : 'Active';
       final parts = <String>[
-        if (rawCycle != null && rawCycle.isNotEmpty) '${rawCycle.toUpperCase()} BILLING',
+        if (rawCycle != null && rawCycle.isNotEmpty) '${rawCycle[0].toUpperCase()}${rawCycle.substring(1).toLowerCase()}',
         statusLabel,
       ];
       final dateRaw = (activeSub['ends_at'] ?? activeSub['renews_at'])?.toString();
       if (dateRaw != null && dateRaw.isNotEmpty) {
         try {
           final parsed = DateTime.parse(dateRaw).toLocal();
-          final prefix = statusRaw == 'past_due'
-              ? 'Grace ends'
-              : (statusRaw == 'canceled' || !autoRenew || activeSub['ends_at'] != null)
-                  ? 'Ends'
-                  : 'Renews';
+          final prefix = statusRaw == 'canceled' || activeSub['ends_at'] != null ? 'Until' : 'Through';
           parts.add('$prefix ${DateFormat('MMM d, yyyy').format(parsed)}');
         } catch (_) {}
       }
@@ -461,28 +455,6 @@ Color get cardBg => context.bgAlt;
                   ],
                 ),
               ),
-              if (slug != 'max')
-                TextButton(
-                  onPressed: () {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      builder: (ctx) => UpgradePaywallBottomSheet(
-                        requiredTier: slug == 'pro' ? 'max' : 'pro',
-                        message: slug == 'pro'
-                            ? 'Noor (Max) includes unlimited screens, holdings, Dividend Alerts, 90-Day Drift Tracking, and Monthly Spotlight.'
-                            : 'Rawdha (Pro) and Noor (Max) memberships unlock higher quarterly/unlimited quotas, Zakat, and Purification.',
-                      ),
-                    );
-                  },
-                  style: TextButton.styleFrom(
-                    backgroundColor: context.primary.withValues(alpha: 0.1),
-                    foregroundColor: context.primary,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  ),
-                  child: const Text('Plan Info', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12)),
-                ),
             ],
           ),
           const SizedBox(height: 16),

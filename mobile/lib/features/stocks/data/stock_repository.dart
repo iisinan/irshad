@@ -36,7 +36,7 @@ class StockRepository {
         data is Map &&
         (data['error'] == 'Upgrade Required' || data['upgrade_required'] == true)) {
       return UpgradeRequiredException(
-        message: data['message']?.toString() ?? 'You have reached your plan screening limit. Please upgrade to continue.',
+        message: data['message']?.toString() ?? 'You have reached your account screening limit.',
         requiredTier: data['required_tier']?.toString(),
         feature: data['feature']?.toString(),
       );

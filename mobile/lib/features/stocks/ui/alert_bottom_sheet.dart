@@ -22,7 +22,8 @@ class AlertBottomSheet extends StatefulWidget {
         backgroundColor: Colors.transparent,
         builder: (_) => const UpgradePaywallBottomSheet(
           requiredTier: 'pro',
-          message: 'Price and compliance alerts require the Rawdha (Pro) or Noor (Max) plan.',
+          featureKey: 'price_alerts',
+          message: 'Alerts are unavailable on your current account.',
         ),
       );
       return;

@@ -18,6 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(prepend: [
             'throttle:1000,1',
         ]);
+        $middleware->api(append: [
+            \App\Http\Middleware\SendThresholdUpgradeEmail::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

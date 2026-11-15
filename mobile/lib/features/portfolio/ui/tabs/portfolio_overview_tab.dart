@@ -1494,7 +1494,6 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> with Automa
     } else if (tierSlug == 'pro') {
       limit = 7;
     }
-    final String planName = tierSlug == 'max' ? 'Noor' : (tierSlug == 'pro' ? 'Rawdha' : 'Miftah');
     
     if (limit != -1 && currentHoldings >= limit) {
       showModalBottomSheet(
@@ -1503,7 +1502,8 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> with Automa
         backgroundColor: Colors.transparent,
         builder: (context) => UpgradePaywallBottomSheet(
           requiredTier: tierSlug == 'pro' ? 'max' : 'pro',
-          message: 'You have reached your portfolio limit of $limit stocks on the $planName plan. Upgrade to track more stocks.',
+          featureKey: 'portfolio_limit',
+          message: 'You have reached your portfolio limit of $limit stocks.',
         ),
       );
       return;

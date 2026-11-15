@@ -31,7 +31,7 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
     'Is MTNN Halal?',
     'How do Zakat & Hawl work?',
     'How does dividend purification work?',
-    'I need billing or account help',
+    'I need account help',
   ];
 
   bool _showingHistory = false;
@@ -598,10 +598,10 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
               if (!isUser && upgradeRequired) ...[
                 const SizedBox(height: 6),
                 ActionChip(
-                  avatar: const Icon(Icons.workspace_premium_rounded, size: 15, color: Colors.white),
-                  label: Text(
-                    requiredTier == 'max' ? 'Noor (Max) Feature' : 'Membership Info',
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white),
+                  avatar: const Icon(Icons.info_outline_rounded, size: 15, color: Colors.white),
+                  label: const Text(
+                    'Account Limit Reached',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white),
                   ),
                   backgroundColor: context.primary,
                   side: BorderSide.none,
@@ -612,7 +612,7 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
                       isScrollControlled: true,
                       backgroundColor: Colors.transparent,
                       builder: (_) => UpgradePaywallBottomSheet(
-                        message: msg['content']?.toString() ?? 'This feature requires an active membership tier.',
+                        message: msg['content']?.toString() ?? 'This feature has reached its limit on your current account.',
                         requiredTier: requiredTier == 'max' ? 'max' : 'pro',
                       ),
                     );

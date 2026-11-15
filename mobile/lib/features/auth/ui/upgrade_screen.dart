@@ -38,7 +38,7 @@ class UpgradeScreen extends StatelessWidget {
                     Icon(Icons.auto_awesome_rounded, size: 14, color: context.primary),
                     const SizedBox(width: 6),
                     Text(
-                      'IRSHAD PLANS • MIFTAH, RAWDHA & NOOR',
+                      'IRSHAD OVERVIEW',
                       style: TextStyle(
                         color: context.primary,
                         fontWeight: FontWeight.w700,
@@ -64,7 +64,7 @@ class UpgradeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                'Start free on Miftah or unlock Rawdha (Pro) and Noor (Max) for automated AAOIFI screening, Zakat, purification, and 90-day drift tracking.',
+                'Explore AAOIFI Shariah screening, portfolio tracking, Zakat tools, and market insights on NGX equities.',
                 style: TextStyle(
                   color: context.textMuted,
                   fontSize: 15,
@@ -77,22 +77,22 @@ class UpgradeScreen extends StatelessWidget {
               _buildFeature(
                 context,
                 Icons.verified_rounded,
-                'Miftah (Free) — Essential Access',
-                '3 AAOIFI stock screens/month, 3 portfolio holdings, News & Resources',
+                'Miftah — Essential Access',
+                'AAOIFI stock screening, portfolio tracking, News & Resources',
                 const Color(0xFF64748B),
               ),
               _buildFeature(
                 context,
                 Icons.workspace_premium_rounded,
-                'Rawdha (Pro) — Active NGX Investor',
-                '30 screens/quarter, 7 holdings, 2 watchlist alerts, 3 curated + 3 custom baskets, 6 purifications/quarter & Zakat calculator',
+                'Rawdha — Active NGX Investor',
+                'Expanded screening quotas, holdings, watchlist alerts, baskets, purifications & Zakat tools',
                 context.primary,
               ),
               _buildFeature(
                 context,
                 Icons.auto_awesome_rounded,
-                'Noor (Max) — Unlimited Compliance',
-                'Unlimited screening, holdings, watchlist & purification plus Dividend Alerts, 90-day Drift Tracking & Monthly Spotlight',
+                'Noor — Complete Compliance',
+                'Expanded compliance tools including Dividend Insights, 90-day Drift Tracking & Monthly Digest',
                 const Color(0xFFD9A05B),
               ),
 
@@ -114,7 +114,7 @@ class UpgradeScreen extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'Create a free Miftah account to get started, or sign in to access an existing Rawdha or Noor membership. Paid plans cannot be purchased or modified inside this app.',
+                        'Create an account to get started, or sign in with your existing credentials.',
                         style: TextStyle(color: const Color(0xFF166534), fontSize: 13, height: 1.4),
                       ),
                     ),

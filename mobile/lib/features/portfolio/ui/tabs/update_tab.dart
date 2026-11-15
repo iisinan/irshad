@@ -234,9 +234,10 @@ class _UpdateTabState extends State<UpdateTab> {
                   backgroundColor: Colors.transparent,
                   builder: (ctx) => UpgradePaywallBottomSheet(
                     requiredTier: 'max',
+                    featureKey: tab['id'] == 'dividends' ? 'dividend_alerts' : 'drift_tracking',
                     message: tab['id'] == 'dividends'
-                        ? 'Dividend Alerts & purification payout insights are exclusive to the Noor (Max) plan.'
-                        : '90-Day Drift Tracking & compliance status alerts are exclusive to the Noor (Max) plan.',
+                        ? 'Dividend insights are unavailable on your current account.'
+                        : '90-day drift tracking is unavailable on your current account.',
                   ),
                 );
                 return;

@@ -266,10 +266,10 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                     children: [
                       Icon(Icons.lock_outline_rounded, size: 42, color: context.primary),
                       const SizedBox(height: 16),
-                      Text('Automated Zakat Locked', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark), textAlign: TextAlign.center),
+                      Text('Automated Zakat Unavailable', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark), textAlign: TextAlign.center),
                       const SizedBox(height: 8),
                       Text(
-                        'Available on Rawdha (Pro) and Noor (Max) for automated portfolio Zakat calculations, Hawl tracking, and Zakat statements.',
+                        'Automated portfolio Zakat calculations are not enabled on your current account.',
                         style: TextStyle(fontSize: 13, color: context.textMuted, height: 1.5),
                         textAlign: TextAlign.center,
                       ),
@@ -280,7 +280,11 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                             context: context,
                             isScrollControlled: true,
                             backgroundColor: Colors.transparent,
-                            builder: (ctx) => const UpgradePaywallBottomSheet(message: 'Automated portfolio Zakat calculations are included with Rawdha (Pro) and Noor (Max) memberships.'),
+                            builder: (ctx) => const UpgradePaywallBottomSheet(
+                              featureKey: 'zakat_calc',
+                              requiredTier: 'pro',
+                              message: 'Automated portfolio Zakat calculations are currently unavailable on your account.',
+                            ),
                           );
                         },
                         style: ElevatedButton.styleFrom(
@@ -289,7 +293,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                         ),
-                        child: const Text('Membership Info', style: TextStyle(fontWeight: FontWeight.w800)),
+                        child: const Text('Account Info', style: TextStyle(fontWeight: FontWeight.w800)),
                       ),
                     ],
                   ),

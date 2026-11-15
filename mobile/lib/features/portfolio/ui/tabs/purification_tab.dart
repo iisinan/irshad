@@ -32,10 +32,10 @@ class PurificationTab extends StatelessWidget {
               children: [
                 Icon(Icons.lock_outline_rounded, size: 42, color: context.primary),
                 const SizedBox(height: 16),
-                Text('Automated Purification Locked', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark), textAlign: TextAlign.center),
+                Text('Automated Purification Unavailable', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark), textAlign: TextAlign.center),
                 const SizedBox(height: 8),
                 Text(
-                  'Available on Rawdha (Pro) for 6 automated purification calculations per quarter, or Noor (Max) for unlimited access.',
+                  'Dividend purification calculations are not enabled on your current account.',
                   style: TextStyle(fontSize: 13, color: context.textMuted, height: 1.5),
                   textAlign: TextAlign.center,
                 ),
@@ -46,7 +46,11 @@ class PurificationTab extends StatelessWidget {
                       context: context,
                       isScrollControlled: true,
                       backgroundColor: Colors.transparent,
-                      builder: (ctx) => const UpgradePaywallBottomSheet(message: 'Automated dividend purification calculations are included with Rawdha (Pro) and Noor (Max) memberships.'),
+                      builder: (ctx) => const UpgradePaywallBottomSheet(
+                        featureKey: 'purifications_per_month',
+                        requiredTier: 'pro',
+                        message: 'Dividend purification is currently unavailable on your account.',
+                      ),
                     );
                   },
                   style: ElevatedButton.styleFrom(
@@ -55,7 +59,7 @@ class PurificationTab extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   ),
-                  child: const Text('Membership Info', style: TextStyle(fontWeight: FontWeight.w800)),
+                  child: const Text('Account Info', style: TextStyle(fontWeight: FontWeight.w800)),
                 ),
               ],
             ),

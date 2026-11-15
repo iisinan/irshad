@@ -185,7 +185,7 @@ class _UpdatesDigestTabState extends State<UpdatesDigestTab> {
                         icon: Icon(Icons.keyboard_arrow_down, color: context.textMuted),
                         style: TextStyle(fontWeight: FontWeight.w700, color: context.primary, fontSize: 14),
                         items: ['Weekly', 'Monthly'].map((String value) {
-                          final label = (value == 'Monthly' && !canMonthly) ? 'Monthly (Noor)' : value;
+                          final label = (value == 'Monthly' && !canMonthly) ? 'Monthly' : value;
                           return DropdownMenuItem<String>(
                             value: value,
                             child: Text(label),
@@ -200,7 +200,8 @@ class _UpdatesDigestTabState extends State<UpdatesDigestTab> {
                               backgroundColor: Colors.transparent,
                               builder: (ctx) => const UpgradePaywallBottomSheet(
                                 requiredTier: 'max',
-                                message: 'Monthly Spotlight digest is exclusive to the Noor (Max) plan.',
+                                featureKey: 'monthly_digest',
+                                message: 'Monthly digest view is unavailable on your current account.',
                               ),
                             );
                             return;

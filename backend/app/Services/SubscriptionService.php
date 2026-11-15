@@ -9,6 +9,9 @@ use App\Models\UserUsage;
 use App\Models\Watchlist;
 use Carbon\Carbon;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class SubscriptionService
 {
@@ -136,15 +139,95 @@ class SubscriptionService
             ? "You have reached your {$periodLabel} limit of {$limit} stock screenings. Please upgrade your plan."
             : "You have reached your limit of {$limit} stock screenings {$periodLabel}. Please upgrade your plan.";
 
+        $requiredTier = ($user->tier->slug ?? 'free') === 'free' ? 'pro' : 'max';
+        self::sendThresholdUpgradeEmail($user, 'stock_screens_per_month', $requiredTier, $message);
+
         return [
             'error' => 'Upgrade Required',
             'upgrade_required' => true,
             'feature' => 'stock_screens_per_month',
             'limit' => $limit,
             'period' => $period,
-            'required_tier' => ($user->tier->slug ?? 'free') === 'free' ? 'pro' : 'max',
+            'required_tier' => $requiredTier,
             'message' => $message,
         ];
+    }
+
+    /**
+     * Automatically email a user when they exhaust a tier quota or attempt a locked feature.
+     * Deduplicated per user/feature per 24h so repeated taps do not spam their inbox.
+     */
+    public static function sendThresholdUpgradeEmail(
+        User $user,
+        string $featureKey = 'general',
+        ?string $requiredTier = null,
+        ?string $reason = null
+    ): bool {
+        if (empty($user->email)) {
+            return false;
+        }
+
+        $currentSlug = $user->tier->slug ?? 'free';
+        if ($currentSlug === 'max') {
+            return false;
+        }
+
+        $normalizedFeature = preg_replace('/[^a-z0-9_:-]/i', '_', strtolower(trim($featureKey))) ?: 'general';
+        $dedupKey = "threshold_upgrade_email:{$user->id}:{$normalizedFeature}:" . now()->toDateString();
+
+        try {
+            if (!Cache::add($dedupKey, true, now()->addHours(24))) {
+                return false;
+            }
+        } catch (\Throwable) {
+            // Proceed even if cache store fails temporarily
+        }
+
+        $targetTier = $requiredTier ?: ($currentSlug === 'free' ? 'pro' : 'max');
+        $currentPlanName = $user->tier->name ?? ($currentSlug === 'pro' ? 'Rawdha' : 'Miftah');
+        $targetPlanName = $targetTier === 'max' ? 'Noor (Max)' : 'Rawdha (Pro)';
+
+        $featureLabels = [
+            'stock_screens_per_month' => 'stock screenings',
+            'portfolio_limit'         => 'portfolio holdings',
+            'watchlist_limit'         => 'watchlist & price alerts',
+            'baskets'                 => 'thematic & custom baskets',
+            'purifications_per_month' => 'dividend purification runs',
+            'zakat_calc'              => 'automated Zakat calculation',
+            'statements'              => 'broker statements & history',
+            'dividend_alerts'         => 'dividend alerts',
+            'drift_tracking'          => '90-day compliance drift tracking',
+            'monthly_spotlight'       => 'Monthly Spotlight insights',
+        ];
+        $featureLabel = $featureLabels[$normalizedFeature] ?? 'account features';
+
+        $pricingUrl = rtrim((string) config('app.frontend_url', 'https://iirshad.com'), '/')
+            . '/pricing?plan=' . urlencode($targetTier);
+
+        $tierBenefits = $targetTier === 'max'
+            ? 'unlimited stock screenings, unlimited holdings & watchlist alerts, full curated + unlimited custom baskets, unlimited purification, Dividend Alerts, 90-day Drift Tracking, and Monthly Spotlight.'
+            : '30 quarterly stock screenings, 7 holdings, 2 watchlist alerts, 3 curated + 3 custom baskets, 6 quarterly purifications, Zakat calculation, and broker statements.';
+
+        $reasonLine = $reason
+            ? trim(preg_replace('/\s*Please upgrade.*$/i', '', $reason))
+            : "You reached your {$currentPlanName} limit for {$featureLabel}.";
+
+        $body = "Assalamu Alaikum {$user->name},\n\n"
+            . "{$reasonLine}\n\n"
+            . "To continue without limits, you can upgrade from {$currentPlanName} to {$targetPlanName} for {$tierBenefits}\n\n"
+            . "View plans & upgrade anytime on our website:\n"
+            . "{$pricingUrl}\n\n"
+            . "Thank you,\nThe Irshad Team";
+
+        try {
+            Mail::raw($body, function ($message) use ($user, $targetPlanName) {
+                $message->to($user->email)->subject("Unlock {$targetPlanName} on Irshad");
+            });
+            return true;
+        } catch (\Throwable $e) {
+            Log::warning("Failed sending threshold upgrade email to user #{$user->id}: {$e->getMessage()}");
+            return false;
+        }
     }
 
     public static function hasScreenedSymbolThisMonth(User $user, string $symbol): bool

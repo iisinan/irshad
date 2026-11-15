@@ -75,9 +75,7 @@ class StockScreenCounterBadge extends StatelessWidget {
       borderRadius: BorderRadius.circular(compact ? 100 : 10),
       onTap: () {
         final String requiredTier = tierSlug == 'pro' ? 'max' : 'pro';
-        final String message = tierSlug == 'pro'
-            ? 'You have used $used of $limit quarterly stock screens on Rawdha (Pro). Noor (Max) members have unlimited stock screenings.'
-            : 'You have used $used of $limit monthly stock screens on Miftah (Free). Rawdha (Pro) includes 30 screens/quarter and Noor (Max) includes unlimited screenings.';
+        final String message = 'You have used $used of $limit stock screenings in the current ${isQuarterly ? 'quarter' : 'month'}.';
         showModalBottomSheet(
           context: context,
           isScrollControlled: true,
@@ -85,6 +83,8 @@ class StockScreenCounterBadge extends StatelessWidget {
           builder: (_) => UpgradePaywallBottomSheet(
             message: message,
             requiredTier: requiredTier,
+            featureKey: 'stock_screens_per_month',
+            notifyThreshold: used >= limit,
           ),
         );
       },

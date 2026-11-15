@@ -92,8 +92,10 @@ class ApiService {
               isScrollControlled: true,
               backgroundColor: Colors.transparent,
               builder: (context) => UpgradePaywallBottomSheet(
-                message: error.response?.data?['message'] ?? 'This feature requires an active Rawdha or Noor membership tier.',
+                message: error.response?.data?['message'] ?? 'This feature has reached its limit on your current account.',
                 requiredTier: error.response?.data?['required_tier']?.toString(),
+                featureKey: error.response?.data?['feature']?.toString(),
+                notifyThreshold: false,
               ),
             );
           }
