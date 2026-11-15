@@ -538,4 +538,36 @@ class ChatAssistantTest extends TestCase
 
         $this->assertStringContainsString('Questionable', $kbRes->json('assistant_message.content'));
     }
+
+    public function test_chatboard_fails_over_to_groq_when_gemini_returns_429(): void
+    {
+        Config::set('services.gemini.key', 'exhausted-gemini-key');
+        Config::set('services.groq.key', 'test-groq-key');
+        Config::set('services.groq.model', 'llama-3.1-8b-instant');
+
+        Http::fake([
+            'generativelanguage.googleapis.com/*' => Http::response(['error' => ['code' => 429, 'message' => 'Quota exceeded']], 429),
+            'api.groq.com/*' => Http::response([
+                'choices' => [
+                    [
+                        'message' => [
+                            'content' => json_encode([
+                                'reply' => 'Answered smoothly via Groq backup while Gemini quota recovers.',
+                                'cited_symbols' => [],
+                                'suggested_followups' => ['What is Zakat purification?'],
+                                'needs_human_support' => false,
+                            ]),
+                        ],
+                    ],
+                ],
+            ], 200),
+        ]);
+
+        $res = $this->postJson('/api/v1/chat/public', [
+            'message' => 'Explain Halal investing on NGX',
+        ])->assertStatus(200)
+            ->assertJsonPath('assistant_message.metadata.provider', 'groq');
+
+        $this->assertStringContainsString('Groq backup', $res->json('assistant_message.content'));
+    }
 }

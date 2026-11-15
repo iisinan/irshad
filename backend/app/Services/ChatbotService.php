@@ -572,8 +572,9 @@ PROMPT;
 
     private function askGroq(string $systemInstruction, array $history, string $userMessage): ?array
     {
-        $apiKey = trim((string) env('GROQ_API_KEY', ''));
-        if ($apiKey === '') {
+        $rawKeys = (string) config('services.groq.key', env('GROQ_API_KEY', ''));
+        $apiKeys = array_values(array_filter(array_map('trim', explode(',', $rawKeys))));
+        if (empty($apiKeys)) {
             return null;
         }
 
@@ -588,24 +589,37 @@ PROMPT;
         }
         $messages[] = ['role' => 'user', 'content' => $userMessage];
 
-        try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer '.$apiKey,
-                'Content-Type' => 'application/json',
-            ])->timeout(8)->post('https://api.groq.com/openai/v1/chat/completions', [
-                'model' => env('GROQ_MODEL', 'llama-3.1-8b-instant'),
-                'messages' => $messages,
-                'temperature' => 0.25,
-                'max_tokens' => 480,
-            ]);
+        $model = (string) config('services.groq.model', env('GROQ_MODEL', 'llama-3.1-8b-instant'));
 
-            if ($response->successful()) {
-                $content = $response->json('choices.0.message.content', '');
+        foreach ($apiKeys as $idx => $apiKey) {
+            try {
+                $response = Http::withHeaders([
+                    'Authorization' => 'Bearer '.$apiKey,
+                    'Content-Type' => 'application/json',
+                ])->timeout(8)->post('https://api.groq.com/openai/v1/chat/completions', [
+                    'model' => $model,
+                    'messages' => $messages,
+                    'temperature' => 0.25,
+                    'max_tokens' => 480,
+                ]);
 
-                return $this->parseModelPayload($content);
+                if ($response->successful()) {
+                    $content = $response->json('choices.0.message.content', '');
+
+                    return $this->parseModelPayload($content);
+                }
+
+                if ($response->status() === 429) {
+                    Log::warning('ChatbotService Groq key hit 429; trying next key.', ['index' => $idx]);
+                    continue;
+                }
+
+                Log::warning('ChatbotService Groq API error', ['status' => $response->status()]);
+                break;
+            } catch (\Throwable $e) {
+                Log::warning('ChatbotService Groq exception: '.$e->getMessage());
+                break;
             }
-        } catch (\Throwable $e) {
-            Log::warning('ChatbotService Groq exception: '.$e->getMessage());
         }
 
         return null;
@@ -613,7 +627,7 @@ PROMPT;
 
     private function askPerplexity(string $systemInstruction, array $history, string $userMessage): ?array
     {
-        $apiKey = trim((string) env('PERPLEXITY_API_KEY', ''));
+        $apiKey = trim((string) config('services.perplexity.key', env('PERPLEXITY_API_KEY', '')));
         if ($apiKey === '') {
             return null;
         }
@@ -634,7 +648,7 @@ PROMPT;
                 'Authorization' => 'Bearer '.$apiKey,
                 'Content-Type' => 'application/json',
             ])->timeout(8)->post('https://api.perplexity.ai/chat/completions', [
-                'model' => env('PERPLEXITY_MODEL', 'sonar-pro'),
+                'model' => (string) config('services.perplexity.model', env('PERPLEXITY_MODEL', 'sonar-pro')),
                 'messages' => $messages,
                 'temperature' => 0.2,
             ]);
