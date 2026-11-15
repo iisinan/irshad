@@ -543,7 +543,7 @@ class ChatAssistantTest extends TestCase
     {
         Config::set('services.gemini.key', 'exhausted-gemini-key');
         Config::set('services.groq.key', 'test-groq-key');
-        Config::set('services.groq.model', 'llama-3.1-8b-instant');
+        Config::set('services.groq.model', 'qwen/qwen3.8-27b');
 
         Http::fake([
             'generativelanguage.googleapis.com/*' => Http::response(['error' => ['code' => 429, 'message' => 'Quota exceeded']], 429),

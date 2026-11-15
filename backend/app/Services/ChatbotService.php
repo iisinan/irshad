@@ -589,36 +589,46 @@ PROMPT;
         }
         $messages[] = ['role' => 'user', 'content' => $userMessage];
 
-        $model = (string) config('services.groq.model', env('GROQ_MODEL', 'llama-3.1-8b-instant'));
+        $configuredModel = trim((string) config('services.groq.model', env('GROQ_MODEL', 'qwen/qwen3.8-27b')));
+        $models = array_values(array_unique(array_filter([
+            $configuredModel,
+            'qwen/qwen3.8-27b',
+            'openai/gpt-oss-20b',
+            'openai/gpt-oss-120b',
+        ])));
 
-        foreach ($apiKeys as $idx => $apiKey) {
-            try {
-                $response = Http::withHeaders([
-                    'Authorization' => 'Bearer '.$apiKey,
-                    'Content-Type' => 'application/json',
-                ])->timeout(8)->post('https://api.groq.com/openai/v1/chat/completions', [
-                    'model' => $model,
-                    'messages' => $messages,
-                    'temperature' => 0.25,
-                    'max_tokens' => 480,
-                ]);
+        foreach ($models as $model) {
+            foreach ($apiKeys as $idx => $apiKey) {
+                try {
+                    $response = Http::withHeaders([
+                        'Authorization' => 'Bearer '.$apiKey,
+                        'Content-Type' => 'application/json',
+                    ])->timeout(8)->post('https://api.groq.com/openai/v1/chat/completions', [
+                        'model' => $model,
+                        'messages' => $messages,
+                        'temperature' => 0.25,
+                        'max_tokens' => 800,
+                    ]);
 
-                if ($response->successful()) {
-                    $content = $response->json('choices.0.message.content', '');
+                    if ($response->successful()) {
+                        $content = $response->json('choices.0.message.content', '');
+                        $parsed = $this->parseModelPayload($content);
+                        if ($parsed !== null) {
+                            return $parsed;
+                        }
+                    }
 
-                    return $this->parseModelPayload($content);
+                    if ($response->status() === 429) {
+                        Log::warning('ChatbotService Groq key hit 429; rotating.', ['index' => $idx, 'model' => $model]);
+                        continue;
+                    }
+
+                    Log::warning('ChatbotService Groq API error', ['model' => $model, 'status' => $response->status()]);
+                    break;
+                } catch (\Throwable $e) {
+                    Log::warning('ChatbotService Groq exception ('.$model.'): '.$e->getMessage());
+                    break;
                 }
-
-                if ($response->status() === 429) {
-                    Log::warning('ChatbotService Groq key hit 429; trying next key.', ['index' => $idx]);
-                    continue;
-                }
-
-                Log::warning('ChatbotService Groq API error', ['status' => $response->status()]);
-                break;
-            } catch (\Throwable $e) {
-                Log::warning('ChatbotService Groq exception: '.$e->getMessage());
-                break;
             }
         }
 
