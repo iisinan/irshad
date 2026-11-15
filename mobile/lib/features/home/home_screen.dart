@@ -4,6 +4,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/providers/app_state_provider.dart';
 import '../stocks/ui/stock_screener_screen.dart';
 import '../baskets/ui/baskets_screen.dart';
+import '../chat/ui/chat_assistant_sheet.dart';
 import 'ui/funds_screen.dart';
 
 import '../../core/api/api_service.dart';
@@ -68,6 +69,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     Row(
                       children: [
+                        GestureDetector(
+                          onTap: () => ChatAssistantSheet.show(context),
+                          child: Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: context.primary.withValues(alpha: 0.12),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(Icons.auto_awesome_rounded, color: context.primary, size: 22),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
                         GestureDetector(
                           onTap: () async {
                             await Navigator.pushNamed(context, '/notifications');
