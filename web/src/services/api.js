@@ -366,6 +366,16 @@ export const fetchAdminUserAnalytics = async (id) => {
   return response.data;
 };
 
+export const fetchAdminFinances = async ({ page = 1, perPage = 20, search = '', status = 'all', type = 'all', gateway = 'all' } = {}) => {
+  const params = new URLSearchParams({ page: String(page), per_page: String(perPage) });
+  if (search) params.set('search', search);
+  if (status && status !== 'all') params.set('status', status);
+  if (type && type !== 'all') params.set('type', type);
+  if (gateway && gateway !== 'all') params.set('gateway', gateway);
+  const response = await api.get(`/admin/finances?${params.toString()}`);
+  return response.data;
+};
+
 // Admin Ticker Management
 export const updateTickerAbout = async (symbol, data) => {
   const response = await api.put(`/admin/stocks/${symbol}`, data);

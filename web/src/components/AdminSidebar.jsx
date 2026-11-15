@@ -7,7 +7,7 @@ import { useTheme } from '../context/ThemeContext';
 import {
   Activity, HeartHandshake, BookOpen,
   LogOut, ChevronLeft, X, Moon, Sun,
-  LayoutDashboard, Shield, Users, ArrowLeft, Inbox, Mail
+  LayoutDashboard, Shield, Users, ArrowLeft, Inbox, Mail, Wallet
 } from 'lucide-react';
 
 export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
@@ -37,6 +37,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
       badge: stats?.pending_reviews > 0 ? stats.pending_reviews : null,
     },
     { label: 'Registered Users',    icon: Users,           to: '/admin/users' },
+    { label: 'Finances',            icon: Wallet,          to: '/admin/finances' },
     { label: 'Resources',           icon: BookOpen,        to: '/admin/resources' },
     { label: 'Financial Data Queue',icon: Inbox,           to: '/admin/financial-queue' },
     { label: 'Zakat Settings',      icon: HeartHandshake,  to: '/admin/zakat-settings' },

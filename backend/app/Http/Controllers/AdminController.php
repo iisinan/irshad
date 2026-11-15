@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AdminAlert;
 use App\Models\Company;
 use App\Models\News;
+use App\Models\PaymentTransaction;
 use App\Models\User;
 use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
@@ -481,5 +482,80 @@ class AdminController extends Controller
         Cache::tags(['stocks'])->flush();
 
         return response()->json(['message' => "Successfully updated $updatedCount tickers."]);
+    }
+
+    /**
+     * Get payment transaction ledger and revenue KPIs for the Admin Finances tab.
+     */
+    public function getFinances(Request $request)
+    {
+        $perPage = min(max((int) $request->input('per_page', 20), 1), 100);
+
+        $query = PaymentTransaction::with([
+            'user:id,name,email',
+            'plan:id,name,slug',
+        ]);
+
+        if ($search = trim((string) $request->input('search', ''))) {
+            $pattern = '%' . strtolower($search) . '%';
+            $query->where(function ($q) use ($pattern) {
+                $q->whereRaw('LOWER(transaction_ref) LIKE ?', [$pattern])
+                    ->orWhereRaw('LOWER(COALESCE(gateway_ref, \'\')) LIKE ?', [$pattern])
+                    ->orWhereHas('user', function ($uq) use ($pattern) {
+                        $uq->whereRaw('LOWER(name) LIKE ?', [$pattern])
+                            ->orWhereRaw('LOWER(email) LIKE ?', [$pattern]);
+                    });
+            });
+        }
+
+        if (($status = $request->input('status')) && $status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        if (($type = $request->input('type')) && $type !== 'all') {
+            $query->where('type', $type);
+        }
+
+        if (($gateway = $request->input('gateway')) && $gateway !== 'all') {
+            $query->where('gateway', $gateway);
+        }
+
+        $transactions = $query
+            ->orderByRaw('COALESCE(paid_at, created_at) DESC')
+            ->orderByDesc('id')
+            ->paginate($perPage);
+
+        $transactions->getCollection()->transform(function (PaymentTransaction $tx) {
+            $tx->amount_ngn = round($tx->amount_kobo / 100, 2);
+            return $tx;
+        });
+
+        $thirtyDaysAgo = now()->subDays(30);
+
+        $totalSuccessKobo = (int) PaymentTransaction::where('status', 'success')->sum('amount_kobo');
+        $last30dSuccessKobo = (int) PaymentTransaction::where('status', 'success')
+            ->whereRaw('COALESCE(paid_at, created_at) >= ?', [$thirtyDaysAgo])
+            ->sum('amount_kobo');
+
+        $statusCounts = PaymentTransaction::select('status', DB::raw('COUNT(*) as aggregate'))
+            ->groupBy('status')
+            ->pluck('aggregate', 'status');
+
+        $summary = [
+            'total_revenue_ngn'  => round($totalSuccessKobo / 100, 2),
+            'revenue_30d_ngn'    => round($last30dSuccessKobo / 100, 2),
+            'success_count'      => (int) ($statusCounts['success'] ?? 0),
+            'pending_count'      => (int) ($statusCounts['pending'] ?? 0),
+            'failed_count'       => (int) ($statusCounts['failed'] ?? 0),
+            'total_count'        => (int) $statusCounts->sum(),
+            'paying_users_count' => (int) PaymentTransaction::where('status', 'success')
+                ->distinct('user_id')
+                ->count('user_id'),
+        ];
+
+        return response()->json([
+            'summary'      => $summary,
+            'transactions' => $transactions,
+        ]);
     }
 }

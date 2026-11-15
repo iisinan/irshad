@@ -70,6 +70,7 @@ const AdminInbox = lazyWithRetry(() => import('./components/AdminInbox'));
 
 const AdminComplianceReviews = lazyWithRetry(() => import('./components/AdminComplianceReviews'));
 const AdminUsers = lazyWithRetry(() => import('./components/AdminUsers'));
+const AdminFinances = lazyWithRetry(() => import('./components/AdminFinances'));
 const ZakatSettingsAdmin = lazyWithRetry(() => import('./components/ZakatSettingsAdmin'));
 const Pricing = lazyWithRetry(() => import('./components/Pricing'));
 const LandingPage = lazyWithRetry(() => import('./components/LandingPage'));
@@ -133,6 +134,8 @@ const DocumentTitleUpdater = () => {
     else if (path.startsWith('/terms')) title = 'Terms of Service | Irshad';
     else if (path.startsWith('/privacy')) title = 'Privacy Policy | Irshad';
     else if (path.startsWith('/disclosure')) title = 'General Disclosures & Risk | Irshad';
+    else if (path.startsWith('/admin/finances')) title = 'Finances | Irshad Admin';
+    else if (path.startsWith('/admin')) title = 'Admin Dashboard | Irshad';
     document.title = title;
   }, [location]);
   return null;
@@ -395,6 +398,7 @@ function App() {
                     <Route path="/admin/alerts" element={<AdminDashboard />} />
                     <Route path="/admin/compliance-reviews" element={<AdminComplianceReviews />} />
                     <Route path="/admin/users" element={<AdminUsers />} />
+                    <Route path="/admin/finances" element={<AdminFinances />} />
                     <Route path="/admin/resources" element={<ResourcesPage />} />
                     <Route path="/admin/zakat-settings" element={<ZakatSettingsAdmin />} />
                     <Route path="/admin/financial-queue" element={<AdminFinancialReviewQueue />} />

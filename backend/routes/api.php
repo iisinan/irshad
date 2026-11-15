@@ -379,6 +379,9 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete('/admin/users/{id}', [AdminController::class, 'deleteUser']);
             Route::get('/admin/users/{id}/analytics', [AdminController::class, 'getUserAnalytics']);
 
+            // Admin Finances / Payment Ledger
+            Route::get('/admin/finances', [AdminController::class, 'getFinances']);
+
             // Admin Alerts
             Route::get('/admin/alerts', [AdminController::class, 'getAlerts']);
             Route::post('/admin/alerts/{id}/resolve', [AdminController::class, 'resolveAlert']);
