@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Mail\WelcomeEmail;
 use App\Models\User;
 use App\Traits\ApiResponder;
 use Illuminate\Auth\Events\Registered;
@@ -11,6 +12,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Schema;
 
 class AuthController extends Controller
 {
@@ -37,6 +41,7 @@ class AuthController extends Controller
         ]);
 
         event(new Registered($user));
+        $this->sendWelcomeEmail($user);
 
         $token = $user->createToken('auth_token')->plainTextToken;
         $user = $this->hydrateUserForClient($user);
@@ -127,6 +132,7 @@ class AuthController extends Controller
             ]);
             // Mark Google-authenticated users as immediately verified
             $user->markEmailAsVerified();
+            $this->sendWelcomeEmail($user);
         } else {
             // Update google_id and avatar if missing
             $user->update([
@@ -208,6 +214,7 @@ class AuthController extends Controller
                     'preferences' => [],
                 ]);
                 $user->markEmailAsVerified();
+                $this->sendWelcomeEmail($user);
             } else {
                 // Update apple_id if missing
                 $user->update([
@@ -243,6 +250,34 @@ class AuthController extends Controller
     public function me(Request $request): JsonResponse
     {
         return $this->success($this->hydrateUserForClient($request->user()));
+    }
+
+    /**
+     * Send the one-time welcome email when a user registers for the first time.
+     */
+    private function sendWelcomeEmail(User $user): void
+    {
+        if (! $user->email || ! filter_var($user->email, FILTER_VALIDATE_EMAIL)) {
+            return;
+        }
+
+        $hasCol = Schema::hasColumn('users', 'welcome_email_sent_at');
+        if ($hasCol && $user->welcome_email_sent_at !== null) {
+            return;
+        }
+
+        try {
+            Mail::to($user->email)->queue(new WelcomeEmail($user));
+            if ($hasCol) {
+                $user->forceFill(['welcome_email_sent_at' => now()])->saveQuietly();
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Failed to send welcome email', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**
