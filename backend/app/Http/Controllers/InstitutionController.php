@@ -243,14 +243,17 @@ class InstitutionController extends Controller
     }
 
     /**
-     * Screen an uploaded portfolio file (CSV/XLSX/PDF) or JSON holdings array
-     * against Irshad's live AAOIFI database and calculate purification.
+     * Screen any uploaded portfolio document (CSV/XLSX/PDF/DOCX/ODS/JSON/HTML/Image/Text),
+     * pasted raw text blotter, or JSON holdings array against Irshad's live AAOIFI database.
      */
     public function screenPortfolio(Request $request, StatementParserService $parser): JsonResponse
     {
         $rows = [];
         $sourceLabel = 'Manual / JSON Portfolio';
         $brokerDetected = null;
+        $detectedFormat = 'json';
+        $detectedFormatLabel = 'Structured Portfolio Payload';
+        $extractionMethod = 'deterministic';
 
         if ($request->hasFile('file') || $request->hasFile('statement')) {
             $file = $request->file('file') ?? $request->file('statement');
@@ -260,11 +263,19 @@ class InstitutionController extends Controller
                 'password' => 'nullable|string',
             ]);
 
-            $ext = strtolower($file->getClientOriginalExtension());
             $sourceLabel = $file->getClientOriginalName();
+            $detection = $parser->detectDocumentFormat(
+                $file->getRealPath(),
+                $sourceLabel,
+                $file->getMimeType() ?: $file->getClientMimeType()
+            );
+            $detectedFormat = $detection['format'];
+            $detectedFormatLabel = $detection['label'];
 
-            if (in_array($ext, ['csv', 'txt'], true)) {
+            // Fast deterministic institutional CSV shortcut when file actually looks like delimited text
+            if (in_array($detectedFormat, ['csv', 'tsv'], true)) {
                 $rows = $this->parseInstitutionalCsv($file->getRealPath());
+                $brokerDetected = $detectedFormat === 'tsv' ? 'TSV Statement' : 'CSV Portfolio';
             }
 
             if (empty($rows)) {
@@ -272,17 +283,41 @@ class InstitutionController extends Controller
                 if (! empty($parsed['password_required'])) {
                     return response()->json([
                         'status' => 'password_required',
+                        'detected_format' => $parsed['detected_format'] ?? $detectedFormat,
+                        'detected_format_label' => $parsed['detected_format_label'] ?? $detectedFormatLabel,
                         'message' => $parsed['message'] ?? 'This document is password protected.',
                     ], 200);
                 }
+
+                $detectedFormat = $parsed['detected_format'] ?? $detectedFormat;
+                $detectedFormatLabel = $parsed['detected_format_label'] ?? $detectedFormatLabel;
+                $extractionMethod = $parsed['extraction_method'] ?? $extractionMethod;
                 $brokerDetected = $parsed['broker'] ?? null;
+
                 $rows = collect($parsed['holdings'] ?? [])->map(fn ($h) => [
                     'symbol' => $h['symbol'] ?? $h['ticker'] ?? '',
                     'shares' => (float) ($h['shares'] ?? $h['units'] ?? $h['quantity'] ?? 0),
                     'avg_price' => isset($h['average_buy_price']) ? (float) $h['average_buy_price'] : null,
-                    'label' => $h['name'] ?? null,
+                    'label' => $h['company_name'] ?? $h['name'] ?? null,
                 ])->toArray();
             }
+        } elseif ($request->filled('raw_text')) {
+            $request->validate([
+                'raw_text' => 'required|string|max:200000',
+            ]);
+            $parsed = $parser->parseRawText((string) $request->input('raw_text'));
+            $sourceLabel = 'Pasted Institutional Blotter';
+            $detectedFormat = $parsed['detected_format'] ?? 'text';
+            $detectedFormatLabel = $parsed['detected_format_label'] ?? 'Pasted Text / Blotter';
+            $extractionMethod = $parsed['extraction_method'] ?? 'deterministic';
+            $brokerDetected = $parsed['broker'] ?? null;
+
+            $rows = collect($parsed['holdings'] ?? [])->map(fn ($h) => [
+                'symbol' => $h['symbol'] ?? $h['ticker'] ?? '',
+                'shares' => (float) ($h['shares'] ?? $h['units'] ?? $h['quantity'] ?? 0),
+                'avg_price' => isset($h['average_buy_price']) ? (float) $h['average_buy_price'] : null,
+                'label' => $h['company_name'] ?? $h['name'] ?? null,
+            ])->toArray();
         } else {
             $request->validate([
                 'holdings' => 'required|array|min:1',
@@ -293,11 +328,17 @@ class InstitutionController extends Controller
         }
 
         if (empty($rows)) {
-            return $this->error('No valid stock positions were found in the uploaded file or payload.', 422);
+            return $this->error(
+                "Detected {$detectedFormatLabel}, but could not find any recognizable stock positions or share quantities inside it.",
+                422
+            );
         }
 
         $result = $this->evaluateHoldingsArray($rows);
         $result['source_label'] = $sourceLabel;
+        $result['detected_format'] = $detectedFormat;
+        $result['detected_format_label'] = $detectedFormatLabel;
+        $result['extraction_method'] = $extractionMethod;
         if ($brokerDetected) {
             $result['broker_detected'] = $brokerDetected;
         }
@@ -645,6 +686,31 @@ class InstitutionController extends Controller
             }
         }
 
+        $nearThresholdCount = count(array_filter($evaluated, fn ($h) => ! empty($h['is_near_threshold'])));
+        $debtWeightDenom = 0.0;
+        $debtWeightedSum = 0.0;
+        $cashWeightDenom = 0.0;
+        $cashWeightedSum = 0.0;
+        $impureWeightDenom = 0.0;
+        $impureWeightedSum = 0.0;
+
+        foreach ($evaluated as $h) {
+            $w = (float) ($h['market_value'] ?? 0);
+            if ($w <= 0) {
+                continue;
+            }
+            if ($h['debt_ratio'] !== null) {
+                $debtWeightDenom += $w;
+                $debtWeightedSum += $w * (float) $h['debt_ratio'];
+            }
+            if ($h['cash_ratio'] !== null) {
+                $cashWeightDenom += $w;
+                $cashWeightedSum += $w * (float) $h['cash_ratio'];
+            }
+            $impureWeightDenom += $w;
+            $impureWeightedSum += $w * (float) ($h['impure_ratio'] ?? 0);
+        }
+
         return [
             'holdings' => $evaluated,
             'sector_allocation' => $sectorAllocation,
@@ -655,6 +721,10 @@ class InstitutionController extends Controller
                 'non_compliant_count' => $nonCompliantCount,
                 'doubtful_count' => $doubtfulCount,
                 'purify_required_count' => $purifyRequiredCount,
+                'near_threshold_count' => $nearThresholdCount,
+                'weighted_debt_ratio' => $debtWeightDenom > 0 ? round($debtWeightedSum / $debtWeightDenom, 2) : null,
+                'weighted_cash_ratio' => $cashWeightDenom > 0 ? round($cashWeightedSum / $cashWeightDenom, 2) : null,
+                'weighted_impure_ratio' => $impureWeightDenom > 0 ? round($impureWeightedSum / $impureWeightDenom, 2) : 0,
                 'total_aum' => round($totalAum, 2),
                 'compliant_aum' => round($compliantAum, 2),
                 'compliant_pct' => $totalAum > 0 ? round(($compliantAum / $totalAum) * 100, 2) : 0,

@@ -494,4 +494,68 @@ class InstitutionPortalTest extends TestCase
             ->getJson('/api/v1/b2b/stocks/DANGCEM/pre-trade-check')
             ->assertStatus(401);
     }
+
+    public function test_institution_smart_upload_auto_detects_json_html_docx_and_raw_text(): void
+    {
+        $this->seedSampleEquities();
+
+        $instUser = User::factory()->create([
+            'role' => 'institution',
+            'institution_name' => 'Chapel Hill Denham',
+        ]);
+
+        // 1. JSON file even with odd extension (.dat) — detected by magic content
+        $jsonPayload = json_encode([
+            'broker' => 'Chapel Hill OMS',
+            'holdings' => [
+                ['symbol' => 'DANGCEM', 'shares' => 1000],
+                ['symbol' => 'JAIZBANK', 'shares' => 2500],
+            ],
+        ]);
+        $jsonFile = UploadedFile::fake()->createWithContent('book_export.dat', $jsonPayload);
+
+        $this->actingAs($instUser, 'sanctum')
+            ->post('/api/v1/institution/screen-portfolio', ['file' => $jsonFile])
+            ->assertStatus(200)
+            ->assertJsonPath('data.detected_format', 'json')
+            ->assertJsonPath('data.summary.holdings_count', 2)
+            ->assertJsonPath('data.summary.compliant_count', 2);
+
+        // 2. HTML broker statement table
+        $htmlContent = '<html><body><table><tr><th>Ticker</th><th>Units Held</th></tr><tr><td>DANGCEM</td><td>500</td></tr><tr><td>ZENITHBANK</td><td>2000</td></tr></table></body></html>';
+        $htmlFile = UploadedFile::fake()->createWithContent('broker_statement.html', $htmlContent);
+
+        $this->actingAs($instUser, 'sanctum')
+            ->post('/api/v1/institution/screen-portfolio', ['file' => $htmlFile])
+            ->assertStatus(200)
+            ->assertJsonPath('data.detected_format', 'html')
+            ->assertJsonPath('data.summary.holdings_count', 2)
+            ->assertJsonPath('data.summary.non_compliant_count', 1);
+
+        // 3. Word .DOCX document with holdings table
+        $docxTmp = tempnam(sys_get_temp_dir(), 'test_docx_') . '.docx';
+        $zip = new \ZipArchive();
+        $zip->open($docxTmp, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+        $zip->addFromString('[Content_Types].xml', '<?xml version="1.0"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"></Types>');
+        $zip->addFromString('word/document.xml', '<?xml version="1.0"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:tbl><w:tr><w:tc><w:p><w:r><w:t>Symbol</w:t></w:r></w:p></w:tc><w:tc><w:p><w:r><w:t>Units</w:t></w:r></w:p></w:tc></w:tr><w:tr><w:tc><w:p><w:r><w:t>JAIZBANK</w:t></w:r></w:p></w:tc><w:tc><w:p><w:r><w:t>1200</w:t></w:r></w:p></w:tc></w:tr></w:tbl></w:body></w:document>');
+        $zip->close();
+
+        $docxUpload = new UploadedFile($docxTmp, 'mandate.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', null, true);
+        $this->actingAs($instUser, 'sanctum')
+            ->post('/api/v1/institution/screen-portfolio', ['file' => $docxUpload])
+            ->assertStatus(200)
+            ->assertJsonPath('data.detected_format', 'docx')
+            ->assertJsonPath('data.summary.holdings_count', 1);
+        @unlink($docxTmp);
+
+        // 4. Raw pasted blotter text
+        $this->actingAs($instUser, 'sanctum')
+            ->postJson('/api/v1/institution/screen-portfolio', [
+                'raw_text' => "DANGCEM 10,000\nZENITHBANK 25,000",
+            ])
+            ->assertStatus(200)
+            ->assertJsonPath('data.detected_format', 'text')
+            ->assertJsonPath('data.summary.holdings_count', 2)
+            ->assertJsonPath('data.summary.non_compliant_count', 1);
+    }
 }

@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import {
   Building2, Upload, FileSpreadsheet, ShieldCheck, AlertTriangle,
-  Droplet, FileText, Presentation, Download, Plus, Save, Trash2,
-  CheckCircle2, Maximize2, Minimize2, Loader2, ArrowLeftRight, Key
+  Droplet, FileText, Presentation, Download, Save, Trash2,
+  CheckCircle2, Maximize2, Minimize2, Loader2, ArrowLeftRight, Key,
+  Lock, Sparkles, ClipboardPaste
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import {
@@ -74,8 +75,11 @@ export default function InstitutionalDashboard({ demoMode = false }) {
   const [presentationFullscreen, setPresentationFullscreen] = useState(false);
   const [showUploadDrawer, setShowUploadDrawer] = useState(false);
 
-  const [manualSymbol, setManualSymbol] = useState('');
-  const [manualShares, setManualShares] = useState('50000');
+  const [pendingEncryptedFile, setPendingEncryptedFile] = useState(null);
+  const [pdfPassword, setPdfPassword] = useState('');
+  const [uploadMeta, setUploadMeta] = useState(null);
+  const [showPasteBox, setShowPasteBox] = useState(false);
+  const [rawPasteText, setRawPasteText] = useState('');
 
   useEffect(() => {
     setActiveTab(getHashTab());
@@ -182,65 +186,108 @@ export default function InstitutionalDashboard({ demoMode = false }) {
     }
   };
 
-  const handleFileUpload = async (file) => {
+  const inferLocalFileBadge = (file) => {
+    const ext = (file?.name?.split('.').pop() || '').toLowerCase();
+    const mime = (file?.type || '').toLowerCase();
+    if (ext === 'pdf' || mime.includes('pdf')) return 'PDF Document';
+    if (['xlsx', 'xls', 'ods'].includes(ext) || mime.includes('sheet') || mime.includes('excel')) return 'Spreadsheet Workbook';
+    if (['csv', 'tsv', 'txt', 'md'].includes(ext) || mime.startsWith('text/')) return 'Delimited / Text Sheet';
+    if (['docx', 'doc'].includes(ext) || mime.includes('word')) return 'Word Document';
+    if (ext === 'json' || mime.includes('json')) return 'JSON Payload';
+    if (['html', 'htm', 'xml'].includes(ext)) return 'HTML / XML Table';
+    if (['png', 'jpg', 'jpeg', 'webp', 'gif'].includes(ext) || mime.startsWith('image/')) return 'Image / Screenshot OCR';
+    return 'Universal Auto-Detect';
+  };
+
+  const handleFileUpload = async (file, password = '') => {
     if (!file) return;
     setIsScreening(true);
+    setUploadMeta({
+      fileName: file.name,
+      localGuess: inferLocalFileBadge(file),
+      status: 'scanning',
+    });
     try {
       const formData = new FormData();
       formData.append('file', file);
+      if (password) {
+        formData.append('password', password);
+      }
       const res = await screenInstitutionPortfolio(formData, isAuthenticatedInstitution);
+      if (res?.status === 'password_required' || res?.data?.status === 'password_required') {
+        setPendingEncryptedFile(file);
+        setShowUploadDrawer(true);
+        setUploadMeta({
+          fileName: file.name,
+          localGuess: 'Encrypted PDF Document',
+          status: 'password_required',
+        });
+        toastError(res?.message || res?.data?.message || 'This document is password-protected. Enter password below.');
+        return;
+      }
+
       if (res?.data) {
         setCustomScreened(res.data);
-        setCustomFundName(file.name.replace(/\.(csv|xlsx|xls|pdf|txt)$/i, ''));
+        setCustomFundName(file.name.replace(/\.[^.]+$/, ''));
         setSelectedSavedId(null);
         setActivePresetId('uploaded');
         setActiveTab('screening');
+        setPendingEncryptedFile(null);
+        setPdfPassword('');
         setShowUploadDrawer(false);
-        toastSuccess(`Screened ${res.data.summary?.holdings_count || 0} holdings from ${file.name}`);
+        setUploadMeta({
+          fileName: file.name,
+          detectedFormat: res.data.detected_format_label || inferLocalFileBadge(file),
+          broker: res.data.broker_detected || null,
+          method: res.data.extraction_method || 'deterministic',
+          status: 'done',
+        });
+        toastSuccess(
+          `Detected ${res.data.detected_format_label || 'document'} — screened ${res.data.summary?.holdings_count || 0} holdings`
+        );
       }
     } catch (err) {
-      toastError(err?.response?.data?.message || 'Could not parse uploaded file. Try the sample CSV template.');
+      setUploadMeta(null);
+      toastError(err?.response?.data?.message || 'Could not extract holdings from this document. Try pasting text or using the sample CSV.');
     } finally {
       setIsScreening(false);
     }
   };
 
-  const handleAddManualTicker = async (e) => {
+  const handleUnlockPdf = async (e) => {
     e.preventDefault();
-    const sym = manualSymbol.trim().toUpperCase();
-    const qty = Number(manualShares) || 0;
-    if (!sym || qty <= 0) {
-      toastError('Enter a valid NGX symbol and unit quantity.');
+    if (!pendingEncryptedFile || !pdfPassword.trim()) return;
+    await handleFileUpload(pendingEncryptedFile, pdfPassword.trim());
+  };
+
+  const handleScreenPastedText = async (e) => {
+    e.preventDefault();
+    if (!rawPasteText.trim()) {
+      toastError('Paste portfolio lines, CSV/TSV rows, or JSON holdings to screen.');
       return;
     }
-
-    const baseHoldings = (activeScreened?.holdings || []).map((h) => ({
-      symbol: h.symbol,
-      shares: h.shares,
-      avg_price: h.current_price,
-    }));
-
-    const existingIdx = baseHoldings.findIndex((h) => h.symbol === sym);
-    if (existingIdx >= 0) {
-      baseHoldings[existingIdx].shares = Number(baseHoldings[existingIdx].shares) + qty;
-    } else {
-      baseHoldings.push({ symbol: sym, shares: qty });
-    }
-
     setIsScreening(true);
     try {
-      const res = await screenInstitutionPortfolio({ holdings: baseHoldings }, isAuthenticatedInstitution);
+      const res = await screenInstitutionPortfolio({ raw_text: rawPasteText }, isAuthenticatedInstitution);
       if (res?.data) {
         setCustomScreened(res.data);
-        if (activePresetId !== 'uploaded') {
-          setCustomFundName(`${activeTitle} (Modified)`);
-        }
+        setCustomFundName('Screened Institutional Blotter');
+        setSelectedSavedId(null);
         setActivePresetId('uploaded');
-        setManualSymbol('');
-        toastSuccess(`Added & screened ${sym}`);
+        setActiveTab('screening');
+        setShowPasteBox(false);
+        setShowUploadDrawer(false);
+        setUploadMeta({
+          fileName: 'Pasted Portfolio Text',
+          detectedFormat: res.data.detected_format_label || 'Pasted Text / Blotter',
+          broker: res.data.broker_detected || null,
+          method: res.data.extraction_method || 'deterministic',
+          status: 'done',
+        });
+        toastSuccess(`Screened ${res.data.summary?.holdings_count || 0} holdings from pasted text`);
       }
     } catch (err) {
-      toastError(err?.response?.data?.message || `Failed to screen ${sym}`);
+      toastError(err?.response?.data?.message || 'Could not detect holdings in pasted text.');
     } finally {
       setIsScreening(false);
     }
@@ -497,11 +544,10 @@ export default function InstitutionalDashboard({ demoMode = false }) {
         }
       `}</style>
 
-      {/* Hidden File Input (always mounted for header/action buttons) */}
+      {/* Hidden Universal File Input (accepts any document format for magic-byte detection) */}
       <input
         ref={fileInputRef}
         type="file"
-        accept=".csv,.xlsx,.xls,.pdf,.txt"
         style={{ display: 'none' }}
         onChange={(e) => {
           const f = e.target.files?.[0];
@@ -739,7 +785,29 @@ export default function InstitutionalDashboard({ demoMode = false }) {
       <div role="tabpanel" aria-labelledby="inst-tab-screening" hidden={activeTab !== 'screening'}>
         {activeTab === 'screening' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {/* Toggleable Upload Drawer (OR automatic centered onboarding when no holdings exist) */}
+            {/* Detected Document Banner (after upload/paste) */}
+            {uploadMeta?.status === 'done' && activePresetId === 'uploaded' && (
+              <div style={{
+                display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 10,
+                padding: '10px 16px', borderRadius: 12,
+                background: 'rgba(15, 118, 110, 0.08)', border: '1px solid rgba(15, 118, 110, 0.25)',
+                fontSize: '0.78rem', color: 'var(--text-dark)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <Sparkles size={15} color="#0F766E" />
+                  <span>
+                    <strong>Detected:</strong> {uploadMeta.detectedFormat}
+                    {uploadMeta.broker ? ` · Source: ${uploadMeta.broker}` : ''}
+                    {uploadMeta.method && uploadMeta.method !== 'deterministic' ? ' · AI Extraction' : ''}
+                  </span>
+                </div>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                  {uploadMeta.fileName}
+                </span>
+              </div>
+            )}
+
+            {/* Smart Universal Document Upload Drawer (OR automatic onboarding when no holdings exist) */}
             {(showUploadDrawer || (!hasHoldings && !isNorrenbergerActive && !loadingPresets)) && (
               <div
                 onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
@@ -756,86 +824,155 @@ export default function InstitutionalDashboard({ demoMode = false }) {
                   padding: '24px',
                   border: `2px dashed ${isDragging ? 'var(--primary)' : 'var(--border-strong)'}`,
                   display: 'flex',
-                  flexWrap: 'wrap',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  gap: 18,
+                  flexDirection: 'column',
+                  gap: 16,
                 }}
               >
-                <div style={{ flex: '1 1 320px' }}>
-                  <h2 style={{ margin: 0, fontSize: '1.02rem', fontWeight: 800, color: 'var(--text-dark)' }}>
-                    Upload Portfolio or Broker Statement
-                  </h2>
-                  <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                    Drop a <strong>.CSV, .XLSX, or Broker .PDF</strong> to generate live AAOIFI verdicts, purification calculations, and a factsheet.
-                  </p>
-                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 14 }}>
-                    <button
-                      type="button"
-                      disabled={isScreening}
-                      onClick={() => fileInputRef.current?.click()}
-                      style={{
-                        display: 'inline-flex', alignItems: 'center', gap: 7,
-                        padding: '9px 16px', borderRadius: 10, border: 'none',
-                        background: 'var(--primary)', color: '#fff', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer',
-                      }}
-                    >
-                      <FileSpreadsheet size={15} /> {isScreening ? 'Screening...' : 'Choose File'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleDownloadSampleCsv}
-                      style={{
-                        display: 'inline-flex', alignItems: 'center', gap: 6,
-                        padding: '9px 14px', borderRadius: 10,
-                        border: '1px solid var(--border-strong)', background: 'var(--bg-section)',
-                        color: 'var(--text-dark)', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
-                      }}
-                    >
-                      <Download size={14} /> Sample CSV
-                    </button>
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 18 }}>
+                  <div style={{ flex: '1 1 340px' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: '0.68rem', fontWeight: 800, color: '#0F766E', textTransform: 'uppercase', letterSpacing: '0.7px', marginBottom: 6 }}>
+                      <Sparkles size={13} /> Smart Format Auto-Detection
+                    </div>
+                    <h2 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-dark)' }}>
+                      Drop Any Institutional Portfolio Document
+                    </h2>
+                    <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                      Irshad inspects file signatures &amp; layout automatically to extract holdings, run AAOIFI checks, compute purification, and populate your uniform Factsheet.
+                    </p>
+                    <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 14 }}>
+                      <button
+                        type="button"
+                        disabled={isScreening}
+                        onClick={() => fileInputRef.current?.click()}
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 7,
+                          padding: '10px 16px', borderRadius: 10, border: 'none',
+                          background: 'var(--primary)', color: '#fff', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer',
+                        }}
+                      >
+                        {isScreening ? <Loader2 size={15} /> : <FileSpreadsheet size={15} />}
+                        {isScreening ? `Scanning ${uploadMeta?.localGuess || 'Document'}...` : 'Choose Any Document'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowPasteBox((v) => !v)}
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 6,
+                          padding: '10px 14px', borderRadius: 10,
+                          border: `1px solid ${showPasteBox ? 'var(--primary)' : 'var(--border-strong)'}`,
+                          background: showPasteBox ? 'var(--primary-50)' : 'var(--bg-section)',
+                          color: showPasteBox ? 'var(--primary)' : 'var(--text-dark)', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
+                        }}
+                      >
+                        <ClipboardPaste size={14} /> Paste Text / Blotter
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleDownloadSampleCsv}
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 6,
+                          padding: '10px 14px', borderRadius: 10,
+                          border: '1px solid var(--border-strong)', background: 'var(--bg-section)',
+                          color: 'var(--text-dark)', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
+                        }}
+                      >
+                        <Download size={14} /> Sample CSV
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Supported Formats Capability Badges */}
+                  <div style={{ flex: '0 1 320px', display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'flex-end', alignContent: 'center' }}>
+                    {[
+                      'Broker PDF / Scanned',
+                      'Excel (.XLSX / .XLS / .ODS)',
+                      'CSV / TSV / Pipe',
+                      'Word (.DOCX)',
+                      'JSON / HTML / XML',
+                      'Screenshots (.PNG / .JPG)',
+                    ].map((fmt) => (
+                      <span
+                        key={fmt}
+                        style={{
+                          padding: '5px 10px', borderRadius: 999,
+                          background: 'var(--bg-section)', border: '1px solid var(--border)',
+                          fontSize: '0.71rem', fontWeight: 700, color: 'var(--text-muted)',
+                        }}
+                      >
+                        {fmt}
+                      </span>
+                    ))}
                   </div>
                 </div>
 
-                {/* Inline Quick-Add Ticker */}
-                <form onSubmit={handleAddManualTicker} style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center', flex: '1 1 300px', justifyContent: 'flex-end' }}>
-                  <input
-                    type="text"
-                    value={manualSymbol}
-                    onChange={(e) => setManualSymbol(e.target.value)}
-                    placeholder="Add NGX ticker (e.g. SEPLAT)"
-                    aria-label="NGX Ticker Symbol"
+                {/* Encrypted PDF Unlock Bar */}
+                {pendingEncryptedFile && (
+                  <form
+                    onSubmit={handleUnlockPdf}
                     style={{
-                      flex: '1 1 150px', maxWidth: 210, padding: '9px 12px', borderRadius: 10,
-                      border: '1px solid var(--border-strong)', background: 'var(--bg-section)',
-                      color: 'var(--text-dark)', fontSize: '0.8rem', fontWeight: 700,
-                    }}
-                  />
-                  <input
-                    type="number"
-                    min={1}
-                    value={manualShares}
-                    onChange={(e) => setManualShares(e.target.value)}
-                    placeholder="Units"
-                    aria-label="Units"
-                    style={{
-                      width: 100, padding: '9px 10px', borderRadius: 10,
-                      border: '1px solid var(--border-strong)', background: 'var(--bg-section)',
-                      color: 'var(--text-dark)', fontSize: '0.8rem', fontWeight: 700,
-                    }}
-                  />
-                  <button
-                    type="submit"
-                    disabled={isScreening}
-                    style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 5,
-                      padding: '9px 14px', borderRadius: 10, border: 'none',
-                      background: '#111827', color: '#fff', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
+                      display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center',
+                      padding: '12px 14px', borderRadius: 12,
+                      background: 'rgba(217, 119, 6, 0.08)', border: '1px solid rgba(217, 119, 6, 0.35)',
                     }}
                   >
-                    <Plus size={14} /> Add
-                  </button>
-                </form>
+                    <Lock size={16} color="#B45309" />
+                    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#92400E' }}>
+                      Password required to unlock <strong>{pendingEncryptedFile.name}</strong>:
+                    </span>
+                    <input
+                      type="password"
+                      value={pdfPassword}
+                      onChange={(e) => setPdfPassword(e.target.value)}
+                      placeholder="Enter statement password"
+                      aria-label="Statement PDF Password"
+                      style={{
+                        flex: '1 1 180px', maxWidth: 240, padding: '8px 10px', borderRadius: 8,
+                        border: '1px solid var(--border-strong)', background: 'var(--bg)', color: 'var(--text-dark)', fontSize: '0.8rem',
+                      }}
+                    />
+                    <button
+                      type="submit"
+                      disabled={isScreening || !pdfPassword.trim()}
+                      style={{
+                        padding: '8px 14px', borderRadius: 8, border: 'none',
+                        background: '#B45309', color: '#fff', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
+                      }}
+                    >
+                      Unlock &amp; Screen
+                    </button>
+                  </form>
+                )}
+
+                {/* Paste Text / Blotter Form */}
+                {showPasteBox && (
+                  <form onSubmit={handleScreenPastedText} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <textarea
+                      rows={4}
+                      value={rawPasteText}
+                      onChange={(e) => setRawPasteText(e.target.value)}
+                      placeholder={'Paste rows from Excel, Bloomberg, email, CSCS, CSV, or JSON:\ne.g.\nDANGCEM 120,000\nMTNN 180,000\nZENITHBANK 500,000'}
+                      aria-label="Paste portfolio text"
+                      style={{
+                        width: '100%', padding: '10px 12px', borderRadius: 10,
+                        border: '1px solid var(--border-strong)', background: 'var(--bg-section)',
+                        color: 'var(--text-dark)', fontSize: '0.79rem', fontFamily: 'monospace',
+                      }}
+                    />
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                      <button
+                        type="submit"
+                        disabled={isScreening}
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 6,
+                          padding: '9px 16px', borderRadius: 10, border: 'none',
+                          background: '#111827', color: '#fff', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
+                        }}
+                      >
+                        <Sparkles size={14} /> {isScreening ? 'Extracting...' : 'Detect & Screen Text'}
+                      </button>
+                    </div>
+                  </form>
+                )}
               </div>
             )}
 

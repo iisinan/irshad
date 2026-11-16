@@ -156,104 +156,360 @@ class StatementParserService
     ];
 
     /**
-     * Parse an uploaded statement file and return normalized holdings.
+     * Parse an uploaded statement file (any format) and return normalized holdings.
+     * Detects format via magic bytes and structural inspection rather than trusting extension alone.
      */
     public function parse(UploadedFile $file, ?string $password = null): array
     {
-        $extension = strtolower($file->getClientOriginalExtension());
         $filePath = $file->getRealPath();
+        $originalName = $file->getClientOriginalName();
+        $mimeType = $file->getMimeType() ?: $file->getClientMimeType();
+
+        $detection = $this->detectDocumentFormat($filePath, $originalName, $mimeType);
+        $format = $detection['format'];
+        $formatLabel = $detection['label'];
         $extracted = [];
         $brokerDetected = 'Unknown Broker';
+        $extractionMethod = 'deterministic';
 
         try {
-            if (in_array($extension, ['csv', 'txt'])) {
-                $result = $this->parseCsv($filePath);
-                $extracted = $result['holdings'] ?? [];
-                $brokerDetected = $result['broker'] ?? 'CSV Trade Log';
-            } elseif (in_array($extension, ['xlsx', 'xls'])) {
-                $result = $this->parseXlsx($filePath);
-                $extracted = $result['holdings'] ?? [];
-                $brokerDetected = $result['broker'] ?? 'Excel Statement';
-            } elseif ($extension === 'pdf') {
-                $result = $this->parsePdf($filePath, $password);
-                if (!empty($result['password_required'])) {
-                    return $result;
-                }
-                $extracted = $result['holdings'] ?? [];
-                $brokerDetected = $result['broker'] ?? 'PDF Statement';
-            } else {
-                throw new \InvalidArgumentException("Unsupported file extension: .{$extension}");
+            switch ($format) {
+                case 'pdf':
+                    $result = $this->parsePdf($filePath, $password);
+                    if (!empty($result['password_required'])) {
+                        $result['detected_format'] = $format;
+                        $result['detected_format_label'] = $formatLabel;
+                        return $result;
+                    }
+                    $extracted = $result['holdings'] ?? [];
+                    $brokerDetected = $result['broker'] ?? 'PDF Statement';
+                    break;
+
+                case 'xlsx':
+                    $result = $this->parseXlsx($filePath);
+                    $extracted = $result['holdings'] ?? [];
+                    $brokerDetected = $result['broker'] ?? 'Excel Workbook';
+                    break;
+
+                case 'docx':
+                    $result = $this->parseDocx($filePath);
+                    $extracted = $result['holdings'] ?? [];
+                    $brokerDetected = $result['broker'] ?? 'Word Document';
+                    break;
+
+                case 'ods':
+                    $result = $this->parseOds($filePath);
+                    $extracted = $result['holdings'] ?? [];
+                    $brokerDetected = $result['broker'] ?? 'OpenDocument Spreadsheet';
+                    break;
+
+                case 'json':
+                    $result = $this->parseJson($filePath);
+                    $extracted = $result['holdings'] ?? [];
+                    $brokerDetected = $result['broker'] ?? 'JSON Portfolio Export';
+                    break;
+
+                case 'html':
+                case 'xml':
+                    $result = $this->parseHtmlOrXml($filePath);
+                    $extracted = $result['holdings'] ?? [];
+                    $brokerDetected = $result['broker'] ?? 'Web / XML Statement';
+                    break;
+
+                case 'csv':
+                case 'tsv':
+                    $result = $this->parseCsv($filePath);
+                    $extracted = $result['holdings'] ?? [];
+                    $brokerDetected = $result['broker'] ?? 'Delimited Portfolio';
+                    if (empty($extracted)) {
+                        $rawText = @file_get_contents($filePath) ?: '';
+                        $textRes = $this->parseUnstructuredText($rawText);
+                        $extracted = $textRes['holdings'] ?? [];
+                        $brokerDetected = $textRes['broker'] ?? $brokerDetected;
+                    }
+                    break;
+
+                case 'image':
+                    $extractionMethod = 'ai_vision';
+                    $visionMime = $detection['mime'] ?: ($mimeType ?: 'image/png');
+                    $geminiResult = $this->parseWithGemini($filePath, $visionMime);
+                    $extracted = $geminiResult['holdings'] ?? [];
+                    $brokerDetected = $geminiResult['broker'] ?? 'Screenshot / Scanned Statement';
+                    break;
+
+                case 'ole_office':
+                case 'text':
+                default:
+                    $rawText = @file_get_contents($filePath) ?: '';
+                    if ($format !== 'ole_office' && $rawText !== '') {
+                        $csvTry = $this->parseCsv($filePath);
+                        if (!empty($csvTry['holdings'])) {
+                            $extracted = $csvTry['holdings'];
+                            $brokerDetected = $csvTry['broker'] ?? 'Text Statement';
+                            break;
+                        }
+                        $textRes = $this->parseUnstructuredText($rawText);
+                        $extracted = $textRes['holdings'] ?? [];
+                        $brokerDetected = $textRes['broker'] ?? 'Text / Blotter';
+                    }
+                    break;
             }
         } catch (\Throwable $e) {
             $errMsg = strtolower($e->getMessage());
             if (str_contains($errMsg, 'secured') || str_contains($errMsg, 'password') || str_contains($errMsg, 'encrypt')) {
                 return [
                     'password_required' => true,
+                    'detected_format' => $format,
+                    'detected_format_label' => $formatLabel,
                     'broker' => 'Encrypted PDF',
                     'holdings' => [],
                     'message' => 'This PDF statement is password-protected. Please enter your password to unlock it.',
                 ];
             }
 
-            Log::error("[StatementParserService] Error parsing file: " . $e->getMessage(), [
-                'file' => $file->getClientOriginalName(),
-                'trace' => $e->getTraceAsString(),
+            Log::error("[StatementParserService] Error parsing {$format} file: " . $e->getMessage(), [
+                'file' => $originalName,
             ]);
+        }
 
-            // If local parsing failed on PDF/XLSX, attempt Gemini AI extraction
-            if (in_array($extension, ['pdf', 'xlsx', 'xls', 'csv'])) {
-                Log::info("[StatementParserService] Attempting Gemini fallback extraction...");
-                $geminiResult = $this->parseWithGemini($filePath, $file->getClientMimeType());
-                if (!empty($geminiResult['holdings'])) {
-                    $extracted = $geminiResult['holdings'];
-                    $brokerDetected = $geminiResult['broker'] ?? 'Broker Statement';
+        // Universal intelligent AI fallback if deterministic extraction yielded nothing
+        if (empty($extracted)) {
+            $extractionMethod = 'ai_assisted';
+            $geminiResult = $this->parseAnyWithGemini($filePath, $format, $detection['mime'] ?: ($mimeType ?: 'application/octet-stream'));
+            if (!empty($geminiResult['holdings'])) {
+                $extracted = $geminiResult['holdings'];
+                $brokerDetected = $geminiResult['broker'] ?? $brokerDetected;
+            }
+        }
+
+        $reconciled = $this->reconcileHoldings($extracted, $brokerDetected);
+        $reconciled['detected_format'] = $format;
+        $reconciled['detected_format_label'] = $formatLabel;
+        $reconciled['extraction_method'] = $extractionMethod;
+
+        return $reconciled;
+    }
+
+    /**
+     * Parse raw pasted portfolio / blotter text (from email, WhatsApp, Bloomberg, Excel copy-paste).
+     */
+    public function parseRawText(string $rawText): array
+    {
+        $trimmed = trim($rawText);
+        if ($trimmed === '') {
+            return [
+                'broker' => 'Pasted Portfolio',
+                'detected_format' => 'text',
+                'detected_format_label' => 'Pasted Text / Blotter',
+                'extraction_method' => 'deterministic',
+                'total_count' => 0,
+                'matched_count' => 0,
+                'holdings' => [],
+            ];
+        }
+
+        $tmp = tempnam(sys_get_temp_dir(), 'raw_port_');
+        file_put_contents($tmp, $trimmed);
+
+        try {
+            $firstChar = substr(ltrim($trimmed), 0, 1);
+            $extracted = [];
+            $broker = 'Pasted Portfolio';
+            $format = 'text';
+            $formatLabel = 'Pasted Text / Blotter';
+            $method = 'deterministic';
+
+            if (($firstChar === '{' || $firstChar === '[') && json_decode($trimmed, true) !== null) {
+                $format = 'json';
+                $formatLabel = 'Pasted JSON Payload';
+                $res = $this->parseJson($tmp);
+                $extracted = $res['holdings'] ?? [];
+                $broker = $res['broker'] ?? $broker;
+            } elseif (stripos($trimmed, '<table') !== false || stripos($trimmed, '<html') !== false) {
+                $format = 'html';
+                $formatLabel = 'Pasted HTML Table';
+                $res = $this->parseHtmlOrXml($tmp);
+                $extracted = $res['holdings'] ?? [];
+                $broker = $res['broker'] ?? $broker;
+            } else {
+                $csvRes = $this->parseCsv($tmp);
+                if (!empty($csvRes['holdings'])) {
+                    $format = 'csv';
+                    $formatLabel = 'Pasted Table / CSV';
+                    $extracted = $csvRes['holdings'];
+                    $broker = $csvRes['broker'] ?? $broker;
+                } else {
+                    $textRes = $this->parseUnstructuredText($trimmed);
+                    $extracted = $textRes['holdings'] ?? [];
+                    $broker = $textRes['broker'] ?? $broker;
+                }
+            }
+
+            if (empty($extracted)) {
+                $method = 'ai_assisted';
+                $ai = $this->parseTextWithGemini($trimmed);
+                $extracted = $ai['holdings'] ?? [];
+                $broker = $ai['broker'] ?? $broker;
+            }
+
+            $reconciled = $this->reconcileHoldings($extracted, $broker);
+            $reconciled['detected_format'] = $format;
+            $reconciled['detected_format_label'] = $formatLabel;
+            $reconciled['extraction_method'] = $method;
+
+            return $reconciled;
+        } finally {
+            @unlink($tmp);
+        }
+    }
+
+    /**
+     * Detect actual file format using magic bytes, ZIP entry inspection, and content heuristics.
+     */
+    public function detectDocumentFormat(string $filePath, string $originalName = '', ?string $mimeType = null): array
+    {
+        $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+        $fh = @fopen($filePath, 'rb');
+        $head = $fh ? fread($fh, 4096) : '';
+        if ($fh) {
+            fclose($fh);
+        }
+
+        // 1. Binary Magic Bytes
+        if (str_starts_with($head, '%PDF-') || preg_match('/^.{0,16}%PDF-/s', $head)) {
+            return ['format' => 'pdf', 'label' => 'PDF Statement (.pdf)', 'mime' => 'application/pdf'];
+        }
+
+        if (str_starts_with($head, "\x89PNG\r\n\x1a\n")) {
+            return ['format' => 'image', 'label' => 'PNG Image / Screenshot', 'mime' => 'image/png'];
+        }
+        if (str_starts_with($head, "\xFF\xD8\xFF")) {
+            return ['format' => 'image', 'label' => 'JPEG Image / Photo', 'mime' => 'image/jpeg'];
+        }
+        if (str_starts_with($head, 'GIF87a') || str_starts_with($head, 'GIF89a')) {
+            return ['format' => 'image', 'label' => 'GIF Image', 'mime' => 'image/gif'];
+        }
+        if (str_starts_with($head, 'RIFF') && substr($head, 8, 4) === 'WEBP') {
+            return ['format' => 'image', 'label' => 'WebP Image', 'mime' => 'image/webp'];
+        }
+        if (str_starts_with($head, "\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1")) {
+            return ['format' => 'ole_office', 'label' => 'Legacy Office / Excel (.xls/.doc)', 'mime' => 'application/vnd.ms-excel'];
+        }
+
+        // 2. ZIP Container (XLSX, DOCX, ODS, etc.)
+        if (str_starts_with($head, "PK\x03\x04")) {
+            $zip = new ZipArchive();
+            if ($zip->open($filePath) === true) {
+                $hasXlsx = $zip->locateName('xl/workbook.xml') !== false || $zip->locateName('xl/worksheets/sheet1.xml') !== false;
+                $hasDocx = $zip->locateName('word/document.xml') !== false;
+                $mimeEntry = $zip->getFromName('mimetype');
+                $zip->close();
+
+                if ($hasXlsx) {
+                    return ['format' => 'xlsx', 'label' => 'Excel Workbook (.xlsx)', 'mime' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+                }
+                if ($hasDocx) {
+                    return ['format' => 'docx', 'label' => 'Word Document (.docx)', 'mime' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+                }
+                if (is_string($mimeEntry) && str_contains($mimeEntry, 'spreadsheet')) {
+                    return ['format' => 'ods', 'label' => 'OpenDocument Spreadsheet (.ods)', 'mime' => 'application/vnd.oasis.opendocument.spreadsheet'];
                 }
             }
         }
 
-        // Reconcile and enrich matched holdings with current database status & prices
-        return $this->reconcileHoldings($extracted, $brokerDetected);
+        // 3. Text / Markup / Structured Text Inspection (strip UTF-8/UTF-16 BOMs)
+        $cleanText = preg_replace('/^\xEF\xBB\xBF/', '', $head);
+        $trimmed = ltrim($cleanText);
+
+        if ($trimmed !== '') {
+            $first = substr($trimmed, 0, 1);
+            if ($first === '{' || $first === '[') {
+                $full = @file_get_contents($filePath);
+                if ($full !== false && json_decode($full, true) !== null) {
+                    return ['format' => 'json', 'label' => 'JSON Portfolio (.json)', 'mime' => 'application/json'];
+                }
+            }
+
+            if (preg_match('/^<!doctype\s+html|<html[\s>]|<table[\s>]/i', $trimmed)) {
+                return ['format' => 'html', 'label' => 'HTML Portfolio Table', 'mime' => 'text/html'];
+            }
+
+            if (str_starts_with($trimmed, '<?xml') || preg_match('/^<[a-z0-9:_-]+[\s>]/i', $trimmed)) {
+                if (str_contains(strtolower($trimmed), 'workbook') || str_contains(strtolower($trimmed), 'worksheet')) {
+                    return ['format' => 'html', 'label' => 'XML Spreadsheet', 'mime' => 'text/xml'];
+                }
+                return ['format' => 'xml', 'label' => 'XML Portfolio Export', 'mime' => 'text/xml'];
+            }
+
+            $lines = preg_split('/\r\n|\r|\n/', trim($cleanText));
+            $sampleLines = array_slice($lines, 0, 10);
+            $tabHits = 0;
+            $commaHits = 0;
+            $semiHits = 0;
+            foreach ($sampleLines as $sl) {
+                if (substr_count($sl, "\t") >= 1) $tabHits++;
+                if (substr_count($sl, ',') >= 1) $commaHits++;
+                if (substr_count($sl, ';') >= 1) $semiHits++;
+            }
+
+            if ($tabHits >= 2 || $ext === 'tsv') {
+                return ['format' => 'tsv', 'label' => 'Tab-Separated Sheet (.tsv)', 'mime' => 'text/tab-separated-values'];
+            }
+            if ($commaHits >= 2 || $semiHits >= 2 || $ext === 'csv') {
+                return ['format' => 'csv', 'label' => 'CSV Portfolio (.csv)', 'mime' => 'text/csv'];
+            }
+
+            return ['format' => 'text', 'label' => 'Text / Broker Blotter', 'mime' => 'text/plain'];
+        }
+
+        // Extension fallback if unreadable/unusual mime
+        if (in_array($ext, ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp'], true) || ($mimeType && str_starts_with($mimeType, 'image/'))) {
+            return ['format' => 'image', 'label' => 'Scanned Image', 'mime' => $mimeType ?: 'image/png'];
+        }
+        if ($ext === 'xlsx') {
+            return ['format' => 'xlsx', 'label' => 'Excel Workbook (.xlsx)', 'mime' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+        }
+        if ($ext === 'docx') {
+            return ['format' => 'docx', 'label' => 'Word Document (.docx)', 'mime' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+        }
+        if ($ext === 'pdf') {
+            return ['format' => 'pdf', 'label' => 'PDF Statement (.pdf)', 'mime' => 'application/pdf'];
+        }
+
+        return ['format' => 'text', 'label' => strtoupper($ext ?: 'Unknown') . ' Document', 'mime' => $mimeType ?: 'text/plain'];
     }
 
     /**
-     * Parse CSV / TSV files with automatic column detection.
+     * Shared tabular row extractor used by CSV/TSV, XLSX, DOCX tables, ODS, and HTML tables.
      */
-    public function parseCsv(string $filePath): array
+    protected function extractHoldingsFromTableRows(array $rows, string $defaultBroker = 'Statement'): array
     {
-        $lines = file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        if (empty($lines)) {
-            return ['broker' => 'Empty CSV', 'holdings' => []];
-        }
-
-        // Determine delimiter (, or \t or ;)
-        $firstLine = $lines[0];
-        $delimiter = ',';
-        if (substr_count($firstLine, "\t") > substr_count($firstLine, ',')) {
-            $delimiter = "\t";
-        } elseif (substr_count($firstLine, ';') > substr_count($firstLine, ',')) {
-            $delimiter = ';';
-        }
-
         $headerIdx = -1;
         $colMap = [];
-        $broker = 'CSV Statement';
+        $broker = $defaultBroker;
 
-        // Scan the first 15 lines to identify the table header row
-        foreach (array_slice($lines, 0, 15) as $i => $line) {
-            $lower = strtolower($line);
-            if (str_contains($lower, 'meristem')) $broker = 'Meristem Securities';
-            elseif (str_contains($lower, 'stanbic')) $broker = 'Stanbic IBTC Stockbrokers';
-            elseif (str_contains($lower, 'bamboo')) $broker = 'Bamboo';
-            elseif (str_contains($lower, 'chaka')) $broker = 'Chaka';
-            elseif (str_contains($lower, 'trove')) $broker = 'Trove';
-            elseif (str_contains($lower, 'cscs')) $broker = 'CSCS Clearing';
+        $scanned = 0;
+        foreach ($rows as $rIdx => $row) {
+            $scanned++;
+            $rowStr = strtolower(implode(' ', array_map('strval', $row)));
+            if (str_contains($rowStr, 'meristem')) $broker = 'Meristem Securities';
+            elseif (str_contains($rowStr, 'stanbic')) $broker = 'Stanbic IBTC Stockbrokers';
+            elseif (str_contains($rowStr, 'chapel hill')) $broker = 'Chapel Hill Denham';
+            elseif (str_contains($rowStr, 'cardinalstone')) $broker = 'CardinalStone';
+            elseif (str_contains($rowStr, 'lotus')) $broker = 'Lotus Capital';
+            elseif (str_contains($rowStr, 'norrenberger')) $broker = 'Norrenberger';
+            elseif (str_contains($rowStr, 'bamboo')) $broker = 'Bamboo';
+            elseif (str_contains($rowStr, 'chaka')) $broker = 'Chaka';
+            elseif (str_contains($rowStr, 'trove')) $broker = 'Trove';
+            elseif (str_contains($rowStr, 'cscs')) $broker = 'CSCS Clearing';
 
-            $cols = array_map('trim', str_getcsv($line, $delimiter, '"', "\\"));
-            $foundCols = $this->detectColumns($cols);
-
-            if (isset($foundCols['symbol']) && (isset($foundCols['shares']) || isset($foundCols['price']))) {
-                $headerIdx = $i;
-                $colMap = $foundCols;
+            $detected = $this->detectColumns($row);
+            if (isset($detected['symbol']) && (isset($detected['shares']) || isset($detected['price']))) {
+                $headerIdx = $rIdx;
+                $colMap = $detected;
+                break;
+            }
+            if ($scanned >= 25) {
                 break;
             }
         }
@@ -263,15 +519,23 @@ class StatementParserService
         }
 
         $holdings = [];
-        for ($i = $headerIdx + 1; $i < count($lines); $i++) {
-            $row = array_map('trim', str_getcsv($lines[$i], $delimiter, '"', "\\"));
-            if (empty($row) || count($row) <= $colMap['symbol']) continue;
+        $passedHeader = false;
+        foreach ($rows as $rIdx => $row) {
+            if ($rIdx === $headerIdx) {
+                $passedHeader = true;
+                continue;
+            }
+            if (! $passedHeader) {
+                continue;
+            }
 
-            $rawSym = $row[$colMap['symbol']] ?? '';
-            if (empty($rawSym) || is_numeric($rawSym)) continue;
-
-            // Skip total / summary rows
-            if (preg_match('/^(total|subtotal|balance|grand total|cash)/i', $rawSym)) continue;
+            $rawSym = trim((string) ($row[$colMap['symbol']] ?? ''));
+            if ($rawSym === '' || is_numeric($rawSym)) {
+                continue;
+            }
+            if (preg_match('/^(total|subtotal|sub-total|balance|grand total|cash|portfolio value)/i', $rawSym)) {
+                continue;
+            }
 
             $shares = isset($colMap['shares']) && isset($row[$colMap['shares']])
                 ? $this->cleanNumber($row[$colMap['shares']])
@@ -282,7 +546,7 @@ class StatementParserService
                 : 0.0;
 
             $date = isset($colMap['date']) && isset($row[$colMap['date']])
-                ? $this->cleanDate($row[$colMap['date']])
+                ? $this->cleanDate((string) $row[$colMap['date']])
                 : null;
 
             if ($shares > 0) {
@@ -299,7 +563,43 @@ class StatementParserService
     }
 
     /**
-     * Parse Excel .xlsx files via native ZipArchive + SimpleXML (no heavy packages required).
+     * Parse CSV / TSV / Pipe / Semicolon delimited files with automatic delimiter & column detection.
+     */
+    public function parseCsv(string $filePath): array
+    {
+        $lines = file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        if (empty($lines)) {
+            return ['broker' => 'Empty CSV', 'holdings' => []];
+        }
+
+        // Strip UTF-8 BOM if present on first line
+        $lines[0] = preg_replace('/^\xEF\xBB\xBF/', '', $lines[0]);
+
+        $sampleText = implode("\n", array_slice($lines, 0, 8));
+        $delimiter = ',';
+        $counts = [
+            "\t" => substr_count($sampleText, "\t"),
+            ',' => substr_count($sampleText, ','),
+            ';' => substr_count($sampleText, ';'),
+            '|' => substr_count($sampleText, '|'),
+        ];
+        arsort($counts);
+        $topDelim = array_key_first($counts);
+        if ($counts[$topDelim] > 0) {
+            $delimiter = $topDelim;
+        }
+
+        $rows = [];
+        foreach ($lines as $i => $line) {
+            $cols = array_map('trim', str_getcsv($line, $delimiter, '"', "\\"));
+            $rows[$i] = $cols;
+        }
+
+        return $this->extractHoldingsFromTableRows($rows, 'CSV Statement');
+    }
+
+    /**
+     * Parse multi-sheet Excel .xlsx files via native ZipArchive + SimpleXML.
      */
     public function parseXlsx(string $filePath): array
     {
@@ -308,101 +608,340 @@ class StatementParserService
             throw new \RuntimeException("Unable to open XLSX archive.");
         }
 
-        // 1. Read shared strings
+        // 1. Read shared strings (handles plain <t> and rich-text <r><t>)
         $sharedStrings = [];
         $stringsXml = $zip->getFromName('xl/sharedStrings.xml');
         if ($stringsXml) {
-            $xml = simplexml_load_string($stringsXml);
+            $xml = @simplexml_load_string($stringsXml);
             if ($xml && isset($xml->si)) {
                 foreach ($xml->si as $si) {
-                    $sharedStrings[] = (string) ($si->t ?? ($si->r->t ?? ''));
+                    if (isset($si->t)) {
+                        $sharedStrings[] = (string) $si->t;
+                    } elseif (isset($si->r)) {
+                        $buf = '';
+                        foreach ($si->r as $run) {
+                            $buf .= (string) ($run->t ?? '');
+                        }
+                        $sharedStrings[] = $buf;
+                    } else {
+                        $sharedStrings[] = '';
+                    }
                 }
             }
         }
 
-        // 2. Read sheet1.xml
-        $sheetXml = $zip->getFromName('xl/worksheets/sheet1.xml');
+        // 2. Discover all worksheet XML entries cleanly
+        $sheetPaths = [];
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $name = $zip->getNameIndex($i);
+            if (preg_match('/^xl\/worksheets\/sheet\d+\.xml$/i', $name)) {
+                $sheetPaths[] = $name;
+            }
+        }
+        natsort($sheetPaths);
+
+        $allHoldings = [];
+        $detectedBroker = 'Excel Workbook';
+
+        foreach ($sheetPaths as $sheetPath) {
+            $sheetXml = $zip->getFromName($sheetPath);
+            if (! $sheetXml) {
+                continue;
+            }
+            $xml = @simplexml_load_string($sheetXml);
+            if (! $xml || ! isset($xml->sheetData->row)) {
+                continue;
+            }
+
+            $rows = [];
+            foreach ($xml->sheetData->row as $row) {
+                $rIndex = (int) $row['r'];
+                $cells = [];
+                foreach ($row->c as $c) {
+                    $r = (string) $c['r'];
+                    $colLetters = preg_replace('/[0-9]/', '', $r);
+                    $colIdx = $colLetters !== '' ? $this->columnLetterToIndex($colLetters) : count($cells);
+
+                    $type = (string) $c['t'];
+                    $val = (string) $c->v;
+                    if ($type === 's' && isset($sharedStrings[(int) $val])) {
+                        $val = $sharedStrings[(int) $val];
+                    } elseif ($type === 'inlineStr' && isset($c->is->t)) {
+                        $val = (string) $c->is->t;
+                    }
+                    $cells[$colIdx] = trim($val);
+                }
+                if (! empty($cells)) {
+                    ksort($cells);
+                    $rows[$rIndex] = $cells;
+                }
+            }
+
+            $res = $this->extractHoldingsFromTableRows($rows, 'Excel Workbook');
+            if (! empty($res['holdings'])) {
+                $allHoldings = array_merge($allHoldings, $res['holdings']);
+                $detectedBroker = $res['broker'] ?? $detectedBroker;
+            }
+        }
+
         $zip->close();
 
-        if (!$sheetXml) {
-            throw new \RuntimeException("Sheet 1 not found in XLSX file.");
+        return ['broker' => $detectedBroker, 'holdings' => $allHoldings];
+    }
+
+    /**
+     * Parse Word .docx documents by inspecting embedded tables (<w:tbl>) and paragraphs (<w:p>).
+     */
+    public function parseDocx(string $filePath): array
+    {
+        $zip = new ZipArchive();
+        if ($zip->open($filePath) !== true) {
+            throw new \RuntimeException("Unable to open DOCX archive.");
+        }
+        $docXml = $zip->getFromName('word/document.xml');
+        $zip->close();
+
+        if (! $docXml) {
+            return ['broker' => 'Word Document', 'holdings' => []];
         }
 
-        $xml = simplexml_load_string($sheetXml);
-        if (!$xml || !isset($xml->sheetData->row)) {
-            return ['broker' => 'Excel Statement', 'holdings' => []];
-        }
+        $dom = new \DOMDocument();
+        @$dom->loadXML($docXml);
 
-        $rows = [];
-        foreach ($xml->sheetData->row as $row) {
-            $rIndex = (int) $row['r'];
-            $cells = [];
-            foreach ($row->c as $c) {
-                $r = (string) $c['r'];
-                $colLetters = preg_replace('/[0-9]/', '', $r);
-                $colIdx = $this->columnLetterToIndex($colLetters);
+        $allHoldings = [];
+        $broker = 'Word Document';
 
-                $val = (string) $c->v;
-                if ((string) $c['t'] === 's' && isset($sharedStrings[(int) $val])) {
-                    $val = $sharedStrings[(int) $val];
+        // 1. Parse Word tables first
+        $tables = $dom->getElementsByTagName('tbl');
+        foreach ($tables as $tbl) {
+            $tableRows = [];
+            foreach ($tbl->getElementsByTagName('tr') as $tr) {
+                $rowCells = [];
+                foreach ($tr->getElementsByTagName('tc') as $tc) {
+                    $rowCells[] = trim(preg_replace('/\s+/', ' ', $tc->textContent));
                 }
-                $cells[$colIdx] = trim($val);
+                if (! empty(array_filter($rowCells, fn ($v) => $v !== ''))) {
+                    $tableRows[] = $rowCells;
+                }
             }
-            if (!empty($cells)) {
-                ksort($cells);
-                $rows[$rIndex] = $cells;
+            if (! empty($tableRows)) {
+                $res = $this->extractHoldingsFromTableRows($tableRows, 'Word Document');
+                if (! empty($res['holdings'])) {
+                    $allHoldings = array_merge($allHoldings, $res['holdings']);
+                    $broker = $res['broker'] ?? $broker;
+                }
             }
         }
 
-        // Convert structured rows to CSV-like array
-        $headerIdx = -1;
-        $colMap = [];
-        $broker = 'Excel Statement';
+        if (! empty($allHoldings)) {
+            return ['broker' => $broker, 'holdings' => $allHoldings];
+        }
 
-        foreach (array_slice($rows, 0, 15, true) as $rIdx => $row) {
-            $rowStr = strtolower(implode(' ', $row));
-            if (str_contains($rowStr, 'meristem')) $broker = 'Meristem Securities';
-            elseif (str_contains($rowStr, 'stanbic')) $broker = 'Stanbic IBTC';
-            elseif (str_contains($rowStr, 'cscs')) $broker = 'CSCS Clearing';
+        // 2. Fall back to paragraph text extraction
+        $paraText = [];
+        foreach ($dom->getElementsByTagName('p') as $p) {
+            $txt = trim(preg_replace('/\s+/', ' ', $p->textContent));
+            if ($txt !== '') {
+                $paraText[] = $txt;
+            }
+        }
 
-            $detected = $this->detectColumns($row);
-            if (isset($detected['symbol']) && (isset($detected['shares']) || isset($detected['price']))) {
-                $headerIdx = $rIdx;
-                $colMap = $detected;
+        return $this->parseUnstructuredText(implode("\n", $paraText), 'Word Document');
+    }
+
+    /**
+     * Parse OpenDocument Spreadsheet (.ods) files cleanly via ZipArchive + DOMDocument.
+     */
+    public function parseOds(string $filePath): array
+    {
+        $zip = new ZipArchive();
+        if ($zip->open($filePath) !== true) {
+            throw new \RuntimeException("Unable to open ODS archive.");
+        }
+        $contentXml = $zip->getFromName('content.xml');
+        $zip->close();
+
+        if (! $contentXml) {
+            return ['broker' => 'OpenDocument Spreadsheet', 'holdings' => []];
+        }
+
+        $dom = new \DOMDocument();
+        @$dom->loadXML($contentXml);
+        $tables = $dom->getElementsByTagName('table');
+        $allHoldings = [];
+        $broker = 'OpenDocument Spreadsheet';
+
+        foreach ($tables as $table) {
+            $tableRows = [];
+            foreach ($table->getElementsByTagName('table-row') as $tr) {
+                $rowCells = [];
+                foreach ($tr->getElementsByTagName('table-cell') as $tc) {
+                    $val = trim(preg_replace('/\s+/', ' ', $tc->textContent));
+                    $repeat = (int) $tc->getAttribute('table:number-columns-repeated');
+                    $repeatCount = ($repeat > 0 && $repeat <= 12) ? $repeat : 1;
+                    for ($r = 0; $r < $repeatCount; $r++) {
+                        $rowCells[] = $val;
+                    }
+                }
+                if (! empty(array_filter($rowCells, fn ($v) => $v !== ''))) {
+                    $tableRows[] = $rowCells;
+                }
+            }
+            $res = $this->extractHoldingsFromTableRows($tableRows, 'OpenDocument Spreadsheet');
+            if (! empty($res['holdings'])) {
+                $allHoldings = array_merge($allHoldings, $res['holdings']);
+                $broker = $res['broker'] ?? $broker;
+            }
+        }
+
+        return ['broker' => $broker, 'holdings' => $allHoldings];
+    }
+
+    /**
+     * Parse JSON portfolio payloads (array of holdings, nested keys, or symbol->units map).
+     */
+    public function parseJson(string $filePath): array
+    {
+        $raw = @file_get_contents($filePath);
+        if (! $raw) {
+            return ['broker' => 'JSON Portfolio', 'holdings' => []];
+        }
+        $data = json_decode($raw, true);
+        if (! is_array($data)) {
+            return ['broker' => 'JSON Portfolio', 'holdings' => []];
+        }
+
+        $broker = is_string($data['broker'] ?? null)
+            ? $data['broker']
+            : (is_string($data['institution'] ?? null) ? $data['institution'] : 'JSON Portfolio');
+
+        // Recursively locate list of holding arrays
+        $candidates = $data;
+        foreach (['holdings', 'positions', 'portfolio', 'securities', 'constituents', 'data', 'items'] as $key) {
+            if (isset($data[$key]) && is_array($data[$key])) {
+                $candidates = $data[$key];
                 break;
             }
         }
 
-        if ($headerIdx === -1 || !isset($colMap['symbol'])) {
-            return ['broker' => $broker, 'holdings' => []];
+        $holdings = [];
+        if (array_is_list($candidates)) {
+            foreach ($candidates as $row) {
+                if (! is_array($row)) {
+                    continue;
+                }
+                $sym = $row['symbol'] ?? $row['ticker'] ?? $row['stock'] ?? $row['security'] ?? $row['name'] ?? $row['symbol_or_name'] ?? null;
+                $shares = $row['shares'] ?? $row['units'] ?? $row['quantity'] ?? $row['qty'] ?? $row['volume'] ?? 0;
+                $price = $row['avg_price'] ?? $row['average_buy_price'] ?? $row['price'] ?? $row['unit_price'] ?? $row['cost'] ?? 0;
+                if ($sym && (float) $shares > 0) {
+                    $holdings[] = [
+                        'symbol_or_name' => trim((string) $sym),
+                        'shares' => $this->cleanNumber($shares),
+                        'average_buy_price' => $this->cleanNumber($price),
+                        'purchase_date' => isset($row['date']) ? $this->cleanDate((string) $row['date']) : null,
+                    ];
+                }
+            }
+        } else {
+            // Associative map e.g. {"DANGCEM": 50000, "MTNN": 120000}
+            foreach ($candidates as $sym => $val) {
+                if (! is_string($sym) || preg_match('/^(broker|institution|name|currency|date|meta|summary)/i', $sym)) {
+                    continue;
+                }
+                if (is_numeric($val) && (float) $val > 0) {
+                    $holdings[] = [
+                        'symbol_or_name' => trim($sym),
+                        'shares' => (float) $val,
+                        'average_buy_price' => 0.0,
+                        'purchase_date' => null,
+                    ];
+                }
+            }
         }
 
+        return ['broker' => $broker, 'holdings' => $holdings];
+    }
+
+    /**
+     * Parse HTML or XML documents containing portfolio tables.
+     */
+    public function parseHtmlOrXml(string $filePath): array
+    {
+        $raw = @file_get_contents($filePath);
+        if (! $raw) {
+            return ['broker' => 'Web Statement', 'holdings' => []];
+        }
+
+        $dom = new \DOMDocument();
+        @$dom->loadHTML($raw, LIBXML_NOERROR | LIBXML_NOWARNING);
+
+        $allHoldings = [];
+        $broker = 'Web / HTML Statement';
+        foreach ($dom->getElementsByTagName('table') as $table) {
+            $tableRows = [];
+            foreach ($table->getElementsByTagName('tr') as $tr) {
+                $cells = [];
+                foreach ($tr->childNodes as $child) {
+                    if (in_array(strtolower($child->nodeName), ['th', 'td'], true)) {
+                        $cells[] = trim(preg_replace('/\s+/', ' ', $child->textContent));
+                    }
+                }
+                if (! empty(array_filter($cells, fn ($v) => $v !== ''))) {
+                    $tableRows[] = $cells;
+                }
+            }
+            if (! empty($tableRows)) {
+                $res = $this->extractHoldingsFromTableRows($tableRows, $broker);
+                if (! empty($res['holdings'])) {
+                    $allHoldings = array_merge($allHoldings, $res['holdings']);
+                    $broker = $res['broker'] ?? $broker;
+                }
+            }
+        }
+
+        if (! empty($allHoldings)) {
+            return ['broker' => $broker, 'holdings' => $allHoldings];
+        }
+
+        $plain = trim(strip_tags($raw));
+        return $this->parseUnstructuredText($plain, $broker);
+    }
+
+    /**
+     * Smart unstructured text / Markdown / blotter line extractor matching against known symbols & aliases.
+     */
+    public function parseUnstructuredText(string $text, string $defaultBroker = 'Text Blotter'): array
+    {
+        $lines = preg_split('/\r\n|\r|\n/', $text);
         $holdings = [];
-        foreach ($rows as $rIdx => $row) {
-            if ($rIdx <= $headerIdx) continue;
-            $rawSym = $row[$colMap['symbol']] ?? '';
-            if (empty($rawSym) || is_numeric($rawSym)) continue;
-            if (preg_match('/^(total|subtotal|balance|grand total|cash)/i', $rawSym)) continue;
+        $broker = $defaultBroker;
 
-            $shares = isset($colMap['shares']) && isset($row[$colMap['shares']])
-                ? $this->cleanNumber($row[$colMap['shares']])
-                : 0.0;
+        $lowerText = strtolower($text);
+        if (str_contains($lowerText, 'meristem')) $broker = 'Meristem Securities';
+        elseif (str_contains($lowerText, 'stanbic')) $broker = 'Stanbic IBTC Stockbrokers';
+        elseif (str_contains($lowerText, 'lotus')) $broker = 'Lotus Capital';
+        elseif (str_contains($lowerText, 'norrenberger')) $broker = 'Norrenberger';
+        elseif (str_contains($lowerText, 'cscs')) $broker = 'CSCS Statement';
 
-            $price = isset($colMap['price']) && isset($row[$colMap['price']])
-                ? $this->cleanNumber($row[$colMap['price']])
-                : 0.0;
+        foreach ($lines as $line) {
+            $clean = trim(preg_replace('/[|`*•\-]+/', ' ', $line));
+            if ($clean === '' || preg_match('/^(total|subtotal|account|statement|date|page|client|balance|symbol|ticker)/i', $clean)) {
+                continue;
+            }
 
-            $date = isset($colMap['date']) && isset($row[$colMap['date']])
-                ? $this->cleanDate($row[$colMap['date']])
-                : null;
-
-            if ($shares > 0) {
-                $holdings[] = [
-                    'symbol_or_name' => $rawSym,
-                    'shares' => $shares,
-                    'average_buy_price' => $price,
-                    'purchase_date' => $date,
-                ];
+            // Match e.g. "DANGCEM 50,000 285.00" or "DANGCEM - 50000" or "MTN Nigeria 120,000 units"
+            if (preg_match('/^([A-Z][A-Z0-9\.\& ]{1,36}?)\s+([\d,]{2,}(?:\.\d+)?)(?:\s+(?:units|shares|qty))?(?:\s+(?:@|₦|NGN|N|\$)?\s*([\d,]+(?:\.\d+)?))?/i', $clean, $m)) {
+                $sym = trim($m[1]);
+                $shares = $this->cleanNumber($m[2]);
+                $price = isset($m[3]) ? $this->cleanNumber($m[3]) : 0.0;
+                if ($sym !== '' && $shares > 0) {
+                    $holdings[] = [
+                        'symbol_or_name' => $sym,
+                        'shares' => $shares,
+                        'average_buy_price' => $price,
+                        'purchase_date' => null,
+                    ];
+                }
             }
         }
 
@@ -516,11 +1055,107 @@ class StatementParserService
             return ['broker' => $broker, 'holdings' => $holdings];
         }
 
+        // Try unstructured text line scan before invoking external AI
+        $textFallback = $this->parseUnstructuredText($text, $broker);
+        if (!empty($textFallback['holdings'])) {
+            return $textFallback;
+        }
+
         return $this->parseWithGemini($filePath, 'application/pdf');
     }
 
+    protected function geminiExtractionPrompt(): string
+    {
+        return 'You are an expert investment statement parser. Analyze this portfolio statement, blotter, spreadsheet export, or screenshot from any brokerage or asset manager. Extract ALL equity/stock holdings and share/unit positions. Return ONLY a valid JSON object matching this schema without markdown codeblocks:
+{
+  "broker_name": "detected broker or institution name or unknown",
+  "holdings": [
+    {
+      "symbol_or_name": "exact ticker or company name",
+      "shares": 1000,
+      "average_buy_price": 50.25,
+      "purchase_date": "YYYY-MM-DD or null"
+    }
+  ]
+}';
+    }
+
     /**
-     * Fallback AI Document Parser using Gemini Flash.
+     * Route non-native formats cleanly into Gemini (extracting text first for XML/Office containers if needed).
+     */
+    protected function parseAnyWithGemini(string $filePath, string $format, string $mimeType): array
+    {
+        if (in_array($format, ['docx', 'xlsx', 'ods', 'html', 'xml', 'csv', 'tsv', 'json', 'text'], true)) {
+            $extractedText = @file_get_contents($filePath) ?: '';
+            if (in_array($format, ['docx', 'xlsx', 'ods'], true)) {
+                $zip = new ZipArchive();
+                if ($zip->open($filePath) === true) {
+                    $chunks = [];
+                    for ($i = 0; $i < $zip->numFiles; $i++) {
+                        $entry = $zip->getNameIndex($i);
+                        if (str_ends_with(strtolower($entry), '.xml')) {
+                            $chunks[] = strip_tags(str_replace('<', ' <', (string) $zip->getFromIndex($i)));
+                        }
+                    }
+                    $zip->close();
+                    $extractedText = trim(preg_replace('/\s+/', ' ', implode("\n", $chunks)));
+                }
+            }
+            if ($extractedText !== '') {
+                return $this->parseTextWithGemini(mb_substr($extractedText, 0, 80000));
+            }
+        }
+
+        return $this->parseWithGemini($filePath, $mimeType);
+    }
+
+    /**
+     * Ask Gemini Flash to extract structured holdings directly from text/tables.
+     */
+    public function parseTextWithGemini(string $text): array
+    {
+        $apiKeysString = config('services.gemini.key');
+        if (empty($apiKeysString)) {
+            return ['broker' => 'Statement Import', 'holdings' => []];
+        }
+        $apiKeys = array_map('trim', explode(',', $apiKeysString));
+        $currentKeyIndex = Cache::get('gemini_key_index', 0);
+        $apiKey = $apiKeys[$currentKeyIndex] ?? $apiKeys[0];
+
+        try {
+            $genUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=' . $apiKey;
+            $response = Http::timeout(45)->post($genUrl, [
+                'contents' => [[
+                    'parts' => [
+                        ['text' => $this->geminiExtractionPrompt() . "\n\nDOCUMENT CONTENT:\n" . $text],
+                    ],
+                ]],
+                'generationConfig' => [
+                    'temperature' => 0.1,
+                    'responseMimeType' => 'application/json',
+                ],
+            ]);
+
+            if ($response->successful()) {
+                $rawJson = (string) $response->json('candidates.0.content.parts.0.text');
+                $rawJson = trim(str_replace(['```json', '```'], '', $rawJson));
+                $decoded = json_decode($rawJson, true);
+                if (isset($decoded['holdings']) && is_array($decoded['holdings'])) {
+                    return [
+                        'broker' => $decoded['broker_name'] ?? 'Broker Statement',
+                        'holdings' => $decoded['holdings'],
+                    ];
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::error('[StatementParserService] Gemini text parsing error: ' . $e->getMessage());
+        }
+
+        return ['broker' => 'Statement Import', 'holdings' => []];
+    }
+
+    /**
+     * Fallback AI Document & Vision Parser using Gemini Flash.
      */
     public function parseWithGemini(string $filePath, string $mimeType = 'application/pdf'): array
     {
@@ -535,65 +1170,58 @@ class StatementParserService
         $apiKey = $apiKeys[$currentKeyIndex] ?? $apiKeys[0];
 
         try {
-            // Upload file to Gemini Files API
-            $uploadUrl = 'https://generativelanguage.googleapis.com/upload/v1beta/files?key=' . $apiKey;
             $fileData = file_get_contents($filePath);
             $fileSize = strlen($fileData);
-            $uploadResponse = Http::withHeaders([
-                'X-Goog-Upload-Command' => 'start, upload, finalize',
-                'X-Goog-Upload-Header-Content-Length' => (string) $fileSize,
-                'X-Goog-Upload-Header-Content-Type' => $mimeType,
-                'Content-Type' => $mimeType,
-            ])->withBody($fileData, $mimeType)
-              ->timeout(60)
-              ->post($uploadUrl);
 
-            if ($uploadResponse->failed()) {
-                Log::error("[StatementParserService] Gemini file upload failed: " . $uploadResponse->body());
-                return ['broker' => 'Statement Import', 'holdings' => []];
-            }
-
-            $uploadData = $uploadResponse->json();
-            $fileUri = $uploadData['file']['uri'] ?? null;
-
-            if (!$fileUri) {
-                Log::error("[StatementParserService] Gemini file upload returned no URI: " . $uploadResponse->body());
-                return ['broker' => 'Statement Import', 'holdings' => []];
-            }
-
-            // Generate structured content from Gemini Flash
-            $prompt = 'You are an expert investment statement parser. Analyze this portfolio statement or trade log from any brokerage institution. Extract all equity/stock holdings and positions. Return ONLY a valid JSON object matching this schema without markdown codeblocks or quotes:
-{
-  "broker_name": "detected broker name or unknown",
-  "holdings": [
-    {
-      "symbol_or_name": "exact ticker or company name",
-      "shares": 1000,
-      "average_buy_price": 50.25,
-      "purchase_date": "YYYY-MM-DD or null"
-    }
-  ]
-}';
-
-            $genUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . $apiKey;
-            $payload = [
-                'contents' => [
-                    [
-                        'parts' => [
-                            ['text' => $prompt],
-                            ['fileData' => ['mimeType' => $mimeType, 'fileUri' => $fileUri]],
-                        ],
+            // Prefer inline base64 for files <= 4MB (faster, fewer roundtrips); Files API for larger docs
+            $docPart = null;
+            if ($fileSize <= 4 * 1024 * 1024) {
+                $docPart = [
+                    'inlineData' => [
+                        'mimeType' => $mimeType,
+                        'data' => base64_encode($fileData),
                     ],
-                ],
+                ];
+            } else {
+                $uploadUrl = 'https://generativelanguage.googleapis.com/upload/v1beta/files?key=' . $apiKey;
+                $uploadResponse = Http::withHeaders([
+                    'X-Goog-Upload-Command' => 'start, upload, finalize',
+                    'X-Goog-Upload-Header-Content-Length' => (string) $fileSize,
+                    'X-Goog-Upload-Header-Content-Type' => $mimeType,
+                    'Content-Type' => $mimeType,
+                ])->withBody($fileData, $mimeType)
+                  ->timeout(60)
+                  ->post($uploadUrl);
+
+                if ($uploadResponse->successful()) {
+                    $fileUri = $uploadResponse->json('file.uri');
+                    if ($fileUri) {
+                        $docPart = ['fileData' => ['mimeType' => $mimeType, 'fileUri' => $fileUri]];
+                    }
+                }
+            }
+
+            if (! $docPart) {
+                return ['broker' => 'Statement Import', 'holdings' => []];
+            }
+
+            $genUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=' . $apiKey;
+            $response = Http::timeout(60)->post($genUrl, [
+                'contents' => [[
+                    'parts' => [
+                        ['text' => $this->geminiExtractionPrompt()],
+                        $docPart,
+                    ],
+                ]],
                 'generationConfig' => [
                     'temperature' => 0.1,
                     'responseMimeType' => 'application/json',
                 ],
-            ];
+            ]);
 
-            $response = Http::timeout(60)->post($genUrl, $payload);
             if ($response->successful()) {
-                $candidates = $response->json('candidates.0.content.parts.0.text');
+                $candidates = (string) $response->json('candidates.0.content.parts.0.text');
+                $candidates = trim(str_replace(['```json', '```'], '', $candidates));
                 $decoded = json_decode($candidates, true);
                 if (isset($decoded['holdings']) && is_array($decoded['holdings'])) {
                     return [
@@ -825,23 +1453,23 @@ PY;
     {
         $map = [];
         foreach ($headers as $idx => $header) {
-            $h = strtolower(trim($header));
-            if (empty($h)) continue;
+            $h = strtolower(trim((string) $header));
+            if ($h === '') continue;
 
             // Date match first to avoid matching "value date" or "trade date" as security/rate
-            if (!isset($map['date']) && preg_match('/\b(date|trade\s*date|transaction\s*date|purchase\s*date|value\s*date|time)\b/i', $h)) {
+            if (!isset($map['date']) && preg_match('/\b(date|trade\s*date|transaction\s*date|purchase\s*date|value\s*date|settlement\s*date|time)\b/i', $h)) {
                 $map['date'] = $idx;
             }
-            // Price match (average cost, unit cost, buy price, consideration)
-            elseif (!isset($map['price']) && preg_match('/\b(average|avg|cost|unit\s*cost|unit\s*price|buy\s*price|buy|price|rate|consideration)\b/i', $h)) {
+            // Price match (average cost, unit cost, buy price, market price, closing price)
+            elseif (!isset($map['price']) && preg_match('/\b(average|avg|cost|unit\s*cost|unit\s*price|buy\s*price|market\s*price|closing\s*price|buy|price|rate|consideration)\b/i', $h)) {
                 $map['price'] = $idx;
             }
-            // Shares / Quantity
-            elseif (!isset($map['shares']) && preg_match('/\b(shares|qty|quantity|units|volume|vol|balance|holdings|position)\b/i', $h)) {
+            // Shares / Quantity / Shareholding
+            elseif (!isset($map['shares']) && preg_match('/\b(shares|shareholding|qty|quantity|units|units\s*held|volume|vol|balance|holdings|position)\b/i', $h)) {
                 $map['shares'] = $idx;
             }
-            // Symbol / Ticker / Description
-            elseif (!isset($map['symbol']) && preg_match('/\b(symbol|ticker|stock|security|instrument|asset|code|description|company)\b/i', $h)) {
+            // Symbol / Ticker / Security Name / Company
+            elseif (!isset($map['symbol']) && preg_match('/\b(symbol|ticker|stock|stock\s*code|security|instrument|asset|code|isin|description|company|company\s*name|name|issuer|equity)\b/i', $h)) {
                 $map['symbol'] = $idx;
             }
         }
