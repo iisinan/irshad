@@ -57,7 +57,7 @@ function MonthlySpotlightView() {
         </div>
         <h3 style={{ margin: '0 0 6px', fontSize: '1.35rem', fontWeight: 900, color: 'var(--text-dark)' }}>Monthly Shariah Market Spotlight</h3>
         <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--text-muted)' }}>
-          Monthly sector Shariah compliance health and curated market intelligence across the NGX.
+          Monthly sector Shariah compliance health across the NGX.
         </p>
       </div>
 
@@ -83,30 +83,6 @@ function MonthlySpotlightView() {
           </div>
         </div>
       </div>
-
-      {(spotlight.spotlight_articles || []).length > 0 && (
-        <div style={{ background: 'var(--bg)', borderRadius: '20px', padding: '22px', border: '1px solid var(--border)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.95rem' }}>
-            <Newspaper size={18} color="var(--primary)" /> Curated Market Intelligence Briefs
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px' }}>
-            {(spotlight.spotlight_articles || []).map(art => (
-              <div key={art.id} style={{ padding: '14px', borderRadius: '14px', background: 'var(--bg-section)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--primary)' }}>{art.symbol || art.category}</span>
-                  {art.time_ago && <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{art.time_ago}</span>}
-                </div>
-                <div style={{ fontWeight: 800, fontSize: '0.86rem', color: 'var(--text-dark)', lineHeight: 1.35 }}>{art.title}</div>
-                {art.source_url && (
-                  <a href={art.source_url} target="_blank" rel="noreferrer" style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--primary)', marginTop: 'auto', textDecoration: 'none' }}>
-                    Read source →
-                  </a>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
