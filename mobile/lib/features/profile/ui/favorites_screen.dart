@@ -10,6 +10,7 @@ import 'package:irshad_mobile/core/widgets/company_avatar.dart';
 import 'package:irshad_mobile/features/profile/data/user_activity_repository.dart';
 import 'package:irshad_mobile/core/providers/app_state_provider.dart';
 import 'package:irshad_mobile/core/widgets/upgrade_paywall_bottom_sheet.dart';
+import 'package:irshad_mobile/core/widgets/guest_gate.dart';
 import 'package:irshad_mobile/features/profile/ui/widgets/alert_preferences_bottom_sheet.dart';
 import 'package:irshad_mobile/features/profile/ui/widgets/add_assets_bottom_sheet.dart';
 
@@ -187,10 +188,12 @@ class _FavoritesScreenState extends State<FavoritesScreen> with WidgetsBindingOb
 
   @override
   Widget build(BuildContext context) {
-    final tier = Provider.of<AppStateProvider>(context).userProfile?['tier'];
+    final appState = Provider.of<AppStateProvider>(context);
+    final isGuest = !appState.isAuthenticated;
+    final tier = appState.userProfile?['tier'];
     final tierSlug = tier?['slug'] ?? 'free';
     final watchlistLimit = tier?['features']?['watchlist_limit'] ?? (tierSlug == 'max' ? -1 : tierSlug == 'pro' ? 2 : 0);
-    final isWatchlistLocked = tierSlug == 'free' || watchlistLimit == 0;
+    final isWatchlistLocked = isGuest || tierSlug == 'free' || watchlistLimit == 0;
 
     if (isWatchlistLocked) {
       return Scaffold(
@@ -216,22 +219,32 @@ class _FavoritesScreenState extends State<FavoritesScreen> with WidgetsBindingOb
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.lock_outline_rounded, size: 42, color: context.primary),
+                  Icon(isGuest ? Icons.bookmark_border_rounded : Icons.lock_outline_rounded, size: 42, color: context.primary),
                   const SizedBox(height: 16),
                   Text(
-                    'Watchlist & Alerts Unavailable',
+                    isGuest ? 'Save Your Watchlist & Alerts' : 'Watchlist & Alerts Unavailable',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Watchlist tracking and alerts are not enabled on your current account.',
+                    isGuest
+                        ? 'Create a free account or sign in to save stocks to your watchlist and receive price & compliance alerts.'
+                        : 'Watchlist tracking and alerts are not enabled on your current account.',
                     style: TextStyle(fontSize: 13, color: context.textMuted, height: 1.5),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {
+                      if (isGuest) {
+                        GuestGate.showAuthPrompt(
+                          context,
+                          title: 'Create a Free Account',
+                          message: 'Create a free account or sign in to track your watchlist and set alerts.',
+                        );
+                        return;
+                      }
                       showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,
@@ -249,7 +262,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> with WidgetsBindingOb
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     ),
-                    child: const Text('Account Info', style: TextStyle(fontWeight: FontWeight.w800)),
+                    child: Text(isGuest ? 'Sign In or Register' : 'Account Info', style: const TextStyle(fontWeight: FontWeight.w800)),
                   ),
                 ],
               ),

@@ -5,6 +5,7 @@ import '../../providers/portfolio_provider.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
 import 'package:irshad_mobile/core/providers/app_state_provider.dart';
 import 'package:irshad_mobile/core/widgets/upgrade_paywall_bottom_sheet.dart';
+import 'package:irshad_mobile/core/widgets/guest_gate.dart';
 import '../widgets/purification_card.dart';
 import '../widgets/charities_bottom_sheet.dart';
 import 'updates/updates_purification_tab.dart';
@@ -84,10 +85,12 @@ class _PurificationTabState extends State<PurificationTab> {
 
   @override
   Widget build(BuildContext context) {
-    final tier = Provider.of<AppStateProvider>(context).userProfile?['tier'];
+    final appState = Provider.of<AppStateProvider>(context);
+    final isGuest = !appState.isAuthenticated;
+    final tier = appState.userProfile?['tier'];
     final tierSlug = tier?['slug'] ?? 'free';
     final purificationsLimit = tier?['features']?['purifications_per_month'] ?? (tierSlug == 'max' ? -1 : tierSlug == 'pro' ? 6 : 0);
-    final isLocked = purificationsLimit == 0;
+    final isLocked = isGuest || purificationsLimit == 0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -113,18 +116,28 @@ class _PurificationTabState extends State<PurificationTab> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.lock_outline_rounded, size: 42, color: context.primary),
+                              Icon(isGuest ? Icons.calculate_outlined : Icons.lock_outline_rounded, size: 42, color: context.primary),
                               const SizedBox(height: 16),
-                              Text('Automated Purification Unavailable', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark), textAlign: TextAlign.center),
+                              Text(isGuest ? 'Track Dividend Purification' : 'Automated Purification Unavailable', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark), textAlign: TextAlign.center),
                               const SizedBox(height: 8),
                               Text(
-                                'Dividend purification calculations are not enabled on your current account.',
+                                isGuest
+                                    ? 'Create a free account or sign in to calculate dividend purification on your holdings.'
+                                    : 'Dividend purification calculations are not enabled on your current account.',
                                 style: TextStyle(fontSize: 13, color: context.textMuted, height: 1.5),
                                 textAlign: TextAlign.center,
                               ),
                               const SizedBox(height: 20),
                               ElevatedButton(
                                 onPressed: () {
+                                  if (isGuest) {
+                                    GuestGate.showAuthPrompt(
+                                      context,
+                                      title: 'Create a Free Account',
+                                      message: 'Create a free account or sign in to calculate dividend purification.',
+                                    );
+                                    return;
+                                  }
                                   showModalBottomSheet(
                                     context: context,
                                     isScrollControlled: true,
@@ -142,7 +155,7 @@ class _PurificationTabState extends State<PurificationTab> {
                                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                                 ),
-                                child: const Text('Account Info', style: TextStyle(fontWeight: FontWeight.w800)),
+                                child: Text(isGuest ? 'Sign In or Register' : 'Account Info', style: const TextStyle(fontWeight: FontWeight.w800)),
                               ),
                             ],
                           ),
