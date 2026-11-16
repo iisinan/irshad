@@ -12,6 +12,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\DirectoryController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\HistoryController;
+use App\Http\Controllers\InstitutionApiController;
 use App\Http\Controllers\InstitutionController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\NotificationController;
@@ -31,6 +32,7 @@ use App\Http\Controllers\VerificationController;
 use App\Http\Controllers\WatchlistController;
 use App\Http\Controllers\ZakatController;
 use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\InstitutionApiAuthMiddleware;
 use App\Http\Middleware\InstitutionMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -431,7 +433,19 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/institution/portfolios', [InstitutionController::class, 'portfolios']);
             Route::post('/institution/portfolios', [InstitutionController::class, 'savePortfolio']);
             Route::delete('/institution/portfolios/{id}', [InstitutionController::class, 'deletePortfolio']);
+
+            // Institutional API Key Management
+            Route::get('/institution/api-keys', [InstitutionApiController::class, 'listKeys']);
+            Route::post('/institution/api-keys', [InstitutionApiController::class, 'createKey']);
+            Route::delete('/institution/api-keys/{id}', [InstitutionApiController::class, 'revokeKey']);
         });
+    });
+
+    // ── B2B Broker & Bank API (Authenticated via X-Api-Key / Bearer irsh_live_... or Sanctum) ──
+    Route::middleware(InstitutionApiAuthMiddleware::class)->group(function () {
+        Route::get('/b2b/stocks/compliant-universe', [InstitutionApiController::class, 'compliantUniverse']);
+        Route::get('/b2b/stocks/{symbol}/pre-trade-check', [InstitutionApiController::class, 'preTradeCheck']);
+        Route::post('/b2b/portfolio/screen', [InstitutionApiController::class, 'screenBook']);
     });
 });
 

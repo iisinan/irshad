@@ -14,7 +14,7 @@ export function VerdictBadge({ status, purificationRequired, impureRatio }) {
     return (
       <span style={{
         display: 'inline-flex', alignItems: 'center', gap: 5,
-        padding: '4px 10px', borderRadius: 999, fontSize: '0.71rem', fontWeight: 800,
+        padding: '4px 10px', borderRadius: 999, fontSize: '0.72rem', fontWeight: 800,
         background: needsPurify ? 'rgba(245, 158, 11, 0.12)' : 'var(--halal-bg)',
         color: needsPurify ? '#b45309' : 'var(--halal)',
         border: `1px solid ${needsPurify ? 'rgba(245, 158, 11, 0.35)' : 'var(--halal-border)'}`,
@@ -29,7 +29,7 @@ export function VerdictBadge({ status, purificationRequired, impureRatio }) {
     return (
       <span style={{
         display: 'inline-flex', alignItems: 'center', gap: 5,
-        padding: '4px 10px', borderRadius: 999, fontSize: '0.71rem', fontWeight: 800,
+        padding: '4px 10px', borderRadius: 999, fontSize: '0.72rem', fontWeight: 800,
         background: 'var(--non-compliant-bg)',
         color: 'var(--non-compliant)',
         border: '1px solid var(--non-compliant-border)',
@@ -44,19 +44,19 @@ export function VerdictBadge({ status, purificationRequired, impureRatio }) {
     return (
       <span style={{
         display: 'inline-flex', alignItems: 'center', gap: 5,
-        padding: '4px 10px', borderRadius: 999, fontSize: '0.71rem', fontWeight: 800,
+        padding: '4px 10px', borderRadius: 999, fontSize: '0.72rem', fontWeight: 800,
         background: 'var(--bg-section)', color: 'var(--text-muted)',
         border: '1px solid var(--border)', whiteSpace: 'nowrap',
       }}>
         <Info size={12} aria-hidden="true" />
-        Unmapped Ticker
+        Unmapped
       </span>
     );
   }
   return (
     <span style={{
       display: 'inline-flex', alignItems: 'center', gap: 5,
-      padding: '4px 10px', borderRadius: 999, fontSize: '0.71rem', fontWeight: 800,
+      padding: '4px 10px', borderRadius: 999, fontSize: '0.72rem', fontWeight: 800,
       background: 'var(--doubtful-bg)', color: '#92400e',
       border: '1px solid var(--doubtful-border)', whiteSpace: 'nowrap',
     }}>
@@ -96,13 +96,13 @@ const RatioMeter = ({ label, value, threshold }) => {
 
 export default function InstitutionalVerdictsTable({
   holdings = [],
-  title = 'Screened Holdings & AAOIFI Verdicts',
+  title = 'Portfolio Screening Verdicts',
   onRemoveHolding,
 }) {
   const captionId = useId();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [sortCol, setSortCol] = useState('weight_pct');
+  const [sortCol, setSortCol] = useState('market_value');
   const [sortDir, setSortDir] = useState('descending');
   const [expandedSymbol, setExpandedSymbol] = useState(null);
   const [liveStatusText, setLiveStatusText] = useState('');
@@ -130,7 +130,7 @@ export default function InstitutionalVerdictsTable({
 
     const factor = sortDir === 'ascending' ? 1 : -1;
     return [...list].sort((a, b) => {
-      if (['symbol', 'name', 'sector', 'status'].includes(sortCol)) {
+      if (['symbol', 'status'].includes(sortCol)) {
         return factor * collator.compare(String(a[sortCol] || ''), String(b[sortCol] || ''));
       }
       const va = Number(a[sortCol] ?? 0);
@@ -196,7 +196,7 @@ export default function InstitutionalVerdictsTable({
           style={{
             width: '100%',
             minHeight: 40,
-            padding: '10px 12px',
+            padding: '10px 14px',
             background: 'transparent',
             border: 'none',
             display: 'inline-flex',
@@ -222,14 +222,14 @@ export default function InstitutionalVerdictsTable({
   return (
     <div style={{
       background: 'var(--bg)',
-      borderRadius: 20,
+      borderRadius: 18,
       border: '1px solid var(--border)',
       boxShadow: 'var(--shadow-sm)',
       overflow: 'hidden',
     }}>
-      {/* Filter & Search Toolbar */}
+      {/* Clean Filter & Search Toolbar */}
       <div style={{
-        padding: '18px 20px',
+        padding: '14px 18px',
         borderBottom: '1px solid var(--border)',
         display: 'flex',
         flexWrap: 'wrap',
@@ -241,16 +241,16 @@ export default function InstitutionalVerdictsTable({
           {[
             { id: 'all', label: `All (${counts.all})` },
             { id: 'halal', label: `Compliant (${counts.halal})` },
-            { id: 'purify', label: `Needs Purification (${counts.purify})` },
-            { id: 'non-compliant', label: `Flagged Non-Compliant (${counts['non-compliant']})` },
-            ...(counts.doubtful > 0 ? [{ id: 'doubtful', label: `Doubtful/Other (${counts.doubtful})` }] : []),
+            { id: 'purify', label: `Purify (${counts.purify})` },
+            ...(counts['non-compliant'] > 0 ? [{ id: 'non-compliant', label: `Flagged (${counts['non-compliant']})` }] : []),
+            ...(counts.doubtful > 0 ? [{ id: 'doubtful', label: `Other (${counts.doubtful})` }] : []),
           ].map(pill => (
             <button
               key={pill.id}
               type="button"
               onClick={() => setStatusFilter(pill.id)}
               style={{
-                padding: '7px 12px',
+                padding: '6px 12px',
                 borderRadius: 999,
                 fontSize: '0.75rem',
                 fontWeight: 700,
@@ -266,24 +266,24 @@ export default function InstitutionalVerdictsTable({
           ))}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'nowrap', flex: '0 1 auto', minWidth: 0 }}>
-          <div style={{ position: 'relative', width: 250, minWidth: 180, flex: '1 1 220px' }}>
-            <Search size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} aria-hidden="true" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'nowrap', flex: '0 1 auto', minWidth: 0 }}>
+          <div style={{ position: 'relative', width: 230, minWidth: 160, flex: '1 1 200px' }}>
+            <Search size={14} style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} aria-hidden="true" />
             <input
               type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search ticker, company, sector..."
+              placeholder="Search ticker or sector..."
               aria-label="Filter screened holdings"
               style={{
                 width: '100%',
                 boxSizing: 'border-box',
-                padding: '8px 12px 8px 34px',
+                padding: '8px 10px 8px 32px',
                 borderRadius: 10,
                 border: '1px solid var(--border-strong)',
                 background: 'var(--bg-section)',
                 color: 'var(--text-dark)',
-                fontSize: '0.8rem',
+                fontSize: '0.78rem',
                 outline: 'none',
               }}
             />
@@ -328,40 +328,37 @@ export default function InstitutionalVerdictsTable({
         aria-labelledby={captionId}
         style={{
           overflowX: 'auto',
-          maxHeight: '620px',
+          maxHeight: '600px',
           overflowY: 'auto',
           width: '100%',
         }}
       >
-        <table style={{ width: '100%', minWidth: 900, borderCollapse: 'separate', borderSpacing: 0 }}>
+        <table style={{ width: '100%', minWidth: 760, borderCollapse: 'separate', borderSpacing: 0 }}>
           <caption id={captionId} style={{
             textAlign: 'left',
-            padding: '12px 20px 6px',
-            fontSize: '0.78rem',
+            padding: '10px 18px 4px',
+            fontSize: '0.75rem',
             fontWeight: 700,
             color: 'var(--text-muted)',
           }}>
-            {title} — Click any row to inspect AAOIFI financial ratios &amp; business activity rationale
+            {title} — Click a row to view full AAOIFI financial ratios
           </caption>
           <thead style={{ position: 'sticky', top: 0, zIndex: 2 }}>
             <tr>
               <SortHeader colKey="symbol" label="Security" />
-              <SortHeader colKey="sector" label="Sector" />
-              <SortHeader colKey="weight_pct" label="Weight" align="right" />
-              <SortHeader colKey="shares" label="Units" align="right" />
-              <SortHeader colKey="market_value" label="Market Value" align="right" />
-              <SortHeader colKey="status" label="Irshad Verdict" />
-              <SortHeader colKey="impure_ratio" label="Impure Inc %" align="right" />
-              <SortHeader colKey="purification_due" label="Purification Due" align="right" />
-              <th scope="col" style={{ padding: '10px 12px', background: 'var(--bg-section)', borderBottom: '1px solid var(--border-strong)', textAlign: 'center', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                Audit
+              <SortHeader colKey="market_value" label="Value & Weight" align="right" />
+              <SortHeader colKey="status" label="Shariah Verdict" />
+              <SortHeader colKey="impure_ratio" label="AAOIFI (Debt / Cash / Impure)" align="right" />
+              <SortHeader colKey="purification_due" label="Purification" align="right" />
+              <th scope="col" style={{ padding: '10px 14px', background: 'var(--bg-section)', borderBottom: '1px solid var(--border-strong)', textAlign: 'center', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                Details
               </th>
             </tr>
           </thead>
           <tbody>
             {filteredHoldings.length === 0 ? (
               <tr>
-                <td colSpan={9} style={{ padding: 48, textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.88rem' }}>
+                <td colSpan={6} style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.86rem' }}>
                   No holdings match the active filter.
                 </td>
               </tr>
@@ -381,10 +378,6 @@ export default function InstitutionalVerdictsTable({
                       padding: '12px 14px',
                       borderBottom: '1px solid var(--border)',
                       textAlign: 'left',
-                      position: 'sticky',
-                      left: 0,
-                      background: h.status === 'non-compliant' ? '#fef8f8' : 'var(--bg)',
-                      zIndex: 1,
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <div style={{
@@ -401,43 +394,40 @@ export default function InstitutionalVerdictsTable({
                             <span style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.84rem' }}>{h.symbol}</span>
                             {h.is_near_threshold && (
                               <span title="Approaching AAOIFI threshold" style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: '0.62rem', fontWeight: 800, color: '#b45309', background: 'rgba(245,158,11,0.14)', padding: '1px 6px', borderRadius: 999 }}>
-                                <AlertTriangle size={10} /> Watch
+                                <AlertTriangle size={10} /> Drift Watch
                               </span>
                             )}
                           </div>
-                          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 200 }}>
-                            {h.name}
+                          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 230 }}>
+                            {h.name} · {h.sector}
                           </div>
                         </div>
                       </div>
                     </th>
-                    <td style={{ padding: '12px', borderBottom: '1px solid var(--border)', fontSize: '0.76rem', color: 'var(--text-body)', whiteSpace: 'nowrap' }}>
-                      {h.sector}
+
+                    <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)', textAlign: 'right', fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
+                      <div style={{ fontWeight: 800, fontSize: '0.83rem', color: 'var(--text-dark)' }}>
+                        {formatNaira(h.market_value)}
+                      </div>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                        {Number(h.shares ?? 0).toLocaleString()} u · {Number(h.weight_pct ?? 0).toFixed(2)}%
+                      </div>
                     </td>
-                    <td style={{ padding: '12px', borderBottom: '1px solid var(--border)', textAlign: 'right', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-dark)', fontVariantNumeric: 'tabular-nums' }}>
-                      {Number(h.weight_pct ?? 0).toFixed(2)}%
-                    </td>
-                    <td style={{ padding: '12px', borderBottom: '1px solid var(--border)', textAlign: 'right', fontSize: '0.8rem', color: 'var(--text-body)', fontVariantNumeric: 'tabular-nums' }}>
-                      {Number(h.shares ?? 0).toLocaleString()}
-                    </td>
-                    <td style={{ padding: '12px', borderBottom: '1px solid var(--border)', textAlign: 'right', fontWeight: 700, fontSize: '0.82rem', color: 'var(--text-dark)', fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
-                      {formatNaira(h.market_value)}
-                    </td>
-                    <td style={{ padding: '12px', borderBottom: '1px solid var(--border)' }}>
+
+                    <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)' }}>
                       <VerdictBadge status={h.status} purificationRequired={h.purification_required} impureRatio={h.impure_ratio} />
                     </td>
-                    <td style={{
-                      padding: '12px',
-                      borderBottom: '1px solid var(--border)',
-                      textAlign: 'right',
-                      fontWeight: 800,
-                      fontSize: '0.8rem',
-                      fontVariantNumeric: 'tabular-nums',
-                      color: Number(h.impure_ratio) >= 5 ? 'var(--non-compliant)' : (Number(h.impure_ratio) > 0 ? '#b45309' : 'var(--halal)'),
-                    }}>
-                      {Number(h.impure_ratio ?? 0).toFixed(2)}%
+
+                    <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)', textAlign: 'right', fontSize: '0.77rem', fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>
+                        {h.debt_ratio ?? '—'}% / {h.cash_ratio ?? '—'}% /{' '}
+                      </span>
+                      <strong style={{ color: Number(h.impure_ratio) >= 5 ? 'var(--non-compliant)' : (Number(h.impure_ratio) > 0 ? '#b45309' : 'var(--halal)') }}>
+                        {Number(h.impure_ratio ?? 0).toFixed(2)}%
+                      </strong>
                     </td>
-                    <td style={{ padding: '12px', borderBottom: '1px solid var(--border)', textAlign: 'right', fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
+
+                    <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)', textAlign: 'right', fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
                       {h.status === 'halal' ? (
                         <div>
                           <div style={{ fontWeight: 800, fontSize: '0.82rem', color: Number(h.purification_due) > 0 ? '#b45309' : 'var(--text-muted)' }}>
@@ -445,15 +435,16 @@ export default function InstitutionalVerdictsTable({
                           </div>
                           {Number(h.purification_per_unit) > 0 && (
                             <div style={{ fontSize: '0.67rem', color: 'var(--text-muted)' }}>
-                              ₦{Number(h.purification_per_unit).toFixed(4)}/unit
+                              ₦{Number(h.purification_per_unit).toFixed(4)}/u
                             </div>
                           )}
                         </div>
                       ) : (
-                        <span style={{ fontSize: '0.73rem', color: 'var(--non-compliant)', fontWeight: 700 }}>Divest / Flag</span>
+                        <span style={{ fontSize: '0.73rem', color: 'var(--non-compliant)', fontWeight: 700 }}>Divest / Swap</span>
                       )}
                     </td>
-                    <td style={{ padding: '12px', borderBottom: '1px solid var(--border)', textAlign: 'center' }}>
+
+                    <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)', textAlign: 'center' }}>
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); setExpandedSymbol(isExpanded ? null : h.symbol); }}
@@ -472,7 +463,7 @@ export default function InstitutionalVerdictsTable({
 
                   {isExpanded && (
                     <tr>
-                      <td colSpan={9} style={{ padding: '16px 20px', background: 'var(--bg-alt)', borderBottom: '1px solid var(--border-strong)' }}>
+                      <td colSpan={6} style={{ padding: '16px 20px', background: 'var(--bg-alt)', borderBottom: '1px solid var(--border-strong)' }}>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 12, marginBottom: 14 }}>
                           <RatioMeter label="Interest-Bearing Debt / Market Cap" value={h.debt_ratio} threshold={30} />
                           <RatioMeter label="Cash & Interest Securities / Market Cap" value={h.cash_ratio} threshold={30} />

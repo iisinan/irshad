@@ -97,6 +97,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(InstitutionalPortfolio::class);
     }
 
+    public function institutionalApiKeys()
+    {
+        return $this->hasMany(InstitutionalApiKey::class);
+    }
+
     public function isInstitution(): bool
     {
         return $this->role === 'institution';

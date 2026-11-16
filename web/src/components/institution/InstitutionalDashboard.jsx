@@ -3,7 +3,7 @@ import { useLocation, Link } from 'react-router-dom';
 import {
   Building2, Upload, FileSpreadsheet, ShieldCheck, AlertTriangle,
   Droplet, FileText, Presentation, Download, Plus, Save, Trash2,
-  CheckCircle2, Sparkles, Maximize2, Minimize2, Loader2, FolderOpen, ArrowLeftRight
+  CheckCircle2, Maximize2, Minimize2, Loader2, ArrowLeftRight, Key
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import {
@@ -19,6 +19,7 @@ import InstitutionalVerdictsTable from './InstitutionalVerdictsTable';
 import InstitutionalPurificationPanel from './InstitutionalPurificationPanel';
 import InstitutionalFactsheetView from './InstitutionalFactsheetView';
 import InstitutionalPresentationDeck from './InstitutionalPresentationDeck';
+import InstitutionalApiPanel from './InstitutionalApiPanel';
 import {
   LOTUS_FALLBACK_DATA,
   NORRENBERGER_FALLBACK_DATA,
@@ -27,10 +28,11 @@ import {
 } from './institutionalFixtures';
 
 const TAB_DEFS = [
-  { id: 'screening', label: 'Portfolio Upload & Verdicts', icon: ShieldCheck },
-  { id: 'purification', label: 'Purification Engine', icon: Droplet },
-  { id: 'factsheet', label: 'Factsheet Studio', icon: FileText },
-  { id: 'presentation', label: 'Meeting Presentation Deck', icon: Presentation },
+  { id: 'screening', label: 'Portfolio & Verdicts', icon: ShieldCheck },
+  { id: 'purification', label: 'Purification', icon: Droplet },
+  { id: 'factsheet', label: 'Factsheet', icon: FileText },
+  { id: 'api', label: 'API & Guardrails', icon: Key },
+  { id: 'presentation', label: 'Presentation Deck', icon: Presentation },
 ];
 
 export default function InstitutionalDashboard({ demoMode = false }) {
@@ -58,7 +60,7 @@ export default function InstitutionalDashboard({ demoMode = false }) {
   const [presets, setPresets] = useState(null);
   const [tenantKey, setTenantKey] = useState(isPrivatePortal ? 'custom' : 'admin');
   const [loadingPresets, setLoadingPresets] = useState(true);
-  const [activePresetId, setActivePresetId] = useState(isPrivatePortal ? 'loading' : 'lotus_etf'); // 'lotus_etf' | 'norrenberger_fund' | 'mixed_institutional_book' | 'uploaded'
+  const [activePresetId, setActivePresetId] = useState(isPrivatePortal ? 'loading' : 'lotus_etf');
   const [customScreened, setCustomScreened] = useState(null);
   const [customFundName, setCustomFundName] = useState('Institutional Equity Mandate');
   const [factsheetMeta, setFactsheetMeta] = useState(null);
@@ -70,8 +72,8 @@ export default function InstitutionalDashboard({ demoMode = false }) {
   const [isScreening, setIsScreening] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [presentationFullscreen, setPresentationFullscreen] = useState(false);
+  const [showUploadDrawer, setShowUploadDrawer] = useState(false);
 
-  // Manual quick-add row state
   const [manualSymbol, setManualSymbol] = useState('');
   const [manualShares, setManualShares] = useState('50000');
 
@@ -143,7 +145,6 @@ export default function InstitutionalDashboard({ demoMode = false }) {
       return presets?.mixed_institutional_book || { holdings: [], summary: {}, sector_allocation: [] };
     }
     if (activePresetId === 'norrenberger_fund') {
-      // Norrenberger Islamic Fund is Fixed Income (Sukuk/Mudarabah/Ijarah/Murabaha); do not leak other institutions' equity lists
       return { holdings: [], summary: {}, sector_allocation: [] };
     }
     return customScreened || { holdings: [], summary: {}, sector_allocation: [] };
@@ -194,6 +195,7 @@ export default function InstitutionalDashboard({ demoMode = false }) {
         setSelectedSavedId(null);
         setActivePresetId('uploaded');
         setActiveTab('screening');
+        setShowUploadDrawer(false);
         toastSuccess(`Screened ${res.data.summary?.holdings_count || 0} holdings from ${file.name}`);
       }
     } catch (err) {
@@ -283,7 +285,7 @@ export default function InstitutionalDashboard({ demoMode = false }) {
           const rest = prev.filter((p) => p.id !== saved.id);
           return [saved, ...rest];
         });
-        toastSuccess('Saved portfolio mandate to your institutional workspace.');
+        toastSuccess('Saved portfolio mandate.');
       }
     } catch (err) {
       toastError(err?.response?.data?.message || 'Failed to save portfolio mandate.');
@@ -302,7 +304,6 @@ export default function InstitutionalDashboard({ demoMode = false }) {
         setFactsheetMeta(saved.factsheet_meta || null);
         setSelectedSavedId(saved.id);
         setActivePresetId('uploaded');
-        toastSuccess(`Loaded "${saved.name}" with live AAOIFI verdicts.`);
       }
     } catch {
       toastError('Failed to refresh saved mandate.');
@@ -311,12 +312,17 @@ export default function InstitutionalDashboard({ demoMode = false }) {
     }
   };
 
-  const handleDeleteSavedMandate = async (id, e) => {
-    e.stopPropagation();
+  const handleDeleteSavedMandate = async (id) => {
     try {
       await deleteInstitutionPortfolio(id);
-      setSavedPortfolios((prev) => prev.filter((p) => p.id !== id));
-      if (selectedSavedId === id) setSelectedSavedId(null);
+      const remaining = savedPortfolios.filter((p) => p.id !== id);
+      setSavedPortfolios(remaining);
+      if (selectedSavedId === id) {
+        setSelectedSavedId(null);
+        setCustomScreened(null);
+        if (tenantKey === 'lotus') setActivePresetId('lotus_etf');
+        else if (tenantKey === 'norrenberger') setActivePresetId('norrenberger_fund');
+      }
       toastSuccess('Removed saved mandate.');
     } catch {
       toastError('Could not delete mandate.');
@@ -372,12 +378,16 @@ export default function InstitutionalDashboard({ demoMode = false }) {
     });
     if (!swapped) return;
     await reevaluateHoldings(nextHoldings, 'Shariah Rebalanced');
-    toastSuccess(`Swapped ${sourceSymbol} → ${replacement.symbol} (${replacement.estimated_units.toLocaleString()} units)`);
+    toastSuccess(`Swapped ${sourceSymbol} → ${replacement.symbol}`);
   };
 
   const summary = activeScreened?.summary || {};
   const isNorrenbergerActive = activePresetId === 'norrenberger_fund';
   const hasHoldings = (activeScreened?.holdings || []).length > 0;
+  const nearThresholdHoldings = useMemo(
+    () => (activeScreened?.holdings || []).filter((h) => h.is_near_threshold),
+    [activeScreened?.holdings]
+  );
 
   const allowedFactsheetTemplates = useMemo(() => {
     if (showDemoFeatures) return ['lotus', 'norrenberger', 'custom'];
@@ -388,37 +398,54 @@ export default function InstitutionalDashboard({ demoMode = false }) {
 
   const institutionLabel = isPrivatePortal
     ? (user?.institution_name || user?.name || 'Institutional Desk')
-    : (user?.institution_name || (activePresetId === 'lotus_etf' ? 'Lotus Capital Limited (Demo)' : activePresetId === 'norrenberger_fund' ? 'Norrenberger Asset Management (Demo)' : 'Irshad Institutional Desk'));
+    : (user?.institution_name || (activePresetId === 'lotus_etf' ? 'Lotus Capital Limited (Demo)' : activePresetId === 'norrenberger_fund' ? 'Norrenberger Asset Management (Demo)' : 'Irshad Institutional Demo'));
 
-  const portfolioButtons = useMemo(() => {
+  const mandateOptions = useMemo(() => {
+    const opts = [];
     if (showDemoFeatures) {
-      return [
-        { id: 'lotus_etf', label: 'Lotus Halal Equity ETF (13 Stocks)' },
-        { id: 'norrenberger_fund', label: 'Norrenberger Islamic Fund (Oct 2026)' },
-        { id: 'mixed_institutional_book', label: 'Sample Mixed Bank/Broker Book' },
-        ...(customScreened ? [{ id: 'uploaded', label: `Uploaded: ${customFundName}` }] : []),
-      ];
+      opts.push({ value: 'preset:lotus_etf', label: 'Lotus Halal Equity ETF (13 Stocks)' });
+      opts.push({ value: 'preset:norrenberger_fund', label: 'Norrenberger Islamic Fund (Oct 2026)' });
+      opts.push({ value: 'preset:mixed_institutional_book', label: 'Sample Mixed Broker Book' });
+    } else {
+      if (tenantKey === 'lotus' && presets?.lotus_etf) {
+        opts.push({ value: 'preset:lotus_etf', label: 'Lotus Halal Equity ETF (LOTUSHAL15)' });
+      }
+      if (tenantKey === 'norrenberger' && presets?.norrenberger_fund) {
+        opts.push({ value: 'preset:norrenberger_fund', label: 'Norrenberger Islamic Fund' });
+      }
     }
-    const items = [];
-    if (tenantKey === 'lotus' && presets?.lotus_etf) {
-      items.push({ id: 'lotus_etf', label: 'Lotus Halal Equity ETF (13 Stocks)' });
-    }
-    if (tenantKey === 'norrenberger' && presets?.norrenberger_fund) {
-      items.push({ id: 'norrenberger_fund', label: 'Norrenberger Islamic Fund (Oct 2026)' });
-    }
+    savedPortfolios.forEach((sp) => {
+      opts.push({ value: `saved:${sp.id}`, label: sp.name });
+    });
     if (customScreened && !selectedSavedId) {
-      items.push({ id: 'uploaded', label: `Uploaded: ${customFundName}` });
+      opts.push({ value: 'preset:uploaded', label: `${customFundName} (Unsaved)` });
     }
-    return items;
-  }, [showDemoFeatures, tenantKey, presets, customScreened, customFundName, selectedSavedId]);
+    return opts;
+  }, [showDemoFeatures, tenantKey, presets, savedPortfolios, customScreened, selectedSavedId, customFundName]);
+
+  const selectedMandateValue = selectedSavedId && activePresetId === 'uploaded'
+    ? `saved:${selectedSavedId}`
+    : `preset:${activePresetId}`;
+
+  const handleMandateChange = (val) => {
+    if (val.startsWith('saved:')) {
+      const id = Number(val.replace('saved:', ''));
+      const found = savedPortfolios.find((s) => s.id === id);
+      if (found) handleLoadSavedMandate(found);
+      return;
+    }
+    const presetKey = val.replace('preset:', '');
+    setSelectedSavedId(null);
+    setActivePresetId(presetKey);
+  };
 
   return (
     <div
       className="institutional-portal-shell"
       style={{
-        maxWidth: presentationFullscreen ? '100%' : 1380,
+        maxWidth: presentationFullscreen ? '100%' : 1280,
         margin: '0 auto',
-        padding: presentationFullscreen ? '20px 28px' : '24px 24px 48px',
+        padding: presentationFullscreen ? '20px 28px' : '20px 24px 48px',
         ...(presentationFullscreen ? {
           position: 'fixed',
           inset: 0,
@@ -428,7 +455,6 @@ export default function InstitutionalDashboard({ demoMode = false }) {
         } : {}),
       }}
     >
-      {/* Print Stylesheet */}
       <style>{`
         @media print {
           body * { visibility: hidden !important; }
@@ -471,238 +497,214 @@ export default function InstitutionalDashboard({ demoMode = false }) {
         }
       `}</style>
 
-      {/* Top Executive Header */}
+      {/* Hidden File Input (always mounted for header/action buttons) */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".csv,.xlsx,.xls,.pdf,.txt"
+        style={{ display: 'none' }}
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) handleFileUpload(f);
+          e.target.value = '';
+        }}
+      />
+
+      {/* Clean Single-Row Institutional Header */}
       <header className="no-print" style={{
-        background: 'var(--bg)',
-        borderRadius: 22,
-        padding: '22px 24px',
-        border: '1px solid var(--border)',
-        boxShadow: 'var(--shadow-sm)',
+        display: 'flex',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        gap: 16,
         marginBottom: 20,
       }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div style={{
-              width: 48, height: 48, borderRadius: 14,
-              background: 'linear-gradient(135deg, #297D66 0%, #45A58A 100%)',
-              color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: 'var(--shadow-purple)', flexShrink: 0,
-            }}>
-              <Building2 size={24} />
-            </div>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                <span style={{
-                  fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px',
-                  padding: '3px 9px', borderRadius: 999,
-                  background: 'var(--primary-50)', color: 'var(--primary)', border: '1px solid var(--primary-100)',
-                }}>
-                  {isPrivatePortal ? 'AAOIFI Compliance & Factsheet Portal' : 'Institutional Demo & Presentation'}
-                </span>
-                {user?.institution_type && (
-                  <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)' }}>
-                    • {user.institution_type}
-                  </span>
-                )}
-              </div>
-              <h1 style={{ margin: '4px 0 0', fontSize: '1.45rem', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-0.4px' }}>
-                {institutionLabel}
-              </h1>
-            </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{
+            width: 44, height: 44, borderRadius: 12,
+            background: 'linear-gradient(135deg, #297D66 0%, #45A58A 100%)',
+            color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0,
+          }}>
+            <Building2 size={22} />
           </div>
-
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 10 }}>
-            {!user && (
-              <Link
-                to="/register"
-                style={{
-                  padding: '9px 15px', borderRadius: 11,
-                  border: '1px solid var(--primary)', background: 'var(--primary-50)',
-                  color: 'var(--primary)', fontWeight: 700, fontSize: '0.78rem', textDecoration: 'none',
-                }}
-              >
-                Create Institution Account
-              </Link>
-            )}
-            {isAuthenticatedInstitution && (
-              <button
-                type="button"
-                onClick={handleSaveCurrentMandate}
-                disabled={isSaving || !hasHoldings}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                  padding: '9px 15px', borderRadius: 11,
-                  border: '1px solid var(--border)', background: 'var(--bg-section)',
-                  color: 'var(--text-dark)', fontWeight: 700, fontSize: '0.78rem',
-                  cursor: isSaving || !hasHoldings ? 'not-allowed' : 'pointer',
-                  opacity: !hasHoldings ? 0.55 : 1,
-                }}
-              >
-                {isSaving ? <Loader2 size={14} className="spin" /> : <Save size={14} />}
-                Save Mandate
-              </button>
-            )}
-            {showDemoFeatures && (
-              <button
-                type="button"
-                onClick={() => setPresentationFullscreen((v) => !v)}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 7,
-                  padding: '9px 15px', borderRadius: 11,
-                  border: 'none', background: '#111827',
-                  color: '#fff', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
-                }}
-              >
-                {presentationFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-                {presentationFullscreen ? 'Exit Fullscreen' : 'Presentation Mode'}
-              </button>
-            )}
+          <div>
+            <h1 style={{ margin: 0, fontSize: '1.35rem', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-0.3px' }}>
+              {institutionLabel}
+            </h1>
+            <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+              {user?.institution_type || 'Institutional Desk'} · AAOIFI Shariah Compliance
+            </div>
           </div>
         </div>
 
-        {/* Institutional Portfolio / Mandate Selector (Strictly scoped per tenant) */}
-        <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--border)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.7px', marginRight: 4 }}>
-            {showDemoFeatures ? 'Active Portfolio / Showcase:' : 'Your Mandates & Funds:'}
-          </span>
-          {portfolioButtons.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => {
-                setSelectedSavedId(null);
-                setActivePresetId(p.id);
-              }}
-              style={{
-                padding: '7px 13px',
-                borderRadius: 999,
-                fontSize: '0.76rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                border: `1.5px solid ${activePresetId === p.id && !selectedSavedId ? 'var(--primary)' : 'var(--border)'}`,
-                background: activePresetId === p.id && !selectedSavedId ? 'var(--primary)' : 'var(--bg-section)',
-                color: activePresetId === p.id && !selectedSavedId ? '#fff' : 'var(--text-dark)',
-                transition: 'all 0.15s',
-              }}
-            >
-              {p.label}
-            </button>
-          ))}
-
-          {savedPortfolios.map((sp) => (
-            <div key={sp.id} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-              <button
-                type="button"
-                onClick={() => handleLoadSavedMandate(sp)}
+        {/* Right Controls: Clean Mandate Dropdown + Primary Action */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 10 }}>
+          {mandateOptions.length > 0 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <select
+                aria-label="Select portfolio or mandate"
+                value={selectedMandateValue}
+                onChange={(e) => handleMandateChange(e.target.value)}
                 style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                  padding: '7px 12px', borderRadius: 999, fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer',
-                  border: `1.5px solid ${selectedSavedId === sp.id && activePresetId === 'uploaded' ? 'var(--gold)' : 'var(--border)'}`,
-                  background: selectedSavedId === sp.id && activePresetId === 'uploaded' ? 'var(--gold-50)' : 'var(--bg-section)',
+                  padding: '9px 12px',
+                  borderRadius: 10,
+                  border: '1px solid var(--border-strong)',
+                  background: 'var(--bg)',
                   color: 'var(--text-dark)',
+                  fontSize: '0.8rem',
+                  fontWeight: 700,
+                  maxWidth: 280,
                 }}
               >
-                <FolderOpen size={12} /> {sp.name}
-              </button>
-              <button
-                type="button"
-                onClick={(e) => handleDeleteSavedMandate(sp.id, e)}
-                aria-label={`Delete ${sp.name}`}
-                style={{
-                  background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 4,
-                }}
-              >
-                <Trash2 size={13} />
-              </button>
+                {mandateOptions.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+              {selectedSavedId && (
+                <button
+                  type="button"
+                  onClick={() => handleDeleteSavedMandate(selectedSavedId)}
+                  title="Delete selected mandate"
+                  aria-label="Delete selected mandate"
+                  style={{
+                    width: 36, height: 36, borderRadius: 10,
+                    border: '1px solid var(--border)', background: 'var(--bg)',
+                    color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+                  }}
+                >
+                  <Trash2 size={14} />
+                </button>
+              )}
             </div>
-          ))}
+          )}
 
-          {isPrivatePortal && (
+          {isAuthenticatedInstitution && hasHoldings && (
             <button
               type="button"
-              onClick={() => fileInputRef.current?.click()}
+              onClick={handleSaveCurrentMandate}
+              disabled={isSaving}
               style={{
-                display: 'inline-flex', alignItems: 'center', gap: 5,
-                padding: '7px 12px', borderRadius: 999, fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer',
-                border: '1px dashed var(--primary)', background: 'transparent', color: 'var(--primary)',
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '9px 14px', borderRadius: 10,
+                border: '1px solid var(--border-strong)', background: 'var(--bg)',
+                color: 'var(--text-dark)', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
               }}
             >
-              <Plus size={13} /> Upload Portfolio
+              {isSaving ? <Loader2 size={14} /> : <Save size={14} />}
+              Save
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={() => {
+              if (activeTab !== 'screening') handleSelectTab('screening');
+              setShowUploadDrawer((v) => !v);
+            }}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              padding: '9px 15px', borderRadius: 10,
+              border: 'none', background: 'var(--primary)',
+              color: '#fff', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
+            }}
+          >
+            <Upload size={14} /> Screen Portfolio
+          </button>
+
+          {!user && (
+            <Link
+              to="/login"
+              style={{
+                padding: '9px 14px', borderRadius: 10,
+                border: '1px solid var(--border-strong)', background: 'var(--bg)',
+                color: 'var(--text-dark)', fontWeight: 700, fontSize: '0.78rem', textDecoration: 'none',
+              }}
+            >
+              Sign In
+            </Link>
+          )}
+
+          {showDemoFeatures && (
+            <button
+              type="button"
+              onClick={() => setPresentationFullscreen((v) => !v)}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '9px 14px', borderRadius: 10,
+                border: 'none', background: '#111827',
+                color: '#fff', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
+              }}
+            >
+              {presentationFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+              {presentationFullscreen ? 'Exit' : 'Present'}
             </button>
           )}
         </div>
       </header>
 
-      {/* Executive KPI Strip (hidden only when brand new custom institution has 0 holdings) */}
+      {/* 3 Clean KPI Cards */}
       {(isNorrenbergerActive || hasHoldings || loadingPresets) && (
-      <section className="no-print" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14, marginBottom: 20 }}>
-        <div style={{ background: 'var(--bg)', borderRadius: 18, padding: '18px 20px', border: '1px solid var(--border)' }}>
-          <div style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
-            {isNorrenbergerActive ? 'Norrenberger Fund Size' : 'Screened Equity AUM'}
+        <section className="no-print" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 14, marginBottom: 18 }}>
+          <div style={{ background: 'var(--bg)', borderRadius: 16, padding: '16px 20px', border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
+              {isNorrenbergerActive ? 'Fund Size (Oct 2026)' : 'Portfolio Value'}
+            </div>
+            <div style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-dark)', marginTop: 4 }}>
+              {isNorrenbergerActive ? '₦6.81bn' : (loadingPresets ? '...' : formatNaira(summary.total_aum, true))}
+            </div>
+            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: 3 }}>
+              {isNorrenbergerActive ? 'Unit Price: ₦108.27 · YTD Yield: 17.72%' : `${summary.holdings_count || 0} holdings screened`}
+            </div>
           </div>
-          <div style={{ fontSize: '1.65rem', fontWeight: 900, color: 'var(--text-dark)', marginTop: 6 }}>
-            {isNorrenbergerActive ? '₦6.81bn' : (loadingPresets ? '...' : formatNaira(summary.total_aum, true))}
-          </div>
-          <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: 4 }}>
-            {isNorrenbergerActive ? 'Unit Price: ₦108.27 · YTD Yield: 17.72%' : `${summary.holdings_count || 0} constituent positions evaluated`}
-          </div>
-        </div>
 
-        <div style={{ background: 'var(--bg)', borderRadius: 18, padding: '18px 20px', border: '1px solid var(--border)' }}>
-          <div style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
-            Shariah Compliance Rate
+          <div style={{ background: 'var(--bg)', borderRadius: 16, padding: '16px 20px', border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
+              Shariah Compliance
+            </div>
+            <div style={{
+              fontSize: '1.6rem', fontWeight: 900, marginTop: 4,
+              color: !isNorrenbergerActive && Number(summary.non_compliant_count || 0) > 0 ? '#b45309' : 'var(--halal)',
+            }}>
+              {isNorrenbergerActive ? '100.0%' : `${Number(summary.compliant_pct || 0).toFixed(1)}%`}
+            </div>
+            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: 3 }}>
+              {isNorrenbergerActive
+                ? '5/5 Islamic fixed-income sleeves'
+                : (Number(summary.non_compliant_count || 0) > 0
+                    ? `${summary.non_compliant_count} flagged (${formatNaira(summary.non_compliant_aum, true)})`
+                    : `${summary.compliant_count || 0} compliant · 0 breaches`)}
+            </div>
           </div>
-          <div style={{ fontSize: '1.65rem', fontWeight: 900, color: 'var(--halal)', marginTop: 6 }}>
-            {isNorrenbergerActive ? '100.0%' : `${Number(summary.compliant_pct || 0).toFixed(1)}%`}
-          </div>
-          <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: 4 }}>
-            {isNorrenbergerActive ? '5/5 Sukuk & Islamic Money Market Contracts' : `${summary.compliant_count || 0} compliant holdings`}
-          </div>
-        </div>
 
-        <div style={{ background: 'var(--bg)', borderRadius: 18, padding: '18px 20px', border: '1px solid var(--border)' }}>
-          <div style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
-            {isNorrenbergerActive ? 'Mandate Drift Alert' : 'Non-Compliant Exposure'}
+          <div style={{ background: 'var(--bg)', borderRadius: 16, padding: '16px 20px', border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
+              {isNorrenbergerActive ? 'Mandate Watch' : 'Purification Due'}
+            </div>
+            <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#b45309', marginTop: 4 }}>
+              {isNorrenbergerActive
+                ? '1 Band Watch'
+                : (activePresetId === 'lotus_etf' ? '₦0.46 / unit' : formatNaira(summary.total_purification_due || 0, true))}
+            </div>
+            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: 3 }}>
+              {isNorrenbergerActive
+                ? 'FGN Sukuk at 21.79% vs 30%-100% band'
+                : (activePresetId === 'lotus_etf'
+                    ? `FY25 ETF rate · Live total: ${formatNaira(summary.total_purification_due || 0, true)}`
+                    : `${summary.purify_required_count || 0} holdings need dividend cleansing`)}
+            </div>
           </div>
-          <div style={{
-            fontSize: '1.65rem', fontWeight: 900, marginTop: 6,
-            color: isNorrenbergerActive ? '#b45309' : (Number(summary.non_compliant_aum || 0) > 0 ? 'var(--non-compliant)' : 'var(--halal)'),
-          }}>
-            {isNorrenbergerActive ? '1 Band Watch' : formatNaira(summary.non_compliant_aum || 0, true)}
-          </div>
-          <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: 4 }}>
-            {isNorrenbergerActive
-              ? 'FGN Sukuk at 21.79% vs 30%-100% target'
-              : (Number(summary.non_compliant_count || 0) > 0
-                  ? `${summary.non_compliant_count} holding(s) flagged for divestment`
-                  : 'Zero AAOIFI compliance breaches')}
-          </div>
-        </div>
-
-        <div style={{ background: 'var(--bg)', borderRadius: 18, padding: '18px 20px', border: '1px solid var(--border)' }}>
-          <div style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
-            Purification Liability
-          </div>
-          <div style={{ fontSize: '1.65rem', fontWeight: 900, color: '#b45309', marginTop: 6 }}>
-            {activePresetId === 'lotus_etf' ? '₦0.46 / unit' : formatNaira(summary.total_purification_due || 0, true)}
-          </div>
-          <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: 4 }}>
-            {activePresetId === 'lotus_etf'
-              ? `Live constituent calc: ${formatNaira(summary.total_purification_due || 0, true)}`
-              : `${summary.purify_required_count || 0} holdings require dividend cleansing`}
-          </div>
-        </div>
-      </section>
+        </section>
       )}
 
-      {/* Accessible Tabs Navigation */}
+      {/* Simple Single-Row Tabs */}
       <div className="no-print" style={{
         background: 'var(--bg)',
-        borderRadius: '16px 16px 0 0',
+        borderRadius: '14px 14px 0 0',
         border: '1px solid var(--border)',
         borderBottom: '1px solid var(--border-strong)',
-        padding: '0 12px',
-        marginBottom: 20,
+        padding: '0 10px',
+        marginBottom: 18,
       }}>
         <div
           role="tablist"
@@ -725,7 +727,7 @@ export default function InstitutionalDashboard({ demoMode = false }) {
                 onKeyDown={(e) => handleTabKeyDown(e, idx)}
                 className="inst-tab-btn"
               >
-                <Icon size={16} aria-hidden="true" />
+                <Icon size={15} aria-hidden="true" />
                 <span>{t.label}</span>
               </button>
             );
@@ -733,12 +735,12 @@ export default function InstitutionalDashboard({ demoMode = false }) {
         </div>
       </div>
 
-      {/* TAB 1: PORTFOLIO UPLOAD & SHARIAH VERDICTS */}
+      {/* TAB 1: PORTFOLIO & VERDICTS */}
       <div role="tabpanel" aria-labelledby="inst-tab-screening" hidden={activeTab !== 'screening'}>
         {activeTab === 'screening' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            {/* Upload Dropzone + Manual Add */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {/* Toggleable Upload Drawer (OR automatic centered onboarding when no holdings exist) */}
+            {(showUploadDrawer || (!hasHoldings && !isNorrenbergerActive && !loadingPresets)) && (
               <div
                 onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                 onDragLeave={() => setIsDragging(false)}
@@ -750,106 +752,63 @@ export default function InstitutionalDashboard({ demoMode = false }) {
                 }}
                 style={{
                   background: isDragging ? 'var(--primary-50)' : 'var(--bg)',
-                  borderRadius: 20,
-                  padding: 22,
+                  borderRadius: 18,
+                  padding: '24px',
                   border: `2px dashed ${isDragging ? 'var(--primary)' : 'var(--border-strong)'}`,
                   display: 'flex',
-                  flexDirection: 'column',
+                  flexWrap: 'wrap',
                   justifyContent: 'space-between',
-                  gap: 14,
-                  transition: 'all 0.2s',
+                  alignItems: 'center',
+                  gap: 18,
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-                  <div style={{
-                    width: 44, height: 44, borderRadius: 12,
-                    background: 'var(--primary-50)', color: 'var(--primary)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                  }}>
-                    {isScreening ? <Loader2 size={22} /> : <Upload size={22} />}
-                  </div>
-                  <div>
-                    <h2 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: 'var(--text-dark)' }}>
-                      Upload Institutional Portfolio / Statement
-                    </h2>
-                    <p style={{ margin: '4px 0 0', fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                      Drop a <strong>.CSV, .XLSX, or Broker .PDF</strong> file containing tickers &amp; units. Irshad resolves NGX aliases (e.g., WAPCO → HBMNG) and runs live AAOIFI verdicts &amp; purification.
-                    </p>
-                  </div>
-                </div>
-
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".csv,.xlsx,.xls,.pdf,.txt"
-                  style={{ display: 'none' }}
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) handleFileUpload(f);
-                    e.target.value = '';
-                  }}
-                />
-
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-                  <button
-                    type="button"
-                    disabled={isScreening}
-                    onClick={() => fileInputRef.current?.click()}
-                    style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 8,
-                      padding: '10px 16px', borderRadius: 12,
-                      background: 'var(--primary)', color: '#fff',
-                      border: 'none', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer',
-                    }}
-                  >
-                    <FileSpreadsheet size={15} /> {isScreening ? 'Screening...' : 'Choose Portfolio File'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleDownloadSampleCsv}
-                    style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 6,
-                      padding: '10px 14px', borderRadius: 12,
-                      background: 'var(--bg-section)', color: 'var(--text-dark)',
-                      border: '1px solid var(--border)', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
-                    }}
-                  >
-                    <Download size={14} /> Sample CSV Template
-                  </button>
-                </div>
-              </div>
-
-              {/* Manual Quick Ticker Add */}
-              <div style={{
-                background: 'var(--bg)',
-                borderRadius: 20,
-                padding: 22,
-                border: '1px solid var(--border)',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                gap: 14,
-              }}>
-                <div>
-                  <h2 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Sparkles size={16} color="var(--gold)" /> Quick-Add Position to Screener
+                <div style={{ flex: '1 1 320px' }}>
+                  <h2 style={{ margin: 0, fontSize: '1.02rem', fontWeight: 800, color: 'var(--text-dark)' }}>
+                    Upload Portfolio or Broker Statement
                   </h2>
-                  <p style={{ margin: '4px 0 0', fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                    Test adding any NGX stock (e.g. <code>SEPLAT</code>, <code>NASCON</code>, <code>ZENITHBANK</code>, <code>AIRTELAFRI</code>) into the active book to see live verdict &amp; purification impact.
+                  <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                    Drop a <strong>.CSV, .XLSX, or Broker .PDF</strong> to generate live AAOIFI verdicts, purification calculations, and a factsheet.
                   </p>
+                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 14 }}>
+                    <button
+                      type="button"
+                      disabled={isScreening}
+                      onClick={() => fileInputRef.current?.click()}
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 7,
+                        padding: '9px 16px', borderRadius: 10, border: 'none',
+                        background: 'var(--primary)', color: '#fff', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer',
+                      }}
+                    >
+                      <FileSpreadsheet size={15} /> {isScreening ? 'Screening...' : 'Choose File'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDownloadSampleCsv}
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 6,
+                        padding: '9px 14px', borderRadius: 10,
+                        border: '1px solid var(--border-strong)', background: 'var(--bg-section)',
+                        color: 'var(--text-dark)', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
+                      }}
+                    >
+                      <Download size={14} /> Sample CSV
+                    </button>
+                  </div>
                 </div>
 
-                <form onSubmit={handleAddManualTicker} style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                {/* Inline Quick-Add Ticker */}
+                <form onSubmit={handleAddManualTicker} style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center', flex: '1 1 300px', justifyContent: 'flex-end' }}>
                   <input
                     type="text"
                     value={manualSymbol}
                     onChange={(e) => setManualSymbol(e.target.value)}
-                    placeholder="NGX Ticker (e.g. SEPLAT)"
+                    placeholder="Add NGX ticker (e.g. SEPLAT)"
                     aria-label="NGX Ticker Symbol"
                     style={{
-                      flex: '1 1 140px', padding: '10px 12px', borderRadius: 10,
+                      flex: '1 1 150px', maxWidth: 210, padding: '9px 12px', borderRadius: 10,
                       border: '1px solid var(--border-strong)', background: 'var(--bg-section)',
-                      color: 'var(--text-dark)', fontSize: '0.82rem', fontWeight: 700,
+                      color: 'var(--text-dark)', fontSize: '0.8rem', fontWeight: 700,
                     }}
                   />
                   <input
@@ -858,62 +817,60 @@ export default function InstitutionalDashboard({ demoMode = false }) {
                     value={manualShares}
                     onChange={(e) => setManualShares(e.target.value)}
                     placeholder="Units"
-                    aria-label="Number of units"
+                    aria-label="Units"
                     style={{
-                      width: 120, padding: '10px 12px', borderRadius: 10,
+                      width: 100, padding: '9px 10px', borderRadius: 10,
                       border: '1px solid var(--border-strong)', background: 'var(--bg-section)',
-                      color: 'var(--text-dark)', fontSize: '0.82rem', fontWeight: 700,
+                      color: 'var(--text-dark)', fontSize: '0.8rem', fontWeight: 700,
                     }}
                   />
                   <button
                     type="submit"
                     disabled={isScreening}
                     style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 6,
-                      padding: '10px 16px', borderRadius: 10,
-                      background: '#111827', color: '#fff',
-                      border: 'none', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer',
+                      display: 'inline-flex', alignItems: 'center', gap: 5,
+                      padding: '9px 14px', borderRadius: 10, border: 'none',
+                      background: '#111827', color: '#fff', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
                     }}
                   >
-                    <Plus size={15} /> Screen &amp; Add
+                    <Plus size={14} /> Add
                   </button>
                 </form>
               </div>
-            </div>
+            )}
 
-            {/* Norrenberger Fixed Income Mandate Table when Norrenberger is selected */}
+            {/* Norrenberger Fixed Income Mandate Table */}
             {isNorrenbergerActive && (
               <div style={{
-                background: 'var(--bg)', borderRadius: 20, padding: '20px 22px',
-                border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)',
-                display: 'flex', flexDirection: 'column', gap: 14,
+                background: 'var(--bg)', borderRadius: 18, padding: '18px 20px',
+                border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 14,
               }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, fontSize: '0.98rem', color: '#B91C1C' }}>
-                      <CheckCircle2 size={18} /> Norrenberger Islamic Fund — Fixed Income &amp; Sukuk Mandate Audit (₦6.81bn)
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, fontSize: '0.96rem', color: '#B91C1C' }}>
+                      <CheckCircle2 size={17} /> Fixed Income &amp; Sukuk Mandate Audit (₦6.81bn)
                     </div>
-                    <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                      October 2026 contract-level holdings screened against prospectus Shariah bands &amp; 3-Year FGN Sukuk moving-average benchmark.
+                    <p style={{ margin: '4px 0 0', fontSize: '0.79rem', color: 'var(--text-muted)' }}>
+                      Contract allocation vs prospectus Shariah mandate bands (October 2026).
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={() => handleSelectTab('factsheet')}
                     style={{
-                      padding: '9px 15px', borderRadius: 11, background: '#DC2626', color: '#fff',
+                      padding: '8px 14px', borderRadius: 10, background: '#DC2626', color: '#fff',
                       border: 'none', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
                     }}
                   >
-                    Open Norrenberger Factsheet →
+                    View Factsheet →
                   </button>
                 </div>
 
                 <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', minWidth: 680, borderCollapse: 'collapse', fontSize: '0.8rem' }}>
+                  <table style={{ width: '100%', minWidth: 640, borderCollapse: 'collapse', fontSize: '0.8rem' }}>
                     <thead>
                       <tr style={{ background: 'var(--bg-section)', borderBottom: '1px solid var(--border-strong)' }}>
-                        {['Instrument Class', 'Shariah Contract', 'Current %', 'Est. AUM (₦)', 'Target Band', 'Mandate Status'].map((col, idx) => (
+                        {['Instrument Class', 'Shariah Contract', 'Current %', 'Est. AUM', 'Target Band', 'Status'].map((col, idx) => (
                           <th key={col} style={{ padding: '10px 12px', textAlign: idx >= 2 && idx <= 4 ? 'right' : (idx === 5 ? 'center' : 'left'), fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
                             {col}
                           </th>
@@ -937,7 +894,7 @@ export default function InstitutionalDashboard({ demoMode = false }) {
                                 background: outOfBand ? 'rgba(245, 158, 11, 0.14)' : 'var(--halal-bg)',
                                 color: outOfBand ? '#b45309' : 'var(--halal)',
                               }}>
-                                {outOfBand ? 'Below Target Band' : 'Compliant · In Band'}
+                                {outOfBand ? 'Below Band' : 'Compliant'}
                               </span>
                             </td>
                           </tr>
@@ -949,54 +906,65 @@ export default function InstitutionalDashboard({ demoMode = false }) {
               </div>
             )}
 
-            {/* Flagged Non-Compliant Alert + Rebalancing Replacement Advisor */}
+            {/* Near-Threshold Drift Watch Alert */}
+            {!isNorrenbergerActive && nearThresholdHoldings.length > 0 && (
+              <div style={{
+                padding: '11px 16px', borderRadius: 12,
+                background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.28)',
+                color: '#92400e', fontSize: '0.8rem', fontWeight: 700,
+                display: 'flex', alignItems: 'center', gap: 10,
+              }}>
+                <AlertTriangle size={16} style={{ flexShrink: 0 }} />
+                <span>
+                  Drift Watch: <strong>{nearThresholdHoldings.map((h) => h.symbol).join(', ')}</strong> {nearThresholdHoldings.length === 1 ? 'is' : 'are'} approaching AAOIFI quantitative thresholds (Debt/Cash ≥ 25% or Impure Income ≥ 4%).
+                </span>
+              </div>
+            )}
+
+            {/* Flagged Non-Compliant + 1-Click Rebalancing Advisor */}
             {Number(summary.non_compliant_count || 0) > 0 && !isNorrenbergerActive && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div style={{
-                  padding: '14px 18px', borderRadius: 14,
+                  padding: '12px 16px', borderRadius: 12,
                   background: 'var(--non-compliant-bg)', border: '1px solid var(--non-compliant-border)',
-                  color: 'var(--non-compliant)', display: 'flex', alignItems: 'center', gap: 12,
-                  fontSize: '0.84rem', fontWeight: 700,
+                  color: 'var(--non-compliant)', display: 'flex', alignItems: 'center', gap: 10,
+                  fontSize: '0.82rem', fontWeight: 700,
                 }}>
-                  <AlertTriangle size={18} style={{ flexShrink: 0 }} />
+                  <AlertTriangle size={17} style={{ flexShrink: 0 }} />
                   <span>
-                    Compliance Breach Alert: {summary.non_compliant_count} position(s) totaling {formatNaira(summary.non_compliant_aum)} ({Number(summary.non_compliant_pct || 0).toFixed(2)}% of AUM) failed AAOIFI screening and require divestment or rebalancing.
+                    {summary.non_compliant_count} position(s) totaling {formatNaira(summary.non_compliant_aum)} ({Number(summary.non_compliant_pct || 0).toFixed(1)}% of portfolio) failed AAOIFI screening.
                   </span>
                 </div>
 
                 {(activeScreened?.rebalancing_suggestions || []).length > 0 && (
                   <div style={{
-                    background: 'var(--bg)', borderRadius: 18, padding: '18px 20px',
-                    border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)',
+                    background: 'var(--bg)', borderRadius: 16, padding: '16px 18px',
+                    border: '1px solid var(--border)',
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, fontSize: '0.92rem', color: 'var(--text-dark)', marginBottom: 12 }}>
-                      <ArrowLeftRight size={16} color="var(--primary)" /> Irshad Shariah Rebalancing &amp; Compliant Replacement Simulator
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, fontSize: '0.88rem', color: 'var(--text-dark)', marginBottom: 10 }}>
+                      <ArrowLeftRight size={15} color="var(--primary)" /> Compliant Rebalancing Suggestions
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: 12 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 10 }}>
                       {activeScreened.rebalancing_suggestions.map((sug) => (
-                        <div key={sug.source_symbol} style={{ padding: 14, borderRadius: 14, background: 'var(--bg-section)', border: '1px solid var(--border)' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                            <div>
-                              <span style={{ fontWeight: 900, fontSize: '0.84rem', color: 'var(--non-compliant)' }}>{sug.source_symbol}</span>
-                              <span style={{ fontSize: '0.73rem', color: 'var(--text-muted)', marginLeft: 6 }}>({formatNaira(sug.source_market_value, true)})</span>
-                            </div>
+                        <div key={sug.source_symbol} style={{ padding: 12, borderRadius: 12, background: 'var(--bg-section)', border: '1px solid var(--border)' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                            <span style={{ fontWeight: 900, fontSize: '0.82rem', color: 'var(--non-compliant)' }}>
+                              {sug.source_symbol} <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>({formatNaira(sug.source_market_value, true)})</span>
+                            </span>
                             <button
                               type="button"
                               disabled={isScreening}
                               onClick={() => handleRemoveHolding(sug.source_symbol)}
                               style={{
-                                padding: '4px 9px', borderRadius: 8, border: '1px solid var(--non-compliant-border)',
+                                padding: '3px 8px', borderRadius: 7, border: '1px solid var(--non-compliant-border)',
                                 background: 'var(--non-compliant-bg)', color: 'var(--non-compliant)',
-                                fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer',
+                                fontSize: '0.68rem', fontWeight: 700, cursor: 'pointer',
                               }}
                             >
                               Divest
                             </button>
                           </div>
-                          <div style={{ fontSize: '0.71rem', color: 'var(--text-muted)', marginBottom: 8 }}>
-                            Suggested Halal Sector Replacements ({sug.source_sector}):
-                          </div>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
                             {sug.replacements.map((rep) => (
                               <button
                                 key={rep.symbol}
@@ -1004,10 +972,10 @@ export default function InstitutionalDashboard({ demoMode = false }) {
                                 disabled={isScreening}
                                 onClick={() => handleSwapHolding(sug.source_symbol, rep)}
                                 style={{
-                                  display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8,
-                                  padding: '7px 10px', borderRadius: 9,
+                                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                  padding: '6px 9px', borderRadius: 8,
                                   border: '1px solid var(--halal-border)', background: 'var(--halal-bg)',
-                                  color: 'var(--halal)', fontSize: '0.74rem', fontWeight: 700, cursor: 'pointer', textAlign: 'left',
+                                  color: 'var(--halal)', fontSize: '0.73rem', fontWeight: 700, cursor: 'pointer',
                                 }}
                               >
                                 <span>Swap → <strong>{rep.symbol}</strong> ({rep.estimated_units.toLocaleString()} u)</span>
@@ -1023,31 +991,18 @@ export default function InstitutionalDashboard({ demoMode = false }) {
               </div>
             )}
 
-            {hasHoldings ? (
+            {hasHoldings && (
               <InstitutionalVerdictsTable
                 holdings={activeScreened?.holdings || []}
                 title={`${activeTitle} — AAOIFI Screening Verdicts`}
                 onRemoveHolding={handleRemoveHolding}
               />
-            ) : !isNorrenbergerActive && !loadingPresets ? (
-              <div style={{
-                background: 'var(--bg)', borderRadius: 20, padding: '44px 28px',
-                border: '1px solid var(--border)', textAlign: 'center',
-              }}>
-                <ShieldCheck size={36} color="var(--primary)" style={{ marginBottom: 12 }} />
-                <h3 style={{ margin: '0 0 8px', fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)' }}>
-                  No Portfolio Screened Yet
-                </h3>
-                <p style={{ margin: '0 auto 18px', maxWidth: 520, fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
-                  Upload your existing CSV, Excel, or Broker PDF portfolio above — or quick-add any NGX ticker — to generate AAOIFI Shariah verdicts, purification figures, and a branded institutional factsheet.
-                </p>
-              </div>
-            ) : null}
+            )}
           </div>
         )}
       </div>
 
-      {/* TAB 2: PURIFICATION ENGINE */}
+      {/* TAB 2: PURIFICATION */}
       <div role="tabpanel" aria-labelledby="inst-tab-purification" hidden={activeTab !== 'purification'}>
         {activeTab === 'purification' && (
           <InstitutionalPurificationPanel
@@ -1058,7 +1013,7 @@ export default function InstitutionalDashboard({ demoMode = false }) {
         )}
       </div>
 
-      {/* TAB 3: FACTSHEET STUDIO */}
+      {/* TAB 3: FACTSHEET */}
       <div role="tabpanel" aria-labelledby="inst-tab-factsheet" hidden={activeTab !== 'factsheet'}>
         {activeTab === 'factsheet' && (
           <InstitutionalFactsheetView
@@ -1076,7 +1031,14 @@ export default function InstitutionalDashboard({ demoMode = false }) {
         )}
       </div>
 
-      {/* TAB 4: MEETING PRESENTATION DECK (Demo / Admin only) */}
+      {/* TAB 4: API & GUARDRAILS */}
+      <div role="tabpanel" aria-labelledby="inst-tab-api" hidden={activeTab !== 'api'}>
+        {activeTab === 'api' && (
+          <InstitutionalApiPanel isAuthenticatedInstitution={isAuthenticatedInstitution} />
+        )}
+      </div>
+
+      {/* TAB 5: MEETING PRESENTATION DECK (Demo / Admin only) */}
       {showDemoFeatures && (
         <div role="tabpanel" aria-labelledby="inst-tab-presentation" hidden={activeTab !== 'presentation'}>
           {activeTab === 'presentation' && (

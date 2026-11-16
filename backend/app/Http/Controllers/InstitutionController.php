@@ -376,7 +376,7 @@ class InstitutionController extends Controller
     /**
      * Evaluate a list of holdings against live Company, AaoifiScreening, and Dividend tables.
      */
-    protected function evaluateHoldingsArray(array $rows): array
+    public function evaluateHoldingsArray(array $rows): array
     {
         $normalizedRows = [];
         $symbolsNeeded = [];

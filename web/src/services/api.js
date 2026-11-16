@@ -645,4 +645,26 @@ export const deleteInstitutionPortfolio = async (id) => {
   return response.data;
 };
 
+export const fetchInstitutionApiKeys = async () => {
+  const response = await api.get('/institution/api-keys');
+  return response.data;
+};
+
+export const createInstitutionApiKey = async (payload) => {
+  const response = await api.post('/institution/api-keys', payload);
+  return response.data;
+};
+
+export const revokeInstitutionApiKey = async (id) => {
+  const response = await api.delete(`/institution/api-keys/${id}`);
+  return response.data;
+};
+
+export const runPreTradeGuardrailCheck = async (symbol, units = 1000) => {
+  const response = await api.get(`/b2b/stocks/${encodeURIComponent(symbol)}/pre-trade-check`, {
+    params: { units },
+  });
+  return response.data;
+};
+
 

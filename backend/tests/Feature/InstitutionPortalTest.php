@@ -17,6 +17,7 @@ class InstitutionPortalTest extends TestCase
     {
         parent::setUp();
 
+        Schema::dropIfExists('institutional_api_keys');
         Schema::dropIfExists('institutional_portfolios');
         Schema::dropIfExists('baskets');
         Schema::dropIfExists('watchlists');
@@ -163,6 +164,19 @@ class InstitutionPortalTest extends TestCase
             $table->json('holdings_payload');
             $table->json('summary_snapshot')->nullable();
             $table->json('factsheet_meta')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('institutional_api_keys', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id');
+            $table->string('name', 120);
+            $table->string('key_prefix', 24);
+            $table->string('key_hash', 64)->unique();
+            $table->json('scopes')->nullable();
+            $table->timestamp('last_used_at')->nullable();
+            $table->timestamp('expires_at')->nullable();
+            $table->timestamp('revoked_at')->nullable();
             $table->timestamps();
         });
     }
@@ -422,5 +436,62 @@ class InstitutionPortalTest extends TestCase
             ->assertJsonPath('data.tenant_key', 'custom')
             ->assertJsonPath('data.lotus_etf', null)
             ->assertJsonPath('data.norrenberger_fund', null);
+    }
+
+    public function test_institution_can_generate_api_key_and_call_b2b_pretrade_guardrail_and_revoke(): void
+    {
+        $this->seedSampleEquities();
+
+        $brokerUser = User::factory()->create([
+            'role' => 'institution',
+            'institution_name' => 'CardinalStone Securities',
+        ]);
+
+        // 1. Generate API key
+        $createRes = $this->actingAs($brokerUser, 'sanctum')
+            ->postJson('/api/v1/institution/api-keys', [
+                'name' => 'OMS Production',
+            ]);
+
+        $createRes->assertStatus(201);
+        $plainKey = $createRes->json('data.plain_text_key');
+        $keyId = $createRes->json('data.api_key.id');
+        $this->assertStringStartsWith('irsh_live_', $plainKey);
+
+        // 2. Use X-Api-Key header on B2B pre-trade guardrail (blocked stock)
+        $this->withHeaders(['X-Api-Key' => $plainKey])
+            ->getJson('/api/v1/b2b/stocks/ZENITHBANK/pre-trade-check?units=5000')
+            ->assertStatus(200)
+            ->assertJsonPath('data.order_allowed', false)
+            ->assertJsonPath('data.guardrail_action', 'BLOCK')
+            ->assertJsonPath('data.compliant_alternatives.0.symbol', 'JAIZBANK');
+
+        // 3. Use X-Api-Key header on B2B pre-trade guardrail (halal stock)
+        $this->withHeaders(['X-Api-Key' => $plainKey])
+            ->getJson('/api/v1/b2b/stocks/DANGCEM/pre-trade-check?units=100')
+            ->assertStatus(200)
+            ->assertJsonPath('data.order_allowed', true)
+            ->assertJsonPath('data.guardrail_action', 'APPROVE');
+
+        // 4. Use Bearer irsh_live_... on B2B bulk screen
+        $this->withHeaders(['Authorization' => "Bearer {$plainKey}"])
+            ->postJson('/api/v1/b2b/portfolio/screen', [
+                'holdings' => [
+                    ['symbol' => 'DANGCEM', 'shares' => 100],
+                    ['symbol' => 'ZENITHBANK', 'shares' => 500],
+                ],
+            ])
+            ->assertStatus(200)
+            ->assertJsonPath('data.summary.compliant_count', 1)
+            ->assertJsonPath('data.summary.non_compliant_count', 1);
+
+        // 5. Revoke key and confirm 401
+        $this->actingAs($brokerUser, 'sanctum')
+            ->deleteJson("/api/v1/institution/api-keys/{$keyId}")
+            ->assertStatus(200);
+
+        $this->withHeaders(['X-Api-Key' => $plainKey])
+            ->getJson('/api/v1/b2b/stocks/DANGCEM/pre-trade-check')
+            ->assertStatus(401);
     }
 }
