@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/providers/app_state_provider.dart';
+import '../../core/widgets/guest_gate.dart';
 import '../stocks/ui/stock_screener_screen.dart';
 import '../baskets/ui/baskets_screen.dart';
 import '../chat/ui/chat_assistant_sheet.dart';
@@ -33,6 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _fetchUnreadNotifications() async {
+    if (!mounted || GuestGate.isGuest(context)) return;
     try {
       final response = await ApiService().get('notifications/unread-count');
       if (response.statusCode == 200 && mounted) {
@@ -70,7 +72,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     Row(
                       children: [
                         GestureDetector(
-                          onTap: () => ChatAssistantSheet.show(context),
+                          onTap: () {
+                            if (GuestGate.isGuest(context)) {
+                              GuestGate.showAuthPrompt(
+                                context,
+                                title: 'Create a Free Account',
+                                message: 'Create a free account or sign in to chat with Irshad AI.',
+                              );
+                              return;
+                            }
+                            ChatAssistantSheet.show(context);
+                          },
                           child: Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
@@ -83,6 +95,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(width: 8),
                         GestureDetector(
                           onTap: () async {
+                            if (GuestGate.isGuest(context)) {
+                              GuestGate.showAuthPrompt(
+                                context,
+                                title: 'Create a Free Account',
+                                message: 'Create a free account or sign in to view notifications and alerts.',
+                              );
+                              return;
+                            }
                             await Navigator.pushNamed(context, '/notifications');
                             _fetchUnreadNotifications();
                           },

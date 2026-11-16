@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/providers/app_state_provider.dart';
+import '../../../core/widgets/guest_gate.dart';
 import '../data/auth_repository.dart';
 import '../../portfolio/ui/zakat_calculator_screen.dart';
 import '../../portfolio/providers/portfolio_provider.dart';
@@ -68,8 +69,13 @@ Color get cardBg => context.bgAlt;
   }
 
   void _fetchProfile() async {
+    final appState = Provider.of<AppStateProvider>(context, listen: false);
+    if (!appState.isAuthenticated) {
+      if (mounted) setState(() => _isLoading = false);
+      return;
+    }
     setState(() => _isLoading = true);
-    await Provider.of<AppStateProvider>(context, listen: false).loadProfile();
+    await appState.loadProfile();
     if (mounted) {
       setState(() {
         _isLoading = false;
@@ -87,7 +93,9 @@ Color get cardBg => context.bgAlt;
 
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<AppStateProvider>(context).userProfile;
+    final appState = Provider.of<AppStateProvider>(context);
+    final isGuest = !appState.isAuthenticated;
+    final user = appState.userProfile;
 
     return Scaffold(
       backgroundColor: context.bg,
@@ -95,21 +103,83 @@ Color get cardBg => context.bgAlt;
         title: Text('Profile', style: TextStyle(fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.5)),
         backgroundColor: context.bg,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.settings_outlined, color: context.textDark, size: 22),
-            onPressed: () => Navigator.pushNamed(context, '/settings'),
-          ),
-          IconButton(
-            icon: Icon(Icons.logout_rounded, color: context.haram, size: 22),
-            onPressed: _logout,
-          ),
-        ],
+        actions: isGuest
+            ? null
+            : [
+                IconButton(
+                  icon: Icon(Icons.settings_outlined, color: context.textDark, size: 22),
+                  onPressed: () => Navigator.pushNamed(context, '/settings'),
+                ),
+                IconButton(
+                  icon: Icon(Icons.logout_rounded, color: context.haram, size: 22),
+                  onPressed: _logout,
+                ),
+              ],
       ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator(color: context.primary))
-          : user == null
-              ? Center(child: Text('Failed to load profile', style: TextStyle(color: context.textDark)))
+      body: isGuest
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(28.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 72,
+                      height: 72,
+                      decoration: BoxDecoration(
+                        color: context.primary.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(22),
+                      ),
+                      child: Icon(Icons.person_outline_rounded, size: 36, color: context.primary),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Browsing as Guest',
+                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: context.textDark),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Sign in or create a free account to unlock unlimited stock screenings, portfolio tracking, Zakat, and watchlists.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14, color: context.textMuted, height: 1.5),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pushNamed(context, '/register'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: context.primary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                          elevation: 0,
+                        ),
+                        child: const Text('Create Free Account', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pushNamed(context, '/login'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: context.textDark,
+                          side: BorderSide(color: context.divider, width: 1.5),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                        ),
+                        child: const Text('Sign In', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : _isLoading
+              ? Center(child: CircularProgressIndicator(color: context.primary))
+              : user == null
+                  ? Center(child: Text('Failed to load profile', style: TextStyle(color: context.textDark)))
               : SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                   child: Column(

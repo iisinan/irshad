@@ -5,6 +5,7 @@ import 'package:hive/hive.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/providers/app_state_provider.dart';
 import '../../../core/widgets/upgrade_paywall_bottom_sheet.dart';
+import '../../../core/widgets/guest_gate.dart';
 import '../providers/basket_provider.dart';
 import '../models/basket.dart';
 import '../../stocks/ui/basket_detail_screen.dart';
@@ -208,10 +209,12 @@ class _BasketsScreenState extends State<BasketsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final tier = Provider.of<AppStateProvider>(context).userProfile?['tier'];
+    final appState = Provider.of<AppStateProvider>(context);
+    final isGuest = !appState.isAuthenticated;
+    final tier = appState.userProfile?['tier'];
     final tierSlug = tier?['slug'] ?? 'free';
     final basketsLimit = tier?['features']?['baskets'] ?? (tierSlug == 'max' ? -1 : tierSlug == 'pro' ? 3 : 0);
-    final isBasketsLocked = tierSlug == 'free' || basketsLimit == 0;
+    final isBasketsLocked = isGuest || tierSlug == 'free' || basketsLimit == 0;
 
     if (isBasketsLocked) {
       return Scaffold(
@@ -229,22 +232,32 @@ class _BasketsScreenState extends State<BasketsScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.lock_outline_rounded, size: 42, color: context.primary),
+                  Icon(isGuest ? Icons.layers_outlined : Icons.lock_outline_rounded, size: 42, color: context.primary),
                   const SizedBox(height: 16),
                   Text(
-                    'Thematic Baskets Unavailable',
+                    isGuest ? 'Explore Thematic Baskets' : 'Thematic Baskets Unavailable',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Thematic and custom baskets are not enabled on your current account.',
+                    isGuest
+                        ? 'Create a free account or sign in to view and build Shariah-compliant investing baskets.'
+                        : 'Thematic and custom baskets are not enabled on your current account.',
                     style: TextStyle(fontSize: 13, color: context.textMuted, height: 1.5),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {
+                      if (isGuest) {
+                        GuestGate.showAuthPrompt(
+                          context,
+                          title: 'Create a Free Account',
+                          message: 'Create a free account or sign in to access Shariah-compliant investing baskets.',
+                        );
+                        return;
+                      }
                       showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,
@@ -262,7 +275,7 @@ class _BasketsScreenState extends State<BasketsScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     ),
-                    child: const Text('Account Info', style: TextStyle(fontWeight: FontWeight.w800)),
+                    child: Text(isGuest ? 'Sign In or Register' : 'Account Info', style: const TextStyle(fontWeight: FontWeight.w800)),
                   ),
                 ],
               ),
