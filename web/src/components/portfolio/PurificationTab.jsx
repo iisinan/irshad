@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { ShieldAlert, ArrowRight, Heart, CheckCircle, Sparkles, X, ChevronRight, Calculator, Loader2, Info, Lock } from 'lucide-react';
+import { ShieldAlert, ArrowRight, Heart, CheckCircle, Sparkles, X, ChevronRight, Calculator, Loader2, Info, Lock, Droplet } from 'lucide-react';
 import CompanyLogo from '../CompanyLogo';
 import api from '../../services/api';
 import localforage from 'localforage';
 import { toastSuccess, toastError } from '../../utils/toast';
 import { useAuth } from '../../context/AuthContext';
+import UpdatesPurification from './UpdatesPurification';
 
 const fmt = (n, d = 2) => `₦${Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d })}`;
 
@@ -585,6 +586,7 @@ export default function PurificationTab({ data, initialSymbol, refreshData, onCl
   const purificationUsage = data?.usage_summary?.purifications_per_month;
   const lockedHoldingsCount = data?.summary?.purification_holdings_count ?? (data?.holdings || []).filter(h => h.purification_required).length;
 
+  const [activeSubTab, setActiveSubTab] = useState('calculator');
   const [purifiedSymbols, setPurifiedSymbols] = useState([]);
   const [selectedHolding, setSelectedHolding] = useState(null);
   const [activeStatTarget, setActiveStatTarget] = useState(null);
@@ -663,9 +665,63 @@ export default function PurificationTab({ data, initialSymbol, refreshData, onCl
     }
   };
 
+  const subTabsBar = (
+    <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '18px', marginBottom: '6px' }} className="hide-scrollbar">
+      <button
+        onClick={() => setActiveSubTab('calculator')}
+        style={{
+          display: 'flex', alignItems: 'center', gap: '8px',
+          padding: '10px 20px',
+          borderRadius: '16px',
+          border: `1px solid ${activeSubTab === 'calculator' ? 'var(--primary)' : 'var(--border)'}`,
+          background: activeSubTab === 'calculator' ? 'var(--primary-50)' : 'var(--bg-alt)',
+          color: activeSubTab === 'calculator' ? 'var(--primary)' : 'var(--text-muted)',
+          fontSize: '0.9rem',
+          fontWeight: activeSubTab === 'calculator' ? 800 : 600,
+          cursor: 'pointer',
+          transition: 'all 0.2s',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        <Calculator size={17} strokeWidth={activeSubTab === 'calculator' ? 2.5 : 2} />
+        Dividend Purification
+        {isPurificationLocked && <Lock size={13} color="#d97706" />}
+      </button>
+      <button
+        onClick={() => setActiveSubTab('why')}
+        style={{
+          display: 'flex', alignItems: 'center', gap: '8px',
+          padding: '10px 20px',
+          borderRadius: '16px',
+          border: `1px solid ${activeSubTab === 'why' ? '#0ea5e9' : 'var(--border)'}`,
+          background: activeSubTab === 'why' ? 'rgba(14, 165, 233, 0.1)' : 'var(--bg-alt)',
+          color: activeSubTab === 'why' ? '#0ea5e9' : 'var(--text-muted)',
+          fontSize: '0.9rem',
+          fontWeight: activeSubTab === 'why' ? 800 : 600,
+          cursor: 'pointer',
+          transition: 'all 0.2s',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        <Droplet size={17} strokeWidth={activeSubTab === 'why' ? 2.5 : 2} />
+        Why Purification
+      </button>
+    </div>
+  );
+
+  if (activeSubTab === 'why') {
+    return (
+      <div className="animate-fade-in stagger-1 purification-tab-outer">
+        {subTabsBar}
+        <UpdatesPurification />
+      </div>
+    );
+  }
+
   if (isPurificationLocked) {
     return (
       <div className="animate-fade-in stagger-1 purification-tab-outer">
+        {subTabsBar}
         <div style={{ background: 'var(--bg)', borderRadius: '24px', padding: '56px 32px', textAlign: 'center', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
           <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: 'rgba(217, 119, 6, 0.12)', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
             <Lock size={28} />
@@ -689,6 +745,7 @@ export default function PurificationTab({ data, initialSymbol, refreshData, onCl
 
   return (
     <div className="animate-fade-in stagger-1 purification-tab-outer">
+      {subTabsBar}
       {charityModalTarget && (
         <CharitiesModal 
           amountDue={charityModalTarget.amount} 

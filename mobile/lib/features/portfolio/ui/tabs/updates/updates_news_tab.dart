@@ -6,7 +6,6 @@ import 'dart:convert';
 import 'package:irshad_mobile/core/widgets/company_avatar.dart';
 import 'package:irshad_mobile/features/stocks/ui/stock_detail_screen.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-import 'updates_purification_tab.dart';
 import '../guide_tab.dart';
 
 class UpdatesNewsTab extends StatefulWidget {
@@ -98,7 +97,6 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
     final sections = [
       {'id': 'market', 'label': 'Market Intelligence', 'icon': Icons.bar_chart_outlined, 'color': context.primary},
       {'id': 'guide', 'label': 'Navigation Guide', 'icon': Icons.explore_outlined, 'color': const Color(0xFF10B981)},
-      {'id': 'purification', 'label': 'Why Purification', 'icon': Icons.water_drop_outlined, 'color': const Color(0xFF0EA5E9)},
     ];
 
     return SingleChildScrollView(
@@ -346,16 +344,6 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
         final dateB = DateTime.tryParse(b['published_at']?.toString() ?? '') ?? DateTime.fromMillisecondsSinceEpoch(0);
         return dateB.compareTo(dateA);
       });
-    }
-
-    if (_activeSection == 'purification') {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildSectionPills(),
-          const UpdatesPurificationTab(),
-        ],
-      );
     }
 
     if (_activeSection == 'guide') {

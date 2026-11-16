@@ -7,68 +7,149 @@ import 'package:irshad_mobile/core/providers/app_state_provider.dart';
 import 'package:irshad_mobile/core/widgets/upgrade_paywall_bottom_sheet.dart';
 import '../widgets/purification_card.dart';
 import '../widgets/charities_bottom_sheet.dart';
+import 'updates/updates_purification_tab.dart';
 
-class PurificationTab extends StatelessWidget {
+class PurificationTab extends StatefulWidget {
   const PurificationTab({super.key});
+
+  @override
+  State<PurificationTab> createState() => _PurificationTabState();
+}
+
+class _PurificationTabState extends State<PurificationTab> {
+  String _activeSubTab = 'calculator';
+
+  Widget _buildSubTabBar(BuildContext context, bool isLocked) {
+    final tabs = [
+      {
+        'id': 'calculator',
+        'label': 'Dividend Purification',
+        'icon': Icons.calculate_outlined,
+        'color': context.primary,
+        'locked': isLocked,
+      },
+      {
+        'id': 'why',
+        'label': 'Why Purification',
+        'icon': Icons.water_drop_outlined,
+        'color': const Color(0xFF0EA5E9),
+        'locked': false,
+      },
+    ];
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 4),
+      child: Row(
+        children: tabs.map((tab) {
+          final isActive = _activeSubTab == tab['id'];
+          final color = tab['color'] as Color;
+          final locked = tab['locked'] == true;
+          return GestureDetector(
+            onTap: () => setState(() => _activeSubTab = tab['id'] as String),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              margin: const EdgeInsets.only(right: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+              decoration: BoxDecoration(
+                color: isActive ? color.withValues(alpha: 0.12) : context.bgAlt,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: isActive ? color : context.divider),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(tab['icon'] as IconData, size: 16, color: isActive ? color : context.textMuted),
+                  const SizedBox(width: 6),
+                  Text(
+                    tab['label'] as String,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w800,
+                      color: isActive ? color : context.textMuted,
+                    ),
+                  ),
+                  if (locked) ...[
+                    const SizedBox(width: 6),
+                    const Icon(Icons.lock_rounded, size: 13, color: Color(0xFFD97706)),
+                  ],
+                ],
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final tier = Provider.of<AppStateProvider>(context).userProfile?['tier'];
     final tierSlug = tier?['slug'] ?? 'free';
     final purificationsLimit = tier?['features']?['purifications_per_month'] ?? (tierSlug == 'max' ? -1 : tierSlug == 'pro' ? 6 : 0);
-    if (purificationsLimit == 0) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(28.0),
-          child: Container(
-            padding: const EdgeInsets.all(28),
-            decoration: BoxDecoration(
-              color: context.bg,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: context.divider),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.lock_outline_rounded, size: 42, color: context.primary),
-                const SizedBox(height: 16),
-                Text('Automated Purification Unavailable', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark), textAlign: TextAlign.center),
-                const SizedBox(height: 8),
-                Text(
-                  'Dividend purification calculations are not enabled on your current account.',
-                  style: TextStyle(fontSize: 13, color: context.textMuted, height: 1.5),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      builder: (ctx) => const UpgradePaywallBottomSheet(
-                        featureKey: 'purifications_per_month',
-                        requiredTier: 'pro',
-                        message: 'Dividend purification is currently unavailable on your account.',
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: context.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  ),
-                  child: const Text('Account Info', style: TextStyle(fontWeight: FontWeight.w800)),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
+    final isLocked = purificationsLimit == 0;
 
-    return Consumer<PortfolioProvider>(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildSubTabBar(context, isLocked),
+        Expanded(
+          child: _activeSubTab == 'why'
+              ? const SingleChildScrollView(
+                  padding: EdgeInsets.only(top: 12, bottom: 100),
+                  child: UpdatesPurificationTab(),
+                )
+              : isLocked
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(28.0),
+                        child: Container(
+                          padding: const EdgeInsets.all(28),
+                          decoration: BoxDecoration(
+                            color: context.bg,
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(color: context.divider),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.lock_outline_rounded, size: 42, color: context.primary),
+                              const SizedBox(height: 16),
+                              Text('Automated Purification Unavailable', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark), textAlign: TextAlign.center),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Dividend purification calculations are not enabled on your current account.',
+                                style: TextStyle(fontSize: 13, color: context.textMuted, height: 1.5),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 20),
+                              ElevatedButton(
+                                onPressed: () {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    backgroundColor: Colors.transparent,
+                                    builder: (ctx) => const UpgradePaywallBottomSheet(
+                                      featureKey: 'purifications_per_month',
+                                      requiredTier: 'pro',
+                                      message: 'Dividend purification is currently unavailable on your account.',
+                                    ),
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: context.primary,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                ),
+                                child: const Text('Account Info', style: TextStyle(fontWeight: FontWeight.w800)),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                  : Consumer<PortfolioProvider>(
       builder: (context, provider, child) {
         final isLoading = provider.isLoading;
         
@@ -404,6 +485,9 @@ class PurificationTab extends StatelessWidget {
           ),
         );
       },
+    ),
+        ),
+      ],
     );
   }
 }

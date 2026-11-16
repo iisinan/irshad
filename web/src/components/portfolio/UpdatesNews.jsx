@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import {
-  TrendingUp, AlertTriangle, Droplet, CheckCircle2, BarChart2,
+  TrendingUp, AlertTriangle, CheckCircle2, BarChart2,
   ExternalLink, RefreshCw, Mail, Bell, ChevronRight,
   ArrowRight, ArrowLeft, Newspaper, Zap, Shield, Star, X
 } from 'lucide-react';
@@ -10,7 +10,6 @@ import api, { fetchUpdatesNews } from '../../services/api';
 import { toastSuccess, toastError } from '../../utils/toast';
 import CompanyLogo from '../CompanyLogo';
 import localforage from 'localforage';
-import UpdatesPurification from './UpdatesPurification';
 
 /* ── Skeleton ── */
 export const CardSkeleton = () => {
@@ -231,8 +230,7 @@ export default function UpdatesNews() {
   }, []);
 
   const sections = [
-    { id: 'market',       label: 'Market Intelligence', icon: BarChart2,    color: 'var(--primary)' },
-    { id: 'purification', label: 'Why Purification',    icon: Droplet,      color: '#0ea5e9' },
+    { id: 'market', label: 'Market Intelligence', icon: BarChart2, color: 'var(--primary)' },
   ];
 
   const complianceChanges  = data?.compliance_changes  || [];
@@ -330,12 +328,6 @@ export default function UpdatesNews() {
                 }
               </div>
             </>
-          )}
-
-          {activeSection === 'purification' && (
-            <div style={{ maxHeight: '700px', overflowY: 'auto', paddingRight: '6px' }} className="custom-scrollbar">
-              <UpdatesPurification />
-            </div>
           )}
         </div>
       )}
