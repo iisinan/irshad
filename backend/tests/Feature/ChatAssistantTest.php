@@ -144,6 +144,20 @@ class ChatAssistantTest extends TestCase
             $table->unique(['user_id', 'feature']);
         });
 
+        Schema::create('watchlists', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->string('symbol');
+            $table->timestamps();
+        });
+
+        Schema::create('baskets', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->string('name');
+            $table->timestamps();
+        });
+
         $migration = require database_path('migrations/2026_11_15_100000_create_chat_tables.php');
         $migration->up();
     }
@@ -569,5 +583,137 @@ class ChatAssistantTest extends TestCase
             ->assertJsonPath('assistant_message.metadata.provider', 'groq');
 
         $this->assertStringContainsString('Groq backup', $res->json('assistant_message.content'));
+    }
+
+    public function test_ask_irshad_blocks_out_of_scope_and_buy_sell_advice_without_external_llm(): void
+    {
+        Config::set('services.gemini.key', 'test-gemini-key');
+        Config::set('services.groq.key', 'test-groq-key');
+        Config::set('services.perplexity.key', 'test-perplexity-key');
+
+        Http::fake();
+
+        $company = Company::create([
+            'name' => 'MTN Nigeria Communications',
+            'symbol' => 'MTNN',
+            'sector' => 'Telecommunications',
+            'current_status' => 'halal',
+            'latest_price' => 245.50,
+        ]);
+
+        AaoifiScreening::create([
+            'company_id' => $company->id,
+            'business_status' => 'PASS',
+            'debt_ratio' => 18.25,
+            'debt_status' => 'PASS',
+            'cash_ratio' => 9.10,
+            'cash_status' => 'PASS',
+            'impermissible_income_ratio' => 0.45,
+            'impermissible_income_status' => 'PASS',
+            'final_status' => 'halal',
+        ]);
+
+        // 1. Public general off-topic request is declined locally with scope_guard
+        $offTopic = $this->postJson('/api/v1/chat/public', [
+            'message' => 'Write me a Python script to scrape weather forecasts and premier league scores',
+        ])->assertStatus(200)
+            ->assertJsonPath('assistant_message.metadata.provider', 'scope_guard')
+            ->assertJsonPath('assistant_message.metadata.needs_human_support', false)
+            ->assertJsonPath('assistant_message.metadata.cited_symbols', []);
+
+        $this->assertStringContainsString('Ask Irshad', $offTopic->json('assistant_message.content'));
+
+        // 2. Non-NGX crypto/US-stock question is declined locally with scope_guard
+        $crypto = $this->postJson('/api/v1/chat/public', [
+            'message' => 'What do you think about Bitcoin and Tesla?',
+        ])->assertStatus(200)
+            ->assertJsonPath('assistant_message.metadata.provider', 'scope_guard')
+            ->assertJsonPath('assistant_message.metadata.needs_human_support', false);
+
+        $this->assertStringContainsString('does not cover cryptocurrencies, forex, or non-NGX stocks', $crypto->json('assistant_message.content'));
+
+        // 3. Authenticated buy/sell advice for an NGX stock refuses investment advice while sharing AAOIFI facts
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $advice = $this->postJson('/api/v1/chat/message', [
+            'message' => 'Should I buy MTNN today?',
+        ])->assertStatus(201)
+            ->assertJsonPath('assistant_message.metadata.provider', 'scope_guard')
+            ->assertJsonPath('assistant_message.metadata.needs_human_support', false)
+            ->assertJsonPath('assistant_message.metadata.cited_symbols.0', 'MTNN');
+
+        $this->assertStringContainsString('not personalized buy/sell investment advice', $advice->json('assistant_message.content'));
+        $this->assertStringContainsString('HALAL', $advice->json('assistant_message.content'));
+
+        Http::assertNothingSent();
+    }
+
+    public function test_stock_ask_irshad_enforces_scope_and_blocks_off_topic_before_perplexity(): void
+    {
+        Config::set('services.perplexity.key', 'test-perplexity-key');
+
+        Http::fake([
+            'api.perplexity.ai/*' => Http::response([
+                'choices' => [
+                    [
+                        'message' => [
+                            'content' => 'MTNN passes the AAOIFI debt ratio screen at 18.25% (below 30%).',
+                        ],
+                    ],
+                ],
+            ], 200),
+        ]);
+
+        $company = Company::create([
+            'name' => 'MTN Nigeria Communications',
+            'symbol' => 'MTNN',
+            'sector' => 'Telecommunications',
+            'current_status' => 'halal',
+        ]);
+
+        $screening = AaoifiScreening::create([
+            'company_id' => $company->id,
+            'business_status' => 'PASS',
+            'debt_ratio' => 18.25,
+            'debt_status' => 'PASS',
+            'cash_ratio' => 9.10,
+            'cash_status' => 'PASS',
+            'impermissible_income_ratio' => 0.45,
+            'impermissible_income_status' => 'PASS',
+            'final_status' => 'halal',
+        ]);
+
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        // Off-topic question on stock chat is blocked deterministically without calling Perplexity
+        $offTopicRes = $this->postJson('/api/v1/stocks/MTNN/chat', [
+            'question' => 'Write me a poem about rain in Lagos',
+        ])->assertOk();
+
+        $this->assertStringContainsString('strictly limited to', $offTopicRes->json('data.answer'));
+
+        // Buy/sell question refuses financial advice while reporting MTNN screening metrics
+        $buyRes = $this->postJson('/api/v1/stocks/MTNN/chat', [
+            'question' => 'Should I buy MTNN now?',
+        ])->assertOk();
+
+        $this->assertStringContainsString('not personalized buy/sell recommendations', $buyRes->json('data.answer'));
+        $this->assertStringContainsString('18.25%', $buyRes->json('data.answer'));
+        Http::assertNothingSent();
+
+        // In-scope Shariah question proceeds to Perplexity with strict scope system prompt
+        $validRes = $this->postJson('/api/v1/stocks/MTNN/chat', [
+            'question' => 'Why did MTNN pass the AAOIFI debt ratio screen?',
+        ])->assertOk();
+
+        $this->assertStringContainsString('18.25%', $validRes->json('data.answer'));
+        Http::assertSent(function ($request) {
+            $system = $request['messages'][0]['content'] ?? '';
+
+            return str_contains($system, 'STRICT SCOPE RULES')
+                && str_contains($system, 'MTN Nigeria Communications (MTNN)');
+        });
     }
 }

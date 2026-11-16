@@ -17,8 +17,8 @@ class PerplexityAiService
 
     public function __construct()
     {
-        $this->apiKey = env('PERPLEXITY_API_KEY', '');
-        $this->model = env('PERPLEXITY_MODEL', 'sonar-pro');
+        $this->apiKey = (string) (config('services.perplexity.key') ?: env('PERPLEXITY_API_KEY', ''));
+        $this->model = (string) (config('services.perplexity.model') ?: env('PERPLEXITY_MODEL', 'sonar-pro'));
     }
 
     /**
@@ -366,18 +366,27 @@ class PerplexityAiService
      */
     public function chatAboutStock($company, $screening, string $question): string
     {
+        $name   = $company->name ?? $company->symbol;
+        $symbol = $company->symbol;
+
+        $guardReply = $this->detectOutOfScopeStockQuestion($company, $screening, $question);
+        if ($guardReply !== null) {
+            return $guardReply;
+        }
+
         if (empty($this->apiKey)) {
             return "I'm sorry, the AI service is not configured. Please contact the administrator.";
         }
 
-        $symbol  = $company->symbol;
-        $name    = $company->name ?? $symbol;
         $sector  = $company->sector ?? 'Unknown';
         $status  = $company->current_status ?? 'unknown';
 
-        $context = "You are Irshad AI, an expert Islamic finance assistant embedded in the Irshad stock screening platform. ";
-        $context .= "You help users understand Shariah compliance screening for Nigerian Exchange (NGX) listed stocks. ";
-        $context .= "Always be concise, factual, and cite AAOIFI standards where relevant. Do not mention Qistal.\n\n";
+        $context = "You are Ask Irshad, a strict domain-limited Islamic finance assistant embedded in the Irshad NGX stock screening platform. ";
+        $context .= "STRICT SCOPE RULES:\n";
+        $context .= "1. You MUST ONLY answer questions directly about {$name} ({$symbol}) on the Nigerian Exchange (NGX): its business activities, sector, revenue sources, Shariah/AAOIFI Standard No. 21 screening status, debt/cash/impermissible-income ratios, dividend purification, and corporate disclosures.\n";
+        $context .= "2. NEVER answer off-topic requests (general trivia, coding, politics, sports, weather, creative writing, recipes, unrelated companies, crypto, or forex), and NEVER give personalized buy/sell recommendations, price targets, profit guarantees, or formal unrelated religious fatwas.\n";
+        $context .= "3. If the user asks anything outside {$name} ({$symbol})'s Shariah screening or asks for buy/sell advice, politely refuse in 1-2 concise sentences and ask them to inquire about {$symbol}'s compliance, AAOIFI ratios, or purification.\n";
+        $context .= "Always be concise, factual, cite AAOIFI standards where relevant, and never mention Qistal.\n\n";
         $context .= "Company context:\n";
         $context .= "- Name: {$name} ({$symbol})\n";
         $context .= "- Sector: {$sector}\n";
@@ -418,5 +427,44 @@ class PerplexityAiService
             Log::error('Irshad AI chat error: '.$e->getMessage());
             return 'An error occurred while processing your question. Please try again.';
         }
+    }
+
+    /**
+     * Deterministically decline out-of-scope or buy/sell investment-advice questions before querying Perplexity.
+     */
+    private function detectOutOfScopeStockQuestion($company, $screening, string $question): ?string
+    {
+        $name = $company->name ?? $company->symbol;
+        $symbol = strtoupper((string) $company->symbol);
+        $status = strtoupper((string) ($company->current_status ?? $screening->final_status ?? 'UNSCREENED'));
+
+        // 1. Refuse buy/sell recommendations & price predictions while still sharing factual AAOIFI status
+        if (preg_match('/\b(should\s+i\s+(?:buy|sell|hold|invest|short|trade)|buy\s+or\s+sell|good\s+(?:buy|time\s+to\s+buy)|predict\s+(?:the\s+)?price|price\s+(?:target|prediction|forecast)|will\s+(?:it|the\s+price|'.preg_quote($symbol, '/').')\s+(?:go\s+up|rise|fall|crash|pump|double)|guaranteed\s+(?:return|profit))\b/i', $question)) {
+            $summary = "Irshad provides AAOIFI Shariah compliance screening only—not personalized buy/sell recommendations, financial advice, or price predictions.";
+            $summary .= "\n\nFor **{$name} ({$symbol})**, the current recorded Shariah status is **{$status}**";
+            if ($screening) {
+                $summary .= sprintf(
+                    ' (Business: **%s**, Debt: **%.2f%%** / 30%%, Cash: **%.2f%%** / 30%%, Impermissible Income: **%.2f%%** / 5%%).',
+                    $screening->business_status ?? 'N/A',
+                    (float) ($screening->debt_ratio ?? 0),
+                    (float) ($screening->cash_ratio ?? 0),
+                    (float) ($screening->impermissible_income_ratio ?? 0)
+                );
+            } else {
+                $summary .= '.';
+            }
+
+            return $summary;
+        }
+
+        // 2. Refuse clearly unrelated / general-purpose prompts if they don't touch compliance, ratios, business, finance, or the company
+        $inScopeStockTerms = '/\b(shariah|sharia|halal|haram|compliant|compliance|aaoifi|screen|screening|debt|cash|deposit|interest|riba|revenue|income|impermissible|ratio|ratios|purif|dividend|business|sector|activity|report|disclosure|financial|profit|margin|zakat|asset|equity|sukuk|'.preg_quote($symbol, '/').')\b/i';
+        $offTopicTerms = '/\b(write\s+(?:me\s+)?a?\s*(?:poem|essay|story|code|script|email|song)|python|javascript|php|html|css|sql|recipe|cook|weather|football|premier\s+league|champions\s+league|movie|music|politics|election|president|capital\s+of|joke|translate|bitcoin|ethereum|solana|crypto|forex|tesla|apple|nvidia|amazon|google|netflix)\b/i';
+
+        if (preg_match($offTopicTerms, $question) && ! preg_match($inScopeStockTerms, $question)) {
+            return "Ask Irshad on this page is strictly limited to **{$name} ({$symbol})**—its business activities, AAOIFI Shariah compliance status, financial ratios, and dividend purification. Please ask a screening or compliance question about {$symbol}.";
+        }
+
+        return null;
     }
 }

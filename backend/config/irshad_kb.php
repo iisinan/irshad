@@ -65,7 +65,7 @@ TEXT,
         'content' => <<<'TEXT'
 - Plans & Tiers:
   - Miftah (Free): 3 stock screens/month, up to 3 portfolio holdings, no watchlist/baskets/Zakat calculator/purification/statements/alerts.
-  - Rawdha (Pro — NGN 6,500/qtr or NGN 25,000/yr): 10 stock screens/month, 7 portfolio holdings, 2 watchlist stocks, 3 baskets, 2 purifications/month, automated Zakat calculator, and broker statement imports.
+  - Rawdha (Pro — NGN 6,500/qtr or NGN 25,000/yr): 30 stock screens/quarter, 7 portfolio holdings, 2 watchlist stocks, 3 curated + 3 custom baskets, 6 purifications/quarter, automated Zakat calculator, and broker statement imports.
   - Noor (Max — NGN 8,500/qtr or NGN 33,000/yr): Unlimited stock screens, holdings, watchlist, baskets, and purifications, plus Dividend Alerts, 90-day Compliance Drift Tracking, and Monthly Spotlight full insights.
 - Verification & Password Reset: If a user experiences login, email verification, or unexpected password-reset issues, advise them to check account security, avoid clicking unrecognized links, and offer escalation to the Irshad Support Team if they need an admin check.
 - Billing disputes, missing stocks, or technical bugs: Encourage escalating the conversation to the Irshad Support Team so an admin can review directly in Admin Inbox.

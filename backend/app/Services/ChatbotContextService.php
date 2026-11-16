@@ -61,7 +61,9 @@ class ChatbotContextService
         }
 
         $resources = $this->findRelevantResources($message);
-        $kbSections = $this->matchKnowledgeBase($message);
+        $kbMatch = $this->matchKnowledgeBase($message);
+        $kbSections = $kbMatch['sections'];
+        $kbHit = $kbMatch['hit'];
         $userProfileData = $user ? $this->buildUserProfileData($user, $tierInfo) : null;
         $userSummary = $user
             ? $this->summarizeUser($userProfileData, $tierInfo)
@@ -150,6 +152,7 @@ class ChatbotContextService
             'matched_resources' => $resources->values()->all(),
             'kb_sections' => array_column($kbSections, 'title'),
             'kb_matched_sections' => $kbSections,
+            'kb_hit' => $kbHit,
             'tier' => $tierInfo,
             'stock_gate' => $stockGate,
             'user_profile' => $userProfileData,
@@ -420,7 +423,7 @@ class ChatbotContextService
     /**
      * Select up to 3 relevant static KB sections; falls back to core overview sections.
      *
-     * @return array<int, array{title: string, content: string}>
+     * @return array{sections: array<int, array{title: string, content: string}>, hit: bool}
      */
     private function matchKnowledgeBase(string $message): array
     {
@@ -443,13 +446,19 @@ class ChatbotContextService
         usort($scored, fn ($a, $b) => $b['score'] <=> $a['score']);
 
         if (empty($scored)) {
-            return array_values(array_filter([
-                $kb['aaoifi_methodology'] ?? null,
-                $kb['platform_features'] ?? null,
-            ]));
+            return [
+                'sections' => array_values(array_filter([
+                    $kb['aaoifi_methodology'] ?? null,
+                    $kb['platform_features'] ?? null,
+                ])),
+                'hit' => false,
+            ];
         }
 
-        return array_map(fn ($item) => $item['section'], array_slice($scored, 0, 3));
+        return [
+            'sections' => array_map(fn ($item) => $item['section'], array_slice($scored, 0, 3)),
+            'hit' => true,
+        ];
     }
 
     /**

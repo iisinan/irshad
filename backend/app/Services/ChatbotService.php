@@ -66,6 +66,11 @@ class ChatbotService
             return $instant;
         }
 
+        $outOfScope = $this->detectOutOfScope($userMessage, $history, $contextBundle, $isPublic);
+        if ($outOfScope !== null) {
+            return $outOfScope;
+        }
+
         $hasStocks = ! empty($contextBundle['matched_companies']);
         $canCacheFaq = empty($history)
             && ! $hasStocks
@@ -73,7 +78,7 @@ class ChatbotService
             && ! preg_match('/\b(my\s+(?:tier|plan|subscription|portfolio|holding|holdings|hawl|zakat|account|dividend|dividends|watchlist|basket)|i\s+(?:have|own|hold|bought|sold|paid|was\s+charged)|account|subscription|billing|refund|charge|charged|password|login|verify)\b/i', $userMessage);
 
         $tierSlug = (string) ($contextBundle['tier']['slug'] ?? ($isPublic ? 'guest' : 'free'));
-        $cacheKey = 'chatbot_faq_v4:'.sha1($tierSlug.':'.$this->normalizeQuestion($userMessage));
+        $cacheKey = 'chatbot_faq_v5:'.sha1($tierSlug.':'.$this->normalizeQuestion($userMessage));
         if ($canCacheFaq && ($cached = Cache::get($cacheKey)) && is_array($cached)) {
             return $cached;
         }
@@ -211,18 +216,22 @@ class ChatbotService
             : '4. If the user asks about billing disputes, double charges, missing stocks, broken features, account recovery, or explicitly asks to talk to a human/admin, set `"needs_human_support": true` and advise them they can tap **Send to Support Team** to route this chat to Irshad admins.';
 
         return <<<PROMPT
-You are **Irshad Assistant**, the fast in-app AI support & Islamic finance assistant for **Irshad** (an AAOIFI-aligned Halal stock screening, portfolio purification, and Zakat platform focused on the NGX).
+You are **Ask Irshad**, a strict domain-limited AI assistant for **Irshad** (an AAOIFI-aligned Nigerian Exchange / NGX Halal stock screening, portfolio purification, and Zakat platform).
 
-RULES & GUARDRAILS:
-1. Keep replies crisp, warm, structured, and concise (under 120 words using clean markdown bullets unless detail is asked). Never mention "Qistal".
-2. TIER AWARENESS: Check the user's **Detected Tier & Features** in CONTEXT. Answer any question that is within their tier (including exact company AAOIFI status/ratios/price from CONTEXT when present). Only if a requested capability/quota is beyond their detected tier, politely state their current tier and advise upgrading to **Rawdha (Pro)** or **Noor (Max)** (and set `"upgrade_required": true` with `"required_tier": "pro"` or `"max"`).
-3. Only cite stock statuses, ratios, prices, or holdings present in CONTEXT; never guess numbers or issue formal fatwas / buy-sell advice.
+STRICT SCOPE & REFUSAL RULES:
+1. IN-SCOPE TOPICS ONLY: You MUST ONLY answer questions directly about:
+   - Nigerian Exchange (NGX) stocks/companies present in CONTEXT and their Shariah compliance data.
+   - AAOIFI Standard No. 21 screening methodology (<30% debt, <30% cash/deposits, <5% impermissible income), Zakat, Nisab, Hawl tracking, dividend purification, NGX halal directory/baskets, and Irshad educational resources.
+   - Irshad platform features, detected user tier/quotas in CONTEXT, and Irshad account/billing/support issues.
+2. OUT-OF-SCOPE REFUSALS: NEVER answer general knowledge questions, coding, math/homework, recipes, sports, weather, politics, entertainment, creative writing, medical/legal advice, or non-NGX markets (US/foreign stocks, crypto, forex). NEVER search outside CONTEXT, guess numbers/statuses for stocks not in CONTEXT, issue formal fatwas, or give buy/sell recommendations or price predictions.
+   - If a question is outside Irshad's scope or asks for unsupported market/company facts not in CONTEXT, politely decline in 1–2 crisp sentences explaining that Ask Irshad only covers NGX Shariah screening, AAOIFI methodology, Zakat/purification, and Irshad support, set `"cited_symbols": []`, set `"needs_human_support": false`, and suggest 2 relevant Irshad follow-up questions.
+3. TIER AWARENESS & STYLE: Keep replies crisp and concise (under 120 words, clean markdown bullets unless detail is asked). Never mention "Qistal". Check **Detected Tier & Features** in CONTEXT before describing paid features; only if a requested paid capability/quota is beyond their detected tier, set `"upgrade_required": true` with `"required_tier": "pro"` or `"max"`.
 {$supportRule}
 5. Output ONLY a valid JSON object with these exact keys (no code fences):
 {
   "reply": "<concise markdown answer>",
   "cited_symbols": ["<UPPERCASE ticker symbols referenced from CONTEXT, or empty array>"],
-  "suggested_followups": ["<2 short natural next questions>"],
+  "suggested_followups": ["<2 short natural in-scope Irshad questions>"],
   "needs_human_support": false,
   "upgrade_required": false,
   "required_tier": null
@@ -231,6 +240,105 @@ RULES & GUARDRAILS:
 CONTEXT:
 {$groundedContext}
 PROMPT;
+    }
+
+    /**
+     * Deterministically block buy/sell financial advice, non-NGX assets, and clearly off-topic prompts before calling LLMs.
+     *
+     * @param  array<int, array{role: string, content: string}>  $history
+     * @param  array<string, mixed>  $contextBundle
+     * @return array<string, mixed>|null
+     */
+    private function detectOutOfScope(string $userMessage, array $history, array $contextBundle, bool $isPublic): ?array
+    {
+        $companyDetails = $contextBundle['company_details'] ?? [];
+        $hasCompanies = ! empty($contextBundle['matched_companies']);
+        $hasResources = ! empty($contextBundle['matched_resources']);
+        $hasKbHit = (bool) ($contextBundle['kb_hit'] ?? false);
+
+        // 1. Always decline buy/sell investment recommendations and price predictions
+        if (preg_match('/\b(should\s+i\s+(?:buy|sell|hold|short|trade)|buy\s+or\s+sell|good\s+(?:buy|stock\s+to\s+buy|investment\s+pick)|predict\s+(?:the\s+)?price|price\s+(?:target|prediction|forecast)|will\s+.+\s+(?:go\s+up|rise|fall|crash|pump|moon|double)|guaranteed\s+(?:return|profit)|recommend\s+(?:stocks|shares)\s+to\s+buy|best\s+stock\s+to\s+buy)\b/i', $userMessage)) {
+            $lines = [
+                'Irshad provides factual **AAOIFI Shariah compliance screening** and portfolio tools—not personalized buy/sell investment advice, price targets, or return guarantees.',
+            ];
+
+            if (! empty($companyDetails)) {
+                foreach ($companyDetails as $c) {
+                    $statusLabel = strtoupper((string) ($c['status'] ?? 'unscreened'));
+                    $line = "- **{$c['name']} ({$c['symbol']})**: Current status is **{$statusLabel}**";
+                    if (! empty($c['screening'])) {
+                        $s = $c['screening'];
+                        $line .= sprintf(
+                            ' (Debt: %.2f%%, Cash: %.2f%%, Impermissible Income: %.2f%%).',
+                            $s['debt_ratio'],
+                            $s['cash_ratio'],
+                            $s['impermissible_income_ratio']
+                        );
+                    } else {
+                        $line .= '.';
+                    }
+                    $lines[] = $line;
+                }
+            } else {
+                $lines[] = 'Ask me for a specific **NGX stock\'s Shariah compliance status** or how **AAOIFI screening** works.';
+            }
+
+            return [
+                'reply' => implode("\n", $lines),
+                'cited_symbols' => array_column($contextBundle['matched_companies'] ?? [], 'symbol'),
+                'suggested_followups' => [
+                    'How does AAOIFI screening work?',
+                    'How does dividend purification work?',
+                ],
+                'needs_human_support' => false,
+                'upgrade_required' => false,
+                'required_tier' => null,
+                'provider' => 'scope_guard',
+            ];
+        }
+
+        // 2. Non-NGX equities, crypto, or forex (when no NGX company/KB match exists)
+        if (! $hasCompanies && ! $hasResources && preg_match('/\b(bitcoin|btc|ethereum|eth|solana|dogecoin|crypto|cryptocurrency|binance|forex|fx\s+trading|cfd|options\s+trading|apple|aapl|tesla|tsla|nvidia|nvda|microsoft|msft|amazon|amzn|alphabet|googl|netflix|nflx|nasdaq|nyse|s&p\s*500)\b/i', $userMessage)) {
+            return $this->outOfScopeResponse(
+                "**Ask Irshad** covers **Nigerian Exchange (NGX) listed equities**, AAOIFI Shariah screening, Zakat & Hawl tracking, dividend purification, and Irshad account support.\n\nIt does not cover cryptocurrencies, forex, or non-NGX stocks."
+            );
+        }
+
+        // Preserve conversational continuity for short clarifications on in-scope history
+        $wordCount = str_word_count(trim($userMessage));
+        $isConversationalFollowUp = ! empty($history) && ($wordCount <= 5 || preg_match('/^(yes|no|why|how|explain|more|clarify|recheck|check again)\b/i', trim($userMessage)));
+        if ($isConversationalFollowUp) {
+            return null;
+        }
+
+        $inScopeTerms = '/\b(irshad|ngx|nigerian\s+exchange|stock|stocks|share|shares|equity|equities|company|companies|ticker|halal|haram|shariah|sharia|islamic|aaoifi|riba|interest|zakat|hawl|nisab|purif|dividend|portfolio|holding|holdings|watchlist|alert|alerts|basket|baskets|statement|drift|spotlight|account|plan|plans|tier|tiers|miftah|rawdha|noor|subscription|billing|payment|squad|login|verify|verification|password|support|human|admin|bug|error|refund|charge|broker|cscs|takaful|sukuk|compliant|compliance|screen|screening|ratio|debt|cash|revenue|directory|resource|thank|thanks|salam|hello|hi)\b/i';
+
+        if (! $hasCompanies && ! $hasResources && ! $hasKbHit && ! preg_match($inScopeTerms, $userMessage)) {
+            return $this->outOfScopeResponse(
+                "I'm **Ask Irshad**, and I only answer questions within Irshad's scope:\n- **NGX Stocks & AAOIFI Screening** (Halal/Haram statuses & financial ratios)\n- **Zakat, Hawl & Dividend Purification**\n- **Your Irshad Account, Quotas & Support**"
+            );
+        }
+
+        return null;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function outOfScopeResponse(string $message): array
+    {
+        return [
+            'reply' => $message,
+            'cited_symbols' => [],
+            'suggested_followups' => [
+                'How does AAOIFI screening work?',
+                'Is MTNN Halal?',
+            ],
+            'needs_human_support' => false,
+            'upgrade_required' => false,
+            'required_tier' => null,
+            'provider' => 'scope_guard',
+        ];
     }
 
     private function normalizeQuestion(string $text): string
@@ -666,6 +774,7 @@ PROMPT;
                 'model' => (string) config('services.perplexity.model', env('PERPLEXITY_MODEL', 'sonar-pro')),
                 'messages' => $messages,
                 'temperature' => 0.2,
+                'disable_search' => true,
             ]);
 
             if ($response->successful()) {
@@ -748,6 +857,7 @@ PROMPT;
         $companyDetails = $contextBundle['company_details'] ?? [];
         $companies = $contextBundle['matched_companies'] ?? [];
         $kbSections = $contextBundle['kb_matched_sections'] ?? [];
+        $kbHit = (bool) ($contextBundle['kb_hit'] ?? false);
         $resources = $contextBundle['matched_resources'] ?? [];
         $lower = strtolower($userMessage);
 
@@ -783,7 +893,7 @@ PROMPT;
             $followups = ['How does dividend purification work?', 'How do Zakat & Hawl work?'];
         } elseif (! $isPublic && preg_match('/\b(my\s+(?:plan|tier|subscription|hawl|holdings|portfolio|quota|limit)|what\s+tier|which\s+plan)\b/i', $lower)) {
             $lines[] = $this->formatAccountStatusMarkdown($contextBundle);
-        } elseif (! empty($kbSections)) {
+        } elseif ($kbHit && ! empty($kbSections)) {
             foreach (array_slice($kbSections, 0, 2) as $idx => $section) {
                 if ($idx > 0) {
                     $lines[] = '';
@@ -792,11 +902,18 @@ PROMPT;
                 $lines[] = trim((string) $section['content']);
             }
             $needsSupport = (bool) preg_match('/\b(support|human|admin|bug|error|refund|charged|billing dispute|broken|reset)\b/i', $lower);
-        } else {
+        } elseif (empty($resources)) {
+            $isAccountSupportQuery = (bool) preg_match('/\b(support|human|admin|bug|error|refund|charged|billing|broken|reset|login|verify|verification|password|account|missing)\b/i', $lower);
+            if (! $isAccountSupportQuery) {
+                return $this->outOfScopeResponse(
+                    "I'm **Ask Irshad**, and I only answer questions within Irshad's scope:\n- **NGX Stocks & AAOIFI Screening** (Halal/Haram statuses & financial ratios)\n- **Zakat, Hawl & Dividend Purification**\n- **Your Irshad Account & Support**"
+                );
+            }
+
             $lines[] = "Here is what I can help with directly right now:";
-            $lines[] = '- **NGX Stock Screening:** Ask about a ticker/company (within your plan\'s monthly screen quota) for its AAOIFI status and ratios.';
+            $lines[] = '- **NGX Stock Screening:** Ask about a ticker/company for its AAOIFI status and ratios.';
             $lines[] = '- **Zakat, Hawl & Purification:** Ask how AAOIFI Standard No. 21, Hawl tracking, or dividend cleansing work.';
-            $lines[] = '- **Plans & Account:** Ask about your active tier (**Miftah**, **Rawdha Pro**, **Noor Max**) or support help.';
+            $lines[] = '- **Account & Support Help:** Share your issue or tap **Send to Support Team** below.';
             $needsSupport = true;
         }
 
