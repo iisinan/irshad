@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/providers/app_state_provider.dart';
+import '../../../core/widgets/guest_gate.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../data/auth_repository.dart';
 import 'forgot_password_screen.dart';
@@ -60,6 +61,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         await _secureStorage.write(key: 'login_method', value: 'email');
         await _secureStorage.write(key: 'saved_email', value: _emailController.text);
         await _secureStorage.write(key: 'saved_password', value: _passwordController.text);
+        await GuestGate.clearGuestScreen();
         if (mounted) {
           Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
           Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/main', (route) => false);
@@ -78,6 +80,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       final user = await _authRepository.signInWithAppleFlow();
       if (user != null) {
         await _secureStorage.write(key: 'login_method', value: 'apple');
+        await GuestGate.clearGuestScreen();
         if (!mounted) return;
         Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
         Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/main', (route) => false);
@@ -102,6 +105,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       final user = await _authRepository.signInWithGoogleFlow();
       if (user != null) {
         await _secureStorage.write(key: 'login_method', value: 'google');
+        await GuestGate.clearGuestScreen();
         if (mounted) {
           Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
           Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/main', (route) => false);

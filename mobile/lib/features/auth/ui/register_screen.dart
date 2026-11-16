@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/providers/app_state_provider.dart';
+import '../../../core/widgets/guest_gate.dart';
 import '../data/auth_repository.dart';
 
 import 'package:irshad_mobile/core/theme/app_theme.dart';
@@ -107,12 +108,13 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         _passwordController.text,
         _passwordConfirmationController.text,
         location: _country,
-        phoneNumber: _phoneController.text.trim(),
+        phoneNumber: _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
         investorType: _investorType,
         primaryUseCase: _primaryUseCase,
         investmentExperience: _investmentExperience,
       );
       if (user != null) {
+        await GuestGate.clearGuestScreen();
         if (mounted) {
           Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
           Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/main', (route) => false);
@@ -140,6 +142,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
       final user = await _authRepository.signInWithAppleFlow();
       if (user != null) {
         await _secureStorage.write(key: 'login_method', value: 'apple');
+        await GuestGate.clearGuestScreen();
         if (!mounted) return;
         Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
         Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/main', (route) => false);
@@ -172,6 +175,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     try {
       final user = await _authRepository.signInWithGoogleFlow();
       if (user != null) {
+        await GuestGate.clearGuestScreen();
         if (mounted) {
           Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
           Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('/main', (route) => false);

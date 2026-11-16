@@ -90,14 +90,17 @@ class AuthRepository {
       await _googleSignIn.disconnect().catchError((_) => null);
       final GoogleSignInAccount? account = await _googleSignIn.signIn();
       if (account == null) return null; // user canceled
-      
+
       final GoogleSignInAuthentication auth = await account.authentication;
       final String? idToken = auth.idToken;
-      
-      if (idToken == null) throw 'Missing Google ID Token';
-      
+
+      if (idToken == null || idToken.isEmpty) {
+        throw 'Missing Google ID Token';
+      }
+
       return await loginWithGoogle(idToken);
     } catch (e) {
+      if (e is String) rethrow;
       throw 'Google Sign In failed: $e';
     }
   }
@@ -116,7 +119,9 @@ class AuthRepository {
         return data['user'];
       }
     } on DioException catch (e) {
-      throw e.response?.data['message'] ?? 'Apple login failed';
+      final respData = e.response?.data;
+      final msg = respData is Map ? respData['message'] : null;
+      throw msg ?? 'Apple login failed';
     }
     return null;
   }
@@ -130,14 +135,27 @@ class AuthRepository {
         ],
       );
       final identityToken = credential.identityToken;
-      if (identityToken == null) throw 'Missing Apple Identity Token';
-      
+      if (identityToken == null || identityToken.isEmpty) {
+        throw 'Missing Apple Identity Token';
+      }
+
       // Apple only returns email and fullName on the VERY FIRST login!
       final email = credential.email;
-      final fullName = credential.givenName != null ? "${credential.givenName} ${credential.familyName ?? ''}".trim() : null;
-      
+      final nameParts = [credential.givenName, credential.familyName]
+          .whereType<String>()
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toList();
+      final fullName = nameParts.isNotEmpty ? nameParts.join(' ') : null;
+
       return await loginWithApple(identityToken, email, fullName);
+    } on SignInWithAppleAuthorizationException catch (e) {
+      if (e.code == AuthorizationErrorCode.canceled) {
+        return null; // user canceled cleanly
+      }
+      throw 'Apple Sign In failed: ${e.message}';
     } catch (e) {
+      if (e is String) rethrow;
       throw 'Apple Sign In failed: $e';
     }
   }

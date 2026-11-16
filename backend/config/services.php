@@ -73,8 +73,12 @@ return [
     'google' => [
         'client_id'        => env('GOOGLE_CLIENT_ID'),
         'web_client_id'    => env('GOOGLE_WEB_CLIENT_ID', '695007449342-h6pllbs2fctnjlnq5tr0j9ktlmoaohed.apps.googleusercontent.com'),
-        'ios_client_id'    => env('GOOGLE_CLIENT_ID_IOS'),
-        'mobile_client_id' => env('GOOGLE_CLIENT_ID_MOBILE'),
+        'ios_client_id'    => env('GOOGLE_CLIENT_ID_IOS', '900192262603-0chfhu7jl6eoniq7ien7frn7nd9nj49j.apps.googleusercontent.com'),
+        'mobile_client_id' => env('GOOGLE_CLIENT_ID_MOBILE', '900192262603-1v5t8hgmboe173j1h997p1bfk4kedn4k.apps.googleusercontent.com'),
+    ],
+
+    'apple' => [
+        'client_id' => env('APPLE_CLIENT_ID', 'com.irshad.irshadMobile'),
     ],
 
 ];

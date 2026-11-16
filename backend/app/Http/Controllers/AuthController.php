@@ -25,15 +25,19 @@ class AuthController extends Controller
      */
     public function register(RegisterRequest $request): JsonResponse
     {
+        $isInstitution = $request->input('account_type') === 'institution';
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'phone_number' => $request->phone_number,
             'password' => Hash::make($request->password),
             'location' => $request->location,
-            'role' => 'user', // Default role
+            'role' => $isInstitution ? 'institution' : 'user',
+            'institution_name' => $isInstitution ? $request->input('institution_name') : null,
+            'institution_type' => $isInstitution ? $request->input('institution_type', 'Asset / Fund Manager') : null,
             'preferences' => [
-                'investor_type' => $request->investor_type,
+                'investor_type' => $isInstitution ? 'Institutional Manager' : $request->investor_type,
                 'primary_use_case' => $request->primary_use_case,
                 'investment_experience' => $request->investment_experience,
                 'dob' => $request->dob,
@@ -181,8 +185,8 @@ class AuthController extends Controller
             }
             
             // The audience should be the iOS bundle ID (com.irshad.irshadMobile)
-            // or the web service ID. We check if it matches APPLE_CLIENT_ID
-            $expectedClientId = env('APPLE_CLIENT_ID', 'com.irshad.irshadMobile');
+            // or the web service ID. We check if it matches configured APPLE_CLIENT_ID
+            $expectedClientId = config('services.apple.client_id', 'com.irshad.irshadMobile');
             if ($decoded->aud !== $expectedClientId) {
                 throw new \Exception('Invalid Apple audience. Expected: ' . $expectedClientId . ', got: ' . $decoded->aud);
             }
@@ -191,7 +195,7 @@ class AuthController extends Controller
             
             // Apple only sends email and name on the very first login, so we capture them from the request if provided
             $email = $request->email ?? ($decoded->email ?? null);
-            $name = $request->fullName ?? 'Apple User';
+            $name = trim((string) $request->fullName) ?: 'Apple User';
 
             // Find user by apple_id or email
             $user = User::where('apple_id', $appleId);
