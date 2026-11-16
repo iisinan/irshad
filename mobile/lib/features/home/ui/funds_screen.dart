@@ -28,11 +28,9 @@ class _FundsScreenState extends State<FundsScreen> {
     'All',
     'Fixed Income',
     'Balanced',
-    'Equity',
     'ETF',
     'Endowment',
     'Commodities',
-    'Ethical',
   ];
 
   static final List<Map<String, dynamic>> _staticBanking = [

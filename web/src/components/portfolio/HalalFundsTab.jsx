@@ -249,11 +249,9 @@ const STATIC_TAKAFUL = [
 const FUND_TYPE_CONFIG = {
   'Fixed Income': { bg: 'var(--primary-50)',   color: 'var(--primary)',  label: 'Fixed Income' },
   'Balanced':     { bg: 'var(--halal-bg)',      color: 'var(--halal)',    label: 'Balanced' },
-  'Equity':       { bg: 'var(--primary-100)',   color: 'var(--primary)',  label: 'Equity' },
   'ETF':          { bg: 'var(--gold-50)',        color: 'var(--accent)',   label: 'ETF' },
   'Endowment':    { bg: 'var(--gold-100)',       color: 'var(--accent)',   label: 'Endowment' },
   'Commodities':  { bg: 'var(--gold-50)',        color: 'var(--accent)',   label: 'Commodities' },
-  'Ethical':      { bg: 'var(--halal-bg)',       color: 'var(--halal)',    label: 'Ethical' },
 };
 
 const ALL_FUND_TYPES = ['All Types', ...Object.keys(FUND_TYPE_CONFIG)];
