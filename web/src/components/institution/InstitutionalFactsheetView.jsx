@@ -23,21 +23,29 @@ export default function InstitutionalFactsheetView({
   institutionName,
   factsheetMeta,
   onChangeFactsheetMeta,
+  allowedTemplates = ['lotus', 'norrenberger', 'custom'],
 }) {
-  const initialTemplate =
+  const preferredTemplate =
     activePresetId === 'norrenberger_fund'
       ? 'norrenberger'
       : activePresetId === 'lotus_etf'
       ? 'lotus'
       : 'custom';
+  const initialTemplate = allowedTemplates.includes(preferredTemplate)
+    ? preferredTemplate
+    : (allowedTemplates[0] || 'custom');
 
   const [template, setTemplate] = useState(initialTemplate);
   const [showCustomizer, setShowCustomizer] = useState(false);
 
+  const defaultTheme = allowedTemplates.includes('lotus') && !allowedTemplates.includes('norrenberger')
+    ? 'lotus'
+    : (allowedTemplates.includes('norrenberger') && !allowedTemplates.includes('lotus') ? 'norrenberger' : 'emerald');
+
   const meta = {
-    theme: 'emerald',
+    theme: defaultTheme,
     institution_name: institutionName || 'Irshad Institutional Shariah Screening',
-    fund_name: customFundName || 'Uploaded Institutional Portfolio Factsheet',
+    fund_name: customFundName || 'Institutional Portfolio Factsheet',
     ticker: 'IRSHAD-MANDATE',
     benchmark: 'NGX Lotus Islamic Index (NGXLII)',
     management_fee: '0.75% p.a.',
@@ -77,31 +85,33 @@ export default function InstitutionalFactsheetView({
       }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
           <span style={{ fontSize: '0.74rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.7px', marginRight: 4 }}>
-            Factsheet Template:
+            Factsheet View:
           </span>
           {[
             { id: 'lotus', label: 'Lotus Halal Equity ETF (LOTUSHAL15)' },
             { id: 'norrenberger', label: 'Norrenberger Islamic Fund' },
-            { id: 'custom', label: `Uploaded / Live Portfolio (${customHoldings.length})` },
-          ].map((opt) => (
-            <button
-              key={opt.id}
-              type="button"
-              onClick={() => setTemplate(opt.id)}
-              style={{
-                padding: '8px 14px',
-                borderRadius: 10,
-                border: `1.5px solid ${template === opt.id ? 'var(--primary)' : 'var(--border)'}`,
-                background: template === opt.id ? 'var(--primary-50)' : 'var(--bg-section)',
-                color: template === opt.id ? 'var(--primary)' : 'var(--text-muted)',
-                fontWeight: 700,
-                fontSize: '0.78rem',
-                cursor: 'pointer',
-              }}
-            >
-              {opt.label}
-            </button>
-          ))}
+            { id: 'custom', label: `Screened Mandate Factsheet (${customHoldings.length})` },
+          ]
+            .filter((opt) => allowedTemplates.includes(opt.id))
+            .map((opt) => (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => setTemplate(opt.id)}
+                style={{
+                  padding: '8px 14px',
+                  borderRadius: 10,
+                  border: `1.5px solid ${template === opt.id ? 'var(--primary)' : 'var(--border)'}`,
+                  background: template === opt.id ? 'var(--primary-50)' : 'var(--bg-section)',
+                  color: template === opt.id ? 'var(--primary)' : 'var(--text-muted)',
+                  fontWeight: 700,
+                  fontSize: '0.78rem',
+                  cursor: 'pointer',
+                }}
+              >
+                {opt.label}
+              </button>
+            ))}
         </div>
 
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>

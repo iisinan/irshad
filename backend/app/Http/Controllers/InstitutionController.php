@@ -77,11 +77,7 @@ class InstitutionController extends Controller
         'UBA' => 'UBA',
     ];
 
-    /**
-     * Public-safe institutional demo presets backed by live DB screening data.
-     * Powers boardroom presentations & live demos for Lotus Capital & Norrenberger.
-     */
-    public function demoPresets(): JsonResponse
+    protected function buildLotusPreset(): array
     {
         // Lotus Halal Equity ETF 13 constituent holdings (from July 2026 Fact Sheet)
         $lotusConstituents = [
@@ -105,6 +101,126 @@ class InstitutionController extends Controller
             ['symbol' => 'NASCON', 'label' => 'Nascon Allied Industries Plc (Removed Jun 30, 2026)', 'sector' => 'Consumer Goods', 'shares' => 250000],
         ]);
 
+        return [
+            'id' => 'lotus_etf',
+            'institution_name' => 'Lotus Capital Limited',
+            'fund_name' => 'Lotus Halal Equity Exchange Traded Fund',
+            'short_name' => 'LHE ETF',
+            'ticker' => 'LOTUSHAL15',
+            'bloomberg_ticker' => 'LOTCHLAL:NL',
+            'isin' => 'NGLOTUSHAL13',
+            'factsheet_date' => '3rd July, 2026',
+            'fund_size_label' => '₦3.18billion',
+            'fund_size_ngn' => 3180000000,
+            'nav_per_unit' => 95.17,
+            'closing_price' => 127.90,
+            'purification_per_unit_fy25' => 0.46,
+            'last_distribution' => 'December 2025: ₦0.81/unit',
+            'management_fee' => '0.60%',
+            'rebalancing_frequency' => 'Half-Yearly',
+            'last_rebalancing' => '30th June, 2026',
+            'next_rebalancing' => '31st December, 2026',
+            'benchmark_index' => 'NGX Lotus Islamic Index (NGXLII)',
+            'launch_date' => 'Aug-14',
+            'listing_date' => 'Nov-14',
+            'screening_result' => $lotusScreened,
+            'rebalance_removed' => $removedNascon['holdings'][0] ?? null,
+        ];
+    }
+
+    protected function buildNorrenbergerPreset(): array
+    {
+        return [
+            'id' => 'norrenberger_fund',
+            'institution_name' => 'Norrenberger Asset Management Limited',
+            'fund_name' => 'Norrenberger Islamic Fund',
+            'factsheet_date' => 'October 2026',
+            'ytd_yield' => 17.72,
+            'unit_price' => 108.27,
+            'fund_size_label' => '₦6.81bn',
+            'fund_size_ngn' => 6810000000,
+            'expense_ratio' => '1.90%',
+            'management_fee' => '1.50% p.a.',
+            'launch_date' => 'May 2021',
+            'status' => 'Open Ended',
+            'bias' => 'Fixed Income',
+            'listed' => 'NGX',
+            'initial_investment' => '50 Units',
+            'additional_investment' => '10 Units',
+            'benchmark' => '3-year FGN Sukuk (Moving Average)',
+            'risk_profile' => 'Conservative',
+            'allocation' => [
+                ['security' => 'Federal Government Sukuk', 'current' => 21.79, 'target_min' => 30, 'target_max' => 100, 'target_label' => '30% - 100%', 'shariah_contract' => 'Sukuk Al-Ijarah', 'status' => 'Below Target Band'],
+                ['security' => 'Mudarabah',                'current' => 43.99, 'target_min' => 0,  'target_max' => 70,  'target_label' => '0% - 70%',   'shariah_contract' => 'Profit-Sharing',   'status' => 'Within Mandate'],
+                ['security' => 'Ijarah/Wakalah',           'current' => 7.23,  'target_min' => 0,  'target_max' => 50,  'target_label' => '0% - 50%',   'shariah_contract' => 'Leasing / Agency', 'status' => 'Within Mandate'],
+                ['security' => 'Murabaha',                 'current' => 25.34, 'target_min' => 0,  'target_max' => 50,  'target_label' => '0% - 50%',   'shariah_contract' => 'Cost-Plus Trade',  'status' => 'Within Mandate'],
+                ['security' => 'Cash',                     'current' => 1.64,  'target_min' => 0,  'target_max' => 15,  'target_label' => '0% - 15%',   'shariah_contract' => 'Non-Interest Cash','status' => 'Within Mandate'],
+            ],
+        ];
+    }
+
+    /**
+     * Tenant-isolated institutional workspace payload.
+     * Ensures logged-in institutions only see their own funds and saved mandates.
+     */
+    public function workspace(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $identity = strtolower(trim(($user->institution_name ?? '') . ' ' . ($user->email ?? '')));
+        $isAdmin = $user->role === 'admin';
+
+        $tenantKey = 'custom';
+        if ($isAdmin) {
+            $tenantKey = 'admin';
+        } elseif (str_contains($identity, 'lotus')) {
+            $tenantKey = 'lotus';
+        } elseif (str_contains($identity, 'norrenberger')) {
+            $tenantKey = 'norrenberger';
+        }
+
+        $savedPortfolios = InstitutionalPortfolio::where('user_id', $user->id)
+            ->orderByDesc('updated_at')
+            ->get()
+            ->map(function ($p) {
+                $screened = $this->evaluateHoldingsArray($p->holdings_payload ?? []);
+                return [
+                    'id' => $p->id,
+                    'name' => $p->name,
+                    'fund_code' => $p->fund_code,
+                    'benchmark' => $p->benchmark,
+                    'currency' => $p->currency,
+                    'holdings_payload' => $p->holdings_payload,
+                    'factsheet_meta' => $p->factsheet_meta,
+                    'screened' => $screened,
+                    'updated_at' => $p->updated_at,
+                ];
+            });
+
+        $payload = [
+            'tenant_key' => $tenantKey,
+            'institution_name' => $user->institution_name ?: $user->name,
+            'institution_type' => $user->institution_type ?: 'Institutional Partner',
+            'saved_portfolios' => $savedPortfolios,
+            'lotus_etf' => null,
+            'norrenberger_fund' => null,
+        ];
+
+        if ($tenantKey === 'lotus' || $isAdmin) {
+            $payload['lotus_etf'] = $this->buildLotusPreset();
+        }
+        if ($tenantKey === 'norrenberger' || $isAdmin) {
+            $payload['norrenberger_fund'] = $this->buildNorrenbergerPreset();
+        }
+
+        return $this->success($payload);
+    }
+
+    /**
+     * Public-safe institutional demo presets backed by live DB screening data.
+     * Powers boardroom presentations & live demos for Lotus Capital & Norrenberger.
+     */
+    public function demoPresets(): JsonResponse
+    {
         // Sample mixed institutional brokerage / bank book (demonstrates flagging non-compliant positions)
         $mixedBook = $this->evaluateHoldingsArray([
             ['symbol' => 'DANGCEM',    'shares' => 120000],
@@ -120,58 +236,8 @@ class InstitutionController extends Controller
         ]);
 
         return $this->success([
-            'lotus_etf' => [
-                'id' => 'lotus_etf',
-                'institution_name' => 'Lotus Capital Limited',
-                'fund_name' => 'Lotus Halal Equity Exchange Traded Fund',
-                'short_name' => 'LHE ETF',
-                'ticker' => 'LOTUSHAL15',
-                'bloomberg_ticker' => 'LOTCHLAL:NL',
-                'isin' => 'NGLOTUSHAL13',
-                'factsheet_date' => '3rd July, 2026',
-                'fund_size_label' => '₦3.18billion',
-                'fund_size_ngn' => 3180000000,
-                'nav_per_unit' => 95.17,
-                'closing_price' => 127.90,
-                'purification_per_unit_fy25' => 0.46,
-                'last_distribution' => 'December 2025: ₦0.81/unit',
-                'management_fee' => '0.60%',
-                'rebalancing_frequency' => 'Half-Yearly',
-                'last_rebalancing' => '30th June, 2026',
-                'next_rebalancing' => '31st December, 2026',
-                'benchmark_index' => 'NGX Lotus Islamic Index (NGXLII)',
-                'launch_date' => 'Aug-14',
-                'listing_date' => 'Nov-14',
-                'screening_result' => $lotusScreened,
-                'rebalance_removed' => $removedNascon['holdings'][0] ?? null,
-            ],
-            'norrenberger_fund' => [
-                'id' => 'norrenberger_fund',
-                'institution_name' => 'Norrenberger Asset Management Limited',
-                'fund_name' => 'Norrenberger Islamic Fund',
-                'factsheet_date' => 'October 2026',
-                'ytd_yield' => 17.72,
-                'unit_price' => 108.27,
-                'fund_size_label' => '₦6.81bn',
-                'fund_size_ngn' => 6810000000,
-                'expense_ratio' => '1.90%',
-                'management_fee' => '1.50% p.a.',
-                'launch_date' => 'May 2021',
-                'status' => 'Open Ended',
-                'bias' => 'Fixed Income',
-                'listed' => 'NGX',
-                'initial_investment' => '50 Units',
-                'additional_investment' => '10 Units',
-                'benchmark' => '3-year FGN Sukuk (Moving Average)',
-                'risk_profile' => 'Conservative',
-                'allocation' => [
-                    ['security' => 'Federal Government Sukuk', 'current' => 21.79, 'target_min' => 30, 'target_max' => 100, 'target_label' => '30% - 100%', 'shariah_contract' => 'Sukuk Al-Ijarah', 'status' => 'Below Target Band'],
-                    ['security' => 'Mudarabah',                'current' => 43.99, 'target_min' => 0,  'target_max' => 70,  'target_label' => '0% - 70%',   'shariah_contract' => 'Profit-Sharing',   'status' => 'Within Mandate'],
-                    ['security' => 'Ijarah/Wakalah',           'current' => 7.23,  'target_min' => 0,  'target_max' => 50,  'target_label' => '0% - 50%',   'shariah_contract' => 'Leasing / Agency', 'status' => 'Within Mandate'],
-                    ['security' => 'Murabaha',                 'current' => 25.34, 'target_min' => 0,  'target_max' => 50,  'target_label' => '0% - 50%',   'shariah_contract' => 'Cost-Plus Trade',  'status' => 'Within Mandate'],
-                    ['security' => 'Cash',                     'current' => 1.64,  'target_min' => 0,  'target_max' => 15,  'target_label' => '0% - 15%',   'shariah_contract' => 'Non-Interest Cash','status' => 'Within Mandate'],
-                ],
-            ],
+            'lotus_etf' => $this->buildLotusPreset(),
+            'norrenberger_fund' => $this->buildNorrenbergerPreset(),
             'mixed_institutional_book' => $mixedBook,
         ]);
     }

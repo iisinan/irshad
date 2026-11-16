@@ -8,6 +8,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import {
   fetchInstitutionDemoPresets,
+  fetchInstitutionWorkspace,
   screenInstitutionPortfolio,
   fetchInstitutionPortfolios,
   saveInstitutionPortfolio,
@@ -39,16 +40,25 @@ export default function InstitutionalDashboard({ demoMode = false }) {
   const tabRefs = useRef([]);
 
   const isAuthenticatedInstitution = Boolean(user && ['institution', 'admin'].includes(user.role));
+  const isPrivatePortal = !demoMode && user?.role === 'institution';
+  const showDemoFeatures = !isPrivatePortal;
+
+  const visibleTabs = useMemo(
+    () => (showDemoFeatures ? TAB_DEFS : TAB_DEFS.filter((t) => t.id !== 'presentation')),
+    [showDemoFeatures]
+  );
 
   const getHashTab = () => {
     const raw = (location.hash || '').replace('#', '').trim();
-    return TAB_DEFS.some((t) => t.id === raw) ? raw : 'screening';
+    const allowed = showDemoFeatures ? TAB_DEFS : TAB_DEFS.filter((t) => t.id !== 'presentation');
+    return allowed.some((t) => t.id === raw) ? raw : 'screening';
   };
 
   const [activeTab, setActiveTab] = useState(getHashTab);
   const [presets, setPresets] = useState(null);
+  const [tenantKey, setTenantKey] = useState(isPrivatePortal ? 'custom' : 'admin');
   const [loadingPresets, setLoadingPresets] = useState(true);
-  const [activePresetId, setActivePresetId] = useState('lotus_etf'); // 'lotus_etf' | 'norrenberger_fund' | 'mixed_institutional_book' | 'uploaded'
+  const [activePresetId, setActivePresetId] = useState(isPrivatePortal ? 'loading' : 'lotus_etf'); // 'lotus_etf' | 'norrenberger_fund' | 'mixed_institutional_book' | 'uploaded'
   const [customScreened, setCustomScreened] = useState(null);
   const [customFundName, setCustomFundName] = useState('Institutional Equity Mandate');
   const [factsheetMeta, setFactsheetMeta] = useState(null);
@@ -75,41 +85,69 @@ export default function InstitutionalDashboard({ demoMode = false }) {
     const load = async () => {
       setLoadingPresets(true);
       try {
-        const res = await fetchInstitutionDemoPresets();
-        if (mounted && res?.data) {
-          setPresets(res.data);
+        if (isPrivatePortal) {
+          const res = await fetchInstitutionWorkspace();
+          if (mounted && res?.data) {
+            const ws = res.data;
+            setTenantKey(ws.tenant_key || 'custom');
+            setPresets({
+              lotus_etf: ws.lotus_etf || null,
+              norrenberger_fund: ws.norrenberger_fund || null,
+            });
+            const saved = ws.saved_portfolios || [];
+            setSavedPortfolios(saved);
+
+            if (ws.tenant_key === 'lotus' && ws.lotus_etf) {
+              setActivePresetId('lotus_etf');
+            } else if (ws.tenant_key === 'norrenberger' && ws.norrenberger_fund) {
+              setActivePresetId('norrenberger_fund');
+            } else if (saved.length > 0) {
+              setCustomScreened(saved[0].screened);
+              setCustomFundName(saved[0].name);
+              setFactsheetMeta(saved[0].factsheet_meta || null);
+              setSelectedSavedId(saved[0].id);
+              setActivePresetId('uploaded');
+            } else {
+              setActivePresetId('uploaded');
+            }
+          }
+        } else {
+          const res = await fetchInstitutionDemoPresets();
+          if (mounted && res?.data) {
+            setPresets(res.data);
+            setTenantKey('admin');
+            setActivePresetId('lotus_etf');
+          }
+          if (isAuthenticatedInstitution) {
+            fetchInstitutionPortfolios()
+              .then((pRes) => {
+                if (mounted) setSavedPortfolios(pRes?.data || []);
+              })
+              .catch(() => {});
+          }
         }
       } catch (err) {
-        console.error('Failed to load institutional demo presets:', err);
+        console.error('Failed to load institutional workspace:', err);
       } finally {
         if (mounted) setLoadingPresets(false);
       }
     };
     load();
     return () => { mounted = false; };
-  }, []);
-
-  useEffect(() => {
-    if (!isAuthenticatedInstitution) return;
-    let mounted = true;
-    fetchInstitutionPortfolios()
-      .then((res) => {
-        if (mounted) setSavedPortfolios(res?.data || []);
-      })
-      .catch(() => {});
-    return () => { mounted = false; };
-  }, [isAuthenticatedInstitution]);
+  }, [isPrivatePortal, isAuthenticatedInstitution]);
 
   const activeScreened = useMemo(() => {
-    if (activePresetId === 'uploaded' && customScreened) return customScreened;
+    if (activePresetId === 'uploaded') return customScreened || { holdings: [], summary: {}, sector_allocation: [] };
     if (activePresetId === 'lotus_etf') return presets?.lotus_etf?.screening_result || { holdings: [], summary: {}, sector_allocation: [] };
-    if (activePresetId === 'mixed_institutional_book') return presets?.mixed_institutional_book || { holdings: [], summary: {}, sector_allocation: [] };
-    if (activePresetId === 'norrenberger_fund') {
-      // Norrenberger Islamic Fund is Fixed Income (Sukuk/Mudarabah/Ijarah/Murabaha); show Sukuk/Fixed-Income breakdown or fallback
-      return presets?.lotus_etf?.screening_result || { holdings: [], summary: {}, sector_allocation: [] };
+    if (activePresetId === 'mixed_institutional_book' && showDemoFeatures) {
+      return presets?.mixed_institutional_book || { holdings: [], summary: {}, sector_allocation: [] };
     }
-    return customScreened || presets?.lotus_etf?.screening_result || { holdings: [], summary: {}, sector_allocation: [] };
-  }, [activePresetId, customScreened, presets]);
+    if (activePresetId === 'norrenberger_fund') {
+      // Norrenberger Islamic Fund is Fixed Income (Sukuk/Mudarabah/Ijarah/Murabaha); do not leak other institutions' equity lists
+      return { holdings: [], summary: {}, sector_allocation: [] };
+    }
+    return customScreened || { holdings: [], summary: {}, sector_allocation: [] };
+  }, [activePresetId, customScreened, presets, showDemoFeatures]);
 
   const activeTitle = useMemo(() => {
     if (activePresetId === 'lotus_etf') return LOTUS_FALLBACK_DATA.fund_name;
@@ -127,19 +165,19 @@ export default function InstitutionalDashboard({ demoMode = false }) {
 
   const handleTabKeyDown = (e, idx) => {
     if (e.key === 'ArrowRight') {
-      const next = (idx + 1) % TAB_DEFS.length;
-      handleSelectTab(TAB_DEFS[next].id);
+      const next = (idx + 1) % visibleTabs.length;
+      handleSelectTab(visibleTabs[next].id);
       tabRefs.current[next]?.focus();
     } else if (e.key === 'ArrowLeft') {
-      const prev = (idx - 1 + TAB_DEFS.length) % TAB_DEFS.length;
-      handleSelectTab(TAB_DEFS[prev].id);
+      const prev = (idx - 1 + visibleTabs.length) % visibleTabs.length;
+      handleSelectTab(visibleTabs[prev].id);
       tabRefs.current[prev]?.focus();
     } else if (e.key === 'Home') {
-      handleSelectTab(TAB_DEFS[0].id);
+      handleSelectTab(visibleTabs[0].id);
       tabRefs.current[0]?.focus();
     } else if (e.key === 'End') {
-      handleSelectTab(TAB_DEFS[TAB_DEFS.length - 1].id);
-      tabRefs.current[TAB_DEFS.length - 1]?.focus();
+      handleSelectTab(visibleTabs[visibleTabs.length - 1].id);
+      tabRefs.current[visibleTabs.length - 1]?.focus();
     }
   };
 
@@ -339,7 +377,40 @@ export default function InstitutionalDashboard({ demoMode = false }) {
 
   const summary = activeScreened?.summary || {};
   const isNorrenbergerActive = activePresetId === 'norrenberger_fund';
-  const institutionLabel = user?.institution_name || (activePresetId === 'lotus_etf' ? 'Lotus Capital Limited (Demo)' : activePresetId === 'norrenberger_fund' ? 'Norrenberger Asset Management (Demo)' : 'Irshad Institutional Desk');
+  const hasHoldings = (activeScreened?.holdings || []).length > 0;
+
+  const allowedFactsheetTemplates = useMemo(() => {
+    if (showDemoFeatures) return ['lotus', 'norrenberger', 'custom'];
+    if (tenantKey === 'lotus') return ['lotus', 'custom'];
+    if (tenantKey === 'norrenberger') return ['norrenberger', 'custom'];
+    return ['custom'];
+  }, [showDemoFeatures, tenantKey]);
+
+  const institutionLabel = isPrivatePortal
+    ? (user?.institution_name || user?.name || 'Institutional Desk')
+    : (user?.institution_name || (activePresetId === 'lotus_etf' ? 'Lotus Capital Limited (Demo)' : activePresetId === 'norrenberger_fund' ? 'Norrenberger Asset Management (Demo)' : 'Irshad Institutional Desk'));
+
+  const portfolioButtons = useMemo(() => {
+    if (showDemoFeatures) {
+      return [
+        { id: 'lotus_etf', label: 'Lotus Halal Equity ETF (13 Stocks)' },
+        { id: 'norrenberger_fund', label: 'Norrenberger Islamic Fund (Oct 2026)' },
+        { id: 'mixed_institutional_book', label: 'Sample Mixed Bank/Broker Book' },
+        ...(customScreened ? [{ id: 'uploaded', label: `Uploaded: ${customFundName}` }] : []),
+      ];
+    }
+    const items = [];
+    if (tenantKey === 'lotus' && presets?.lotus_etf) {
+      items.push({ id: 'lotus_etf', label: 'Lotus Halal Equity ETF (13 Stocks)' });
+    }
+    if (tenantKey === 'norrenberger' && presets?.norrenberger_fund) {
+      items.push({ id: 'norrenberger_fund', label: 'Norrenberger Islamic Fund (Oct 2026)' });
+    }
+    if (customScreened && !selectedSavedId) {
+      items.push({ id: 'uploaded', label: `Uploaded: ${customFundName}` });
+    }
+    return items;
+  }, [showDemoFeatures, tenantKey, presets, customScreened, customFundName, selectedSavedId]);
 
   return (
     <div
@@ -426,7 +497,7 @@ export default function InstitutionalDashboard({ demoMode = false }) {
                   padding: '3px 9px', borderRadius: 999,
                   background: 'var(--primary-50)', color: 'var(--primary)', border: '1px solid var(--primary-100)',
                 }}>
-                  {demoMode || !isAuthenticatedInstitution ? 'Institutional Demo & Presentation' : 'Institutional Role Workspace'}
+                  {isPrivatePortal ? 'AAOIFI Compliance & Factsheet Portal' : 'Institutional Demo & Presentation'}
                 </span>
                 {user?.institution_type && (
                   <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)' }}>
@@ -457,53 +528,50 @@ export default function InstitutionalDashboard({ demoMode = false }) {
               <button
                 type="button"
                 onClick={handleSaveCurrentMandate}
-                disabled={isSaving || (activeScreened?.holdings || []).length === 0}
+                disabled={isSaving || !hasHoldings}
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 6,
                   padding: '9px 15px', borderRadius: 11,
                   border: '1px solid var(--border)', background: 'var(--bg-section)',
-                  color: 'var(--text-dark)', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
+                  color: 'var(--text-dark)', fontWeight: 700, fontSize: '0.78rem',
+                  cursor: isSaving || !hasHoldings ? 'not-allowed' : 'pointer',
+                  opacity: !hasHoldings ? 0.55 : 1,
                 }}
               >
                 {isSaving ? <Loader2 size={14} className="spin" /> : <Save size={14} />}
                 Save Mandate
               </button>
             )}
-            <button
-              type="button"
-              onClick={() => setPresentationFullscreen((v) => !v)}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 7,
-                padding: '9px 15px', borderRadius: 11,
-                border: 'none', background: '#111827',
-                color: '#fff', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
-              }}
-            >
-              {presentationFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-              {presentationFullscreen ? 'Exit Fullscreen' : 'Presentation Mode'}
-            </button>
+            {showDemoFeatures && (
+              <button
+                type="button"
+                onClick={() => setPresentationFullscreen((v) => !v)}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 7,
+                  padding: '9px 15px', borderRadius: 11,
+                  border: 'none', background: '#111827',
+                  color: '#fff', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
+                }}
+              >
+                {presentationFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+                {presentationFullscreen ? 'Exit Fullscreen' : 'Presentation Mode'}
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Institutional Benchmark / Preset Switcher */}
+        {/* Institutional Portfolio / Mandate Selector (Strictly scoped per tenant) */}
         <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--border)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
           <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.7px', marginRight: 4 }}>
-            Active Portfolio / Showcase:
+            {showDemoFeatures ? 'Active Portfolio / Showcase:' : 'Your Mandates & Funds:'}
           </span>
-          {[
-            { id: 'lotus_etf', label: 'Lotus Halal Equity ETF (13 Stocks)' },
-            { id: 'norrenberger_fund', label: 'Norrenberger Islamic Fund (Oct 2026)' },
-            { id: 'mixed_institutional_book', label: 'Sample Mixed Bank/Broker Book' },
-            ...(customScreened ? [{ id: 'uploaded', label: `Uploaded: ${customFundName}` }] : []),
-          ].map((p) => (
+          {portfolioButtons.map((p) => (
             <button
               key={p.id}
               type="button"
               onClick={() => {
+                setSelectedSavedId(null);
                 setActivePresetId(p.id);
-                if (p.id === 'norrenberger_fund' && activeTab === 'screening') {
-                  // Let user stay or view allocation cleanly
-                }
               }}
               style={{
                 padding: '7px 13px',
@@ -511,9 +579,9 @@ export default function InstitutionalDashboard({ demoMode = false }) {
                 fontSize: '0.76rem',
                 fontWeight: 700,
                 cursor: 'pointer',
-                border: `1.5px solid ${activePresetId === p.id ? 'var(--primary)' : 'var(--border)'}`,
-                background: activePresetId === p.id ? 'var(--primary)' : 'var(--bg-section)',
-                color: activePresetId === p.id ? '#fff' : 'var(--text-dark)',
+                border: `1.5px solid ${activePresetId === p.id && !selectedSavedId ? 'var(--primary)' : 'var(--border)'}`,
+                background: activePresetId === p.id && !selectedSavedId ? 'var(--primary)' : 'var(--bg-section)',
+                color: activePresetId === p.id && !selectedSavedId ? '#fff' : 'var(--text-dark)',
                 transition: 'all 0.15s',
               }}
             >
@@ -548,10 +616,25 @@ export default function InstitutionalDashboard({ demoMode = false }) {
               </button>
             </div>
           ))}
+
+          {isPrivatePortal && (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 5,
+                padding: '7px 12px', borderRadius: 999, fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer',
+                border: '1px dashed var(--primary)', background: 'transparent', color: 'var(--primary)',
+              }}
+            >
+              <Plus size={13} /> Upload Portfolio
+            </button>
+          )}
         </div>
       </header>
 
-      {/* Executive KPI Strip */}
+      {/* Executive KPI Strip (hidden only when brand new custom institution has 0 holdings) */}
+      {(isNorrenbergerActive || hasHoldings || loadingPresets) && (
       <section className="no-print" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14, marginBottom: 20 }}>
         <div style={{ background: 'var(--bg)', borderRadius: 18, padding: '18px 20px', border: '1px solid var(--border)' }}>
           <div style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
@@ -610,6 +693,7 @@ export default function InstitutionalDashboard({ demoMode = false }) {
           </div>
         </div>
       </section>
+      )}
 
       {/* Accessible Tabs Navigation */}
       <div className="no-print" style={{
@@ -625,7 +709,7 @@ export default function InstitutionalDashboard({ demoMode = false }) {
           aria-label="Institutional Workspace Views"
           style={{ display: 'flex', overflowX: 'auto', gap: 4 }}
         >
-          {TAB_DEFS.map((t, idx) => {
+          {visibleTabs.map((t, idx) => {
             const Icon = t.icon;
             const selected = activeTab === t.id;
             return (
@@ -939,11 +1023,26 @@ export default function InstitutionalDashboard({ demoMode = false }) {
               </div>
             )}
 
-            <InstitutionalVerdictsTable
-              holdings={activeScreened?.holdings || []}
-              title={isNorrenbergerActive ? 'NGX Shariah-Compliant Equity Universe Reference (Lotus/Irshad Benchmark)' : `${activeTitle} — AAOIFI Screening Verdicts`}
-              onRemoveHolding={!isNorrenbergerActive ? handleRemoveHolding : undefined}
-            />
+            {hasHoldings ? (
+              <InstitutionalVerdictsTable
+                holdings={activeScreened?.holdings || []}
+                title={`${activeTitle} — AAOIFI Screening Verdicts`}
+                onRemoveHolding={handleRemoveHolding}
+              />
+            ) : !isNorrenbergerActive && !loadingPresets ? (
+              <div style={{
+                background: 'var(--bg)', borderRadius: 20, padding: '44px 28px',
+                border: '1px solid var(--border)', textAlign: 'center',
+              }}>
+                <ShieldCheck size={36} color="var(--primary)" style={{ marginBottom: 12 }} />
+                <h3 style={{ margin: '0 0 8px', fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)' }}>
+                  No Portfolio Screened Yet
+                </h3>
+                <p style={{ margin: '0 auto 18px', maxWidth: 520, fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
+                  Upload your existing CSV, Excel, or Broker PDF portfolio above — or quick-add any NGX ticker — to generate AAOIFI Shariah verdicts, purification figures, and a branded institutional factsheet.
+                </p>
+              </div>
+            ) : null}
           </div>
         )}
       </div>
@@ -963,7 +1062,7 @@ export default function InstitutionalDashboard({ demoMode = false }) {
       <div role="tabpanel" aria-labelledby="inst-tab-factsheet" hidden={activeTab !== 'factsheet'}>
         {activeTab === 'factsheet' && (
           <InstitutionalFactsheetView
-            key={activePresetId}
+            key={`${activePresetId}-${tenantKey}`}
             lotusData={presets?.lotus_etf}
             norrenbergerData={presets?.norrenberger_fund}
             screened={activeScreened}
@@ -972,21 +1071,24 @@ export default function InstitutionalDashboard({ demoMode = false }) {
             institutionName={user?.institution_name || 'Irshad Institutional Services'}
             factsheetMeta={factsheetMeta}
             onChangeFactsheetMeta={setFactsheetMeta}
+            allowedTemplates={allowedFactsheetTemplates}
           />
         )}
       </div>
 
-      {/* TAB 4: MEETING PRESENTATION DECK */}
-      <div role="tabpanel" aria-labelledby="inst-tab-presentation" hidden={activeTab !== 'presentation'}>
-        {activeTab === 'presentation' && (
-          <InstitutionalPresentationDeck
-            lotusData={presets?.lotus_etf}
-            mixedData={presets?.mixed_institutional_book}
-            onJumpToTab={handleSelectTab}
-            onSelectPreset={setActivePresetId}
-          />
-        )}
-      </div>
+      {/* TAB 4: MEETING PRESENTATION DECK (Demo / Admin only) */}
+      {showDemoFeatures && (
+        <div role="tabpanel" aria-labelledby="inst-tab-presentation" hidden={activeTab !== 'presentation'}>
+          {activeTab === 'presentation' && (
+            <InstitutionalPresentationDeck
+              lotusData={presets?.lotus_etf}
+              mixedData={presets?.mixed_institutional_book}
+              onJumpToTab={handleSelectTab}
+              onSelectPreset={setActivePresetId}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }

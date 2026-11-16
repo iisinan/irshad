@@ -613,6 +613,11 @@ export const fetchInstitutionDemoPresets = async () => {
   return response.data;
 };
 
+export const fetchInstitutionWorkspace = async () => {
+  const response = await api.get('/institution/workspace');
+  return response.data;
+};
+
 export const screenInstitutionPortfolio = async (payload, isAuthenticated = true) => {
   const endpoint = isAuthenticated ? '/institution/screen-portfolio' : '/institution/demo-screen';
   if (payload instanceof FormData) {

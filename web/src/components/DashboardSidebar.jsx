@@ -7,7 +7,7 @@ import {
   HeartHandshake, Calculator, BookOpen,
   User, LogOut, ChevronLeft, ChevronRight,
   X, Moon, Sun, Shield, FileText, Bell, HelpCircle, Star, CreditCard, Lock,
-  Building2, Upload, Presentation
+  Building2, Upload
 } from 'lucide-react';
 
 const SidebarClock = () => {
@@ -39,7 +39,6 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
     { label: 'Portfolio Screening', icon: Upload,          to: '/institution#screening' },
     { label: 'Purification Engine', icon: HeartHandshake,  to: '/institution#purification' },
     { label: 'Factsheet Studio',    icon: FileText,        to: '/institution#factsheet' },
-    { label: 'Presentation Deck',   icon: Presentation,    to: '/institution#presentation' },
     { section: 'Market Intelligence' },
     { label: 'Market Screener',     icon: BarChart2,       to: '/portfolio#market' },
     { label: 'Halal Directory',     icon: Briefcase,       to: '/portfolio#funds' },

@@ -426,6 +426,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // ── Institutional Portal Routes (institution & admin roles) ─────────
         Route::middleware(InstitutionMiddleware::class)->group(function () {
+            Route::get('/institution/workspace', [InstitutionController::class, 'workspace']);
             Route::post('/institution/screen-portfolio', [InstitutionController::class, 'screenPortfolio']);
             Route::get('/institution/portfolios', [InstitutionController::class, 'portfolios']);
             Route::post('/institution/portfolios', [InstitutionController::class, 'savePortfolio']);

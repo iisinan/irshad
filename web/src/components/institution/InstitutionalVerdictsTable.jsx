@@ -266,17 +266,18 @@ export default function InstitutionalVerdictsTable({
           ))}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', flex: '0 1 auto' }}>
-          <div style={{ position: 'relative', minWidth: 220, flex: '0 1 260px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'nowrap', flex: '0 1 auto', minWidth: 0 }}>
+          <div style={{ position: 'relative', width: 250, minWidth: 180, flex: '1 1 220px' }}>
             <Search size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} aria-hidden="true" />
             <input
               type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Filter ticker, company or sector..."
+              placeholder="Search ticker, company, sector..."
               aria-label="Filter screened holdings"
               style={{
                 width: '100%',
+                boxSizing: 'border-box',
                 padding: '8px 12px 8px 34px',
                 borderRadius: 10,
                 border: '1px solid var(--border-strong)',

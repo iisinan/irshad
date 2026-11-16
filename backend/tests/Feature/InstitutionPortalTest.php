@@ -378,4 +378,49 @@ class InstitutionPortalTest extends TestCase
             ->assertJsonPath('data.lotus_etf.ticker', 'LOTUSHAL15')
             ->assertJsonPath('data.norrenberger_fund.fund_name', 'Norrenberger Islamic Fund');
     }
+
+    public function test_workspace_isolates_tenant_information_per_institution(): void
+    {
+        $this->seedSampleEquities();
+
+        $lotusUser = User::factory()->create([
+            'role' => 'institution',
+            'email' => 'lotus@iirshad.com',
+            'institution_name' => 'Lotus Capital Limited',
+        ]);
+        $norrenUser = User::factory()->create([
+            'role' => 'institution',
+            'email' => 'norrenberger@iirshad.com',
+            'institution_name' => 'Norrenberger Asset Management Limited',
+        ]);
+        $brokerUser = User::factory()->create([
+            'role' => 'institution',
+            'email' => 'desk@stanbicbroker.example',
+            'institution_name' => 'Stanbic Stockbrokers',
+        ]);
+
+        // Lotus sees ONLY Lotus
+        $this->actingAs($lotusUser, 'sanctum')
+            ->getJson('/api/v1/institution/workspace')
+            ->assertStatus(200)
+            ->assertJsonPath('data.tenant_key', 'lotus')
+            ->assertJsonPath('data.lotus_etf.ticker', 'LOTUSHAL15')
+            ->assertJsonPath('data.norrenberger_fund', null);
+
+        // Norrenberger sees ONLY Norrenberger
+        $this->actingAs($norrenUser, 'sanctum')
+            ->getJson('/api/v1/institution/workspace')
+            ->assertStatus(200)
+            ->assertJsonPath('data.tenant_key', 'norrenberger')
+            ->assertJsonPath('data.norrenberger_fund.fund_name', 'Norrenberger Islamic Fund')
+            ->assertJsonPath('data.lotus_etf', null);
+
+        // Other banks/brokers see NEITHER Lotus NOR Norrenberger
+        $this->actingAs($brokerUser, 'sanctum')
+            ->getJson('/api/v1/institution/workspace')
+            ->assertStatus(200)
+            ->assertJsonPath('data.tenant_key', 'custom')
+            ->assertJsonPath('data.lotus_etf', null)
+            ->assertJsonPath('data.norrenberger_fund', null);
+    }
 }
