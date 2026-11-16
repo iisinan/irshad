@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Cache;
 use App\Models\Company;
 
 class SeedMutualFunds extends Command
@@ -225,7 +226,7 @@ class SeedMutualFunds extends Command
             [
                 'name' => 'Lotus Waqf (Endowment) Fund',
                 'symbol' => 'LOTUS-WAQF',
-                'sector' => 'Balanced',
+                'sector' => 'Endowment',
                 'fund_details' => [
                     'provider' => 'Lotus Capital Ltd',
                     'launched' => null,
@@ -342,6 +343,8 @@ class SeedMutualFunds extends Command
                 ]
             );
         }
+
+        Cache::forget('directory.mutual_funds');
 
         $this->info('Mutual funds seeded with rich details successfully.');
     }
