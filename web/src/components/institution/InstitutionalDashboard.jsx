@@ -984,7 +984,7 @@ export default function InstitutionalDashboard({ demoMode = false }) {
               }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, fontSize: '0.96rem', color: '#B91C1C' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, fontSize: '0.96rem', color: 'var(--primary)' }}>
                       <CheckCircle2 size={17} /> Fixed Income &amp; Sukuk Mandate Audit (₦6.81bn)
                     </div>
                     <p style={{ margin: '4px 0 0', fontSize: '0.79rem', color: 'var(--text-muted)' }}>
@@ -995,7 +995,7 @@ export default function InstitutionalDashboard({ demoMode = false }) {
                     type="button"
                     onClick={() => handleSelectTab('factsheet')}
                     style={{
-                      padding: '8px 14px', borderRadius: 10, background: '#DC2626', color: '#fff',
+                      padding: '8px 14px', borderRadius: 10, background: 'var(--primary)', color: '#fff',
                       border: 'none', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
                     }}
                   >

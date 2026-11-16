@@ -9,40 +9,41 @@ import {
 } from 'lucide-react';
 import { LOTUS_FALLBACK_DATA, NORRENBERGER_FALLBACK_DATA, formatNaira } from './institutionalFixtures';
 
-const SECTOR_PALETTE = ['#0F766E', '#1E3A8A', '#059669', '#D97706', '#991B1B', '#4F46E5', '#64748B'];
+const SECTOR_PALETTE = ['#297D66', '#45A58A', '#D1A562', '#1E4D40', '#74C6A9', '#0F766E', '#64748B'];
 
 const FACTSHEET_THEMES = {
   emerald: {
-    label: 'Irshad Emerald',
-    primary: '#0F766E',
-    dark: '#064E3B',
-    grad: 'linear-gradient(135deg, #064E3B 0%, #0F766E 55%, #115E59 100%)',
-    light: '#ECFDF5',
-    border: '#A7F3D0',
+    label: 'Irshad Teal',
+    primary: '#297D66',
+    accent: '#D1A562',
+    dark: '#1E4D40',
+    grad: 'linear-gradient(135deg, #1E5E4D 0%, #297D66 55%, #45A58A 100%)',
+    light: '#F2F9F5',
+    border: 'rgba(69, 165, 138, 0.35)',
+    railBg: '#F7FCF9',
+    tableHeader: '#1E4D40',
   },
   navy: {
     label: 'Executive Navy',
     primary: '#1E3A8A',
+    accent: '#D1A562',
     dark: '#0F172A',
     grad: 'linear-gradient(135deg, #0F172A 0%, #1E3A8A 65%, #1D4ED8 100%)',
     light: '#EFF6FF',
     border: '#BFDBFE',
+    railBg: '#F8FAFC',
+    tableHeader: '#0F172A',
   },
   lotus: {
     label: 'Burgundy',
     primary: '#991B1B',
+    accent: '#D1A562',
     dark: '#450A0A',
     grad: 'linear-gradient(135deg, #450A0A 0%, #991B1B 65%, #B91C1C 100%)',
     light: '#FEF2F2',
     border: '#FECACA',
-  },
-  crimson: {
-    label: 'Crimson',
-    primary: '#DC2626',
-    dark: '#7F1D1D',
-    grad: 'linear-gradient(135deg, #7F1D1D 0%, #DC2626 70%, #EF4444 100%)',
-    light: '#FEF2F2',
-    border: '#FECACA',
+    railBg: '#FEF9F9',
+    tableHeader: '#450A0A',
   },
 };
 
@@ -92,12 +93,9 @@ export default function InstitutionalFactsheetView({
   const isNorrenberger = activePresetId === 'norrenberger_fund';
   const lotus = useMemo(() => ({ ...LOTUS_FALLBACK_DATA, ...(lotusData || {}) }), [lotusData]);
   const norren = useMemo(() => ({ ...NORRENBERGER_FALLBACK_DATA, ...(norrenbergerData || {}) }), [norrenbergerData]);
+  void allowedTemplates;
 
-  const defaultThemeKey = useMemo(() => {
-    if (isLotus && allowedTemplates.includes('lotus')) return 'emerald';
-    if (isNorrenberger && allowedTemplates.includes('norrenberger')) return 'crimson';
-    return 'emerald';
-  }, [isLotus, isNorrenberger, allowedTemplates]);
+  const defaultThemeKey = 'emerald';
 
   const holdings = useMemo(() => {
     if (isLotus) return lotusData?.screening_result?.holdings || screened?.holdings || [];
@@ -349,7 +347,7 @@ export default function InstitutionalFactsheetView({
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 7,
               padding: '9px 16px', borderRadius: 10,
-              background: '#0F172A', color: '#fff',
+              background: theme.tableHeader, color: '#fff',
               border: 'none', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
             }}
           >
@@ -538,8 +536,8 @@ export default function InstitutionalFactsheetView({
         <section style={{ display: 'grid', gridTemplateColumns: 'minmax(265px, 315px) 1fr', gap: 22, alignItems: 'start', marginBottom: 24 }} className="mobile-col">
           {/* Left Rail */}
           <aside style={{
-            background: '#F8FAFC',
-            border: '1px solid #E2E8F0',
+            background: theme.railBg || '#F7FCF9',
+            border: `1px solid ${theme.border}`,
             borderRadius: 14,
             padding: '18px 16px',
             display: 'flex',
@@ -645,7 +643,7 @@ export default function InstitutionalFactsheetView({
                   </div>
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.73rem' }}>
                     <thead>
-                      <tr style={{ background: '#0F172A', color: '#FFFFFF' }}>
+                      <tr style={{ background: theme.tableHeader, color: '#FFFFFF' }}>
                         <th style={{ padding: '7px 8px', textAlign: 'left' }}>Instrument Class</th>
                         <th style={{ padding: '7px 8px', textAlign: 'right' }}>Current</th>
                         <th style={{ padding: '7px 8px', textAlign: 'right' }}>Target Band</th>
@@ -782,8 +780,8 @@ export default function InstitutionalFactsheetView({
                         <YAxis tick={{ fontSize: 10 }} />
                         <Tooltip />
                         <Legend wrapperStyle={{ fontSize: 11 }} />
-                        <Line type="monotone" dataKey="etf" name="LHE ETF NAV/Unit" stroke="#0F172A" strokeWidth={2.2} dot={false} />
-                        <Line type="monotone" dataKey="benchmark" name="NGXLII Benchmark" stroke={theme.primary} strokeWidth={2.2} dot={false} />
+                        <Line type="monotone" dataKey="etf" name="LHE ETF NAV/Unit" stroke={theme.primary} strokeWidth={2.4} dot={false} />
+                        <Line type="monotone" dataKey="benchmark" name="NGXLII Benchmark" stroke={theme.accent || '#D1A562'} strokeWidth={2.2} dot={false} />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
@@ -796,7 +794,7 @@ export default function InstitutionalFactsheetView({
                     </div>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.74rem' }}>
                       <thead>
-                        <tr style={{ background: '#0F172A', color: '#FFFFFF' }}>
+                        <tr style={{ background: theme.tableHeader, color: '#FFFFFF' }}>
                           <th style={{ padding: '6px 8px', textAlign: 'left' }}>Metric</th>
                           <th style={{ padding: '6px 8px', textAlign: 'right' }}>7D</th>
                           <th style={{ padding: '6px 8px', textAlign: 'right' }}>30D</th>
@@ -839,7 +837,7 @@ export default function InstitutionalFactsheetView({
                           <Tooltip formatter={(v) => `${v}%`} />
                           <Legend wrapperStyle={{ fontSize: 11 }} />
                           <Bar dataKey="yield" name="Yield %" fill={theme.primary} radius={[3, 3, 0, 0]} />
-                          <Bar dataKey="benchmark" name="Benchmark %" fill="#94A3B8" radius={[3, 3, 0, 0]} />
+                          <Bar dataKey="benchmark" name="Benchmark %" fill={theme.accent || '#D1A562'} radius={[3, 3, 0, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
@@ -959,7 +957,7 @@ export default function InstitutionalFactsheetView({
             <div style={{ overflowX: 'auto', border: '1px solid #CBD5E1', borderRadius: 10 }}>
               <table style={{ width: '100%', minWidth: 740, borderCollapse: 'collapse', fontSize: '0.74rem' }}>
                 <thead>
-                  <tr style={{ background: '#0F172A', color: '#FFFFFF' }}>
+                  <tr style={{ background: theme.tableHeader, color: '#FFFFFF' }}>
                     <th style={{ padding: '8px 10px', textAlign: 'center', width: 34 }}>#</th>
                     <th style={{ padding: '8px 10px', textAlign: 'left' }}>Security</th>
                     <th style={{ padding: '8px 10px', textAlign: 'right' }}>Units</th>
