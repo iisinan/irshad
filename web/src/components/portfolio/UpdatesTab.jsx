@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Newspaper, Lock, Moon, Clock, Star, Mail, Droplet, Shield, Rocket, Sparkles, TrendingUp, Award } from 'lucide-react';
+import { Newspaper, Lock, Moon, Clock, Star, Mail, Droplet, Shield, Rocket, Sparkles } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import IslamicQuote from '../IslamicQuote';
@@ -57,79 +57,11 @@ function MonthlySpotlightView() {
         </div>
         <h3 style={{ margin: '0 0 6px', fontSize: '1.35rem', fontWeight: 900, color: 'var(--text-dark)' }}>Monthly Shariah Market Spotlight</h3>
         <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--text-muted)' }}>
-          Deep-dive monthly screening leaders, top-performing Halal equities, and sector compliance health across the NGX.
+          Monthly sector Shariah compliance health and curated market intelligence across the NGX.
         </p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
-        <div style={{ background: 'var(--bg)', borderRadius: '20px', padding: '22px', border: '1px solid var(--border)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.95rem' }}>
-            <TrendingUp size={18} color="var(--halal)" /> Top Halal Performers
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {(spotlight.top_halal_gainers || []).map(item => (
-              <div key={item.symbol} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', borderRadius: '12px', background: 'var(--bg-section)' }}>
-                <div>
-                  <div style={{ fontWeight: 800, fontSize: '0.88rem', color: 'var(--text-dark)' }}>{item.symbol}</div>
-                  <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>{item.sector}</div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontWeight: 800, fontSize: '0.88rem', color: 'var(--text-dark)' }}>₦{Number(item.latest_price || 0).toLocaleString()}</div>
-                  <div style={{ fontSize: '0.75rem', fontWeight: 800, color: Number(item.price_change_pct) >= 0 ? 'var(--halal)' : 'var(--non-compliant)' }}>
-                    {Number(item.price_change_pct) >= 0 ? '+' : ''}{item.price_change_pct}%
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div style={{ background: 'var(--bg)', borderRadius: '20px', padding: '22px', border: '1px solid var(--border)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.95rem' }}>
-            <Award size={18} color="var(--primary)" /> AAOIFI Ratio Health Leaders
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {(spotlight.ratio_health_leaders || []).map(item => (
-              <div key={item.symbol} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', borderRadius: '12px', background: 'var(--bg-section)' }}>
-                <div>
-                  <div style={{ fontWeight: 800, fontSize: '0.88rem', color: 'var(--text-dark)' }}>{item.symbol}</div>
-                  <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>{item.sector}</div>
-                </div>
-                <div style={{ textAlign: 'right', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>
-                  <div>Debt: <strong style={{ color: 'var(--halal)' }}>{item.debt_ratio}%</strong></div>
-                  <div>Impure: <strong style={{ color: 'var(--halal)' }}>{item.impure_income_ratio}%</strong></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
-        <div style={{ background: 'var(--bg)', borderRadius: '20px', padding: '22px', border: '1px solid var(--border)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.95rem' }}>
-            <Star size={18} color="#d97706" /> Dividend Yield Leaders
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {(spotlight.dividend_yield_leaders || []).length === 0 ? (
-              <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>No upcoming Halal dividend leaders recorded this month.</div>
-            ) : (
-              (spotlight.dividend_yield_leaders || []).map((item, idx) => (
-                <div key={`${item.symbol}-${idx}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', borderRadius: '12px', background: 'var(--bg-section)' }}>
-                  <div>
-                    <div style={{ fontWeight: 800, fontSize: '0.88rem', color: 'var(--text-dark)' }}>{item.symbol}</div>
-                    <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>{item.name}</div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontWeight: 800, fontSize: '0.86rem', color: 'var(--halal)' }}>₦{Number(item.dividend_amount || 0).toLocaleString()}</div>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Pay: {item.pay_date || 'TBA'}</div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
         <div style={{ background: 'var(--bg)', borderRadius: '20px', padding: '22px', border: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', fontWeight: 800, color: 'var(--text-dark)', fontSize: '0.95rem' }}>
             <Shield size={18} color="var(--primary)" /> Sector Shariah Compliance
