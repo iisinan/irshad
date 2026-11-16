@@ -9,6 +9,7 @@ import 'package:irshad_mobile/core/theme/app_theme.dart';
 import 'package:irshad_mobile/core/api/api_service.dart';
 import 'package:irshad_mobile/core/providers/app_state_provider.dart';
 import 'package:irshad_mobile/core/widgets/upgrade_paywall_bottom_sheet.dart';
+import 'package:irshad_mobile/core/widgets/guest_gate.dart';
 import 'package:irshad_mobile/features/portfolio/ui/zakat_statement_screen.dart';
 import 'dart:ui' as ui;
 
@@ -235,9 +236,11 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
       daysUntilDue = hawlDueDate.difference(today).inDays;
     }
 
-    final tier = Provider.of<AppStateProvider>(context).userProfile?['tier'];
+    final appState = Provider.of<AppStateProvider>(context);
+    final isGuest = !appState.isAuthenticated;
+    final tier = appState.userProfile?['tier'];
     final tierSlug = tier?['slug'] ?? 'free';
-    final isZakatLocked = !(tier?['features']?['zakat_calc'] == true || tierSlug == 'pro' || tierSlug == 'max');
+    final isZakatLocked = isGuest || !(tier?['features']?['zakat_calc'] == true || tierSlug == 'pro' || tierSlug == 'max');
 
     return Scaffold(
       backgroundColor: context.bg,
@@ -264,18 +267,28 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.lock_outline_rounded, size: 42, color: context.primary),
+                      Icon(isGuest ? Icons.mosque_outlined : Icons.lock_outline_rounded, size: 42, color: context.primary),
                       const SizedBox(height: 16),
-                      Text('Automated Zakat Unavailable', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark), textAlign: TextAlign.center),
+                      Text(isGuest ? 'Calculate Your Zakat' : 'Automated Zakat Unavailable', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark), textAlign: TextAlign.center),
                       const SizedBox(height: 8),
                       Text(
-                        'Automated portfolio Zakat calculations are not enabled on your current account.',
+                        isGuest
+                            ? 'Create a free account or sign in to calculate Zakat on your holdings and track your Hawl.'
+                            : 'Automated portfolio Zakat calculations are not enabled on your current account.',
                         style: TextStyle(fontSize: 13, color: context.textMuted, height: 1.5),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: () {
+                          if (isGuest) {
+                            GuestGate.showAuthPrompt(
+                              context,
+                              title: 'Create a Free Account',
+                              message: 'Create a free account or sign in to calculate Zakat and track your Hawl.',
+                            );
+                            return;
+                          }
                           showModalBottomSheet(
                             context: context,
                             isScrollControlled: true,
@@ -293,7 +306,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                         ),
-                        child: const Text('Account Info', style: TextStyle(fontWeight: FontWeight.w800)),
+                        child: Text(isGuest ? 'Sign In or Register' : 'Account Info', style: const TextStyle(fontWeight: FontWeight.w800)),
                       ),
                     ],
                   ),

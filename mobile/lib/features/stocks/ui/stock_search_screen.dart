@@ -67,7 +67,8 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
         try {
           results = await _stockRepository.searchStocks(query);
         } catch (e) {
-          results = [{'symbol': 'ERR_REPO', 'name': e.toString(), 'sector': 'Error', 'status': {'status': 'halal'}}];
+          debugPrint('Stock search error: $e');
+          results = [];
         }
         
         // Fallback: If API search fails or returns empty (e.g. mock backend missing data), 

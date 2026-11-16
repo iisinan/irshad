@@ -14,6 +14,7 @@ import 'updates/updates_inbox_tab.dart';
 import 'guide_tab.dart';
 import '../widgets/islamic_quote_widget.dart';
 import 'package:irshad_mobile/core/widgets/upgrade_paywall_bottom_sheet.dart';
+import 'package:irshad_mobile/core/widgets/guest_gate.dart';
 
 class UpdateTab extends StatefulWidget {
   const UpdateTab({super.key});
@@ -34,6 +35,7 @@ class _UpdateTabState extends State<UpdateTab> {
   }
 
   Future<void> _fetchUnreadCounts() async {
+    if (!mounted || GuestGate.isGuest(context)) return;
     try {
       final response = await ApiService().get('notifications/unread-count');
       if (response.statusCode == 200) {
@@ -229,6 +231,15 @@ class _UpdateTabState extends State<UpdateTab> {
           
           return GestureDetector(
             onTap: () {
+              if (GuestGate.isGuest(context) &&
+                  (tab['id'] == 'inbox' || tab['id'] == 'dividends' || tab['id'] == 'compliance')) {
+                GuestGate.showAuthPrompt(
+                  context,
+                  title: 'Create a Free Account',
+                  message: 'Create a free account or sign in to access ${tab['label']}.',
+                );
+                return;
+              }
               if (isLocked) {
                 showModalBottomSheet(
                   context: context,
