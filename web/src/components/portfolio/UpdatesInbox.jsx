@@ -13,6 +13,7 @@ import localforage from 'localforage';
 import { Link } from 'react-router-dom';
 import UpdatesDigest from "./UpdatesDigest";
 import UpdatesDigestViewer from "./UpdatesDigestViewer";
+import SuggestModal from "../SuggestModal";
 import { Mail } from 'lucide-react';
 
 /* ── Skeleton ── */
@@ -159,6 +160,7 @@ export default function UpdatesInbox({ onUnreadCountChanged, hideTitle = false }
   const [search, setSearch]                 = useState('');
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
   const [showDigestModal, setShowDigestModal] = useState(false);
+  const [showSuggestModal, setShowSuggestModal] = useState(false);
   const [selectedDigest, setSelectedDigest] = useState(null);
   const pollRef = useRef(null);
   const onUnreadCountChangedRef = useRef(onUnreadCountChanged);
@@ -287,6 +289,28 @@ export default function UpdatesInbox({ onUnreadCountChanged, hideTitle = false }
           </div>
         )}
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <button 
+            onClick={() => setShowSuggestModal(true)} 
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '6px', 
+              padding: '8px 14px', 
+              borderRadius: '10px', 
+              border: 'none', 
+              background: 'var(--primary)', 
+              color: '#ffffff', 
+              fontWeight: 800, 
+              fontSize: '0.72rem', 
+              cursor: 'pointer', 
+              transition: 'all 0.2s',
+              boxShadow: '0 2px 8px rgba(69, 165, 138, 0.25)'
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(69, 165, 138, 0.35)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(69, 165, 138, 0.25)'; }}
+          >
+            <Mail size={13} strokeWidth={2.5} /> Suggest for Irshad
+          </button>
           <button onClick={() => setShowDigestModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '10px', border: '1px solid var(--primary-100)', background: 'var(--primary-50)', color: 'var(--primary)', fontWeight: 800, fontSize: '0.72rem', cursor: 'pointer', transition: 'all 0.2s' }}>
             <Mail size={13} /> Irshad Digest Settings
           </button>
@@ -503,6 +527,10 @@ export default function UpdatesInbox({ onUnreadCountChanged, hideTitle = false }
             </div>
           </div>
         </div>
+      )}
+
+      {showSuggestModal && (
+        <SuggestModal onClose={() => setShowSuggestModal(false)} />
       )}
     </div>
   );

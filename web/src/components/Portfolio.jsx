@@ -10,7 +10,6 @@ import { Search, BarChart2, Star, Calculator, ShieldCheck, BookOpen, Briefcase, 
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
 import PortfolioTab from './portfolio/PortfolioTab';
-import SuggestModal from './SuggestModal';
 import MarketTab from './portfolio/MarketTab';
 import WatchlistTab from './portfolio/WatchlistTab';
 import ZakatTab from './portfolio/ZakatTab';
@@ -86,7 +85,6 @@ export default function Portfolio() {
   const [mountedTabs, setMountedTabs] = useState([activeTab]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [showSuggestModal, setShowSuggestModal] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [activeFilter, setActiveFilter] = useState('all');
   const [initialHoldingSymbol, setInitialHoldingSymbol] = useState(null);
@@ -397,7 +395,6 @@ export default function Portfolio() {
   return (
     <div className="page-wrapper animate-fade-in" style={{ maxWidth: '1400px', margin: '0 auto', padding: '16px 24px 80px' }}>
       {showUpgradeModal && <PricingModal onClose={() => setShowUpgradeModal(false)} />}
-      {showSuggestModal && <SuggestModal onClose={() => setShowSuggestModal(false)} />}
       {showAddModal && (
         <AddHoldingModal 
           initialTab={typeof showAddModal === 'string' ? showAddModal : 'manual'}
@@ -761,36 +758,6 @@ export default function Portfolio() {
         </div>
         )}
       </div>
-      
-      {/* Floating Suggestion Button */}
-      <button 
-        onClick={() => setShowSuggestModal(true)}
-        style={{
-          position: 'fixed',
-          border: 'none',
-          cursor: 'pointer',
-          bottom: '24px',
-          right: '24px',
-          background: 'var(--primary)',
-          color: '#ffffff',
-          padding: '12px 20px',
-          borderRadius: '50px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          textDecoration: 'none',
-          boxShadow: '0 4px 14px rgba(69, 165, 138, 0.4)',
-          zIndex: 1000,
-          transition: 'all 0.2s',
-          fontWeight: 800,
-          fontSize: '0.85rem'
-        }}
-        onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(69, 165, 138, 0.6)'; }}
-        onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(69, 165, 138, 0.4)'; }}
-      >
-        <Mail size={18} strokeWidth={2.5} />
-        Suggest for Irshad
-      </button>
       
     </div>
   );
