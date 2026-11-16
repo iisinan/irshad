@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Newspaper, Lock, Bell, Moon, Clock, Star, Mail, Droplet, Shield, Rocket, Sparkles, TrendingUp, Award } from 'lucide-react';
+import { Newspaper, Lock, Moon, Clock, Star, Mail, Droplet, Shield, Rocket, Sparkles, TrendingUp, Award } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import IslamicQuote from '../IslamicQuote';
 import UpdatesNews    from './UpdatesNews';
-import UpdatesInbox   from './UpdatesInbox';
 import UpdatesDigest  from './UpdatesDigest';
 import UpdatesDividends from './UpdatesDividends';
 import UpdatesCompliance  from './UpdatesCompliance';
@@ -335,13 +334,6 @@ export default function UpdatesTab({ unreadCount = 0 }) {
       icon: Star,
       description: 'Recent dividend announcements and payouts',
     },
-    {
-      id: 'inbox',
-      label: 'Inbox',
-      icon: Bell,
-      hasNew: unreadCount > 0,
-      description: 'Your personal notifications & alerts',
-    },
   ];
 
   return (
@@ -494,7 +486,6 @@ export default function UpdatesTab({ unreadCount = 0 }) {
       {/* ── Tab Content ── */}
       <div className="animate-slide-up stagger-3" key={activeSubTab} style={{ minHeight: '400px' }}>
         {activeSubTab === 'news'         && <UpdatesNews />}
-        {activeSubTab === 'inbox'        && <UpdatesInbox />}
         {activeSubTab === 'compliance'   && <UpdatesCompliance />}
         {activeSubTab === 'spotlight'    && <MonthlySpotlightView />}
         {activeSubTab === 'dividends' && <UpdatesDividends />}

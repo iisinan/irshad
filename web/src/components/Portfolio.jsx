@@ -395,7 +395,7 @@ export default function Portfolio() {
   };
 
   return (
-    <div className="page-wrapper animate-fade-in" style={{ maxWidth: '1400px', margin: '0 auto', padding: '36px 24px 80px' }}>
+    <div className="page-wrapper animate-fade-in" style={{ maxWidth: '1400px', margin: '0 auto', padding: '16px 24px 80px' }}>
       {showUpgradeModal && <PricingModal onClose={() => setShowUpgradeModal(false)} />}
       {showSuggestModal && <SuggestModal onClose={() => setShowSuggestModal(false)} />}
       {showAddModal && (

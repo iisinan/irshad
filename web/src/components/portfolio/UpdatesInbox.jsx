@@ -149,7 +149,7 @@ const NotifCard = ({ notif, onRead, onArchive, onDelete, onCardClick }) => {
 /* ══════════════════════════════════════════════════════════════
    Main Component
    ══════════════════════════════════════════════════════════════ */
-export default function UpdatesInbox() {
+export default function UpdatesInbox({ onUnreadCountChanged, hideTitle = false }) {
   const [notifications, setNotifications]   = useState([]);
   const [unreadCount, setUnreadCount]       = useState(0);
   const [loading, setLoading]               = useState(true);
@@ -161,6 +161,10 @@ export default function UpdatesInbox() {
   const [showDigestModal, setShowDigestModal] = useState(false);
   const [selectedDigest, setSelectedDigest] = useState(null);
   const pollRef = useRef(null);
+  const onUnreadCountChangedRef = useRef(onUnreadCountChanged);
+  useEffect(() => {
+    onUnreadCountChangedRef.current = onUnreadCountChanged;
+  }, [onUnreadCountChanged]);
 
   const load = useCallback(async (params = {}, append = false) => {
     try {
@@ -175,8 +179,10 @@ export default function UpdatesInbox() {
       });
 
       const newItems = res.data || [];
+      const nextUnread = res.unread_count || 0;
       setNotifications(prev => append ? [...prev, ...newItems] : newItems);
-      setUnreadCount(res.unread_count || 0);
+      setUnreadCount(nextUnread);
+      onUnreadCountChangedRef.current?.(nextUnread);
       setPagination(res.pagination);
 
       if (!append && activeCategory === 'all' && !search && !showUnreadOnly && (!params.page || params.page === 1)) {
@@ -220,8 +226,15 @@ export default function UpdatesInbox() {
   const handleRead = async (id) => {
     try {
       await markNotificationRead(id);
+      const wasUnread = notifications.some(n => n.id === id && !n.read_at);
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, read_at: new Date().toISOString() } : n));
-      setUnreadCount(c => Math.max(0, c - 1));
+      if (wasUnread) {
+        setUnreadCount(c => {
+          const next = Math.max(0, c - 1);
+          onUnreadCountChangedRef.current?.(next);
+          return next;
+        });
+      }
     } catch { toastError('Failed to mark as read'); }
   };
 
@@ -230,6 +243,7 @@ export default function UpdatesInbox() {
       await markAllNotificationsRead();
       setNotifications(prev => prev.map(n => ({ ...n, read_at: n.read_at || new Date().toISOString() })));
       setUnreadCount(0);
+      onUnreadCountChangedRef.current?.(0);
       toastSuccess('All notifications marked as read');
     } catch { toastError('Failed to mark all as read'); }
   };
@@ -261,15 +275,17 @@ export default function UpdatesInbox() {
   return (
     <div style={{ width: '100%', maxWidth: '100%' }}>
       {/* Header Bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <h2 style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--text-dark)', margin: 0 }}>Inbox</h2>
-          {unreadCount > 0 && (
-            <span style={{ fontSize: '0.69rem', fontWeight: 900, padding: '3px 9px', borderRadius: '20px', background: 'var(--primary)', color: 'white' }}>
-              {unreadCount} unread
-            </span>
-          )}
-        </div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: hideTitle ? 'flex-end' : 'space-between', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
+        {!hideTitle && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <h2 style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--text-dark)', margin: 0 }}>Inbox</h2>
+            {unreadCount > 0 && (
+              <span style={{ fontSize: '0.69rem', fontWeight: 900, padding: '3px 9px', borderRadius: '20px', background: 'var(--primary)', color: 'white' }}>
+                {unreadCount} unread
+              </span>
+            )}
+          </div>
+        )}
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <button onClick={() => setShowDigestModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '10px', border: '1px solid var(--primary-100)', background: 'var(--primary-50)', color: 'var(--primary)', fontWeight: 800, fontSize: '0.72rem', cursor: 'pointer', transition: 'all 0.2s' }}>
             <Mail size={13} /> Irshad Digest Settings
