@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Newspaper, Lock, Star, Shield, Rocket } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import IslamicQuote from '../IslamicQuote';
