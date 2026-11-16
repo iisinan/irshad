@@ -6,7 +6,6 @@ import 'dart:convert';
 import 'package:irshad_mobile/core/widgets/company_avatar.dart';
 import 'package:irshad_mobile/features/stocks/ui/stock_detail_screen.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-import '../guide_tab.dart';
 
 class UpdatesNewsTab extends StatefulWidget {
   const UpdatesNewsTab({super.key});
@@ -19,7 +18,6 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
   bool _isLoading = true;
   String? _error;
   Map<String, dynamic>? _data;
-  String _activeSection = 'market';
 
   @override
   void initState() {
@@ -89,67 +87,6 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
         });
       }
     }
-  }
-
-  Widget _buildSectionPills() {
-    final complianceChanges = _data?['compliance_changes'] ?? [];
-    
-    final sections = [
-      {'id': 'market', 'label': 'Market Intelligence', 'icon': Icons.bar_chart_outlined, 'color': context.primary},
-      {'id': 'guide', 'label': 'Navigation Guide', 'icon': Icons.explore_outlined, 'color': const Color(0xFF10B981)},
-    ];
-
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      child: Row(
-        children: sections.map((s) {
-          final isActive = _activeSection == s['id'];
-          final color = s['color'] as Color;
-          return GestureDetector(
-            onTap: () => setState(() => _activeSection = s['id'] as String),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              margin: const EdgeInsets.only(right: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: isActive ? color.withValues(alpha: 0.1) : context.bgAlt,
-                border: Border.all(color: isActive ? color : context.appColors.divider),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(s['icon'] as IconData, size: 16, color: isActive ? color : context.textMuted),
-                  const SizedBox(width: 6),
-                  Text(
-                    s['label'] as String,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                      color: isActive ? color : context.textMuted,
-                    ),
-                  ),
-                  if (s['id'] == 'compliance' && (s['count'] as int) > 0)
-                    Container(
-                      margin: const EdgeInsets.only(left: 6),
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: color,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        '${s['count']}',
-                        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.white),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          );
-        }).toList(),
-      ),
-    );
   }
 
   Widget _buildStatusBadge(String? status) {
@@ -333,33 +270,19 @@ class _UpdatesNewsTabState extends State<UpdatesNewsTab> {
     if (_isLoading) return Center(child: CircularProgressIndicator(color: context.primary));
     if (_error != null) return Center(child: Text(_error!, style: const TextStyle(color: Colors.red)));
 
-    List<dynamic> items = [];
-    if (_activeSection == 'market') {
-      final business = (_data?['business_updates'] as List?)?.map((e) => Map<String, dynamic>.from(e as Map)..['_cardType'] = 'business').toList() ?? [];
-      final market = (_data?['market_intelligence'] as List?)?.map((e) => Map<String, dynamic>.from(e as Map)..['_cardType'] = 'market').toList() ?? [];
-      final analysis = (_data?['analysis'] as List?)?.map((e) => Map<String, dynamic>.from(e as Map)..['_cardType'] = 'analysis').toList() ?? [];
-      items = [...business, ...market, ...analysis];
-      items.sort((a, b) {
-        final dateA = DateTime.tryParse(a['published_at']?.toString() ?? '') ?? DateTime.fromMillisecondsSinceEpoch(0);
-        final dateB = DateTime.tryParse(b['published_at']?.toString() ?? '') ?? DateTime.fromMillisecondsSinceEpoch(0);
-        return dateB.compareTo(dateA);
-      });
-    }
-
-    if (_activeSection == 'guide') {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildSectionPills(),
-          const GuideTab(),
-        ],
-      );
-    }
+    final business = (_data?['business_updates'] as List?)?.map((e) => Map<String, dynamic>.from(e as Map)..['_cardType'] = 'business').toList() ?? [];
+    final market = (_data?['market_intelligence'] as List?)?.map((e) => Map<String, dynamic>.from(e as Map)..['_cardType'] = 'market').toList() ?? [];
+    final analysis = (_data?['analysis'] as List?)?.map((e) => Map<String, dynamic>.from(e as Map)..['_cardType'] = 'analysis').toList() ?? [];
+    final items = [...business, ...market, ...analysis];
+    items.sort((a, b) {
+      final dateA = DateTime.tryParse(a['published_at']?.toString() ?? '') ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final dateB = DateTime.tryParse(b['published_at']?.toString() ?? '') ?? DateTime.fromMillisecondsSinceEpoch(0);
+      return dateB.compareTo(dateA);
+    });
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildSectionPills(),
         if (items.isEmpty)
           Padding(
             padding: const EdgeInsets.all(24),

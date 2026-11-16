@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import {
-  TrendingUp, AlertTriangle, CheckCircle2, BarChart2,
+  TrendingUp, AlertTriangle, CheckCircle2,
   ExternalLink, RefreshCw, Mail, Bell, ChevronRight,
   ArrowRight, ArrowLeft, Newspaper, Zap, Shield, Star, X
 } from 'lucide-react';
@@ -188,7 +188,6 @@ export default function UpdatesNews() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeSection, setActiveSection] = useState('market');
   const [selectedUrl, setSelectedUrl] = useState(null);
 
   const handleSelectUrl = async (url) => {
@@ -228,10 +227,6 @@ export default function UpdatesNews() {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const sections = [
-    { id: 'market', label: 'Market Intelligence', icon: BarChart2, color: 'var(--primary)' },
-  ];
 
   const complianceChanges  = data?.compliance_changes  || [];
   const rawBusiness        = data?.business_updates    || [];
@@ -275,34 +270,17 @@ export default function UpdatesNews() {
         </div>,
         document.body
       )}
-      {/* Horizontal Tabs */}
-      <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '16px', marginBottom: '8px' }} className="hide-scrollbar">
-        {sections.map(s => {
-          const isActive = activeSection === s.id;
-          return (
-            <button
-              key={s.id}
-              onClick={() => setActiveSection(s.id)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '8px',
-                padding: '10px 20px',
-                borderRadius: '16px',
-                border: `1px solid ${isActive ? s.color : 'var(--border)'}`,
-                background: isActive ? `${s.color}15` : 'var(--bg-alt)',
-                color: isActive ? s.color : 'var(--text-muted)',
-                fontSize: '0.9rem',
-                fontWeight: isActive ? 800 : 600,
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              <s.icon size={18} strokeWidth={isActive ? 2.5 : 2} />
-              {s.label}
-            </button>
-          );
-        })}
-        <button onClick={load} disabled={loading} style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-muted)', fontWeight: 700, fontSize: '0.72rem', cursor: 'pointer' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: 'color-mix(in srgb, var(--primary) 12%, transparent)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Newspaper size={16} color="var(--primary)" />
+          </div>
+          <div>
+            <h2 style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-dark)', margin: 0 }}>News &amp; Insights</h2>
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>{marketIntelligence.length} items</span>
+          </div>
+        </div>
+        <button onClick={load} disabled={loading} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-muted)', fontWeight: 700, fontSize: '0.72rem', cursor: 'pointer' }}>
           <RefreshCw size={13} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} /> Refresh
         </button>
       </div>
@@ -315,20 +293,11 @@ export default function UpdatesNews() {
       ) : error ? (
         <EmptyState icon={AlertTriangle} title="Failed to Load" subtitle={error} color="var(--non-compliant)" />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          
-
-          {activeSection === 'market' && (
-            <>
-              <SectionHeader icon={BarChart2} title="Market Intelligence" count={marketIntelligence.length} color="var(--primary)" />
-              <div style={{ maxHeight: '600px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '6px' }} className="custom-scrollbar">
-                {marketIntelligence.length === 0
-                  ? <EmptyState icon={BarChart2} title="No Market Intelligence" subtitle="No recent updates have been found." color="var(--primary)" />
-                  : marketIntelligence.map(item => item._cardType === 'business' ? <BusinessCard key={'b'+item.id} item={item} onSelectUrl={handleSelectUrl} /> : <MarketCard key={`${item._cardType}-${item.id}`} item={item} onSelectUrl={handleSelectUrl} />)
-                }
-              </div>
-            </>
-          )}
+        <div style={{ maxHeight: '600px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '6px' }} className="custom-scrollbar">
+          {marketIntelligence.length === 0
+            ? <EmptyState icon={Newspaper} title="No News & Insights" subtitle="No recent updates have been found." color="var(--primary)" />
+            : marketIntelligence.map(item => item._cardType === 'business' ? <BusinessCard key={'b'+item.id} item={item} onSelectUrl={handleSelectUrl} /> : <MarketCard key={`${item._cardType}-${item.id}`} item={item} onSelectUrl={handleSelectUrl} />)
+          }
         </div>
       )}
     </div>
