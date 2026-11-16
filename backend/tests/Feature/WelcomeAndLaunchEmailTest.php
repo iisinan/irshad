@@ -47,6 +47,8 @@ class WelcomeAndLaunchEmailTest extends TestCase
             $table->string('google_id')->nullable();
             $table->string('apple_id')->nullable();
             $table->string('avatar')->nullable();
+            $table->string('institution_name')->nullable();
+            $table->string('institution_type')->nullable();
             $table->json('preferences')->nullable();
             $table->rememberToken();
             $table->timestamps();

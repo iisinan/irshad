@@ -5,7 +5,7 @@ import {
   ExternalLink, RefreshCw, Mail, Bell, ChevronRight,
   ArrowRight, Newspaper, Zap, Shield, Star
 } from 'lucide-react';
-import { fetchUpdatesNews } from '../../services/api';
+import api, { fetchUpdatesNews } from '../../services/api';
 import { toastSuccess, toastError } from '../../utils/toast';
 import CompanyLogo from '../CompanyLogo';
 import localforage from 'localforage';
@@ -169,8 +169,9 @@ export default function UpdatesCompliance() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeSubTab, setActiveSubTab] = useState('changes');
 
-  const CACHE_KEY = 'irshad_updates_compliance_cache_v2';
+  const CACHE_KEY = 'irshad_updates_compliance_cache_v3';
 
   const load = async (silent = false) => {
     try {
@@ -180,7 +181,7 @@ export default function UpdatesCompliance() {
       setData(res.data);
       localforage.setItem(CACHE_KEY, res.data);
     } catch (err) {
-      if (!data && !silent) setError(err?.response?.data?.message || 'Failed to load compliance changes.');
+      if (!data && !silent) setError(err?.response?.data?.message || 'Failed to load compliance brief.');
     } finally {
       if (!silent) setLoading(false);
     }
@@ -189,6 +190,7 @@ export default function UpdatesCompliance() {
   useEffect(() => {
     // Clear legacy stale cache if present
     localforage.removeItem('irshad_updates_compliance_cache').catch(() => {});
+    localforage.removeItem('irshad_updates_compliance_cache_v2').catch(() => {});
     localforage.getItem(CACHE_KEY).then(cached => {
       if (cached) {
         setData(cached);
@@ -197,6 +199,20 @@ export default function UpdatesCompliance() {
     }).catch(() => {});
     load(true);
   }, []);
+
+  useEffect(() => {
+    if (!data || Array.isArray(data.sector_breakdown)) return;
+    let active = true;
+    api.get('/updates/monthly-spotlight')
+      .then(res => {
+        const sectors = res.data?.data?.sector_breakdown;
+        if (active && Array.isArray(sectors)) {
+          setData(prev => (prev ? { ...prev, sector_breakdown: sectors } : prev));
+        }
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [data]);
 
   const rawList = Array.isArray(data?.compliance_changes) ? data.compliance_changes : [];
   const seenCompanies = new Set();
@@ -214,6 +230,8 @@ export default function UpdatesCompliance() {
     return true;
   });
 
+  const sectorBreakdown = Array.isArray(data?.sector_breakdown) ? data.sector_breakdown : [];
+
   if (loading && !data) return <SkeletonLoader />;
   if (error) return (
     <div style={{ padding: '40px 20px', textAlign: 'center' }}>
@@ -222,16 +240,86 @@ export default function UpdatesCompliance() {
     </div>
   );
 
+  const subTabs = [
+    { id: 'changes', label: 'Compliance Changes', icon: Shield, color: 'var(--non-compliant)', count: complianceChanges.length },
+    { id: 'sectors', label: 'Sector Shariah Compliance', icon: BarChart2, color: 'var(--primary)', count: sectorBreakdown.length },
+  ];
+
   return (
     <div style={{ paddingBottom: '60px' }}>
-      <SectionHeader icon={Shield} title="Compliance Status Changes" count={complianceChanges.length} color="var(--non-compliant)" />
-      
-      {complianceChanges.length === 0 ? (
-        <EmptyState icon={CheckCircle2} title="No Recent Changes" subtitle="No companies have changed compliance status recently. You're all clear!" color="var(--halal)" />
+      <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '18px', marginBottom: '6px' }} className="hide-scrollbar">
+        {subTabs.map(tab => {
+          const isActive = activeSubTab === tab.id;
+          const IconComp = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveSubTab(tab.id)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '8px',
+                padding: '10px 20px',
+                borderRadius: '16px',
+                border: `1px solid ${isActive ? tab.color : 'var(--border)'}`,
+                background: isActive ? `color-mix(in srgb, ${tab.color} 10%, transparent)` : 'var(--bg-alt)',
+                color: isActive ? tab.color : 'var(--text-muted)',
+                fontSize: '0.88rem',
+                fontWeight: isActive ? 800 : 600,
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <IconComp size={16} strokeWidth={isActive ? 2.5 : 2} />
+              <span>{tab.label}</span>
+              <span style={{
+                fontSize: '0.68rem',
+                fontWeight: 800,
+                padding: '2px 7px',
+                borderRadius: '20px',
+                background: isActive ? `color-mix(in srgb, ${tab.color} 16%, transparent)` : 'var(--bg-section)',
+                color: isActive ? tab.color : 'var(--text-muted)',
+              }}>
+                {tab.count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {activeSubTab === 'changes' ? (
+        <>
+          <SectionHeader icon={Shield} title="Compliance Status Changes" count={complianceChanges.length} color="var(--non-compliant)" />
+          {complianceChanges.length === 0 ? (
+            <EmptyState icon={CheckCircle2} title="No Recent Changes" subtitle="No companies have changed compliance status recently. You're all clear!" color="var(--halal)" />
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {complianceChanges.map(item => <ComplianceCard key={item.id} item={item} />)}
+            </div>
+          )}
+        </>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {complianceChanges.map(item => <ComplianceCard key={item.id} item={item} />)}
-        </div>
+        <>
+          <SectionHeader icon={BarChart2} title="Sector Shariah Compliance" count={sectorBreakdown.length} color="var(--primary)" />
+          {sectorBreakdown.length === 0 ? (
+            <EmptyState icon={BarChart2} title="No Sector Breakdown" subtitle="Sector compliance statistics are currently unavailable." color="var(--primary)" />
+          ) : (
+            <div style={{ background: 'var(--bg)', borderRadius: '20px', padding: '22px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {sectorBreakdown.map(sec => (
+                <div key={sec.sector} style={{ padding: '12px 14px', borderRadius: '12px', background: 'var(--bg-section)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', gap: '8px', flexWrap: 'wrap' }}>
+                    <span style={{ fontWeight: 800, fontSize: '0.86rem', color: 'var(--text-dark)' }}>{sec.sector}</span>
+                    <span style={{ fontWeight: 800, fontSize: '0.78rem', color: 'var(--halal)' }}>
+                      {sec.halal_companies}/{sec.total_companies} Halal ({sec.compliance_rate}%)
+                    </span>
+                  </div>
+                  <div style={{ height: '7px', borderRadius: '999px', background: 'var(--border)', overflow: 'hidden' }}>
+                    <div style={{ width: `${Math.min(100, Number(sec.compliance_rate || 0))}%`, height: '100%', background: 'var(--halal)', borderRadius: '999px', transition: 'width 0.3s ease' }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

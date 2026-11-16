@@ -32,7 +32,7 @@ class UpdatesController extends Controller
 
     public function newsAndInsights(Request $request): JsonResponse
     {
-        $data = \Illuminate\Support\Facades\Cache::remember('updates_news_insights', now()->addHours(1), function () {
+        $data = \Illuminate\Support\Facades\Cache::remember('updates_news_insights_v2', now()->addHours(1), function () {
             // 1. Compliance Status Changes (strictly filter out stocks that move from/to the same compliance category)
             $complianceChanges = ComplianceStatusChange::with('company:id,symbol,name,logo_url')
                 ->whereNotNull('previous_status')
@@ -125,6 +125,7 @@ class UpdatesController extends Controller
                 'market_intelligence' => $marketIntelligence,
                 'dividends' => $dividends,
                 'analysis' => $analysis,
+                'sector_breakdown' => $this->buildSectorBreakdown(),
             ];
         });
 
@@ -139,6 +140,9 @@ class UpdatesController extends Controller
         }
         if (!$driftTrackingAllowed) {
             $responsePayload['compliance_changes'] = [];
+        }
+        if (!$driftTrackingAllowed && !$monthlySpotlightAllowed) {
+            $responsePayload['sector_breakdown'] = [];
         }
         $responsePayload['tier_locks'] = [
             'dividend_alerts_locked' => !$dividendAlertsAllowed,
@@ -218,22 +222,7 @@ class UpdatesController extends Controller
                     'latest_price' => (float) ($c->latest_price ?? 0),
                 ]);
 
-            $allCompanies = \App\Models\Company::select(['id', 'sector', 'current_status'])->get();
-            $sectorBreakdown = $allCompanies
-                ->groupBy(fn ($c) => $c->sector ?: 'Other')
-                ->map(function ($group, $sector) {
-                    $total = $group->count();
-                    $halal = $group->filter(fn ($c) => in_array(strtolower((string) $c->current_status), ['halal', 'compliant']))->count();
-                    return [
-                        'sector' => $sector,
-                        'total_companies' => $total,
-                        'halal_companies' => $halal,
-                        'compliance_rate' => $total > 0 ? round(($halal / $total) * 100, 1) : 0,
-                    ];
-                })
-                ->sortByDesc('halal_companies')
-                ->take(6)
-                ->values();
+            $sectorBreakdown = $this->buildSectorBreakdown();
 
             $spotlightArticles = NewsArticle::with('company:id,symbol,name')
                 ->whereIn('category', ['market_intelligence', 'aaoifi', 'earnings'])
@@ -305,5 +294,33 @@ class UpdatesController extends Controller
         );
 
         return response()->json(['data' => $pref, 'message' => 'Digest preferences saved']);
+    }
+
+    /**
+     * Build per-sector Halal compliance breakdown across all active companies.
+     */
+    private function buildSectorBreakdown(): array
+    {
+        $allCompanies = \App\Models\Company::select(['id', 'sector', 'current_status'])->get();
+
+        return $allCompanies
+            ->groupBy(fn ($c) => $c->sector ?: 'Other')
+            ->map(function ($group, $sector) {
+                $total = $group->count();
+                $halal = $group->filter(
+                    fn ($c) => in_array(strtolower((string) $c->current_status), ['halal', 'compliant'])
+                )->count();
+
+                return [
+                    'sector' => $sector,
+                    'total_companies' => $total,
+                    'halal_companies' => $halal,
+                    'compliance_rate' => $total > 0 ? round(($halal / $total) * 100, 1) : 0,
+                ];
+            })
+            ->sortByDesc('halal_companies')
+            ->take(6)
+            ->values()
+            ->all();
     }
 }

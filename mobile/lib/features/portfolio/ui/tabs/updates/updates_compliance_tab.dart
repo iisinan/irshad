@@ -18,6 +18,7 @@ class _UpdatesComplianceTabState extends State<UpdatesComplianceTab> {
   bool _isLoading = true;
   String? _error;
   Map<String, dynamic>? _data;
+  String _activeSubTab = 'changes';
   
   @override
   void initState() {
@@ -54,18 +55,34 @@ class _UpdatesComplianceTabState extends State<UpdatesComplianceTab> {
               ? response.data['data']
               : response.data;
           
+          final Map<String, dynamic> mutableData = data is Map
+              ? Map<String, dynamic>.from(data)
+              : <String, dynamic>{};
+
+          if (mutableData['sector_breakdown'] is! List) {
+            try {
+              final spotlightRes = await ApiService().get('updates/monthly-spotlight');
+              final sectors = spotlightRes.data?['data']?['sector_breakdown'];
+              if (sectors is List) {
+                mutableData['sector_breakdown'] = sectors;
+              }
+            } catch (_) {}
+          }
+
           try {
             final box = await Hive.openBox('updatesBox');
             await box.put('news_data', jsonEncode({
-              'data': data,
+              'data': mutableData,
               'expiry': DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch
             }));
           } catch (_) {}
 
-          setState(() {
-            _data = data;
-            _isLoading = false;
-          });
+          if (mounted) {
+            setState(() {
+              _data = mutableData;
+              _isLoading = false;
+            });
+          }
         }
       } else {
         if (mounted && _data == null) {
@@ -227,21 +244,131 @@ class _UpdatesComplianceTabState extends State<UpdatesComplianceTab> {
     return ListView(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       children: [
-        if (items.isEmpty)
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: Center(
-              child: Text(
-                'No compliance updates available',
-                style: TextStyle(color: context.textMuted, fontWeight: FontWeight.w600),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              _buildSubTabPill('changes', 'Compliance Changes', Icons.shield_outlined, const Color(0xFFEF4444)),
+              const SizedBox(width: 8),
+              _buildSubTabPill('sectors', 'Sector Shariah Compliance', Icons.pie_chart_outline_rounded, context.primary),
+            ],
+          ),
+        ),
+        const SizedBox(height: 18),
+        if (_activeSubTab == 'changes') ...[
+          if (items.isEmpty)
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Center(
+                child: Text(
+                  'No compliance updates available',
+                  style: TextStyle(color: context.textMuted, fontWeight: FontWeight.w600),
+                ),
+              ),
+            )
+          else
+            ...items.map((item) => _buildComplianceCard(item)),
+        ] else ...[
+          _buildSectorBreakdownList(),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildSubTabPill(String id, String label, IconData icon, Color color) {
+    final isActive = _activeSubTab == id;
+    return GestureDetector(
+      onTap: () => setState(() => _activeSubTab = id),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isActive ? color.withValues(alpha: 0.1) : context.bgAlt,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: isActive ? color : context.appColors.divider),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 15, color: isActive ? color : context.textMuted),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                color: isActive ? color : context.textMuted,
               ),
             ),
-          )
-        else
-          ...items.map((item) => _buildComplianceCard(item)),
-      ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectorBreakdownList() {
+    final rawSectors = _data?['sector_breakdown'];
+    final sectors = rawSectors is List
+        ? rawSectors.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList()
+        : <Map<String, dynamic>>[];
+
+    if (sectors.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.all(24),
+        child: Center(
+          child: Text(
+            'No sector compliance breakdown available',
+            style: TextStyle(color: context.textMuted, fontWeight: FontWeight.w600),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: sectors.map((sec) {
+        final rate = (num.tryParse(sec['compliance_rate']?.toString() ?? '0')?.toDouble() ?? 0.0).clamp(0.0, 100.0);
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: context.bg,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: context.appColors.divider),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      sec['sector']?.toString() ?? 'Other',
+                      style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: context.textDark),
+                    ),
+                  ),
+                  Text(
+                    '${sec['halal_companies'] ?? 0}/${sec['total_companies'] ?? 0} Halal (${rate.toStringAsFixed(1)}%)',
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF16A34A)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(999),
+                child: LinearProgressIndicator(
+                  value: rate / 100.0,
+                  minHeight: 7,
+                  backgroundColor: context.appColors.divider,
+                  valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF16A34A)),
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 }
