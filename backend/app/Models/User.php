@@ -27,6 +27,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'location',
         'role',
+        'institution_name',
+        'institution_type',
         'plan',
         'preferences',
         'google_id', 'apple_id',
@@ -88,6 +90,16 @@ class User extends Authenticatable implements MustVerifyEmail
     public function favorites()
     {
         return $this->hasMany(Favorite::class);
+    }
+
+    public function institutionalPortfolios()
+    {
+        return $this->hasMany(InstitutionalPortfolio::class);
+    }
+
+    public function isInstitution(): bool
+    {
+        return $this->role === 'institution';
     }
 
     protected function casts(): array
@@ -156,6 +168,25 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function getTierAttribute()
     {
+        if (in_array($this->role, ['institution', 'admin'], true)) {
+            return new Plan([
+                'slug' => $this->role === 'institution' ? 'institution' : 'max',
+                'name' => $this->role === 'institution' ? 'Institutional' : 'Admin',
+                'features' => [
+                    'stock_screens_per_month' => -1,
+                    'portfolio_limit' => -1,
+                    'watchlist_limit' => -1,
+                    'baskets' => -1,
+                    'statements' => true,
+                    'purifications_per_month' => -1,
+                    'zakat_calc' => true,
+                    'dividend_alerts' => true,
+                    'drift_tracking' => true,
+                    'monthly_spotlight' => true,
+                ],
+            ]);
+        }
+
         $activeSub = $this->activeSubscription;
         
         // If the user has an explicit active subscription, return its plan

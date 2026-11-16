@@ -7,7 +7,7 @@ import { useTheme } from '../context/ThemeContext';
 import {
   Activity, HeartHandshake, BookOpen,
   LogOut, ChevronLeft, X, Moon, Sun,
-  LayoutDashboard, Shield, Users, ArrowLeft, Inbox, Mail, Wallet
+  LayoutDashboard, Shield, Users, ArrowLeft, Inbox, Mail, Wallet, Building2
 } from 'lucide-react';
 
 export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
@@ -42,6 +42,7 @@ export default function AdminSidebar({ collapsed, setCollapsed, mobileOpen, setM
     { label: 'Financial Data Queue',icon: Inbox,           to: '/admin/financial-queue' },
     { label: 'Zakat Settings',      icon: HeartHandshake,  to: '/admin/zakat-settings' },
     { section: 'Exit' },
+    { label: 'Institutional Portal', icon: Building2, to: '/institution' },
     { label: 'Back to App',         icon: ArrowLeft,       to: '/portfolio' },
   ];
 

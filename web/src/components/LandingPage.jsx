@@ -192,10 +192,13 @@ export default function LandingPage() {
               <Link to="/portfolio" className="btn-primary hover-lift" style={{ padding: '15px 36px', fontSize: '0.95rem', borderRadius: 13, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 8, boxShadow: '0 8px 28px rgba(69, 165, 138,0.24)', textDecoration: 'none', whiteSpace: 'nowrap' }}>
                 Explore Equities <ArrowRight size={17} />
               </Link>
-              <Link to="/shariah" style={{ padding: '15px 36px', fontSize: '0.95rem', borderRadius: 13, fontWeight: 600, color: 'var(--text-body)', border: '1.5px solid var(--border-strong)', background: 'transparent', display: 'inline-flex', alignItems: 'center', gap: 8, transition: 'border-color 0.22s, color 0.22s', textDecoration: 'none', whiteSpace: 'nowrap' }}
+              <Link to="/shariah" style={{ padding: '15px 30px', fontSize: '0.95rem', borderRadius: 13, fontWeight: 600, color: 'var(--text-body)', border: '1.5px solid var(--border-strong)', background: 'transparent', display: 'inline-flex', alignItems: 'center', gap: 8, transition: 'border-color 0.22s, color 0.22s', textDecoration: 'none', whiteSpace: 'nowrap' }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.color = 'var(--primary)'; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-strong)'; e.currentTarget.style.color = 'var(--text-body)'; }}>
                 Our Methodology
+              </Link>
+              <Link to="/institution/demo" style={{ padding: '15px 28px', fontSize: '0.95rem', borderRadius: 13, fontWeight: 700, color: 'var(--gold)', border: '1.5px solid var(--gold-border)', background: 'var(--gold-50)', display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none', whiteSpace: 'nowrap' }}>
+                Institutional Demo
               </Link>
             </div>
 

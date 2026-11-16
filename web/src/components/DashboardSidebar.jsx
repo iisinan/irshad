@@ -6,7 +6,8 @@ import {
   BarChart2, Activity, Briefcase, Layers,
   HeartHandshake, Calculator, BookOpen,
   User, LogOut, ChevronLeft, ChevronRight,
-  X, Moon, Sun, Shield, FileText, Bell, HelpCircle, Star, CreditCard, Lock
+  X, Moon, Sun, Shield, FileText, Bell, HelpCircle, Star, CreditCard, Lock,
+  Building2, Upload, Presentation
 } from 'lucide-react';
 
 const SidebarClock = () => {
@@ -29,10 +30,23 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
   const { isDark, toggleTheme } = useTheme();
 
   const tierSlug = user?.tier?.slug || 'free';
-  const basketsLocked = tierSlug === 'free' || (user?.tier?.features?.baskets ?? 0) === 0;
-  const watchlistLocked = tierSlug === 'free' || (user?.tier?.features?.watchlist_limit ?? 0) === 0;
+  const isInstitutionUser = user?.role === 'institution';
+  const basketsLocked = !isInstitutionUser && (tierSlug === 'free' || (user?.tier?.features?.baskets ?? 0) === 0);
+  const watchlistLocked = !isInstitutionUser && (tierSlug === 'free' || (user?.tier?.features?.watchlist_limit ?? 0) === 0);
 
-  const NAV_ITEMS = [
+  const NAV_ITEMS = isInstitutionUser ? [
+    { section: 'Institutional Desk' },
+    { label: 'Portfolio Screening', icon: Upload,          to: '/institution#screening' },
+    { label: 'Purification Engine', icon: HeartHandshake,  to: '/institution#purification' },
+    { label: 'Factsheet Studio',    icon: FileText,        to: '/institution#factsheet' },
+    { label: 'Presentation Deck',   icon: Presentation,    to: '/institution#presentation' },
+    { section: 'Market Intelligence' },
+    { label: 'Market Screener',     icon: BarChart2,       to: '/portfolio#market' },
+    { label: 'Halal Directory',     icon: Briefcase,       to: '/portfolio#funds' },
+    { label: 'Updates & Filings',   icon: Bell,            to: '/portfolio#updates' },
+    { section: 'Account' },
+    { label: 'Profile & Settings',  icon: User,            to: '/profile' },
+  ] : [
     { section: 'Main' },
     { label: 'Updates',          icon: Bell,           to: '/portfolio#updates', className: 'tour-updates-tab' },
     { label: 'Holdings',         icon: Activity,       to: '/portfolio#holdings', className: 'tour-portfolio-tab' },
@@ -50,6 +64,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
     { label: 'Profile & Settings', icon: User,         to: '/profile' },
     { label: 'Help & Guide',     icon: HelpCircle,     to: '/portfolio#guide' },
     ...(user?.role === 'admin' ? [
+      { label: 'Institutional Portal', icon: Building2, to: '/institution' },
       { label: 'Admin Dashboard', icon: Shield, to: '/admin' },
     ] : []),
   ];
@@ -59,9 +74,10 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
   const isActive = (to) => {
     const toPath = to.split('#')[0];
     const toHash = to.split('#')[1] ? '#' + to.split('#')[1] : '';
-    if (toPath === '/portfolio' || toPath === '/profile') {
+    if (toPath === '/portfolio' || toPath === '/profile' || toPath === '/institution') {
       if (location.pathname !== toPath) return false;
-      const currentHash = location.hash || (toPath === '/portfolio' ? '#updates' : '');
+      const defaultHash = toPath === '/portfolio' ? '#updates' : (toPath === '/institution' ? '#screening' : '');
+      const currentHash = location.hash || defaultHash;
       if (toHash) return currentHash === toHash;
       return currentHash === '';
     }

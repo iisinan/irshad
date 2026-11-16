@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }) => {
 
           const currentPath = window.location.pathname;
           if (currentPath === '/login' || currentPath === '/register') {
-            navigate('/portfolio');
+            navigate(userData?.role === 'institution' ? '/institution' : '/portfolio');
           }
         } catch (error) {
           console.error("Failed to load profile", error);
@@ -73,7 +73,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('auth_token', res.data.access_token);
         localStorage.setItem('auth_user', JSON.stringify(res.data.user));
         setUser(res.data.user);
-        return { success: true };
+        return { success: true, user: res.data.user };
       }
       return { success: false, error: 'Invalid response from server' };
     } catch (error) {
@@ -93,7 +93,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('auth_token', payload.access_token);
         localStorage.setItem('auth_user', JSON.stringify(payload.user));
         setUser(payload.user);
-        return { success: true };
+        return { success: true, user: payload.user };
       }
       return { success: false, error: 'Invalid response from server' };
     } catch (error) {
@@ -112,7 +112,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('auth_token', res.data.access_token);
         localStorage.setItem('auth_user', JSON.stringify(res.data.user));
         setUser(res.data.user);
-        return { success: true };
+        return { success: true, user: res.data.user };
       }
       return { success: false, error: 'Invalid response from server' };
     } catch (error) {

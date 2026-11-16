@@ -63,16 +63,18 @@ export const LoginPage = () => {
   const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const returnTo = typeof location.state?.returnTo === 'string' && location.state.returnTo.startsWith('/')
+  const explicitReturnTo = typeof location.state?.returnTo === 'string' && location.state.returnTo.startsWith('/')
     ? location.state.returnTo
-    : '/portfolio';
+    : null;
+  const resolveLandingRoute = (loggedUser) =>
+    explicitReturnTo || (loggedUser?.role === 'institution' ? '/institution' : '/portfolio');
 
   const handleGoogleSuccess = async (credentialResponse) => {
     setError('');
     setLoading(true);
     const res = await loginWithGoogle(credentialResponse.credential);
     if (res.success) {
-      navigate(returnTo);
+      navigate(resolveLandingRoute(res.user));
     } else {
       setError(res.error || 'Google login failed');
     }
@@ -86,7 +88,7 @@ export const LoginPage = () => {
     
     const res = await login({ email, password });
     if (res.success) {
-      navigate(returnTo);
+      navigate(resolveLandingRoute(res.user));
     } else {
       setError(res.error);
     }
@@ -172,6 +174,11 @@ export const LoginPage = () => {
             Sign up free
           </Link>
         </p>
+        <div style={{ marginTop: '14px', paddingTop: '14px', borderTop: '1px solid var(--border)', textAlign: 'center' }}>
+          <Link to="/institution/demo" style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--gold)', textDecoration: 'none' }}>
+            Bank, Broker or Asset Manager? Explore the Institutional Demo →
+          </Link>
+        </div>
       </div>
     </div>
   );
@@ -186,6 +193,9 @@ export const RegisterPage = () => {
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [country, setCountry] = useState('Nigeria');
+  const [accountType, setAccountType] = useState('user');
+  const [institutionName, setInstitutionName] = useState('');
+  const [institutionType, setInstitutionType] = useState('Asset / Fund Manager');
   const [investorType, setInvestorType] = useState('Retail Investor');
   const [primaryUseCase, setPrimaryUseCase] = useState('Personal Wealth Growth');
   const [investmentExperience, setInvestmentExperience] = useState('Novice (Just Starting)');
@@ -195,16 +205,16 @@ export const RegisterPage = () => {
   const { register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const returnTo = typeof location.state?.returnTo === 'string' && location.state.returnTo.startsWith('/')
+  const explicitReturnTo = typeof location.state?.returnTo === 'string' && location.state.returnTo.startsWith('/')
     ? location.state.returnTo
-    : '/portfolio';
+    : null;
 
   const handleGoogleSuccess = async (credentialResponse) => {
     setError('');
     setLoading(true);
     const res = await loginWithGoogle(credentialResponse.credential);
     if (res.success) {
-      navigate(returnTo);
+      navigate(explicitReturnTo || '/portfolio');
     } else {
       setError(res.error || 'Google signup failed');
     }
@@ -217,6 +227,11 @@ export const RegisterPage = () => {
     
     if (password !== passwordConfirmation) {
       setError('Passwords do not match.');
+      return;
+    }
+
+    if (accountType === 'institution' && !institutionName.trim()) {
+      setError('Please enter your Institution / Firm Name.');
       return;
     }
 
@@ -237,13 +252,18 @@ export const RegisterPage = () => {
       password_confirmation: passConfirm,
       phone_number: phoneNumber,
       location: country,
-      investor_type: investorType,
+      account_type: accountType,
+      ...(accountType === 'institution' ? {
+        institution_name: institutionName.trim(),
+        institution_type: institutionType,
+      } : {}),
+      investor_type: accountType === 'institution' ? 'Institutional Manager' : investorType,
       primary_use_case: primaryUseCase,
       investment_experience: investmentExperience,
     });
     
     if (res.success) {
-      navigate(returnTo);
+      navigate(explicitReturnTo || (res.user?.role === 'institution' ? '/institution' : '/portfolio'));
     } else {
       setError(res.error);
     }
@@ -266,6 +286,65 @@ export const RegisterPage = () => {
 
         {/* Form */}
         <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Account Type Toggle */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
+            <label className="auth-label">Account Type</label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', padding: '4px', background: 'var(--bg-section)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+              {[
+                { id: 'user', label: 'Individual Investor' },
+                { id: 'institution', label: 'Bank / Broker / Institution' },
+              ].map(opt => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => {
+                    setAccountType(opt.id);
+                    if (opt.id === 'institution') {
+                      setInvestorType('Institutional Manager');
+                      setPrimaryUseCase('Client Advisory Services');
+                    }
+                  }}
+                  style={{
+                    padding: '10px 12px',
+                    borderRadius: '9px',
+                    border: 'none',
+                    fontWeight: 700,
+                    fontSize: '0.78rem',
+                    cursor: 'pointer',
+                    background: accountType === opt.id ? 'var(--primary)' : 'transparent',
+                    color: accountType === opt.id ? '#fff' : 'var(--text-muted)',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {accountType === 'institution' && (
+            <div className="mobile-col" style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: '14px', padding: '14px', borderRadius: '12px', background: 'var(--primary-50)', border: '1px solid var(--primary-100)' }}>
+              <FormField
+                label="Institution / Firm Name *"
+                name="institutionName"
+                placeholder="e.g. Lotus Capital / Norrenberger"
+                value={institutionName}
+                onChange={e => setInstitutionName(e.target.value)}
+                required
+              />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
+                <label className="auth-label">Institution Category</label>
+                <select name="institutionType" className="auth-input" value={institutionType} onChange={e => setInstitutionType(e.target.value)}>
+                  <option value="Asset / Fund Manager">Asset / Fund Manager</option>
+                  <option value="Stockbroking Firm">Stockbroking Firm</option>
+                  <option value="Non-Interest Bank">Non-Interest Bank</option>
+                  <option value="Commercial Bank">Commercial Bank</option>
+                  <option value="Custodian / Pension Fund">Custodian / Pension Fund</option>
+                </select>
+              </div>
+            </div>
+          )}
+
           <div className="mobile-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
             <FormField label="First Name *" name="firstName" placeholder="Omar" value={firstName} onChange={e => setFirstName(e.target.value)} required />
             <FormField label="Last Name *" name="lastName" placeholder="Bello" value={lastName} onChange={e => setLastName(e.target.value)} required />

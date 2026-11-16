@@ -604,4 +604,40 @@ export const escalateChatConversation = async (conversationId, note = '') => {
   return response.data;
 };
 
+// ==========================================
+// INSTITUTIONAL PORTAL & DEMO PRESETS
+// ==========================================
+
+export const fetchInstitutionDemoPresets = async () => {
+  const response = await api.get('/institution/demo-presets');
+  return response.data;
+};
+
+export const screenInstitutionPortfolio = async (payload, isAuthenticated = true) => {
+  const endpoint = isAuthenticated ? '/institution/screen-portfolio' : '/institution/demo-screen';
+  if (payload instanceof FormData) {
+    const response = await api.post(endpoint, payload, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  }
+  const response = await api.post(endpoint, payload);
+  return response.data;
+};
+
+export const fetchInstitutionPortfolios = async () => {
+  const response = await api.get('/institution/portfolios');
+  return response.data;
+};
+
+export const saveInstitutionPortfolio = async (payload) => {
+  const response = await api.post('/institution/portfolios', payload);
+  return response.data;
+};
+
+export const deleteInstitutionPortfolio = async (id) => {
+  const response = await api.delete(`/institution/portfolios/${id}`);
+  return response.data;
+};
+
 

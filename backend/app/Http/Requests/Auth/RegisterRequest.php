@@ -30,6 +30,9 @@ class RegisterRequest extends FormRequest
             'primary_use_case' => ['nullable', 'string', 'max:255'],
             'investment_experience' => ['nullable', 'string', 'max:255'],
             'dob' => ['nullable', 'string', 'max:50'],
+            'account_type' => ['nullable', 'string', 'in:user,institution'],
+            'institution_name' => ['nullable', 'string', 'max:255', 'required_if:account_type,institution'],
+            'institution_type' => ['nullable', 'string', 'max:100'],
         ];
     }
 }

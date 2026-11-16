@@ -32,7 +32,8 @@ class AdminController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('institution_name', 'like', "%{$search}%");
             });
         }
 
@@ -61,7 +62,9 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
-            'role' => 'nullable|string|in:admin,user',
+            'role' => 'nullable|string|in:admin,user,scholar,institution',
+            'institution_name' => 'nullable|string|max:255',
+            'institution_type' => 'nullable|string|max:100',
             'plan' => 'nullable|string',
         ]);
 
@@ -74,11 +77,14 @@ class AdminController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->input('role', 'admin'),
+            'institution_name' => $request->input('institution_name'),
+            'institution_type' => $request->input('institution_type'),
             'plan' => $request->input('plan', 'free'),
         ]);
+        $user->forceFill(['email_verified_at' => now()])->save();
 
         return response()->json([
-            'message' => 'Admin account created successfully.',
+            'message' => 'Account created successfully.',
             'user' => $user,
         ], 201);
     }
@@ -117,7 +123,9 @@ class AdminController extends Controller
         $validator = Validator::make($request->all(), [
             'name'  => 'sometimes|string|max:255',
             'email' => 'sometimes|string|email|max:255|unique:users,email,'.$user->id,
-            'role'  => 'sometimes|string|in:admin,user',
+            'role'  => 'sometimes|string|in:admin,user,scholar,institution',
+            'institution_name' => 'nullable|string|max:255',
+            'institution_type' => 'nullable|string|max:100',
             'plan'  => 'sometimes|string|in:free,paid',
         ]);
 
@@ -125,7 +133,7 @@ class AdminController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $user->update($request->only(['name', 'email', 'role', 'plan']));
+        $user->update($request->only(['name', 'email', 'role', 'institution_name', 'institution_type', 'plan']));
 
         return $this->success($user, 'User updated successfully');
     }

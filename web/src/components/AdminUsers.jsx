@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { fetchAdminUsers, createAdminUser, updateAdminUser, deleteAdminUser, overrideAdminUserPlan } from '../services/api';
-import { Users, Shield, Plus, X, Search, Edit2, Trash2, Crown, ChevronRight, Activity, CreditCard, CheckCircle2 } from 'lucide-react';
+import { Users, Shield, Plus, X, Search, Edit2, Trash2, Crown, ChevronRight, Activity, CreditCard, CheckCircle2, Building2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -64,7 +64,7 @@ const AdminUsers = () => {
   const [planForm, setPlanForm] = useState({ plan_slug: 'pro', billing_cycle: 'quarterly', expires_at: '', note: '' });
   const [analyticsUserId, setAnalyticsUserId] = useState(null);
 
-  const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'user', plan: 'free' });
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'user', institution_name: '', institution_type: 'Asset / Fund Manager', plan: 'free' });
   const [selectedUser, setSelectedUser] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState('');
@@ -116,7 +116,7 @@ const AdminUsers = () => {
       }
       toast.success('User created successfully');
       setShowCreateModal(false);
-      setFormData({ name: '', email: '', password: '', role: 'user', plan: 'free' });
+      setFormData({ name: '', email: '', password: '', role: 'user', institution_name: '', institution_type: 'Asset / Fund Manager', plan: 'free' });
       loadUsers(page, debouncedSearch);
     } catch (err) {
       setFormError(err.response?.data?.message || 'Failed to create user');
@@ -181,7 +181,7 @@ const AdminUsers = () => {
     setSelectedUser(u);
     // Use the real active plan slug from subscription system
     const realPlanSlug = u._planOverride || u.active_plan_slug || 'free';
-    setFormData({ name: u.name || '', email: u.email || '', role: u.role || 'user', plan: realPlanSlug });
+    setFormData({ name: u.name || '', email: u.email || '', role: u.role || 'user', institution_name: u.institution_name || '', institution_type: u.institution_type || 'Asset / Fund Manager', plan: realPlanSlug });
     setFormError('');
     setShowEditModal(true);
   };
@@ -190,7 +190,13 @@ const AdminUsers = () => {
     e.preventDefault();
     setFormLoading(true); setFormError('');
     try {
-      await updateAdminUser(selectedUser.id, { name: formData.name, email: formData.email, role: formData.role });
+      await updateAdminUser(selectedUser.id, {
+        name: formData.name,
+        email: formData.email,
+        role: formData.role,
+        institution_name: formData.role === 'institution' ? formData.institution_name : null,
+        institution_type: formData.role === 'institution' ? formData.institution_type : null,
+      });
       // Apply plan change via the subscription override system
       const currentSlug = selectedUser._planOverride || selectedUser.active_plan_slug || 'free';
       if (formData.plan !== currentSlug) {
@@ -269,14 +275,22 @@ const AdminUsers = () => {
               View all registered users and manage their plans or roles.
             </p>
           </div>
-          <button
-            onClick={() => { setFormData({ name: '', email: '', password: '', role: 'user', plan: 'free' }); setShowCreateModal(true); }}
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '11px 20px', borderRadius: '12px', background: 'var(--primary)', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: '0.85rem', transition: 'all 0.2s', boxShadow: '0 4px 16px rgba(209, 165, 98, 0.25)' }}
-            onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
-            onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
-          >
-            <Plus size={16} /> New User
-          </button>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => { setFormData({ name: '', email: '', password: '', role: 'institution', institution_name: '', institution_type: 'Asset / Fund Manager', plan: 'free' }); setFormError(''); setShowCreateModal(true); }}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '11px 18px', borderRadius: '12px', background: 'var(--gold-50)', color: '#92400e', border: '1px solid var(--gold-border)', fontWeight: 800, cursor: 'pointer', fontSize: '0.84rem', transition: 'all 0.2s' }}
+            >
+              <Building2 size={16} /> New Institution
+            </button>
+            <button
+              onClick={() => { setFormData({ name: '', email: '', password: '', role: 'user', institution_name: '', institution_type: 'Asset / Fund Manager', plan: 'free' }); setFormError(''); setShowCreateModal(true); }}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '11px 20px', borderRadius: '12px', background: 'var(--primary)', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: '0.85rem', transition: 'all 0.2s', boxShadow: '0 4px 16px rgba(209, 165, 98, 0.25)' }}
+              onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+            >
+              <Plus size={16} /> New User
+            </button>
+          </div>
         </div>
       </div>
 
@@ -343,7 +357,12 @@ const AdminUsers = () => {
                       <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--gold-grad)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 800, fontSize: '0.85rem', flexShrink: 0 }}>
                         {(u.name || 'U').charAt(0).toUpperCase()}
                       </div>
-                      <span style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.88rem' }}>{u.name}</span>
+                      <div>
+                        <span style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.88rem', display: 'block' }}>{u.name}</span>
+                        {u.institution_name && (
+                          <span style={{ fontSize: '0.73rem', fontWeight: 600, color: '#92400e' }}>{u.institution_name}</span>
+                        )}
+                      </div>
                     </div>
                   </td>
                   <td style={{ padding: '15px 20px', color: 'var(--text-muted)', fontSize: '0.83rem' }}>{u.email}</td>
@@ -372,10 +391,13 @@ const AdminUsers = () => {
                     <span style={{
                       display: 'inline-flex', alignItems: 'center', gap: '5px',
                       padding: '4px 10px', borderRadius: '100px', fontSize: '0.72rem', fontWeight: 700,
-                      background: u.role === 'admin' ? 'var(--primary-50)' : 'var(--bg-section)',
-                      color: u.role === 'admin' ? 'var(--primary)' : 'var(--text-muted)'
+                      background: u.role === 'admin' ? 'var(--primary-50)' : u.role === 'institution' ? 'var(--gold-50)' : 'var(--bg-section)',
+                      color: u.role === 'admin' ? 'var(--primary)' : u.role === 'institution' ? '#92400e' : 'var(--text-muted)',
+                      border: u.role === 'institution' ? '1px solid var(--gold-border)' : 'none',
+                      textTransform: 'capitalize',
                     }}>
                       {u.role === 'admin' && <Shield size={11} />}
+                      {u.role === 'institution' && <Building2 size={11} />}
                       {u.role || 'user'}
                     </span>
                   </td>
@@ -564,20 +586,20 @@ const AdminUsers = () => {
               <input required type="password" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} minLength={8} style={inputStyle} placeholder="Min 8 characters" />
             </FormField>
             
-            <div className="mobile-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '28px' }}>
+            <div className="mobile-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' }}>Role</label>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  {['user', 'admin'].map(t => (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                  {['user', 'institution', 'scholar', 'admin'].map(t => (
                     <button
                       key={t} type="button"
                       onClick={() => setFormData({...formData, role: t})}
                       style={{
-                        flex: 1, padding: '10px', borderRadius: '10px', border: '1.5px solid',
+                        padding: '9px 6px', borderRadius: '10px', border: '1.5px solid',
                         borderColor: formData.role === t ? 'var(--primary)' : 'var(--border)',
                         background: formData.role === t ? 'var(--primary-50)' : 'var(--bg-section)',
                         color: formData.role === t ? 'var(--primary)' : 'var(--text-muted)',
-                        fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', transition: 'all 0.2s', textTransform: 'capitalize'
+                        fontWeight: 700, fontSize: '0.76rem', cursor: 'pointer', transition: 'all 0.2s', textTransform: 'capitalize'
                       }}
                     >{t}</button>
                   ))}
@@ -602,6 +624,23 @@ const AdminUsers = () => {
                 </div>
               </div>
             </div>
+
+            {formData.role === 'institution' && (
+              <div className="mobile-col" style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: '12px' }}>
+                <FormField label="Institution / Bank / Broker Name *">
+                  <input required type="text" value={formData.institution_name} onChange={e => setFormData({ ...formData, institution_name: e.target.value })} style={inputStyle} placeholder="e.g. Norrenberger Asset Management" />
+                </FormField>
+                <FormField label="Institution Category">
+                  <select value={formData.institution_type || 'Asset / Fund Manager'} onChange={e => setFormData({ ...formData, institution_type: e.target.value })} style={inputStyle}>
+                    <option value="Asset / Fund Manager">Asset / Fund Manager</option>
+                    <option value="Stockbroking Firm">Stockbroking Firm</option>
+                    <option value="Non-Interest Bank">Non-Interest Bank</option>
+                    <option value="Commercial Bank">Commercial Bank</option>
+                    <option value="Custodian / Pension Fund">Custodian / Pension Fund</option>
+                  </select>
+                </FormField>
+              </div>
+            )}
 
             <div style={{ display: 'flex', gap: '12px' }}>
               <button type="button" onClick={() => setShowCreateModal(false)} style={{ flex: 1, padding: '13px', borderRadius: '12px', background: 'var(--bg-section)', border: 'none', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
@@ -626,20 +665,20 @@ const AdminUsers = () => {
               <input required type="email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} style={inputStyle} />
             </FormField>
             
-            <div className="mobile-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '28px' }}>
+            <div className="mobile-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' }}>Role</label>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  {['user', 'admin'].map(t => (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                  {['user', 'institution', 'scholar', 'admin'].map(t => (
                     <button
                       key={t} type="button"
                       onClick={() => setFormData({...formData, role: t})}
                       style={{
-                        flex: 1, padding: '10px', borderRadius: '10px', border: '1.5px solid',
+                        padding: '9px 6px', borderRadius: '10px', border: '1.5px solid',
                         borderColor: formData.role === t ? 'var(--primary)' : 'var(--border)',
                         background: formData.role === t ? 'var(--primary-50)' : 'var(--bg-section)',
                         color: formData.role === t ? 'var(--primary)' : 'var(--text-muted)',
-                        fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', transition: 'all 0.2s', textTransform: 'capitalize'
+                        fontWeight: 700, fontSize: '0.76rem', cursor: 'pointer', transition: 'all 0.2s', textTransform: 'capitalize'
                       }}
                     >{t}</button>
                   ))}
@@ -664,6 +703,23 @@ const AdminUsers = () => {
                 </div>
               </div>
             </div>
+
+            {formData.role === 'institution' && (
+              <div className="mobile-col" style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: '12px' }}>
+                <FormField label="Institution / Bank / Broker Name *">
+                  <input required type="text" value={formData.institution_name} onChange={e => setFormData({ ...formData, institution_name: e.target.value })} style={inputStyle} placeholder="e.g. Lotus Capital Limited" />
+                </FormField>
+                <FormField label="Institution Category">
+                  <select value={formData.institution_type || 'Asset / Fund Manager'} onChange={e => setFormData({ ...formData, institution_type: e.target.value })} style={inputStyle}>
+                    <option value="Asset / Fund Manager">Asset / Fund Manager</option>
+                    <option value="Stockbroking Firm">Stockbroking Firm</option>
+                    <option value="Non-Interest Bank">Non-Interest Bank</option>
+                    <option value="Commercial Bank">Commercial Bank</option>
+                    <option value="Custodian / Pension Fund">Custodian / Pension Fund</option>
+                  </select>
+                </FormField>
+              </div>
+            )}
 
             <div style={{ display: 'flex', gap: '12px' }}>
               <button type="button" onClick={() => setShowEditModal(false)} style={{ flex: 1, padding: '13px', borderRadius: '12px', background: 'var(--bg-section)', border: 'none', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer' }}>Cancel</button>

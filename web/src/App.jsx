@@ -78,7 +78,8 @@ const TermsPage = lazyWithRetry(() => import('./components/Terms'));
 const PrivacyPage = lazyWithRetry(() => import('./components/Privacy'));
 const DisclosurePage = lazyWithRetry(() => import('./components/Disclosure'));
 const AdminFinancialReviewQueue = lazyWithRetry(() => import('./components/AdminFinancialReviewQueue'));
-const DASHBOARD_ROUTES = ['/portfolio', '/profile', '/admin'];
+const InstitutionalDashboard = lazyWithRetry(() => import('./components/institution/InstitutionalDashboard'));
+const DASHBOARD_ROUTES = ['/portfolio', '/profile', '/admin', '/institution'];
 
 /* ─── Animated Routes Wrapper ─────────────────────────────── */
 const AnimatedRoutes = ({ children }) => {
@@ -137,6 +138,8 @@ const DocumentTitleUpdater = () => {
     else if (path.startsWith('/disclosure')) title = 'General Disclosures & Risk | Irshad';
     else if (path.startsWith('/admin/finances')) title = 'Finances | Irshad Admin';
     else if (path.startsWith('/admin')) title = 'Admin Dashboard | Irshad';
+    else if (path.startsWith('/institution/demo')) title = 'Institutional Demo & Presentation | Irshad';
+    else if (path.startsWith('/institution')) title = 'Institutional Portal | Irshad';
     document.title = title;
   }, [location]);
   return null;
@@ -156,8 +159,8 @@ const ThemeToggle = () => {
 /* ─── Navbar ──────────────────────────────────────────────── */
 const TopNavbar = () => {
   const location = useLocation();
-  // Hide top navbar on dashboard / portfolio / profile — those use the sidebar
-  const isDashboard = DASHBOARD_ROUTES.some(r => location.pathname.startsWith(r));
+  // Hide top navbar on dashboard / portfolio / profile / authenticated institution portal
+  const isDashboard = DASHBOARD_ROUTES.some(r => r === '/institution' ? location.pathname === '/institution' : location.pathname.startsWith(r));
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const { user, logout, loading } = useAuth();
@@ -206,8 +209,9 @@ const TopNavbar = () => {
           <Link to="/pricing" className={navLinkClass('/pricing')}>Pricing</Link>
           <Link to="/resources" className={navLinkClass('/resources')}>Resources</Link>
           <Link to="/about" className={navLinkClass('/about')}>About Us</Link>
+          <Link to="/institution/demo" className={navLinkClass('/institution/demo')}>Institutions</Link>
           {user && (
-            <Link to="/portfolio" className={navLinkClass('/portfolio')}>Dashboard</Link>
+            <Link to={user?.role === 'institution' ? '/institution' : '/portfolio'} className={navLinkClass(user?.role === 'institution' ? '/institution' : '/portfolio')}>Dashboard</Link>
           )}
           {(user?.role === 'admin' || user?.role === 'scholar') && (
             <Link to="/admin" className={navLinkClass('/admin')} style={{ color: 'var(--primary)' }}>Admin</Link>
@@ -273,12 +277,15 @@ const TopNavbar = () => {
         <Link to="/about" className={navLinkClass('/about')} onClick={() => setMenuOpen(false)}>
           <Info size={18} /> About Us
         </Link>
+        <Link to="/institution/demo" className={navLinkClass('/institution/demo')} onClick={() => setMenuOpen(false)}>
+          <Shield size={18} /> Institutions
+        </Link>
         <div style={{ padding: '16px 24px' }}>
           <ThemeToggle />
         </div>
 
         {user && (
-          <Link to="/portfolio" className={navLinkClass('/portfolio')} onClick={() => setMenuOpen(false)}>
+          <Link to={user?.role === 'institution' ? '/institution' : '/portfolio'} className={navLinkClass(user?.role === 'institution' ? '/institution' : '/portfolio')} onClick={() => setMenuOpen(false)}>
             <LayoutDashboard size={18} /> Dashboard
           </Link>
         )}
@@ -412,6 +419,16 @@ function App() {
                   </Route>
                   <Route path="/portfolio" element={
                     <DashboardLayout><Portfolio /></DashboardLayout>
+                  } />
+                  <Route path="/institution" element={
+                    <ProtectedRoute institutionOnly={true}>
+                      <DashboardLayout><InstitutionalDashboard /></DashboardLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/institution/demo" element={
+                    <div style={{ paddingTop: '86px' }}>
+                      <InstitutionalDashboard demoMode={true} />
+                    </div>
                   } />
                   <Route path="/settings/billing/callback" element={<BillingCallback />} />
                   <Route path="/profile" element={
