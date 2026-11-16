@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import {
-  TrendingUp, AlertTriangle, CheckCircle2,
+  TrendingUp, AlertTriangle, BarChart2, CheckCircle2,
   ExternalLink, RefreshCw, Mail, Bell, ChevronRight,
   ArrowRight, ArrowLeft, Newspaper, Zap, Shield, Star, X
 } from 'lucide-react';
