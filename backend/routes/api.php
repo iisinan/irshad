@@ -12,6 +12,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\DirectoryController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\HistoryController;
+use App\Http\Controllers\InstitutionController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PasswordResetController;
@@ -30,6 +31,7 @@ use App\Http\Controllers\VerificationController;
 use App\Http\Controllers\WatchlistController;
 use App\Http\Controllers\ZakatController;
 use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\InstitutionMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
@@ -150,21 +152,23 @@ Route::prefix('v1')->group(function () {
     Route::get('/baskets/{basket}', [BasketController::class, 'show']);
     Route::get('/plans', [\App\Http\Controllers\SubscriptionController::class, 'plans']);
 
-    Route::middleware('auth:sanctum')->group(function () {
-        // Protected Stocks
+    // Public Stock Browsing & Guest Screening (auth optional; quota enforced when authenticated)
+    Route::middleware('throttle:60,1')->group(function () {
         Route::get('/stocks', [StockController::class, 'index']);
         Route::get('/stocks/compliance-changes', [StockController::class, 'complianceChanges']);
         Route::get('/stocks/search', [StockController::class, 'search']);
         Route::get('/stocks/ngx', [StockController::class, 'ngx']);
+        Route::get('/stocks/{symbol}/aaoifi-screening', [StockController::class, 'aaoifiScreening']);
+        Route::get('/stocks/{symbol}', [StockController::class, 'show'])->where('symbol', '^(?!baskets$).*');
+    });
 
-        // Strict rate limit on proprietary data to prevent authenticated scraping
+    Route::middleware('auth:sanctum')->group(function () {
+        // Strict rate limit on AI stock analysis & chat
         Route::middleware('throttle:60,1')->group(function () {
             Route::get('/stocks/{symbol}/analysis', [StockController::class, 'getAiAnalysis']);
-            Route::get('/stocks/{symbol}/aaoifi-screening', [StockController::class, 'aaoifiScreening']);
         });
 
         Route::post('/stocks/{symbol}/chat', [StockController::class, 'chatAboutStock']);
-        Route::get('/stocks/{symbol}', [StockController::class, 'show'])->where('symbol', '^(?!baskets$).*');
     });
 
     // ── Public Overview / Landing Page ──
@@ -172,6 +176,12 @@ Route::prefix('v1')->group(function () {
     Route::get('/public/recent-screenings', [PublicOverviewController::class, 'recentScreenings']);
     Route::get('/public/latest-reports', [PublicOverviewController::class, 'latestReports']);
     Route::get('/public/business-news', [PublicOverviewController::class, 'businessNews']);
+
+    // ── Institutional Presentation Demo (Public-safe market & factsheet presets) ──
+    Route::middleware('throttle:30,1')->group(function () {
+        Route::get('/institution/demo-presets', [InstitutionController::class, 'demoPresets']);
+        Route::post('/institution/demo-screen', [InstitutionController::class, 'screenPortfolio']);
+    });
 
     // One-click email link routes — no login required, UUID is the security token
     Route::get('/admin/compliance-reviews/{id}/approve-link', [AdminComplianceController::class, 'approveViaLink']);
@@ -412,6 +422,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
             // Zakat Settings Management
             Route::put('/admin/settings', [SettingsController::class, 'update']);
+        });
+
+        // ── Institutional Portal Routes (institution & admin roles) ─────────
+        Route::middleware(InstitutionMiddleware::class)->group(function () {
+            Route::post('/institution/screen-portfolio', [InstitutionController::class, 'screenPortfolio']);
+            Route::get('/institution/portfolios', [InstitutionController::class, 'portfolios']);
+            Route::post('/institution/portfolios', [InstitutionController::class, 'savePortfolio']);
+            Route::delete('/institution/portfolios/{id}', [InstitutionController::class, 'deletePortfolio']);
         });
     });
 });

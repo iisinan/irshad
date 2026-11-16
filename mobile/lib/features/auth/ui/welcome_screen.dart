@@ -198,6 +198,26 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                     ),
                   ),
                 ),
+                const SizedBox(height: 12),
+
+                // Continue as Guest (App Store 5.1.1(v) compliance)
+                _FadeSlide(
+                  controller: _controller,
+                  delay: 0.85,
+                  child: Center(
+                    child: TextButton(
+                      onPressed: () => Navigator.pushReplacementNamed(context, '/main'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: context.primary,
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      ),
+                      child: const Text(
+                        'Continue as Guest',
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                  ),
+                ),
 
                 const SizedBox(height: 32),
 

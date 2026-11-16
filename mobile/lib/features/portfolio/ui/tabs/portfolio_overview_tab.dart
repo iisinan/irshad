@@ -7,6 +7,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/api/api_service.dart';
 import '../../../../core/widgets/company_avatar.dart';
+import '../../../../core/widgets/guest_gate.dart';
 import '../../providers/portfolio_provider.dart';
 import '../../../stocks/providers/stock_provider.dart';
 import '../../../../core/providers/app_state_provider.dart';
@@ -1480,6 +1481,14 @@ class _PortfolioOverviewTabState extends State<PortfolioOverviewTab> with Automa
   }
 
   void _showAddHoldingSheet(BuildContext context) {
+    if (GuestGate.isGuest(context)) {
+      GuestGate.showAuthPrompt(
+        context,
+        title: 'Create a Free Account',
+        message: 'Create a free account or sign in to add holdings and track your halal portfolio.',
+      );
+      return;
+    }
     final appState = Provider.of<AppStateProvider>(context, listen: false);
     final portfolioProvider = Provider.of<PortfolioProvider>(context, listen: false);
     final tierSlug = appState.userProfile?['tier']?['slug'];

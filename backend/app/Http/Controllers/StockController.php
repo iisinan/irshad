@@ -96,7 +96,7 @@ class StockController extends Controller
             ->select(['id', 'symbol', 'asset_class'])
             ->firstOrFail();
 
-        $user = $request->user();
+        $user = $request->user('sanctum');
         $isMutualFund = $companyMeta->asset_class === 'mutual_fund';
 
         if ($user && !$isMutualFund && !\App\Services\SubscriptionService::canScreenStock($user, $symbol)) {
@@ -507,7 +507,7 @@ class StockController extends Controller
      */
     public function getAiAnalysis(Request $request, string $symbol, PerplexityAiService $aiService): JsonResponse
     {
-        $user = $request->user();
+        $user = $request->user('sanctum');
         if ($user && !\App\Services\SubscriptionService::canScreenStock($user, $symbol)) {
             return response()->json(\App\Services\SubscriptionService::stockScreenLimitPayload($user, 'adjective'), 403);
         }
@@ -539,7 +539,7 @@ class StockController extends Controller
      */
     public function chatAboutStock(Request $request, string $symbol, PerplexityAiService $aiService): JsonResponse
     {
-        $user = $request->user();
+        $user = $request->user('sanctum');
         if ($user && !\App\Services\SubscriptionService::canScreenStock($user, $symbol)) {
             return response()->json(\App\Services\SubscriptionService::stockScreenLimitPayload($user, 'adjective'), 403);
         }
@@ -565,7 +565,7 @@ class StockController extends Controller
      */
     public function aaoifiScreening(Request $request, string $symbol): JsonResponse
     {
-        $user = $request->user();
+        $user = $request->user('sanctum');
         if ($user && !\App\Services\SubscriptionService::canScreenStock($user, $symbol)) {
             return response()->json(\App\Services\SubscriptionService::stockScreenLimitPayload($user), 403);
         }

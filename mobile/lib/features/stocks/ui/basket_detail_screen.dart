@@ -9,6 +9,7 @@ import 'package:irshad_mobile/core/theme/app_theme.dart';
 import '../../baskets/providers/basket_provider.dart';
 import '../../portfolio/providers/portfolio_provider.dart';
 import '../../../core/widgets/company_avatar.dart';
+import '../../../core/widgets/guest_gate.dart';
 
 class BasketDetailScreen extends StatefulWidget {
   final dynamic basket;
@@ -592,6 +593,14 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
   }
 
   void _showInvestSheet(BuildContext context) {
+    if (GuestGate.isGuest(context)) {
+      GuestGate.showAuthPrompt(
+        context,
+        title: 'Create a Free Account',
+        message: 'Create a free account or sign in to invest in or track baskets.',
+      );
+      return;
+    }
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

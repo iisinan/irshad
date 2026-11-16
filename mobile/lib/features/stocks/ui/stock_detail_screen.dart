@@ -20,6 +20,7 @@ import '../../../core/api/api_service.dart';
 import '../../../core/widgets/upgrade_paywall_bottom_sheet.dart';
 import '../../../core/widgets/stock_screen_counter_badge.dart';
 import '../../../core/widgets/company_avatar.dart';
+import '../../../core/widgets/guest_gate.dart';
 import '../../profile/ui/widgets/add_assets_bottom_sheet.dart';
 import '../../portfolio/ui/tabs/portfolio_overview_tab.dart';
 import '../../portfolio/providers/portfolio_provider.dart';
@@ -31,7 +32,22 @@ class StockDetailScreen extends StatefulWidget {
 
   static Future<void> openWithLoading(BuildContext context, Map<String, dynamic> initialStock) async {
     final repository = StockRepository();
-    final symbol = initialStock['symbol'];
+    final symbol = (initialStock['symbol'] ?? '').toString();
+    final isGuest = GuestGate.isGuest(context);
+
+    if (isGuest && symbol.isNotEmpty) {
+      final allowed = await GuestGate.canScreenStock(symbol);
+      if (!allowed) {
+        if (context.mounted) {
+          await GuestGate.showAuthPrompt(
+            context,
+            title: 'Free Guest Preview Used',
+            message: 'Guest mode includes 1 free stock screening. Create a free account or sign in to screen more NGX stocks.',
+          );
+        }
+        return;
+      }
+    }
     
     // Show spinner and wait for network
     showDialog(
@@ -59,6 +75,10 @@ class StockDetailScreen extends StatefulWidget {
       }
 
       if (context.mounted) Navigator.pop(context);
+
+      if (isGuest && symbol.isNotEmpty) {
+        await GuestGate.recordGuestScreen(symbol);
+      }
 
       if (context.mounted) {
         Navigator.pushNamed(context, '/stock_details', arguments: {
@@ -377,6 +397,7 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
   }
 
   void _checkIfFavorited() async {
+    if (GuestGate.isGuest(context)) return;
     final watchlist = await _activityRepository.getWatchlist();
     if (mounted) {
       final isAlerted = watchlist.any((w) => w['symbol'] == _currentStock['symbol']);
@@ -392,6 +413,15 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
   void _onFavorite() async {
     // Press animation
     _alertScaleController.forward().then((_) => _alertScaleController.reverse());
+
+    if (GuestGate.isGuest(context)) {
+      await GuestGate.showAuthPrompt(
+        context,
+        title: 'Create a Free Account',
+        message: 'Create a free account or sign in to add stocks to your watchlist and set price alerts.',
+      );
+      return;
+    }
 
     final tier = Provider.of<AppStateProvider>(context, listen: false).userProfile?['tier'];
     final tierSlug = tier?['slug'] ?? 'free';
@@ -3222,7 +3252,17 @@ class _StockDetailScreenState extends State<StockDetailScreen> with TickerProvid
         ),
       ),
       child: ElevatedButton(
-        onPressed: () => AiAnalysisSheet.show(context, _currentStock['symbol']),
+        onPressed: () {
+          if (GuestGate.isGuest(context)) {
+            GuestGate.showAuthPrompt(
+              context,
+              title: 'Create a Free Account',
+              message: 'Create a free account or sign in to run AI Shariah analysis.',
+            );
+            return;
+          }
+          AiAnalysisSheet.show(context, _currentStock['symbol']);
+        },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           foregroundColor: Colors.blue,

@@ -355,6 +355,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   Future<void> _fetchUnreadAlerts() async {
+    final isAuth = Provider.of<AppStateProvider>(context, listen: false).isAuthenticated;
+    if (!isAuth) return;
     try {
       final response = await ApiService().get('notifications/unread-count');
       if (response.statusCode == 200 && mounted) {
@@ -385,6 +387,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         if (mounted) {
           Provider.of<AppStateProvider>(context, listen: false).setAuthenticated(true);
         }
+      } else if (mounted) {
+        // Guests land directly on Explore (Market Screener) to browse stocks
+        setState(() => _selectedIndex = 1);
       }
     } catch (e) {
       debugPrint('FlutterSecureStorage read failed in main nav: $e');

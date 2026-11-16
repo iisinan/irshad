@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/api/api_service.dart';
+import '../../../core/widgets/guest_gate.dart';
 import 'tabs/update_tab.dart';
 import 'tabs/portfolio_overview_tab.dart';
 import 'tabs/purification_tab.dart';
@@ -24,6 +25,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> with WidgetsBindingOb
   int _currentIndex = 0;
   int _unreadInbox = 0;
   Future<void> _fetchUnreadCounts() async {
+    if (!mounted || GuestGate.isGuest(context)) return;
     try {
       final response = await ApiService().get('notifications/unread-count');
       if (response.statusCode == 200) {
@@ -79,7 +81,17 @@ class _PortfolioScreenState extends State<PortfolioScreen> with WidgetsBindingOb
             IconButton(
               tooltip: 'Ask Irshad AI',
               icon: Icon(Icons.auto_awesome_rounded, color: context.primary),
-              onPressed: () => ChatAssistantSheet.show(context),
+              onPressed: () {
+                if (GuestGate.isGuest(context)) {
+                  GuestGate.showAuthPrompt(
+                    context,
+                    title: 'Create a Free Account',
+                    message: 'Create a free account or sign in to chat with Irshad AI.',
+                  );
+                  return;
+                }
+                ChatAssistantSheet.show(context);
+              },
             ),
             Padding(
               padding: const EdgeInsets.only(right: 8.0),
