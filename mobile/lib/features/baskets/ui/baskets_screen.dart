@@ -417,7 +417,7 @@ class _BasketsScreenState extends State<BasketsScreen> {
                 border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.25)),
               ),
               child: const Text(
-                'COMING SOON',
+                'WAITLIST OPEN',
                 style: TextStyle(color: Color(0xFFD97706), fontWeight: FontWeight.w900, fontSize: 9, letterSpacing: 0.4),
               ),
             ),
@@ -491,7 +491,7 @@ class _BasketsScreenState extends State<BasketsScreen> {
                             Icon(Icons.auto_awesome_rounded, size: 12, color: context.primary),
                             const SizedBox(width: 5),
                             Text(
-                              'IRSHAD EXCLUSIVE • COMING SOON',
+                              'IRSHAD EXCLUSIVE • WAITLIST',
                               style: TextStyle(color: context.primary, fontWeight: FontWeight.w900, fontSize: 9.5, letterSpacing: 0.5),
                             ),
                           ],
@@ -517,7 +517,7 @@ class _BasketsScreenState extends State<BasketsScreen> {
                         children: [
                           _buildPreviewChip(context, Icons.verified_rounded, '100% AAOIFI Certified', const Color(0xFF10B981)),
                           _buildPreviewChip(context, Icons.autorenew_rounded, 'Auto-Rebalanced', const Color(0xFF06B6D4)),
-                          _buildPreviewChip(context, Icons.workspace_premium_rounded, 'Noor & Rawdha Access', const Color(0xFFF59E0B)),
+                          _buildPreviewChip(context, Icons.workspace_premium_rounded, 'Curated Thematic Index', const Color(0xFFF59E0B)),
                         ],
                       ),
                       const SizedBox(height: 16),

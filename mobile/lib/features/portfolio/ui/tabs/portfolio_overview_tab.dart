@@ -1854,7 +1854,7 @@ class _AddHoldingBottomSheetState extends State<AddHoldingBottomSheet> with Sing
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
     _addNewHoldingForm();
     // Pre-fill symbol if provided
     if (widget.preSelectedSymbol != null && _holdings.isNotEmpty) {
@@ -2295,7 +2295,6 @@ class _AddHoldingBottomSheetState extends State<AddHoldingBottomSheet> with Sing
             tabs: const [
               Tab(text: 'Manual Entry'),
               Tab(icon: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.description_outlined, size: 16), SizedBox(width: 4), Text('Import Statement')])),
-              Tab(icon: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.lock_outline, size: 16), SizedBox(width: 4), Text('Link Broker')])),
             ],
           ),
           Expanded(
@@ -2304,7 +2303,6 @@ class _AddHoldingBottomSheetState extends State<AddHoldingBottomSheet> with Sing
               children: [
                 _buildManualEntryTab(),
                 _buildImportTab(),
-                _buildBrokerTab(),
               ],
             ),
           ),

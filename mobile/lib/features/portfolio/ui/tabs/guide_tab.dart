@@ -557,7 +557,7 @@ class _GuideTabState extends State<GuideTab> {
               Icon(Icons.warning_rounded, color: context.questionable, size: 18),
               const SizedBox(width: 12),
               Expanded(
-                child: Text('Video tutorials are coming soon. Written guides are available now.', style: TextStyle(fontSize: 13, color: context.textMuted)),
+                child: Text('Explore our step-by-step written guides below to help you navigate Irshad.', style: TextStyle(fontSize: 13, color: context.textMuted)),
               ),
             ],
           ),
