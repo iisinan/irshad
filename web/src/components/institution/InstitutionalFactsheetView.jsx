@@ -271,7 +271,7 @@ export default function InstitutionalFactsheetView({
         commentary: lotus.index_commentary,
         investor_profile: lotus.investor_profile,
         benefits: lotus.benefits,
-        contact: lotus.contact,
+        contact: 'Irshad Institutional Desk · iirshad.com',
         disclaimer: lotus.disclaimer,
         shariah_board: lotus.parties?.shariah_board,
         approved_by: 'Lotus Investment & Shariah Committee',
@@ -310,8 +310,8 @@ export default function InstitutionalFactsheetView({
         commentary: 'Blended 40% screened NGX equity sleeve with 60% FGN Sukuk, Corporate Sukuk, Mudarabah, and Murabaha placements. Equity purification applies solely to the 40% equity sleeve.',
         investor_profile: 'Built for institutions, endowments, and retail ethical investors seeking both equity upside and regular quarterly non-interest distributions.',
         benefits: ['60% certified Sukuk & Mudarabah income floor', '40% live AAOIFI-screened NGX equity growth', 'Quarterly cash distributions', 'Daily liquidity within 3 business days'],
-        contact: 'Buy through the fund manager platform or authorised distributor · iirshad.com',
-        disclaimer: 'Figures blend the 3 July 2026 screened NGX equity weights scaled to 40% with October 2026 Islamic fixed-income market context. Indicative simulation for institutional reporting.',
+        contact: 'Irshad Institutional Desk · iirshad.com',
+        disclaimer: 'Figures blend the 3 July 2026 screened NGX equity weights scaled to 40% with October 2026 Islamic fixed-income market context. Indicative simulation for institutional reporting via Irshad (iirshad.com).',
         shariah_board: balanced.parties?.shariah_board,
         approved_by: 'Irshad Institutional Compliance',
       };
@@ -356,7 +356,7 @@ export default function InstitutionalFactsheetView({
         commentary: norren.commentary,
         investor_profile: 'Suitable for institutional treasuries, Takaful operators, and investors seeking steady non-interest liquidity.',
         benefits: ['Capital preservation in Sukuk & Mudarabah contracts', 'Quarterly distribution payouts', 'SEC Nigeria & Shariah supervision', 'Benchmark outperformance (+99 bps YTD)'],
-        contact: norren.footer_note,
+        contact: 'Irshad Institutional Desk · iirshad.com',
         disclaimer: norren.disclaimer,
         shariah_board: 'Irshad Tech Ltd & Fund Shariah Panel',
         approved_by: 'Norrenberger Asset Management',
@@ -403,7 +403,7 @@ export default function InstitutionalFactsheetView({
         : 'All portfolio holdings satisfy AAOIFI qualitative business screens and quantitative debt, cash, and impermissible income thresholds.',
       investor_profile: 'Built for Pension Fund Administrators (PFAs), Islamic asset managers, trustees, and institutional brokerage compliance desks.',
       benefits: ['Live AAOIFI screening tied to NGX filings', 'Per-unit & total purification liability tracking', 'Indicative 2.5% zakat computation', 'Drift Watch alerts for threshold proximity'],
-      contact: `${institutionName || 'Irshad Institutional'} · Powered by Irshad Tech Ltd (iirshad.com)`,
+      contact: 'Irshad Institutional Desk · iirshad.com',
       disclaimer: 'Ratios, verdicts, and purification figures reflect live NGX corporate disclosures evaluated under AAOIFI Standard No. 21 via Irshad Tech Ltd.',
       shariah_board: 'Irshad Tech Ltd Automated AAOIFI Audit',
       approved_by: '',
@@ -1106,14 +1106,14 @@ export default function InstitutionalFactsheetView({
                 <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                   <div>
                     <div style={{ fontSize: '0.73rem', fontWeight: 800, letterSpacing: '0.6px', textTransform: 'uppercase', color: IRSHAD.forest, marginBottom: 8 }}>
-                      How to Invest &amp; Contact
+                      Investor Suitability
                     </div>
                     <p style={{ margin: 0, fontSize: '0.76rem', color: '#334155', lineHeight: 1.55 }}>
                       {meta.investor_profile}
                     </p>
                   </div>
                   <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px solid ${IRSHAD.border}`, fontSize: '0.74rem', fontWeight: 700, color: IRSHAD.teal }}>
-                    {meta.contact}
+                    Irshad Institutional Desk · iirshad.com
                   </div>
                 </div>
               </section>
@@ -1428,10 +1428,10 @@ export default function InstitutionalFactsheetView({
                 gap: 10,
               }}>
                 <div style={{ fontSize: '0.75rem', fontWeight: 800, color: IRSHAD.forest, textTransform: 'uppercase' }}>
-                  7. How to Invest, Published Documents &amp; Contacts
+                  7. Investor Suitability &amp; Published Documents
                 </div>
                 <div style={{ fontSize: '0.75rem', color: '#334155', lineHeight: 1.55 }}>
-                  {meta.investor_profile} <strong>Contact / Source:</strong> {meta.contact}
+                  {meta.investor_profile} <strong>Platform:</strong> Irshad Tech Ltd (iirshad.com)
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, fontSize: '0.71rem', color: IRSHAD.slate }}>
                   <span style={{ fontWeight: 700 }}>Official Reference Pack:</span>

@@ -85,7 +85,7 @@ export const LOTUS_FALLBACK_DATA = {
     { sector: 'Banking', weight_pct: 1.25, color: '#FECACA' },
   ],
   purification_history: [
-    { year: 2025, per_unit: 0.46, note: 'Published on Lotus Capital Purification Page' },
+    { year: 2025, per_unit: 0.46, note: 'Published FY2025 AAOIFI Purification Schedule' },
     { year: 2024, per_unit: 0.10, note: 'Annual Audited Fund Report' },
     { year: 2023, per_unit: 0.08, note: 'Annual Audited Fund Report' },
     { year: 2022, per_unit: 0.05, note: 'Annual Audited Fund Report' },
@@ -114,9 +114,9 @@ export const LOTUS_FALLBACK_DATA = {
     { metric: 'NGXLII', d7: '-4.73%', d30: '-16.10%', ytd: '66.79%' },
     { metric: 'NGXASI', d7: '-1.21%', d30: '-7.07%', ytd: '47.31%' },
   ],
-  contact: 'For more information, please contact us on +234 (908) 7058 407/408 and info@lotuscapitallimited.com, or visit www.lotuscapitallimited.com',
+  contact: 'Irshad Institutional Desk · iirshad.com',
   disclaimer:
-    'All financial investments involve an element of risk as such; the value of your investment in the Lotus Halal Equity ETF will vary from time to time in line with the value of the underlying assets. Past performance is no guarantee for future results. Current performance may be higher or lower than the data quoted here-in; information on the current value can be obtained at www.lotuscapitallimited.com OR www.ngxgroup.com',
+    'All financial investments involve an element of risk as such; the value of your investment will vary from time to time in line with the value of the underlying assets. Past performance is no guarantee for future results. Current performance may be higher or lower than the data quoted herein; screening figures are published via Irshad (iirshad.com).',
 };
 
 export const NORRENBERGER_FALLBACK_DATA = {
@@ -194,8 +194,8 @@ export const NORRENBERGER_FALLBACK_DATA = {
     { value: '4.43%', title: 'Real GDP Growth (Q2)', sub: 'Q2 2026 year-on-year, up from 3.89% in Q1 2026' },
   ],
   disclaimer:
-    'Whilst proper and reasonable care has been taken in preparation and accuracy of the facts and figures presented in this report, no responsibility or liability is accepted by Norrenberger Asset Management Limited or its employees for any error, omission or opinion expressed herein. This report is not an investment research or a research recommendation and should not be regarded as such.',
-  footer_note: 'Norrenberger Islamic Fund | Licensed and Regulated by the Securities and Exchange Commission (SEC) Nigeria',
+    'Whilst proper and reasonable care has been taken in preparation and accuracy of the facts and figures presented in this report, no responsibility or liability is accepted by Irshad Tech Ltd (iirshad.com) for any error, omission or opinion expressed herein. This report is not investment research or a financial recommendation and should not be regarded as such.',
+  footer_note: 'Irshad Institutional Compliance · iirshad.com',
 };
 
 export const BALANCED_FALLBACK_DATA = {

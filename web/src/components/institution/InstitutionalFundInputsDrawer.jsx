@@ -343,15 +343,9 @@ export default function InstitutionalFundInputsDrawer({
             <label style={LABEL_STYLE}>Auditor / Registrar</label>
             <input type="text" value={meta.parties?.auditor || ''} onChange={(e) => updateParty('auditor', e.target.value)} placeholder="External Fund Auditor" style={INPUT_STYLE} />
           </div>
-          <div style={{ gridColumn: '1 / -1', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14 }}>
-            <div style={FIELD_COL_STYLE}>
-              <label style={LABEL_STYLE}>Mandate Objective</label>
-              <textarea rows={3} value={meta.objective || ''} onChange={(e) => update('objective', e.target.value)} style={{ ...INPUT_STYLE, fontFamily: 'inherit', resize: 'vertical' }} />
-            </div>
-            <div style={FIELD_COL_STYLE}>
-              <label style={LABEL_STYLE}>How to Invest / Manager Contact</label>
-              <textarea rows={3} value={meta.contact || ''} onChange={(e) => update('contact', e.target.value)} style={{ ...INPUT_STYLE, fontFamily: 'inherit', resize: 'vertical' }} />
-            </div>
+          <div style={{ ...FIELD_COL_STYLE, gridColumn: '1 / -1' }}>
+            <label style={LABEL_STYLE}>Mandate Objective</label>
+            <textarea rows={3} value={meta.objective || ''} onChange={(e) => update('objective', e.target.value)} style={{ ...INPUT_STYLE, fontFamily: 'inherit', resize: 'vertical' }} />
           </div>
           <div style={FIELD_COL_STYLE}>
             <label style={LABEL_STYLE}>Prospectus URL</label>
