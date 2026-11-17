@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 import 'package:video_player/video_player.dart';
@@ -6,7 +8,6 @@ import 'package:irshad_mobile/core/theme/app_theme.dart';
 import 'package:irshad_mobile/core/api/api_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:hive/hive.dart';
-import 'dart:convert';
 
 class ResourcesTab extends StatefulWidget {
   const ResourcesTab({super.key});
@@ -312,8 +313,21 @@ class _ResourcesTabState extends State<ResourcesTab> {
     );
   }
 
+  String? _detectCardFormatLabel(String? url) {
+    if (url == null || url.isEmpty) return null;
+    final lower = url.toLowerCase();
+    if (lower.contains('youtube.com/shorts/')) return 'Shorts • 9:16';
+    if (lower.contains('instagram.com/reel')) return 'Instagram • 9:16';
+    if (lower.contains('instagram.com/p/')) return 'Instagram • 4:5';
+    if (lower.contains('tiktok.com/')) return 'Vertical • 9:16';
+    return null;
+  }
+
   Widget _buildResourceCard(BuildContext context, dynamic r) {
     final isVideo = r['type'] == 'video';
+    final urlStr = r['url']?.toString();
+    final cardFormatLabel = isVideo ? _detectCardFormatLabel(urlStr) : null;
+    final isVerticalSocial = cardFormatLabel != null;
     
     return GestureDetector(
       onTap: () {
@@ -336,11 +350,15 @@ class _ResourcesTabState extends State<ResourcesTab> {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    if (r['thumbnail'] != null)
-                      Image.network(r['thumbnail'], fit: BoxFit.cover,
+                    if (r['thumbnail'] != null) ...[
+                      if (isVerticalSocial)
+                        Container(color: const Color(0xFF090D16)),
+                      Image.network(
+                        r['thumbnail'],
+                        fit: isVerticalSocial ? BoxFit.contain : BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) => Container(color: const Color(0xFF0F172A)),
-                      )
-                    else
+                      ),
+                    ] else
                       Container(
                         decoration: const BoxDecoration(
                           gradient: LinearGradient(
@@ -352,7 +370,7 @@ class _ResourcesTabState extends State<ResourcesTab> {
                       ),
                     
                     // Dark overlay
-                    Container(color: Colors.black.withValues(alpha: 0.3)),
+                    Container(color: Colors.black.withValues(alpha: 0.28)),
                     
                     // Play Button Overlay
                     Center(
@@ -367,6 +385,22 @@ class _ResourcesTabState extends State<ResourcesTab> {
                         ),
                       ),
                     ),
+
+                    if (cardFormatLabel != null)
+                      Positioned(
+                        top: 8, left: 8,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.72),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            cardFormatLabel,
+                            style: const TextStyle(color: Colors.white, fontSize: 8.5, fontWeight: FontWeight.w800),
+                          ),
+                        ),
+                      ),
                     
                     // Duration Pill
                     if (r['duration'] != null)
@@ -491,7 +525,7 @@ class _ResourcesTabState extends State<ResourcesTab> {
       backgroundColor: Colors.transparent,
       builder: (context) {
         return Container(
-          height: MediaQuery.of(context).size.height * 0.85,
+          height: MediaQuery.of(context).size.height * 0.90,
           decoration: BoxDecoration(
             color: context.bg,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
@@ -618,12 +652,39 @@ class _VideoModalPlayerState extends State<_VideoModalPlayer> {
   String? _videoError;
   String? _resolvedUrl;
   String? _originalUrl;
+  double? _urlAspectHint;
+  bool _isSocialPageEmbed = false;
 
   String? _extractYoutubeId(String url) {
     final regExp = RegExp(
-      r'(?:https?:\/\/)?(?:www\.|m\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})',
+      r'(?:https?:\/\/)?(?:www\.|m\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|shorts\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})',
     );
     return regExp.firstMatch(url)?.group(1);
+  }
+
+  double? _detectUrlAspectHint(String url) {
+    final lower = url.toLowerCase();
+    if (lower.contains('youtube.com/shorts/') ||
+        lower.contains('instagram.com/reel') ||
+        lower.contains('tiktok.com/')) {
+      return 9 / 16;
+    }
+    if (lower.contains('instagram.com/p/')) {
+      return 4 / 5;
+    }
+    return null;
+  }
+
+  bool _isExternalSocialVideoUrl(String url) {
+    final lower = url.toLowerCase();
+    return lower.contains('instagram.com/') || lower.contains('tiktok.com/');
+  }
+
+  String _formatLabelForRatio(double ratio) {
+    if (ratio < 0.72) return 'Portrait • 9:16';
+    if (ratio < 0.90) return 'Instagram • 4:5';
+    if (ratio <= 1.12) return 'Square • 1:1';
+    return 'Widescreen • 16:9';
   }
 
   String? _extractCloudflareStreamId(String url) {
@@ -680,6 +741,13 @@ class _VideoModalPlayerState extends State<_VideoModalPlayer> {
 
     var normalizedUrl = _normalizeMediaUrl(rawUrl);
     _originalUrl = normalizedUrl;
+    _urlAspectHint = _detectUrlAspectHint(normalizedUrl);
+    _isSocialPageEmbed = _isExternalSocialVideoUrl(normalizedUrl);
+
+    if (_isSocialPageEmbed) {
+      _resolvedUrl = normalizedUrl;
+      return;
+    }
 
     final youtubeId = _extractYoutubeId(normalizedUrl);
     if (youtubeId != null) {
@@ -969,37 +1037,167 @@ class _VideoModalPlayerState extends State<_VideoModalPlayer> {
     );
   }
 
+  Widget _buildSocialExternalArea(BuildContext context) {
+    final isInstagram = (_originalUrl ?? '').toLowerCase().contains('instagram.com');
+    return Container(
+      color: const Color(0xFF0A0F1C),
+      padding: const EdgeInsets.all(24),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: context.primary.withValues(alpha: 0.18),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.smart_display_rounded, color: context.primary, size: 30),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              isInstagram ? 'Instagram Reel / Video' : 'Vertical Social Video',
+              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              'Tap below to watch this video in full vertical view.',
+              style: TextStyle(color: Colors.white70, fontSize: 12),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: _openExternally,
+              icon: const Icon(Icons.open_in_new_rounded, size: 16, color: Colors.white),
+              label: Text(
+                isInstagram ? 'Open in Instagram' : 'Open Video',
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: context.primary,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  double _computeAdaptivePlayerHeight({
+    required double availWidth,
+    required double availHeight,
+    required double aspectRatio,
+  }) {
+    final safeRatio = aspectRatio > 0 ? aspectRatio : 16 / 9;
+    final idealHeight = availWidth / safeRatio;
+
+    if (safeRatio < 0.90) {
+      // Portrait (Instagram 9:16 / 4:5 / Shorts): give tall hero viewport space
+      final maxPortraitH = math.max(240.0, availHeight * 0.72);
+      return idealHeight.clamp(240.0, maxPortraitH);
+    }
+    if (safeRatio <= 1.12) {
+      // Square (Instagram 1:1)
+      final maxSquareH = math.max(220.0, math.min(availWidth, availHeight * 0.62));
+      return idealHeight.clamp(220.0, maxSquareH);
+    }
+    // Landscape (16:9 widescreen)
+    final maxLandscapeH = math.max(190.0, availHeight * 0.52);
+    return idealHeight.clamp(190.0, maxLandscapeH);
+  }
+
   @override
   Widget build(BuildContext context) {
     final description = widget.r['description']?.toString().trim();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        SizedBox(
-          height: 240,
-          child: _youtubeController != null
-              ? YoutubePlayer(controller: _youtubeController!)
-              : _buildNativePlayerArea(),
-        ),
-        Expanded(
-          child: Container(
-            color: context.bg,
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Description', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: context.textDark)),
-                const SizedBox(height: 12),
-                Text(
-                  (description != null && description.isNotEmpty) ? description : 'This is an Educational Video',
-                  style: TextStyle(fontSize: 14, color: context.textMuted, height: 1.6),
-                ),
-              ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availW = constraints.maxWidth > 0 ? constraints.maxWidth : MediaQuery.of(context).size.width;
+        final availH = constraints.maxHeight > 0 ? constraints.maxHeight : MediaQuery.of(context).size.height * 0.75;
+
+        double activeRatio = _urlAspectHint ?? (16 / 9);
+        final controller = _videoController;
+        if (_isVideoInitialized && controller != null && controller.value.aspectRatio > 0) {
+          activeRatio = controller.value.aspectRatio;
+        }
+
+        final playerHeight = _isSocialPageEmbed
+            ? math.min(300.0, availH * 0.50)
+            : _computeAdaptivePlayerHeight(
+                availWidth: availW,
+                availHeight: availH,
+                aspectRatio: activeRatio,
+              );
+
+        final formatBadge = (_isVideoInitialized || _urlAspectHint != null || _youtubeController != null)
+            ? _formatLabelForRatio(activeRatio)
+            : null;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutCubic,
+              height: playerHeight,
+              color: Colors.black,
+              child: _isSocialPageEmbed
+                  ? _buildSocialExternalArea(context)
+                  : _youtubeController != null
+                      ? Center(
+                          child: AspectRatio(
+                            aspectRatio: activeRatio,
+                            child: YoutubePlayer(controller: _youtubeController!),
+                          ),
+                        )
+                      : _buildNativePlayerArea(),
             ),
-          ),
-        ),
-      ],
+            Expanded(
+              child: Container(
+                color: context.bg,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Description', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: context.textDark)),
+                          if (formatBadge != null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: context.bgAlt,
+                                borderRadius: BorderRadius.circular(999),
+                                border: Border.all(color: context.divider),
+                              ),
+                              child: Text(
+                                formatBadge,
+                                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: context.textMuted),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        (description != null && description.isNotEmpty)
+                            ? description
+                            : 'This is an educational video provided by our Islamic Finance partners. Please note that the content is for educational purposes and should not be taken as direct financial advice.',
+                        style: TextStyle(fontSize: 14, color: context.textMuted, height: 1.6),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
