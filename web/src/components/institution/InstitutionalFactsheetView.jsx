@@ -611,6 +611,7 @@ export default function InstitutionalFactsheetView({
           onChangeMeta={onChangeFactsheetMeta}
           holdings={holdings}
           summary={summary}
+          activePresetId={activePresetId}
           isNorrenberger={isNorrenberger}
           isBalanced={isBalanced}
           onSaveMandate={onSaveMandate}

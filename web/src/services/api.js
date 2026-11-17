@@ -667,4 +667,9 @@ export const runPreTradeGuardrailCheck = async (symbol, units = 1000) => {
   return response.data;
 };
 
+export const smartAutofillInstitutionFactsheet = async (payload) => {
+  const response = await api.post('/institution/smart-autofill', payload);
+  return response.data;
+};
+
 

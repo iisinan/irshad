@@ -430,6 +430,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::middleware(InstitutionMiddleware::class)->group(function () {
             Route::get('/institution/workspace', [InstitutionController::class, 'workspace']);
             Route::post('/institution/screen-portfolio', [InstitutionController::class, 'screenPortfolio']);
+            Route::post('/institution/smart-autofill', [InstitutionController::class, 'smartAutofill']);
             Route::get('/institution/portfolios', [InstitutionController::class, 'portfolios']);
             Route::post('/institution/portfolios', [InstitutionController::class, 'savePortfolio']);
             Route::delete('/institution/portfolios/{id}', [InstitutionController::class, 'deletePortfolio']);

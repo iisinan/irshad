@@ -583,5 +583,27 @@ class InstitutionPortalTest extends TestCase
             ->assertJsonPath('data.detected_format', 'text')
             ->assertJsonPath('data.summary.holdings_count', 2)
             ->assertJsonPath('data.summary.non_compliant_count', 1);
+
+        // 5. Smart Auto-Fill Factsheet Metadata
+        $this->actingAs($instUser, 'sanctum')
+            ->postJson('/api/v1/institution/smart-autofill', [
+                'fund_name' => 'Chapel Hill Halal Growth',
+                'holdings' => [
+                    ['symbol' => 'DANGCEM', 'shares' => 10000],
+                    ['symbol' => 'ZENITHBANK', 'shares' => 25000],
+                ],
+                'nav_per_unit' => 100.00,
+            ])
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    'autofill' => [
+                        'ticker', 'factsheet_date', 'fund_size_ngn', 'units_in_issue',
+                        'benchmark', 'risk_level', 'volatility_3y_pct', 'objective',
+                        'commentary', 'investor_profile', 'purification_per_unit_input', 'zakat_per_unit_input',
+                    ],
+                    'filled_fields',
+                ],
+            ]);
     }
 }

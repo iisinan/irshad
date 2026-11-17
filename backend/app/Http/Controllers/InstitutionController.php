@@ -9,6 +9,9 @@ use App\Traits\ApiResponder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class InstitutionController extends Controller
 {
@@ -1008,5 +1011,245 @@ class InstitutionController extends Controller
         fclose($handle);
 
         return $rows;
+    }
+
+    /**
+     * Smart Auto-Fill engine for Factsheet & One-Page Summary setup.
+     * Derives quantitative KPIs, reconciles fee lines & units, classifies SEC risk 1-7,
+     * extracts Drift/Non-Compliance audit logs, and synthesizes executive commentary (with Gemini enhancement when available).
+     */
+    public function smartAutofill(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'fund_name' => 'nullable|string|max:180',
+            'institution_name' => 'nullable|string|max:180',
+            'mandate_type' => 'nullable|string|max:80',
+            'preset_id' => 'nullable|string|max:64',
+            'ticker' => 'nullable|string|max:40',
+            'nav_per_unit' => 'nullable|numeric|min:0',
+            'expense_ratio_pct' => 'nullable|numeric|min:0|max:20',
+            'fee_lines' => 'nullable|array',
+            'holdings' => 'nullable|array|max:250',
+            'holdings.*.symbol' => 'required_with:holdings|string|max:64',
+            'holdings.*.shares' => 'required_with:holdings|numeric|min:0',
+        ]);
+
+        $user = $request->user();
+        $institutionName = trim((string) ($validated['institution_name'] ?? $user->institution_name ?? $user->name ?? 'Irshad Institutional'));
+        $fundName = trim((string) ($validated['fund_name'] ?? 'Institutional Shariah Mandate'));
+        $presetId = (string) ($validated['preset_id'] ?? '');
+        $mandateType = (string) ($validated['mandate_type'] ?? '');
+
+        $isFixed = $presetId === 'norrenberger_fund' || stripos($mandateType, 'fixed income') !== false;
+        $isBalanced = $presetId === 'balanced_fund' || stripos($mandateType, 'balanced') !== false;
+
+        $holdingsInput = $validated['holdings'] ?? [];
+        $evaluated = ! empty($holdingsInput) ? $this->evaluateHoldingsArray($holdingsInput) : null;
+        $summary = $evaluated['summary'] ?? [];
+        $smartBrief = $evaluated['smart_brief'] ?? [];
+        $evaluatedHoldings = $evaluated['holdings'] ?? [];
+
+        // 1. Fund Size & Units Derivation
+        $fundSize = (float) ($summary['total_aum'] ?? 0);
+        if ($fundSize <= 0 && ($isFixed || $isBalanced)) {
+            $fundSize = 6810000000.0;
+        }
+        $nav = (float) ($validated['nav_per_unit'] ?? 0);
+        if ($nav <= 0 && ($isFixed || $isBalanced)) {
+            $nav = 108.27;
+        }
+        $derivedUnits = ($fundSize > 0 && $nav > 0) ? (int) round($fundSize / $nav) : null;
+
+        // 2. Smart Ticker Generation if placeholder or blank
+        $rawTicker = strtoupper(trim((string) ($validated['ticker'] ?? '')));
+        $ticker = ($rawTicker === '' || $rawTicker === 'IRSHAD-MANDATE')
+            ? $this->generateSmartTicker($fundName, $institutionName)
+            : $rawTicker;
+
+        // 3. SEC Risk Rating & 3Y Volatility Estimate
+        if ($isFixed) {
+            $riskLevel = 2;
+            $riskLabel = 'Conservative, 2 of 7';
+            $volatility = 3.4;
+            $holdingPeriod = 'Minimum 90-180 days';
+            $benchmark = '3-year FGN Sukuk (Moving Average)';
+        } elseif ($isBalanced) {
+            $riskLevel = 4;
+            $riskLabel = 'Moderate, 4 of 7';
+            $volatility = 11.8;
+            $holdingPeriod = 'Three years or more';
+            $benchmark = 'Blended (40% NGXLII / 60% FGN Sukuk)';
+        } else {
+            $riskLevel = (int) ($smartBrief['risk_classification']['level'] ?? 4);
+            $riskLabel = (string) ($smartBrief['risk_classification']['label'] ?? "Balanced Growth, {$riskLevel} of 7");
+            $top5 = (float) ($summary['top_5_concentration_pct'] ?? 60.0);
+            $volatility = round(min(32.0, max(12.5, 11.0 + ($top5 * 0.18))), 1);
+            $holdingPeriod = $riskLevel >= 5 ? 'Five years or more' : 'Three years or more';
+            $benchmark = 'NGX Lotus Islamic Index (NGXLII)';
+        }
+
+        // 4. Fee Line Reconciliation to TER
+        $feeLines = $validated['fee_lines'] ?? [];
+        if (empty($feeLines)) {
+            $feeLines = $isFixed
+                ? [['label' => 'Management Fee', 'pct' => 1.50], ['label' => 'Custody, Trustee & Audit', 'pct' => 0.40]]
+                : [['label' => 'Management Fee', 'pct' => 0.55], ['label' => 'Custody & Shariah Advisory', 'pct' => 0.20]];
+        }
+        $sumFees = round(array_sum(array_map(fn ($f) => (float) ($f['pct'] ?? 0), $feeLines)), 2);
+        $expenseRatio = $sumFees > 0 ? $sumFees : (float) ($validated['expense_ratio_pct'] ?? 0.75);
+        $managementFeeStr = number_format((float) ($feeLines[0]['pct'] ?? $expenseRatio), 2) . '%';
+
+        // 5. Purification & Zakat Defaults from Live Screening
+        $purifPerUnit = isset($summary['weighted_purification_per_unit'])
+            ? (float) $summary['weighted_purification_per_unit']
+            : ($isFixed ? 0.00 : ($isBalanced ? 0.18 : 0.00));
+        $zakatPerUnit = isset($summary['indicative_zakat_per_unit']) && (float) $summary['indicative_zakat_per_unit'] > 0
+            ? (float) $summary['indicative_zakat_per_unit']
+            : ($nav > 0 ? round($nav * 0.025, 2) : 0.00);
+
+        // 6. Auto-Detect Audit / Drift Log Events from Flagged or Watched Constituents
+        $autoEvents = [];
+        foreach ($evaluatedHoldings as $h) {
+            if (($h['status'] ?? '') !== 'halal') {
+                $autoEvents[] = [
+                    'date' => now()->toDateString(),
+                    'symbol' => $h['symbol'],
+                    'action' => 'Flagged Non-Compliant',
+                    'detail' => "Failed AAOIFI screen ({$h['impure_ratio']}% impure revenue). Remediation swap recommended.",
+                ];
+            } elseif (! empty($h['is_near_threshold'])) {
+                $autoEvents[] = [
+                    'date' => now()->toDateString(),
+                    'symbol' => $h['symbol'],
+                    'action' => 'Drift Watch',
+                    'detail' => "Approaching AAOIFI ratio cap (Debt: {$h['debt_ratio']}%, Cash: {$h['cash_ratio']}%, Impure: {$h['impure_ratio']}%).",
+                ];
+            }
+        }
+
+        // 7. Narrative Drafting (Deterministic + Optional Gemini AI Enrichment)
+        $objective = $isFixed
+            ? "Preserve institutional liquidity and generate non-interest returns through certified FGN/Corporate Sukuk, Mudarabah, and Murabaha placements overseen under SEC & AAOIFI standards."
+            : ($isBalanced
+                ? "Deliver balanced capital appreciation and quarterly income by pairing 40% AAOIFI-screened NGX halal equities with 60% certified Sukuk and non-interest money market instruments."
+                : "Achieve competitive long-term capital growth strictly within AAOIFI Standard No. 21 boundaries (<30% debt, <30% interest-bearing cash, <5% non-permissible income) with automated dividend purification.");
+
+        $commentary = $smartBrief['suggested_commentary']
+            ?? "Portfolio allocations remain monitored against {$benchmark} with continuous AAOIFI compliance oversight and quarterly distribution governance.";
+
+        $investorProfile = $riskLevel >= 5
+            ? "Suitable for Pension Fund Administrators (PFAs), Islamic asset managers, endowments, and growth-focused institutional mandates with a {$holdingPeriod} horizon."
+            : "Built for institutional treasuries, Takaful operators, corporate cash desks, and capital-preservation mandates seeking SEC-regulated Shariah returns.";
+
+        $aiEnhanced = false;
+        if (! empty($evaluatedHoldings) && ! empty(config('services.gemini.key'))) {
+            $aiCopy = $this->draftCopyWithGemini($fundName, $institutionName, $summary, $evaluatedHoldings);
+            if (! empty($aiCopy)) {
+                $objective = $aiCopy['objective'] ?? $objective;
+                $commentary = $aiCopy['commentary'] ?? $commentary;
+                $investorProfile = $aiCopy['investor_profile'] ?? $investorProfile;
+                $aiEnhanced = true;
+            }
+        }
+
+        $filledFields = [
+            'Ticker & Cut-Off Date',
+            'Benchmark Index',
+            'SEC Risk Rating & 3Y Volatility',
+            'TER Fee Reconciliation',
+            'Mandate Objective & Suitability',
+            'Manager & Shariah Commentary',
+        ];
+        if (! empty($evaluatedHoldings)) {
+            $filledFields[] = 'Fund Size, Purification & Zakat';
+        }
+        if (! empty($autoEvents)) {
+            $filledFields[] = count($autoEvents) . ' Audit Event(s)';
+        }
+
+        return $this->success([
+            'autofill' => [
+                'ticker' => $ticker,
+                'factsheet_date' => now()->format('jS F, Y'),
+                'fund_size_ngn' => $fundSize > 0 ? round($fundSize, 2) : null,
+                'nav_per_unit' => $nav > 0 ? $nav : null,
+                'units_in_issue' => $derivedUnits,
+                'benchmark' => $benchmark,
+                'risk_level' => $riskLevel,
+                'risk_label' => $riskLabel,
+                'volatility_3y_pct' => $volatility,
+                'holding_period' => $holdingPeriod,
+                'rebalancing_frequency' => $isFixed ? 'Monthly' : 'Quarterly / Continuous Watch',
+                'fee_lines' => $feeLines,
+                'expense_ratio_pct' => $expenseRatio,
+                'management_fee' => $managementFeeStr,
+                'purification_per_unit_input' => round($purifPerUnit, 4),
+                'zakat_per_unit_input' => round($zakatPerUnit, 2),
+                'shariah_board' => 'Irshad Tech Ltd (AAOIFI Standard No. 21 Certified Screening)',
+                'objective' => $objective,
+                'commentary' => $commentary,
+                'investor_profile' => $investorProfile,
+                'suggested_events' => array_slice($autoEvents, 0, 10),
+            ],
+            'filled_fields' => $filledFields,
+            'ai_enhanced' => $aiEnhanced,
+        ], 'Smart Auto-Fill completed.');
+    }
+
+    protected function generateSmartTicker(string $fundName, string $institutionName): string
+    {
+        $words = preg_split('/[^A-Za-z0-9]+/', trim($fundName . ' ' . $institutionName), -1, PREG_SPLIT_NO_EMPTY);
+        $skip = ['LIMITED', 'LTD', 'PLC', 'THE', 'AND', 'OF', 'FUND', 'MANDATE', 'INSTITUTIONAL'];
+        $letters = '';
+        foreach ($words as $w) {
+            $u = strtoupper($w);
+            if (in_array($u, $skip, true)) {
+                continue;
+            }
+            $letters .= substr($u, 0, 2);
+            if (strlen($letters) >= 8) {
+                break;
+            }
+        }
+        return substr($letters ?: 'IRSHFUND', 0, 10);
+    }
+
+    protected function draftCopyWithGemini(string $fundName, string $institutionName, array $summary, array $holdings): ?array
+    {
+        try {
+            $apiKeys = array_map('trim', explode(',', (string) config('services.gemini.key')));
+            $idx = Cache::get('gemini_key_index', 0);
+            $apiKey = $apiKeys[$idx] ?? ($apiKeys[0] ?? '');
+            if ($apiKey === '') {
+                return null;
+            }
+
+            $top5 = array_map(fn ($h) => "{$h['symbol']} ({$h['weight_pct']}%, {$h['status']})", array_slice($holdings, 0, 5));
+            $prompt = "You are writing institutional factsheet copy for {$institutionName}'s '{$fundName}' in Nigeria (NGX equities). Use ONLY these verified metrics: Holdings=" . ($summary['holdings_count'] ?? count($holdings))
+                . ', Compliant%=' . ($summary['compliant_pct'] ?? 100)
+                . ', Top5Concentration%=' . ($summary['top_5_concentration_pct'] ?? 0)
+                . ', TotalPurificationNGN=' . ($summary['total_purification_due'] ?? 0)
+                . ', TopHoldings=[' . implode('; ', $top5) . ']. '
+                . 'Return strict JSON with keys "objective" (max 35 words), "commentary" (max 45 words referencing exact numbers), and "investor_profile" (max 30 words).';
+
+            $response = Http::timeout(8)->post(
+                "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={$apiKey}",
+                [
+                    'contents' => [['parts' => [['text' => $prompt]]]],
+                    'generationConfig' => ['temperature' => 0.2, 'responseMimeType' => 'application/json'],
+                ]
+            );
+
+            if ($response->successful()) {
+                $raw = trim(str_replace(['```json', '```'], '', (string) $response->json('candidates.0.content.parts.0.text')));
+                $decoded = json_decode($raw, true);
+                if (is_array($decoded) && ! empty($decoded['commentary'])) {
+                    return $decoded;
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::warning('[InstitutionController::draftCopyWithGemini] Fallback to deterministic copy: ' . $e->getMessage());
+        }
+        return null;
     }
 }
