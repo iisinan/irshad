@@ -402,11 +402,29 @@ export default function InstitutionalDashboard({ demoMode = false }) {
     }
   };
 
+  const appendRemediationEvent = (entry) => {
+    setFactsheetMeta((prev) => {
+      const existing = Array.isArray(prev?.non_compliance_events) ? prev.non_compliance_events : [];
+      return {
+        ...(prev || {}),
+        non_compliance_events: [
+          { date: new Date().toISOString().slice(0, 10), ...entry },
+          ...existing,
+        ].slice(0, 20),
+      };
+    });
+  };
+
   const handleRemoveHolding = async (symbol) => {
     const nextHoldings = (activeScreened?.holdings || [])
       .filter((h) => h.symbol !== symbol)
       .map((h) => ({ symbol: h.symbol, shares: h.shares, avg_price: h.current_price }));
     await reevaluateHoldings(nextHoldings, 'Rebalanced');
+    appendRemediationEvent({
+      symbol,
+      action: 'Divested',
+      detail: `Removed non-compliant/watched position ${symbol} during portfolio rebalancing.`,
+    });
     toastSuccess(`Simulated divestment of ${symbol}`);
   };
 
@@ -429,6 +447,11 @@ export default function InstitutionalDashboard({ demoMode = false }) {
     });
     if (!swapped) return;
     await reevaluateHoldings(nextHoldings, 'Shariah Rebalanced');
+    appendRemediationEvent({
+      symbol: sourceSymbol,
+      action: `Swapped → ${replacement.symbol}`,
+      detail: `Reallocated ${sourceSymbol} proceeds (${replacement.estimated_units.toLocaleString()} units of ${replacement.symbol}).`,
+    });
     toastSuccess(`Swapped ${sourceSymbol} → ${replacement.symbol}`);
   };
 
@@ -1174,6 +1197,9 @@ export default function InstitutionalDashboard({ demoMode = false }) {
             institutionName={user?.institution_name || 'Irshad Institutional Services'}
             factsheetMeta={factsheetMeta}
             onChangeFactsheetMeta={setFactsheetMeta}
+            onSaveMandate={handleSaveCurrentMandate}
+            isSaving={isSaving}
+            isAuthenticatedInstitution={isAuthenticatedInstitution}
             allowedTemplates={allowedFactsheetTemplates}
           />
         )}

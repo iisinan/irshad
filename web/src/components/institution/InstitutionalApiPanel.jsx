@@ -111,7 +111,13 @@ curl -X GET "${API_ORIGIN}/b2b/stocks/${checkSymbol.trim().toUpperCase() || 'DAN
 curl -X POST "${API_ORIGIN}/b2b/portfolio/screen" \\
   -H "X-Api-Key: ${sampleKey}" \\
   -H "Content-Type: application/json" \\
-  -d '{"holdings":[{"symbol":"DANGCEM","shares":50000},{"symbol":"ZENITHBANK","shares":25000}]}'`,
+  -d '{"holdings":[{"symbol":"DANGCEM","shares":50000},{"symbol":"ZENITHBANK","shares":25000}]}'
+
+# 3. Pull Live Factsheet & AAOIFI Audit JSON for Fund CMS
+curl -X POST "${API_ORIGIN}/b2b/portfolio/factsheet-data" \\
+  -H "X-Api-Key: ${sampleKey}" \\
+  -H "Content-Type: application/json" \\
+  -d '{"fund_name":"My Ethical Equity Fund","ticker":"MYETH","nav_per_unit":100,"closing_price":112,"holdings":[{"symbol":"DANGCEM","shares":50000}]}'`,
     js: `// Pre-Trade Guardrail Check in your Brokerage / OMS Backend
 const res = await fetch(
   "${API_ORIGIN}/b2b/stocks/${checkSymbol.trim().toUpperCase() || 'DANGCEM'}/pre-trade-check?units=${Number(checkUnits) || 1000}",

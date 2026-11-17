@@ -4,7 +4,7 @@ import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend,
 } from 'recharts';
 import {
-  Printer, ShieldCheck, CheckCircle2, SlidersHorizontal, FileText, LayoutGrid
+  Printer, ShieldCheck, CheckCircle2, SlidersHorizontal, FileText, LayoutGrid, Download
 } from 'lucide-react';
 import {
   LOTUS_FALLBACK_DATA,
@@ -162,6 +162,9 @@ export default function InstitutionalFactsheetView({
   institutionName,
   factsheetMeta,
   onChangeFactsheetMeta,
+  onSaveMandate,
+  isSaving = false,
+  isAuthenticatedInstitution = false,
   allowedTemplates = ['lotus', 'norrenberger', 'custom'],
 }) {
   void allowedTemplates;
@@ -557,6 +560,36 @@ export default function InstitutionalFactsheetView({
           </button>
           <button
             type="button"
+            onClick={() => {
+              const payload = {
+                generated_at: new Date().toISOString(),
+                identity: { institution: meta.institution_name, fund: meta.fund_name, ticker: meta.ticker, isin: meta.isin, cut_off_date: meta.factsheet_date },
+                pricing: { fund_size_ngn: fundSizeVal, nav_per_unit: navVal, closing_price: priceVal, premium_to_nav_pct: premiumPct, units_in_issue: unitsVal },
+                shariah_audit: { ...healthMetrics, purification_per_unit: purificationPerUnit, zakat_per_unit: zakatPerUnit, compliance_pct: summary.compliant_pct ?? 100 },
+                validation_checks: validation.checks,
+                non_compliance_events: meta.non_compliance_events || [],
+                holdings,
+              };
+              const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `${(meta.ticker || 'irshad-factsheet').toLowerCase()}-audit.json`;
+              a.click();
+              URL.revokeObjectURL(url);
+            }}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              padding: '8px 13px', borderRadius: 10,
+              background: 'var(--bg-section)', color: 'var(--text-dark)',
+              border: '1px solid var(--border-strong)',
+              fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
+            }}
+          >
+            <Download size={14} /> Audit JSON
+          </button>
+          <button
+            type="button"
             onClick={() => window.print()}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 7,
@@ -579,6 +612,9 @@ export default function InstitutionalFactsheetView({
           summary={summary}
           isNorrenberger={isNorrenberger}
           isBalanced={isBalanced}
+          onSaveMandate={onSaveMandate}
+          isSaving={isSaving}
+          isAuthenticatedInstitution={isAuthenticatedInstitution}
         />
       )}
 
@@ -1378,7 +1414,7 @@ export default function InstitutionalFactsheetView({
                 </section>
               )}
 
-              {/* 7. How to Invest, Documents & Sign-Off Audit Trail */}
+              {/* 7. How to Invest, Documents, Non-Compliance Log & Sign-Off Audit Trail */}
               <section style={{
                 background: '#FFFFFF',
                 border: `1px solid ${IRSHAD.border}`,
@@ -1394,9 +1430,32 @@ export default function InstitutionalFactsheetView({
                 <div style={{ fontSize: '0.75rem', color: '#334155', lineHeight: 1.55 }}>
                   {meta.investor_profile} <strong>Contact / Source:</strong> {meta.contact}
                 </div>
-                <div style={{ fontSize: '0.71rem', color: IRSHAD.slate }}>
-                  Official Reference Pack: Prospectus · Trust Deed · Audited Financial Statements · Shari&apos;ah Compliance Certificate
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, fontSize: '0.71rem', color: IRSHAD.slate }}>
+                  <span style={{ fontWeight: 700 }}>Official Reference Pack:</span>
+                  {[
+                    { key: 'prospectus_url', label: 'Prospectus' },
+                    { key: 'trust_deed_url', label: 'Trust Deed' },
+                    { key: 'audited_accounts_url', label: 'Audited Financial Statements' },
+                    { key: 'shariah_certificate_url', label: "Shari'ah Compliance Certificate" },
+                  ].map((doc) => {
+                    const href = meta.document_links?.[doc.key];
+                    return href ? (
+                      <a key={doc.key} href={href} target="_blank" rel="noreferrer" style={{ color: IRSHAD.teal, fontWeight: 700, textDecoration: 'underline' }}>
+                        {doc.label} ↗
+                      </a>
+                    ) : (
+                      <span key={doc.key}>• {doc.label}</span>
+                    );
+                  })}
                 </div>
+                {(isLotus || (meta.non_compliance_events || []).length > 0) && (
+                  <div style={{ background: IRSHAD.goldBg, border: `1px solid ${IRSHAD.gold}`, borderRadius: 8, padding: '8px 12px', fontSize: '0.72rem', color: '#475569' }}>
+                    <strong style={{ color: IRSHAD.goldDark }}>Non-Compliance &amp; Rebalancing Events:</strong>{' '}
+                    {(meta.non_compliance_events || []).length > 0
+                      ? meta.non_compliance_events.map((ev) => `${ev.date}: ${ev.symbol} (${ev.action}) — ${ev.detail}`).join(' | ')
+                      : '30 Jun 2026: NASCON removed at rebalancing due to Impermissible Revenue exceeding the 5% AAOIFI threshold.'}
+                  </div>
+                )}
                 <div style={{
                   paddingTop: 10,
                   borderTop: `1px solid ${IRSHAD.border}`,

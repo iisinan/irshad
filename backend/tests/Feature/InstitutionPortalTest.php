@@ -493,6 +493,23 @@ class InstitutionPortalTest extends TestCase
             ->assertJsonPath('data.summary.compliant_count', 1)
             ->assertJsonPath('data.summary.non_compliant_count', 1);
 
+        // 4b. Call B2B Factsheet JSON data endpoint
+        $this->withHeaders(['X-Api-Key' => $plainKey])
+            ->postJson('/api/v1/b2b/portfolio/factsheet-data', [
+                'fund_name' => 'CardinalStone Ethical Growth',
+                'ticker' => 'CSTONEETH',
+                'nav_per_unit' => 100.00,
+                'closing_price' => 112.00,
+                'holdings' => [
+                    ['symbol' => 'DANGCEM', 'shares' => 100],
+                    ['symbol' => 'JAIZBANK', 'shares' => 5000],
+                ],
+            ])
+            ->assertStatus(200)
+            ->assertJsonPath('data.identity.ticker', 'CSTONEETH')
+            ->assertJsonPath('data.pricing.premium_to_nav_pct', 12)
+            ->assertJsonPath('data.validation.weights_reconciled', true);
+
         // 5. Revoke key and confirm 401
         $this->actingAs($brokerUser, 'sanctum')
             ->deleteJson("/api/v1/institution/api-keys/{$keyId}")

@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import {
-  CheckCircle2, AlertTriangle, Building2, TrendingUp, Percent, ShieldCheck
+  CheckCircle2, AlertTriangle, Building2, TrendingUp, Percent, ShieldCheck, Save, Plus, Trash2
 } from 'lucide-react';
 import { computeFundValidation } from './institutionalFixtures';
 
@@ -18,8 +18,49 @@ export default function InstitutionalFundInputsDrawer({
   summary = {},
   isNorrenberger = false,
   isBalanced = false,
+  onSaveMandate,
+  isSaving = false,
+  isAuthenticatedInstitution = false,
 }) {
   const [subTab, setSubTab] = useState('identity');
+  const [newLogSymbol, setNewLogSymbol] = useState('');
+  const [newLogAction, setNewLogAction] = useState('Removed from Mandate');
+  const [newLogDetail, setNewLogDetail] = useState('');
+
+  const updateDocLink = (key, val) => {
+    onChangeMeta({
+      ...meta,
+      document_links: { ...(meta.document_links || {}), [key]: val },
+    });
+  };
+
+  const handleAddComplianceEvent = () => {
+    const sym = newLogSymbol.trim().toUpperCase();
+    if (!sym) return;
+    const prev = Array.isArray(meta.non_compliance_events) ? meta.non_compliance_events : [];
+    onChangeMeta({
+      ...meta,
+      non_compliance_events: [
+        {
+          date: new Date().toISOString().slice(0, 10),
+          symbol: sym,
+          action: newLogAction.trim() || 'Reviewed',
+          detail: newLogDetail.trim() || 'Logged by fund compliance officer.',
+        },
+        ...prev,
+      ],
+    });
+    setNewLogSymbol('');
+    setNewLogDetail('');
+  };
+
+  const handleDeleteComplianceEvent = (idx) => {
+    const prev = Array.isArray(meta.non_compliance_events) ? meta.non_compliance_events : [];
+    onChangeMeta({
+      ...meta,
+      non_compliance_events: prev.filter((_, i) => i !== idx),
+    });
+  };
 
   const update = (key, value) => {
     onChangeMeta({ ...meta, [key]: value });
@@ -173,6 +214,22 @@ export default function InstitutionalFundInputsDrawer({
               <textarea rows={2} value={meta.contact || ''} onChange={(e) => update('contact', e.target.value)} style={{ ...inputStyle, fontFamily: 'inherit' }} />
             </div>
           </div>
+          <div>
+            <label style={labelStyle}>Prospectus URL (Optional)</label>
+            <input type="url" value={meta.document_links?.prospectus_url || ''} onChange={(e) => updateDocLink('prospectus_url', e.target.value)} placeholder="https://.../prospectus.pdf" style={inputStyle} />
+          </div>
+          <div>
+            <label style={labelStyle}>Trust Deed URL (Optional)</label>
+            <input type="url" value={meta.document_links?.trust_deed_url || ''} onChange={(e) => updateDocLink('trust_deed_url', e.target.value)} placeholder="https://.../trust-deed.pdf" style={inputStyle} />
+          </div>
+          <div>
+            <label style={labelStyle}>Audited Accounts URL (Optional)</label>
+            <input type="url" value={meta.document_links?.audited_accounts_url || ''} onChange={(e) => updateDocLink('audited_accounts_url', e.target.value)} placeholder="https://.../audited-accounts.pdf" style={inputStyle} />
+          </div>
+          <div>
+            <label style={labelStyle}>Shari&apos;ah Certificate URL (Optional)</label>
+            <input type="url" value={meta.document_links?.shariah_certificate_url || ''} onChange={(e) => updateDocLink('shariah_certificate_url', e.target.value)} placeholder="https://.../shariah-certificate.pdf" style={inputStyle} />
+          </div>
         </div>
       )}
 
@@ -263,6 +320,39 @@ export default function InstitutionalFundInputsDrawer({
             <label style={labelStyle}>Market / Shari&apos;ah Commentary &amp; Rebalancing Notes</label>
             <textarea rows={2} value={meta.commentary || ''} onChange={(e) => update('commentary', e.target.value)} style={{ ...inputStyle, fontFamily: 'inherit' }} />
           </div>
+          <div style={{ gridColumn: '1 / -1', borderTop: '1px solid var(--border)', paddingTop: 10 }}>
+            <label style={labelStyle}>Non-Compliance Events &amp; Rebalancing Log</label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
+              <input type="text" value={newLogSymbol} onChange={(e) => setNewLogSymbol(e.target.value)} placeholder="Ticker (e.g. NASCON)" style={{ ...inputStyle, flex: '1 1 120px', maxWidth: 160 }} />
+              <input type="text" value={newLogAction} onChange={(e) => setNewLogAction(e.target.value)} placeholder="Action (e.g. Divested)" style={{ ...inputStyle, flex: '1 1 140px', maxWidth: 180 }} />
+              <input type="text" value={newLogDetail} onChange={(e) => setNewLogDetail(e.target.value)} placeholder="Resolution note (e.g. Impure rev > 5%)" style={{ ...inputStyle, flex: '2 1 220px' }} />
+              <button
+                type="button"
+                onClick={handleAddComplianceEvent}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 5,
+                  padding: '8px 12px', borderRadius: 8, border: 'none',
+                  background: '#1E4D40', color: '#fff', fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer',
+                }}
+              >
+                <Plus size={13} /> Log Event
+              </button>
+            </div>
+            {(meta.non_compliance_events || []).length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {(meta.non_compliance_events || []).map((ev, idx) => (
+                  <div key={`${ev.symbol}-${idx}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, fontSize: '0.74rem', padding: '6px 10px', borderRadius: 8, background: 'var(--bg-section)', border: '1px solid var(--border)' }}>
+                    <span>
+                      <strong>{ev.date}</strong> · <strong>{ev.symbol}</strong> ({ev.action}) — {ev.detail}
+                    </span>
+                    <button type="button" onClick={() => handleDeleteComplianceEvent(idx)} aria-label="Remove log entry" style={{ border: 'none', background: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -305,6 +395,20 @@ export default function InstitutionalFundInputsDrawer({
               <label style={labelStyle}>Fund Manager Approver Name</label>
               <input type="text" value={meta.approved_by || ''} onChange={(e) => update('approved_by', e.target.value)} placeholder="e.g. Chief Investment Officer / Compliance Officer" style={inputStyle} />
             </div>
+            {isAuthenticatedInstitution && onSaveMandate && holdings.length > 0 && (
+              <button
+                type="button"
+                disabled={isSaving}
+                onClick={onSaveMandate}
+                style={{
+                  marginTop: 4, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                  padding: '9px 14px', borderRadius: 9, border: 'none',
+                  background: '#1E4D40', color: '#fff', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
+                }}
+              >
+                <Save size={14} /> {isSaving ? 'Saving Mandate...' : 'Save Mandate & Sign-Off'}
+              </button>
+            )}
           </div>
         </div>
       )}

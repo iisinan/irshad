@@ -152,6 +152,81 @@ class InstitutionApiController extends Controller
     }
 
     /**
+     * B2B Factsheet & AAOIFI Compliance Audit Payload for Institutional CMS / Client Portals.
+     * POST /api/v1/b2b/portfolio/factsheet-data
+     */
+    public function factsheetData(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'fund_name' => 'nullable|string|max:180',
+            'ticker' => 'nullable|string|max:32',
+            'nav_per_unit' => 'nullable|numeric|min:0.0001',
+            'closing_price' => 'nullable|numeric|min:0',
+            'expense_ratio_pct' => 'nullable|numeric|min:0|max:20',
+            'holdings' => 'required|array|min:1|max:250',
+            'holdings.*.symbol' => 'required|string|max:64',
+            'holdings.*.shares' => 'required|numeric|min:0',
+            'holdings.*.avg_price' => 'nullable|numeric|min:0',
+        ]);
+
+        $user = $request->user();
+        $controller = app(InstitutionController::class);
+        $evaluated = $controller->evaluateHoldingsArray($validated['holdings']);
+        $summary = $evaluated['summary'] ?? [];
+
+        $aum = (float) ($summary['total_aum'] ?? 0);
+        $nav = isset($validated['nav_per_unit']) ? (float) $validated['nav_per_unit'] : null;
+        $price = isset($validated['closing_price']) ? (float) $validated['closing_price'] : null;
+        $derivedUnits = ($nav && $nav > 0 && $aum > 0) ? (int) round($aum / $nav) : null;
+        $premiumPct = ($nav && $nav > 0 && $price !== null)
+            ? round((($price / $nav) - 1) * 100, 2)
+            : null;
+        $weightsTotal = round(array_sum(array_map(fn ($h) => (float) ($h['weight_pct'] ?? 0), $evaluated['holdings'] ?? [])), 2);
+
+        return $this->success([
+            'identity' => [
+                'institution_name' => $user->institution_name ?: $user->name,
+                'fund_name' => $validated['fund_name'] ?? 'Institutional Shariah Mandate',
+                'ticker' => strtoupper($validated['ticker'] ?? 'IRSHAD-MANDATE'),
+                'as_of_date' => now()->toDateString(),
+                'standard' => 'AAOIFI Shariah Standard No. 21',
+            ],
+            'pricing' => [
+                'fund_size_ngn' => $aum,
+                'nav_per_unit' => $nav,
+                'closing_price' => $price,
+                'premium_to_nav_pct' => $premiumPct,
+                'derived_units_in_issue' => $derivedUnits,
+                'expense_ratio_pct' => $validated['expense_ratio_pct'] ?? null,
+            ],
+            'shariah_audit' => [
+                'compliance_rate_pct' => $summary['compliant_pct'] ?? 0,
+                'compliant_count' => $summary['compliant_count'] ?? 0,
+                'non_compliant_count' => $summary['non_compliant_count'] ?? 0,
+                'near_threshold_count' => $summary['near_threshold_count'] ?? 0,
+                'weighted_debt_ratio' => $summary['weighted_debt_ratio'] ?? null,
+                'weighted_cash_ratio' => $summary['weighted_cash_ratio'] ?? null,
+                'weighted_impure_ratio' => $summary['weighted_impure_ratio'] ?? 0,
+                'purification_per_unit' => $summary['weighted_purification_per_unit'] ?? 0,
+                'total_purification_due' => $summary['total_purification_due'] ?? 0,
+                'indicative_zakat_per_unit' => $summary['indicative_zakat_per_unit'] ?? 0,
+                'total_zakatable_amount' => $summary['total_zakatable_amount'] ?? 0,
+            ],
+            'concentration' => [
+                'top_5_pct' => $summary['top_5_concentration_pct'] ?? 0,
+                'top_10_pct' => $summary['top_10_concentration_pct'] ?? 0,
+                'sector_allocation' => $evaluated['sector_allocation'] ?? [],
+            ],
+            'validation' => [
+                'weights_sum_pct' => $weightsTotal,
+                'weights_reconciled' => abs($weightsTotal - 100.0) <= 1.0,
+            ],
+            'holdings' => $evaluated['holdings'] ?? [],
+            'rebalancing_suggestions' => $evaluated['rebalancing_suggestions'] ?? [],
+        ], 'Institutional factsheet data generated successfully.');
+    }
+
+    /**
      * B2B Compliant Equity Universe & Curated Model Baskets feed.
      * GET /api/v1/b2b/stocks/compliant-universe
      */

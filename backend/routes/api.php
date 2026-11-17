@@ -446,6 +446,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/b2b/stocks/compliant-universe', [InstitutionApiController::class, 'compliantUniverse']);
         Route::get('/b2b/stocks/{symbol}/pre-trade-check', [InstitutionApiController::class, 'preTradeCheck']);
         Route::post('/b2b/portfolio/screen', [InstitutionApiController::class, 'screenBook']);
+        Route::post('/b2b/portfolio/factsheet-data', [InstitutionApiController::class, 'factsheetData']);
     });
 });
 
