@@ -209,7 +209,6 @@ const TopNavbar = () => {
           <Link to="/pricing" className={navLinkClass('/pricing')}>Pricing</Link>
           <Link to="/resources" className={navLinkClass('/resources')}>Resources</Link>
           <Link to="/about" className={navLinkClass('/about')}>About Us</Link>
-          <Link to="/institution/demo" className={navLinkClass('/institution/demo')}>Institutions</Link>
           {user && (
             <Link to={user?.role === 'institution' ? '/institution' : '/portfolio'} className={navLinkClass(user?.role === 'institution' ? '/institution' : '/portfolio')}>Dashboard</Link>
           )}
@@ -276,9 +275,6 @@ const TopNavbar = () => {
         </Link>
         <Link to="/about" className={navLinkClass('/about')} onClick={() => setMenuOpen(false)}>
           <Info size={18} /> About Us
-        </Link>
-        <Link to="/institution/demo" className={navLinkClass('/institution/demo')} onClick={() => setMenuOpen(false)}>
-          <Shield size={18} /> Institutions
         </Link>
         <div style={{ padding: '16px 24px' }}>
           <ThemeToggle />
