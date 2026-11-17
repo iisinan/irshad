@@ -29,9 +29,9 @@ export default function InstitutionalPresentationDeck({
             {
               icon: Upload,
               color: 'var(--primary)',
-              title: 'Bulk Portfolio Ingestion',
-              desc: 'Upload Excel, CSV, or Broker PDF statements to screen an entire client book or mutual fund mandate in under 3 seconds.',
-              actionLabel: 'Open Live Uploader',
+              title: 'Universal Document Ingestion',
+              desc: 'Drop PDF, Excel (.XLSX/.ODS), CSV, Word (.DOCX), JSON, HTML tables, or screenshots — auto-detected and screened in seconds.',
+              actionLabel: 'Open Smart Uploader',
               onClick: () => onJumpToTab('screening'),
             },
             {
@@ -44,18 +44,18 @@ export default function InstitutionalPresentationDeck({
             },
             {
               icon: Droplet,
-              color: '#b45309',
-              title: 'Automated Purification Math',
-              desc: 'Computes constituent-level & fund-level purification liabilities (₦/unit and total ₦) with exportable charity disbursement schedules.',
+              color: '#856527',
+              title: 'Purification & Zakat Engine',
+              desc: 'Computes constituent & fund-level purification (₦/unit), indicative equity Zakat, and exportable charity schedules.',
               actionLabel: 'Open Purification Engine',
               onClick: () => onJumpToTab('purification'),
             },
             {
               icon: FileText,
-              color: '#991B1B',
-              title: 'One-Click Factsheet Studio',
-              desc: 'Generates SEC-ready branded factsheets modeled on Lotus Capital & Norrenberger templates directly from live screened holdings.',
-              actionLabel: 'Launch Factsheet Studio',
+              color: '#1E4D40',
+              title: 'One-Page Summary & Factsheet',
+              desc: 'Generates standardized Irshad One-Page Summaries and 7-Section SEC Fact Sheets with built-in reconciliation checks.',
+              actionLabel: 'Open Factsheet Suite',
               onClick: () => onJumpToTab('factsheet'),
             },
           ].map((card) => (
@@ -161,7 +161,7 @@ export default function InstitutionalPresentationDeck({
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 12 }}>
             {NORRENBERGER_FALLBACK_DATA.kpis.map((k) => (
-              <div key={k.label} style={{ padding: 16, borderRadius: 14, background: '#DC2626', color: '#fff' }}>
+              <div key={k.label} style={{ padding: 16, borderRadius: 14, background: 'linear-gradient(135deg, #1E4D40 0%, #297D66 100%)', color: '#fff' }}>
                 <div style={{ fontSize: '1.5rem', fontWeight: 900 }}>{k.value}</div>
                 <div style={{ fontSize: '0.76rem', opacity: 0.9, marginTop: 4 }}>{k.label}</div>
               </div>
@@ -191,7 +191,7 @@ export default function InstitutionalPresentationDeck({
                 onClick={() => { onSelectPreset('norrenberger_fund'); onJumpToTab('factsheet'); }}
                 style={{
                   alignSelf: 'flex-start', padding: '10px 16px', borderRadius: 12,
-                  background: '#DC2626', color: '#fff', border: 'none', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
+                  background: '#1E4D40', color: '#fff', border: 'none', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
                 }}
               >
                 Open Norrenberger Factsheet

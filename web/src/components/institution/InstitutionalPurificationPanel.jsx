@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Droplet, Download, CheckCircle2, Building2, Calculator, Sparkles, ArrowRight } from 'lucide-react';
-import { LOTUS_FALLBACK_DATA, formatNaira } from './institutionalFixtures';
+import { LOTUS_FALLBACK_DATA, BALANCED_FALLBACK_DATA, formatNaira } from './institutionalFixtures';
 
 export default function InstitutionalPurificationPanel({
   screened,
@@ -18,14 +18,21 @@ export default function InstitutionalPurificationPanel({
   );
 
   const isLotus = activePresetId === 'lotus_etf';
+  const isBalanced = activePresetId === 'balanced_fund';
   const totalUnitsHeld = useMemo(
     () => holdings.reduce((acc, h) => acc + Number(h.shares || 0), 0),
     [holdings]
   );
 
   const fundLevelTotalPurification = Number(summary.total_purification_due || 0);
-  const etfPublishedPerUnit = isLotus ? LOTUS_FALLBACK_DATA.purification_per_unit_fy25 : Number(summary.weighted_purification_per_unit || 0);
+  const etfPublishedPerUnit = isLotus
+    ? LOTUS_FALLBACK_DATA.purification_per_unit_fy25
+    : (isBalanced ? BALANCED_FALLBACK_DATA.purification_per_unit_fy25 : Number(summary.weighted_purification_per_unit || 0));
+  const zakatPerUnit = isLotus
+    ? LOTUS_FALLBACK_DATA.zakat_per_unit
+    : (isBalanced ? BALANCED_FALLBACK_DATA.zakat_per_unit : Number(summary.indicative_zakat_per_unit || 0));
   const simulatedLiability = simulatedUnits * etfPublishedPerUnit;
+  const simulatedZakat = simulatedUnits * zakatPerUnit;
 
   const exportCsv = () => {
     const header = ['Symbol', 'Company', 'Units', 'Trailing Dividend/Share (NGN)', 'Total Dividends (NGN)', 'Impure Income Ratio (%)', 'Purification/Unit (NGN)', 'Total Purification Due (NGN)'];
@@ -202,6 +209,11 @@ export default function InstitutionalPurificationPanel({
           <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#92400e', marginTop: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
             <ArrowRight size={13} /> Charity Due: {formatNaira(simulatedLiability)}
           </div>
+          {zakatPerUnit > 0 && (
+            <div style={{ fontSize: '0.76rem', fontWeight: 700, color: 'var(--primary)', marginTop: 4 }}>
+              Indicative Zakat (2.5%): {formatNaira(simulatedZakat)}
+            </div>
+          )}
         </div>
       </div>
 

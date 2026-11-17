@@ -1171,6 +1171,134 @@ export default function InstitutionalFactsheetView({
                 </div>
               </section>
 
+              {/* 3. Performance, Tracking & Benchmark Analysis + Mandate Contract Sleeves */}
+              <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: 16 }}>
+                <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16 }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 800, color: IRSHAD.forest, textTransform: 'uppercase', marginBottom: 10 }}>
+                    3. Performance &amp; Benchmark Tracking
+                  </div>
+                  {isLotus ? (
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.73rem' }}>
+                      <thead>
+                        <tr style={{ background: IRSHAD.forest, color: '#FFFFFF' }}>
+                          <th style={{ padding: '6px 8px', textAlign: 'left' }}>Metric</th>
+                          <th style={{ padding: '6px 8px', textAlign: 'right' }}>7D</th>
+                          <th style={{ padding: '6px 8px', textAlign: 'right' }}>30D</th>
+                          <th style={{ padding: '6px 8px', textAlign: 'right' }}>YTD</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {lotus.performance_table.map((row) => (
+                          <tr key={row.metric} style={{ borderBottom: `1px solid ${IRSHAD.border}` }}>
+                            <td style={{ padding: '6px 8px', fontWeight: 700 }}>{row.metric}</td>
+                            <td style={{ padding: '6px 8px', textAlign: 'right', color: row.d7.startsWith('-') ? '#B91C1C' : IRSHAD.teal, fontWeight: 700 }}>{row.d7}</td>
+                            <td style={{ padding: '6px 8px', textAlign: 'right', color: row.d30.startsWith('-') ? '#B91C1C' : IRSHAD.teal, fontWeight: 700 }}>{row.d30}</td>
+                            <td style={{ padding: '6px 8px', textAlign: 'right', color: IRSHAD.forest, fontWeight: 800 }}>{row.ytd}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : isFixedOrBalanced ? (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+                      {(isBalanced
+                        ? balanced.performance_metrics
+                        : norren.historical_performance.map((h) => ({ label: `${h.period} Yield`, value: `${h.yield}% (Bmk ${h.benchmark}%)` }))
+                      ).map((row) => (
+                        <div key={row.label} style={{ background: IRSHAD.canvas, border: `1px solid ${IRSHAD.border}`, borderRadius: 8, padding: '8px 10px' }}>
+                          <div style={{ fontSize: '0.66rem', fontWeight: 800, color: IRSHAD.slate, textTransform: 'uppercase' }}>{row.label}</div>
+                          <div style={{ fontSize: '0.92rem', fontWeight: 900, color: IRSHAD.forest, marginTop: 2 }}>{row.value}</div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: '0.74rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #EEF2F0', paddingBottom: 4 }}>
+                        <span style={{ color: IRSHAD.slate }}>Benchmark Index</span>
+                        <strong>{meta.benchmark}</strong>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #EEF2F0', paddingBottom: 4 }}>
+                        <span style={{ color: IRSHAD.slate }}>3Y Annualized Volatility</span>
+                        <strong>{Number(meta.volatility_3y_pct || 18.2).toFixed(1)}%</strong>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ color: IRSHAD.slate }}>SEC Risk Classification</span>
+                        <strong>{meta.risk_label}</strong>
+                      </div>
+                    </div>
+                  )}
+                  <div style={{ fontSize: '0.7rem', color: IRSHAD.slate, marginTop: 10, lineHeight: 1.45 }}>
+                    {isLotus
+                      ? `Last Rebalancing: ${lotus.last_rebalancing} · Next: ${lotus.next_rebalancing} · 3Y Tracking Error: ${lotus.tracking_error_3y_pct}%`
+                      : `Rebalancing Frequency: ${meta.rebalancing_frequency} · Portfolio Commentary: ${meta.commentary}`}
+                  </div>
+                </div>
+
+                {activeAllocationList.length > 0 ? (
+                  <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16 }}>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: IRSHAD.forest, textTransform: 'uppercase', marginBottom: 10 }}>
+                      5. Contract &amp; Sleeve Mandate Compliance
+                    </div>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.73rem' }}>
+                      <thead>
+                        <tr style={{ background: IRSHAD.forest, color: '#FFFFFF' }}>
+                          <th style={{ padding: '6px 8px', textAlign: 'left' }}>Instrument / Contract</th>
+                          <th style={{ padding: '6px 8px', textAlign: 'right' }}>Current</th>
+                          <th style={{ padding: '6px 8px', textAlign: 'right' }}>Target Band</th>
+                          <th style={{ padding: '6px 8px', textAlign: 'center' }}>Check</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {activeAllocationList.map((row) => {
+                          const outOfBand = row.current < row.target_min || row.current > row.target_max;
+                          return (
+                            <tr key={row.security} style={{ borderBottom: `1px solid ${IRSHAD.border}` }}>
+                              <td style={{ padding: '6px 8px' }}>
+                                <strong>{row.security}</strong> <span style={{ color: IRSHAD.slate }}>({row.shariah_contract})</span>
+                              </td>
+                              <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: 800 }}>{row.current.toFixed(2)}%</td>
+                              <td style={{ padding: '6px 8px', textAlign: 'right', color: IRSHAD.slate }}>{row.target_label}</td>
+                              <td style={{ padding: '6px 8px', textAlign: 'center' }}>
+                                <span style={{
+                                  padding: '2px 7px', borderRadius: 999, fontSize: '0.64rem', fontWeight: 800,
+                                  background: outOfBand ? IRSHAD.goldBg : 'rgba(69,165,138,0.12)',
+                                  color: outOfBand ? IRSHAD.goldDark : IRSHAD.forest,
+                                }}>
+                                  {outOfBand ? 'Below Band' : 'Compliant'}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16 }}>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: IRSHAD.forest, textTransform: 'uppercase', marginBottom: 10 }}>
+                      5. Portfolio Risk, Concentration &amp; Zakat Metrics
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 7, fontSize: '0.74rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #EEF2F0', paddingBottom: 4 }}>
+                        <span style={{ color: IRSHAD.slate }}>Top 5 Holding Concentration</span>
+                        <strong>{top5Pct.toFixed(1)}%</strong>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #EEF2F0', paddingBottom: 4 }}>
+                        <span style={{ color: IRSHAD.slate }}>3Y Annualized Volatility</span>
+                        <strong>{Number(meta.volatility_3y_pct || 24.5).toFixed(1)}%</strong>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #EEF2F0', paddingBottom: 4 }}>
+                        <span style={{ color: IRSHAD.slate }}>Indicative Zakatable Amount / Unit</span>
+                        <strong style={{ color: IRSHAD.goldDark }}>₦{zakatPerUnit.toFixed(2)}</strong>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 2 }}>
+                        <span style={{ color: IRSHAD.slate }}>SEC Risk Scale ({meta.risk_level} of 7)</span>
+                        <div style={{ width: 130 }}><RiskScaleSeven level={Number(meta.risk_level || 4)} max={7} /></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </section>
+
               {/* 5 & 6. Full Constituent Screening & Purification Schedule */}
               {holdings.length > 0 && (
                 <section style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16 }}>
@@ -1250,26 +1378,43 @@ export default function InstitutionalFactsheetView({
                 </section>
               )}
 
-              {/* Sign-Off Audit Trail Strip */}
+              {/* 7. How to Invest, Documents & Sign-Off Audit Trail */}
               <section style={{
                 background: '#FFFFFF',
                 border: `1px solid ${IRSHAD.border}`,
                 borderRadius: 12,
-                padding: '12px 16px',
+                padding: '14px 16px',
                 display: 'flex',
-                flexWrap: 'wrap',
-                justifyContent: 'space-between',
-                alignItems: 'center',
+                flexDirection: 'column',
                 gap: 10,
-                fontSize: '0.74rem',
               }}>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 700, color: IRSHAD.forest }}>
-                  <ShieldCheck size={15} /> Shariah Board: {meta.shariah_board}
-                </span>
-                <span style={{ color: IRSHAD.slate }}>
-                  <CheckCircle2 size={13} style={{ verticalAlign: 'middle', marginRight: 4, color: IRSHAD.teal }} />
-                  Cut-Off: <strong>{meta.factsheet_date}</strong> · Approver: <strong>{meta.approved_by || 'Pending Final Sign-Off'}</strong>
-                </span>
+                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: IRSHAD.forest, textTransform: 'uppercase' }}>
+                  7. How to Invest, Published Documents &amp; Contacts
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#334155', lineHeight: 1.55 }}>
+                  {meta.investor_profile} <strong>Contact / Source:</strong> {meta.contact}
+                </div>
+                <div style={{ fontSize: '0.71rem', color: IRSHAD.slate }}>
+                  Official Reference Pack: Prospectus · Trust Deed · Audited Financial Statements · Shari&apos;ah Compliance Certificate
+                </div>
+                <div style={{
+                  paddingTop: 10,
+                  borderTop: `1px solid ${IRSHAD.border}`,
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: 10,
+                  fontSize: '0.74rem',
+                }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 700, color: IRSHAD.forest }}>
+                    <ShieldCheck size={15} /> Shariah Board: {meta.shariah_board}
+                  </span>
+                  <span style={{ color: IRSHAD.slate }}>
+                    <CheckCircle2 size={13} style={{ verticalAlign: 'middle', marginRight: 4, color: IRSHAD.teal }} />
+                    Cut-Off: <strong>{meta.factsheet_date}</strong> · Approver: <strong>{meta.approved_by || 'Pending Final Sign-Off'}</strong>
+                  </span>
+                </div>
               </section>
             </>
           )}

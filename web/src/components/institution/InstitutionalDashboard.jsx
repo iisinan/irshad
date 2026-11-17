@@ -981,8 +981,8 @@ export default function InstitutionalDashboard({ demoMode = false }) {
               </div>
             )}
 
-            {/* Norrenberger Fixed Income Mandate Table */}
-            {isNorrenbergerActive && (
+            {/* Fixed Income & Balanced Contract Sleeve Audit Table (Norrenberger & Balanced 60/40) */}
+            {(isNorrenbergerActive || activePresetId === 'balanced_fund') && (
               <div style={{
                 background: 'var(--bg)', borderRadius: 18, padding: '18px 20px',
                 border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 14,
@@ -990,7 +990,9 @@ export default function InstitutionalDashboard({ demoMode = false }) {
                 <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, fontSize: '0.96rem', color: 'var(--primary)' }}>
-                      <CheckCircle2 size={17} /> Fixed Income &amp; Sukuk Mandate Audit (₦6.81bn)
+                      <CheckCircle2 size={17} /> {activePresetId === 'balanced_fund'
+                        ? '60/40 Balanced Fund — Contract & Equity Sleeve Mandate Audit (₦6.81bn)'
+                        : 'Fixed Income & Sukuk Mandate Audit (₦6.81bn)'}
                     </div>
                     <p style={{ margin: '4px 0 0', fontSize: '0.79rem', color: 'var(--text-muted)' }}>
                       Contract allocation vs prospectus Shariah mandate bands (October 2026).
@@ -1004,7 +1006,7 @@ export default function InstitutionalDashboard({ demoMode = false }) {
                       border: 'none', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
                     }}
                   >
-                    View Factsheet →
+                    View Summary &amp; Factsheet →
                   </button>
                 </div>
 
@@ -1020,7 +1022,10 @@ export default function InstitutionalDashboard({ demoMode = false }) {
                       </tr>
                     </thead>
                     <tbody>
-                      {(presets?.norrenberger_fund?.allocation || NORRENBERGER_FALLBACK_DATA.allocation).map((row) => {
+                      {(activePresetId === 'balanced_fund'
+                        ? (presets?.balanced_fund?.allocation || BALANCED_FALLBACK_DATA.allocation)
+                        : (presets?.norrenberger_fund?.allocation || NORRENBERGER_FALLBACK_DATA.allocation)
+                      ).map((row) => {
                         const outOfBand = row.current < row.target_min || row.current > row.target_max;
                         const estVal = (row.current / 100) * 6810000000;
                         return (
