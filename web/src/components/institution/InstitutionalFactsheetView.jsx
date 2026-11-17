@@ -165,6 +165,7 @@ export default function InstitutionalFactsheetView({
   onSaveMandate,
   isSaving = false,
   isAuthenticatedInstitution = false,
+  smartBrief = null,
   allowedTemplates = ['lotus', 'norrenberger', 'custom'],
 }) {
   void allowedTemplates;
@@ -615,6 +616,7 @@ export default function InstitutionalFactsheetView({
           onSaveMandate={onSaveMandate}
           isSaving={isSaving}
           isAuthenticatedInstitution={isAuthenticatedInstitution}
+          smartBrief={smartBrief}
         />
       )}
 

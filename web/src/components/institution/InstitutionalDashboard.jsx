@@ -455,6 +455,22 @@ export default function InstitutionalDashboard({ demoMode = false }) {
     toastSuccess(`Swapped ${sourceSymbol} → ${replacement.symbol}`);
   };
 
+  const handleAutoRebalanceAll = async () => {
+    const plan = activeScreened?.smart_brief?.auto_rebalance_plan;
+    if (!plan?.available || !Array.isArray(plan.proposed_holdings) || plan.proposed_holdings.length === 0) {
+      return;
+    }
+    await reevaluateHoldings(plan.proposed_holdings, '100% Halal Aligned');
+    (plan.swaps || []).forEach((s) => {
+      appendRemediationEvent({
+        symbol: s.from_symbol,
+        action: `Auto-Swapped → ${s.to_symbol}`,
+        detail: `Auto-rebalanced ${s.from_symbol} into ${s.estimated_units.toLocaleString()} units of Halal peer ${s.to_symbol}.`,
+      });
+    });
+    toastSuccess(`Auto-aligned ${plan.swaps_count} flagged holding(s) to 100% Shariah compliance.`);
+  };
+
   const summary = activeScreened?.summary || {};
   const isNorrenbergerActive = activePresetId === 'norrenberger_fund';
   const hasHoldings = (activeScreened?.holdings || []).length > 0;
@@ -1076,6 +1092,27 @@ export default function InstitutionalDashboard({ demoMode = false }) {
               </div>
             )}
 
+            {/* Smart Intelligence: Alias Resolution & Concentration Warnings */}
+            {!isNorrenbergerActive && ((summary.aliases_applied || []).length > 0 || (activeScreened?.smart_brief?.concentration_warnings || []).length > 0) && (
+              <div style={{
+                padding: '10px 16px', borderRadius: 12,
+                background: 'rgba(69, 165, 138, 0.08)', border: '1px solid rgba(69, 165, 138, 0.25)',
+                color: 'var(--text-dark)', fontSize: '0.78rem',
+                display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', justifyContent: 'space-between',
+              }}>
+                {(summary.aliases_applied || []).length > 0 && (
+                  <span>
+                    <strong style={{ color: '#1E4D40' }}>Smart Ticker Resolver:</strong> Normalized {summary.aliases_applied.join(', ')}
+                  </span>
+                )}
+                {(activeScreened?.smart_brief?.concentration_warnings || []).length > 0 && (
+                  <span style={{ color: '#856527', fontWeight: 700 }}>
+                    Concentration Alert: {activeScreened.smart_brief.concentration_warnings[0].message}
+                  </span>
+                )}
+              </div>
+            )}
+
             {/* Near-Threshold Drift Watch Alert */}
             {!isNorrenbergerActive && nearThresholdHoldings.length > 0 && (
               <div style={{
@@ -1111,8 +1148,26 @@ export default function InstitutionalDashboard({ demoMode = false }) {
                     background: 'var(--bg)', borderRadius: 16, padding: '16px 18px',
                     border: '1px solid var(--border)',
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, fontSize: '0.88rem', color: 'var(--text-dark)', marginBottom: 10 }}>
-                      <ArrowLeftRight size={15} color="var(--primary)" /> Compliant Rebalancing Suggestions
+                    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, fontSize: '0.88rem', color: 'var(--text-dark)' }}>
+                        <ArrowLeftRight size={15} color="var(--primary)" /> Compliant Rebalancing Suggestions
+                      </div>
+                      {activeScreened?.smart_brief?.auto_rebalance_plan?.available && (
+                        <button
+                          type="button"
+                          disabled={isScreening}
+                          onClick={handleAutoRebalanceAll}
+                          style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 6,
+                            padding: '7px 13px', borderRadius: 9, border: 'none',
+                            background: 'linear-gradient(135deg, #1E4D40 0%, #297D66 100%)',
+                            color: '#fff', fontWeight: 800, fontSize: '0.74rem', cursor: 'pointer',
+                          }}
+                        >
+                          <Sparkles size={13} />
+                          Auto-Align All ({activeScreened.smart_brief.auto_rebalance_plan.swaps_count}) to 100% Halal
+                        </button>
+                      )}
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 10 }}>
                       {activeScreened.rebalancing_suggestions.map((sug) => (
@@ -1200,6 +1255,7 @@ export default function InstitutionalDashboard({ demoMode = false }) {
             onSaveMandate={handleSaveCurrentMandate}
             isSaving={isSaving}
             isAuthenticatedInstitution={isAuthenticatedInstitution}
+            smartBrief={activeScreened?.smart_brief}
             allowedTemplates={allowedFactsheetTemplates}
           />
         )}

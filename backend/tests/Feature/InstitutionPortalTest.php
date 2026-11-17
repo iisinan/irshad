@@ -396,6 +396,7 @@ class InstitutionPortalTest extends TestCase
                 'data' => [
                     'mixed_institutional_book' => [
                         'summary' => ['top_5_concentration_pct', 'indicative_zakat_per_unit', 'total_zakatable_amount'],
+                        'smart_brief' => ['readiness', 'suggested_commentary', 'auto_rebalance_plan'],
                     ],
                 ],
             ]);

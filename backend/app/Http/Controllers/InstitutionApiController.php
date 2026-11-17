@@ -223,6 +223,7 @@ class InstitutionApiController extends Controller
             ],
             'holdings' => $evaluated['holdings'] ?? [],
             'rebalancing_suggestions' => $evaluated['rebalancing_suggestions'] ?? [],
+            'smart_brief' => $evaluated['smart_brief'] ?? null,
         ], 'Institutional factsheet data generated successfully.');
     }
 

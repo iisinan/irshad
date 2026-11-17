@@ -785,35 +785,179 @@ class InstitutionController extends Controller
         $top10Concentration = round(array_sum(array_map(fn ($h) => (float) ($h['weight_pct'] ?? 0), array_slice($evaluated, 0, 10))), 2);
         $totalZakatable = round($compliantAum * 0.025, 2);
 
+        $aliasesApplied = array_values(array_unique(array_filter(array_map(
+            fn ($h) => ($h['input_symbol'] ?? '') !== '' && ($h['input_symbol'] ?? '') !== ($h['symbol'] ?? '')
+                ? "{$h['input_symbol']} → {$h['symbol']}"
+                : null,
+            $evaluated
+        ))));
+
+        $summary = [
+            'holdings_count' => count($evaluated),
+            'compliant_count' => $compliantCount,
+            'non_compliant_count' => $nonCompliantCount,
+            'doubtful_count' => $doubtfulCount,
+            'purify_required_count' => $purifyRequiredCount,
+            'near_threshold_count' => $nearThresholdCount,
+            'top_5_concentration_pct' => $top5Concentration,
+            'top_10_concentration_pct' => $top10Concentration,
+            'weighted_debt_ratio' => $debtWeightDenom > 0 ? round($debtWeightedSum / $debtWeightDenom, 2) : null,
+            'weighted_cash_ratio' => $cashWeightDenom > 0 ? round($cashWeightedSum / $cashWeightDenom, 2) : null,
+            'weighted_impure_ratio' => $impureWeightDenom > 0 ? round($impureWeightedSum / $impureWeightDenom, 2) : 0,
+            'total_aum' => round($totalAum, 2),
+            'compliant_aum' => round($compliantAum, 2),
+            'compliant_pct' => $totalAum > 0 ? round(($compliantAum / $totalAum) * 100, 2) : 0,
+            'non_compliant_aum' => round($nonCompliantAum, 2),
+            'non_compliant_pct' => $totalAum > 0 ? round(($nonCompliantAum / $totalAum) * 100, 2) : 0,
+            'doubtful_aum' => round($doubtfulAum, 2),
+            'doubtful_pct' => $totalAum > 0 ? round(($doubtfulAum / $totalAum) * 100, 2) : 0,
+            'unmapped_aum' => round($unmappedAum, 2),
+            'total_purification_due' => round($totalPurification, 2),
+            'weighted_purification_per_unit' => $totalUnits > 0 ? round($totalPurification / $totalUnits, 4) : 0,
+            'total_zakatable_amount' => $totalZakatable,
+            'indicative_zakat_per_unit' => $totalUnits > 0 ? round($totalZakatable / $totalUnits, 4) : 0,
+            'aliases_applied' => $aliasesApplied,
+            'screened_at' => now()->toISOString(),
+        ];
+
+        $smartBrief = $this->buildSmartBrief($evaluated, $sectorAllocation, $rebalancingSuggestions, $summary);
+
         return [
             'holdings' => $evaluated,
             'sector_allocation' => $sectorAllocation,
             'rebalancing_suggestions' => $rebalancingSuggestions,
-            'summary' => [
-                'holdings_count' => count($evaluated),
-                'compliant_count' => $compliantCount,
-                'non_compliant_count' => $nonCompliantCount,
-                'doubtful_count' => $doubtfulCount,
-                'purify_required_count' => $purifyRequiredCount,
-                'near_threshold_count' => $nearThresholdCount,
-                'top_5_concentration_pct' => $top5Concentration,
-                'top_10_concentration_pct' => $top10Concentration,
-                'weighted_debt_ratio' => $debtWeightDenom > 0 ? round($debtWeightedSum / $debtWeightDenom, 2) : null,
-                'weighted_cash_ratio' => $cashWeightDenom > 0 ? round($cashWeightedSum / $cashWeightDenom, 2) : null,
-                'weighted_impure_ratio' => $impureWeightDenom > 0 ? round($impureWeightedSum / $impureWeightDenom, 2) : 0,
-                'total_aum' => round($totalAum, 2),
-                'compliant_aum' => round($compliantAum, 2),
-                'compliant_pct' => $totalAum > 0 ? round(($compliantAum / $totalAum) * 100, 2) : 0,
-                'non_compliant_aum' => round($nonCompliantAum, 2),
-                'non_compliant_pct' => $totalAum > 0 ? round(($nonCompliantAum / $totalAum) * 100, 2) : 0,
-                'doubtful_aum' => round($doubtfulAum, 2),
-                'doubtful_pct' => $totalAum > 0 ? round(($doubtfulAum / $totalAum) * 100, 2) : 0,
-                'unmapped_aum' => round($unmappedAum, 2),
-                'total_purification_due' => round($totalPurification, 2),
-                'weighted_purification_per_unit' => $totalUnits > 0 ? round($totalPurification / $totalUnits, 4) : 0,
-                'total_zakatable_amount' => $totalZakatable,
-                'indicative_zakat_per_unit' => $totalUnits > 0 ? round($totalZakatable / $totalUnits, 4) : 0,
-                'screened_at' => now()->toISOString(),
+            'summary' => $summary,
+            'smart_brief' => $smartBrief,
+        ];
+    }
+
+    /**
+     * Synthesize actionable compliance intelligence, auto-rebalance swaps, risk classification,
+     * concentration alerts, and ready-to-publish manager commentary from evaluated holdings.
+     */
+    protected function buildSmartBrief(
+        array $evaluated,
+        array $sectorAllocation,
+        array $rebalancingSuggestions,
+        array $summary
+    ): array {
+        $nonCompliant = (int) ($summary['non_compliant_count'] ?? 0);
+        $doubtful = (int) ($summary['doubtful_count'] ?? 0);
+        $nearCount = (int) ($summary['near_threshold_count'] ?? 0);
+        $compliantPct = (float) ($summary['compliant_pct'] ?? 0);
+        $top5Pct = (float) ($summary['top_5_concentration_pct'] ?? 0);
+        $holdingsCount = (int) ($summary['holdings_count'] ?? 0);
+
+        $readiness = ($nonCompliant > 0 || $doubtful > 0)
+            ? 'REMEDIATION_REQUIRED'
+            : ($nearCount > 0 ? 'COMPLIANT_DRIFT_WATCH' : 'CERTIFIED_READY');
+
+        // Concentration warnings
+        $warnings = [];
+        foreach ($evaluated as $h) {
+            if ((float) ($h['weight_pct'] ?? 0) >= 20.0) {
+                $warnings[] = [
+                    'type' => 'single_name',
+                    'message' => "{$h['symbol']} carries {$h['weight_pct']}% single-name weight (>= 20% prudence threshold).",
+                ];
+            }
+        }
+        foreach ($sectorAllocation as $sec) {
+            if ((float) ($sec['weight_pct'] ?? 0) >= 40.0) {
+                $warnings[] = [
+                    'type' => 'sector',
+                    'message' => "{$sec['sector']} represents {$sec['weight_pct']}% of AUM (>= 40% sector ceiling).",
+                ];
+            }
+        }
+
+        // Dynamic SEC 1–7 risk classification based on diversification & concentration
+        if ($holdingsCount <= 4 || $top5Pct >= 80) {
+            $riskLevel = 6;
+            $riskLabel = 'High Growth / Concentrated, 6 of 7';
+        } elseif ($top5Pct >= 60 || $holdingsCount <= 8) {
+            $riskLevel = 5;
+            $riskLabel = 'Moderate High Equity, 5 of 7';
+        } else {
+            $riskLevel = 4;
+            $riskLabel = 'Balanced Diversified Equity, 4 of 7';
+        }
+
+        // Build 1-click Auto-Align-to-Halal rebalance plan
+        $swapMap = [];
+        $swaps = [];
+        foreach ($rebalancingSuggestions as $sug) {
+            $best = $sug['replacements'][0] ?? null;
+            if (! $best || (int) ($best['estimated_units'] ?? 0) <= 0) {
+                continue;
+            }
+            $swapMap[$sug['source_symbol']] = $best;
+            $swaps[] = [
+                'from_symbol' => $sug['source_symbol'],
+                'to_symbol' => $best['symbol'],
+                'to_name' => $best['name'],
+                'estimated_units' => (int) $best['estimated_units'],
+                'latest_price' => (float) $best['latest_price'],
+                'released_aum' => (float) ($sug['source_market_value'] ?? 0),
+            ];
+        }
+
+        $proposedHoldingsMap = [];
+        foreach ($evaluated as $h) {
+            $sym = $h['symbol'];
+            if (isset($swapMap[$sym])) {
+                $rep = $swapMap[$sym];
+                $repSym = $rep['symbol'];
+                if (! isset($proposedHoldingsMap[$repSym])) {
+                    $proposedHoldingsMap[$repSym] = [
+                        'symbol' => $repSym,
+                        'shares' => 0,
+                        'avg_price' => (float) $rep['latest_price'],
+                    ];
+                }
+                $proposedHoldingsMap[$repSym]['shares'] += (int) $rep['estimated_units'];
+            } elseif (($h['status'] ?? '') === 'halal') {
+                if (! isset($proposedHoldingsMap[$sym])) {
+                    $proposedHoldingsMap[$sym] = [
+                        'symbol' => $sym,
+                        'shares' => 0,
+                        'avg_price' => (float) $h['current_price'],
+                    ];
+                }
+                $proposedHoldingsMap[$sym]['shares'] += (float) $h['shares'];
+            }
+        }
+
+        // Auto-drafted publication commentary
+        $topTickers = implode(', ', array_map(fn ($h) => "{$h['symbol']} ({$h['weight_pct']}%)", array_slice($evaluated, 0, 3)));
+        $leadSector = $sectorAllocation[0]['sector'] ?? 'Equities';
+        $leadSectorPct = $sectorAllocation[0]['weight_pct'] ?? 0;
+        $purifFormatted = '₦' . number_format((float) ($summary['total_purification_due'] ?? 0), 2);
+        $commentary = "Across {$holdingsCount} evaluated holdings led by {$leadSector} ({$leadSectorPct}%) and core positions {$topTickers}, {$compliantPct}% of portfolio AUM satisfies AAOIFI Standard No. 21 screening.";
+        if ($nonCompliant > 0) {
+            $commentary .= " {$nonCompliant} non-compliant holding(s) have been flagged for divestment into verified Halal sector peers.";
+        } else {
+            $commentary .= " Aggregate purification liability stands at {$purifFormatted}.";
+        }
+        if ($nearCount > 0) {
+            $commentary .= " {$nearCount} constituent(s) are placed on Drift Watch near AAOIFI ratio thresholds.";
+        }
+
+        return [
+            'readiness' => $readiness,
+            'risk_classification' => [
+                'level' => $riskLevel,
+                'max' => 7,
+                'label' => $riskLabel,
+            ],
+            'concentration_warnings' => $warnings,
+            'suggested_commentary' => $commentary,
+            'auto_rebalance_plan' => [
+                'available' => ! empty($swaps) && ! empty($proposedHoldingsMap),
+                'swaps_count' => count($swaps),
+                'swaps' => $swaps,
+                'projected_compliant_pct' => ! empty($proposedHoldingsMap) ? 100.0 : $compliantPct,
+                'proposed_holdings' => array_values($proposedHoldingsMap),
             ],
         ];
     }

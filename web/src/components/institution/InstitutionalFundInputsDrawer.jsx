@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import {
-  CheckCircle2, AlertTriangle, Building2, TrendingUp, Percent, ShieldCheck, Save, Plus, Trash2
+  CheckCircle2, AlertTriangle, Building2, TrendingUp, Percent, ShieldCheck, Save, Plus, Trash2, Sparkles
 } from 'lucide-react';
 import { computeFundValidation } from './institutionalFixtures';
 
@@ -21,6 +21,7 @@ export default function InstitutionalFundInputsDrawer({
   onSaveMandate,
   isSaving = false,
   isAuthenticatedInstitution = false,
+  smartBrief = null,
 }) {
   const [subTab, setSubTab] = useState('identity');
   const [newLogSymbol, setNewLogSymbol] = useState('');
@@ -111,6 +112,19 @@ export default function InstitutionalFundInputsDrawer({
     marginBottom: 4,
   };
 
+  const handleAutoDraftFromScreening = () => {
+    const nextRisk = smartBrief?.risk_classification;
+    onChangeMeta({
+      ...meta,
+      fund_size_ngn: Number(summary?.total_aum || meta.fund_size_ngn || 0),
+      commentary: smartBrief?.suggested_commentary || meta.commentary,
+      risk_level: nextRisk?.level || meta.risk_level,
+      risk_label: nextRisk?.label || meta.risk_label,
+      purification_per_unit_input: Number(summary?.weighted_purification_per_unit || meta.purification_per_unit_input || 0),
+      zakat_per_unit_input: Number(summary?.indicative_zakat_per_unit || meta.zakat_per_unit_input || 0),
+    });
+  };
+
   return (
     <div className="no-print" style={{
       background: 'var(--bg)',
@@ -130,16 +144,32 @@ export default function InstitutionalFundInputsDrawer({
             Structured fields from Irshad Fact Sheet &amp; One-Page Summary specification. Calculated ratios (Premium/NAV, Concentration, Zakat, TER) update live.
           </div>
         </div>
-        <span style={{
-          padding: '5px 11px',
-          borderRadius: 999,
-          fontSize: '0.72rem',
-          fontWeight: 800,
-          background: validation.passCount === validation.totalChecks ? 'var(--halal-bg)' : 'rgba(209, 165, 98, 0.16)',
-          color: validation.passCount === validation.totalChecks ? 'var(--halal)' : '#8C6828',
-        }}>
-          {validation.passCount} / {validation.totalChecks} Automated Checks Passed
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          {smartBrief && (
+            <button
+              type="button"
+              onClick={handleAutoDraftFromScreening}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 5,
+                padding: '6px 12px', borderRadius: 9, border: 'none',
+                background: 'linear-gradient(135deg, #1E4D40 0%, #297D66 100%)',
+                color: '#fff', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer',
+              }}
+            >
+              <Sparkles size={12} /> Smart Auto-Fill
+            </button>
+          )}
+          <span style={{
+            padding: '5px 11px',
+            borderRadius: 999,
+            fontSize: '0.72rem',
+            fontWeight: 800,
+            background: validation.passCount === validation.totalChecks ? 'var(--halal-bg)' : 'rgba(209, 165, 98, 0.16)',
+            color: validation.passCount === validation.totalChecks ? 'var(--halal)' : '#8C6828',
+          }}>
+            {validation.passCount} / {validation.totalChecks} Automated Checks Passed
+          </span>
+        </div>
       </div>
 
       {/* Sub-navigation */}
