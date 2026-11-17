@@ -174,11 +174,6 @@ export const LoginPage = () => {
             Sign up free
           </Link>
         </p>
-        <div style={{ marginTop: '14px', paddingTop: '14px', borderTop: '1px solid var(--border)', textAlign: 'center' }}>
-          <Link to="/institution/demo" style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--gold)', textDecoration: 'none' }}>
-            Bank, Broker or Asset Manager? Explore the Institutional Demo →
-          </Link>
-        </div>
       </div>
     </div>
   );
