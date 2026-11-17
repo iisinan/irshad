@@ -375,7 +375,7 @@ export default function BasketsTab({ data, onUpgrade }) {
   const [cashBalance, setCashBalance] = useState(0);
 
   // Filters & Search
-  const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'curated' | 'custom' | 'irshad_thematic'
+  const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'custom' | 'irshad_thematic'
   const [searchQuery, setSearchQuery] = useState('');
   const [isWaitlisted, setIsWaitlisted] = useState(() => {
     try {
@@ -481,7 +481,6 @@ export default function BasketsTab({ data, onUpgrade }) {
   const filteredBaskets = useMemo(() => {
     if (activeFilter === 'irshad_thematic') return [];
     return baskets.filter(b => {
-      if (activeFilter === 'curated' && b.user_id !== null) return false;
       if (activeFilter === 'custom' && b.user_id === null) return false;
 
       if (!searchQuery.trim()) return true;
@@ -1188,7 +1187,6 @@ export default function BasketsTab({ data, onUpgrade }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               {[
                 { id: 'all', label: `All (${baskets.length})` },
-                { id: 'curated', label: `Curated (${curatedCount})` },
                 { id: 'custom', label: `Custom (${customCount})` },
                 { id: 'irshad_thematic', label: 'Irshad Thematic', isNew: true },
               ].map(tab => (

@@ -301,9 +301,7 @@ class _BasketsScreenState extends State<BasketsScreen> {
           final baskets = provider.baskets;
           final filtered = _selectedFilter == 'Custom'
               ? baskets.where((b) => b.userId != null).toList()
-              : _selectedFilter == 'Curated'
-                  ? baskets.where((b) => b.userId == null).toList()
-                  : baskets;
+              : baskets;
 
           return RefreshIndicator(
             color: context.primary,
@@ -902,8 +900,6 @@ class _BasketsScreenState extends State<BasketsScreen> {
       child: Row(
         children: [
           _FilterChip(label: 'All', isSelected: _selectedFilter == 'All', onTap: () => _onFilterTap('All')),
-          const SizedBox(width: 8),
-          _FilterChip(label: 'Curated', isSelected: _selectedFilter == 'Curated', icon: Icons.verified_outlined, onTap: () => _onFilterTap('Curated')),
           const SizedBox(width: 8),
           _FilterChip(label: 'Custom', isSelected: _selectedFilter == 'Custom', icon: Icons.tune_rounded, onTap: () => _onFilterTap('Custom')),
           const SizedBox(width: 8),
