@@ -23,10 +23,43 @@ export const LOTUS_FALLBACK_DATA = {
   last_rebalancing: '30th June, 2026',
   next_rebalancing: '31st December, 2026',
   benchmark_index: 'NGX Lotus Islamic Index',
-  launch_date: 'Aug-14',
-  listing_date: 'Nov-14',
+  launch_date: 'August 2014',
+  listing_date: 'November 2014',
   listing_exchange: 'Nigerian Exchange Limited',
   holdings_count: 13,
+  units_in_issue: 33400000,
+  units_in_issue_label: '33.4 million',
+  expense_ratio_pct: 0.95,
+  bid_offer_spread_pct: 1.4,
+  replication: 'Full physical',
+  holding_period: 'Five years or more',
+  risk_rating: 6,
+  risk_max: 7,
+  risk_label: '6 of 7 (High Growth Equity)',
+  volatility_3y_pct: 24.5,
+  top_5_concentration_pct: 66.5,
+  tracking_error_3y_pct: 4.8,
+  tracking_difference_ytd_pct: -12.6,
+  zakat_per_unit: 21.40,
+  parties: {
+    fund_manager: 'Lotus Capital Limited',
+    trustee: 'STL Trustees Limited',
+    custodian: 'Stanbic IBTC Nominees Limited',
+    registrar: 'Greenwich Registrars & Data Solutions',
+    auditor: 'KPMG / External Fund Auditor',
+    sec_status: 'SEC Nigeria Registered ETF',
+    shariah_board: 'Irshad Tech Ltd & Shariah Advisory Board (CSAA Certified FY2025)',
+  },
+  fee_lines: [
+    { label: 'Management Fee', pct: 0.60 },
+    { label: 'Trustee, Custody & Shariah Advisory', pct: 0.22 },
+    { label: 'Audit, Registrar & Listing', pct: 0.13 },
+  ],
+  multi_period_returns: [
+    { period: 'Year to date', fund: 54.2, benchmark: 66.8, all_share: 47.3 },
+    { period: '1 year', fund: 88.4, benchmark: 104.3, all_share: 72.5 },
+    { period: '3 years p.a.', fund: 58.1, benchmark: 63.0, all_share: 49.8 },
+  ],
   overview:
     'The Lotus Halal Equity Exchange Traded Fund “LHE ETF” is an open-ended fund that tracks the performance of the NGX-Lotus Islamic Index (NGXLII). It is designed to enable investors obtain market exposure to the securities of the constituent companies of the NGX-Lotus Islamic Index and to replicate the performance of the index.',
   index_commentary:
@@ -165,6 +198,91 @@ export const NORRENBERGER_FALLBACK_DATA = {
   footer_note: 'Norrenberger Islamic Fund | Licensed and Regulated by the Securities and Exchange Commission (SEC) Nigeria',
 };
 
+export const BALANCED_FALLBACK_DATA = {
+  id: 'balanced_fund',
+  institution_name: 'Irshad Shariah Fund Benchmark',
+  fund_name: 'Halal Balanced Fund (60/40 Model)',
+  subtitle: "40% NGX halal equities, 60% Shari'ah-compliant fixed income, mostly FGN sukuk",
+  factsheet_date: 'October 2026',
+  frequency_label: 'Monthly, first week',
+  unit_price: 108.27,
+  ytd_yield: 17.72,
+  fund_size_label: '₦6.81bn',
+  fund_size_ngn: 6810000000,
+  units_in_issue: 62900000,
+  units_in_issue_label: '62.9 million',
+  expense_ratio_pct: 1.60,
+  management_fee: '1.25%',
+  launch_date: 'January 2025',
+  initial_investment: '50 units',
+  distributions: 'Quarterly',
+  redemption: 'Daily, 3 business days',
+  risk_rating: 4,
+  risk_max: 7,
+  risk_label: 'Moderate, 4 of 7',
+  volatility_3y_pct: 11.8,
+  holding_period: 'Three years or more',
+  purification_per_unit_fy25: 0.18,
+  zakat_per_unit: 16.80,
+  benchmark: 'Blended (40% NGXLII / 60% FGN Sukuk)',
+  tracking_difference_ytd: -1.70,
+  objective:
+    'Generate balanced capital growth and non-interest quarterly income by combining 40% AAOIFI-screened NGX halal equities with 60% certified FGN/Corporate Sukuk and non-interest money market instruments.',
+  parties: {
+    fund_manager: 'Institutional Fund Manager',
+    trustee: 'Registered Institutional Trustee',
+    custodian: 'Licensed Non-Interest Custodian',
+    registrar: 'Approved Registrar',
+    sec_status: 'SEC Nigeria Open-Ended Mutual Fund',
+    shariah_board: 'Irshad Tech Ltd (AAOIFI & Sukuk Screening Certified FY2025)',
+  },
+  fee_lines: [
+    { label: 'Management Fee', pct: 1.25 },
+    { label: 'Custody, Trustee & Shariah Advisory', pct: 0.25 },
+    { label: 'Audit & Admin Expenses', pct: 0.10 },
+  ],
+  allocation: [
+    { security: 'Equity', current: 40.00, target_label: '30% - 50%', target_min: 30, target_max: 50, shariah_contract: 'Halal NGX Equities' },
+    { security: 'FGN sukuk', current: 36.00, target_label: '25% - 60%', target_min: 25, target_max: 60, shariah_contract: 'Sukuk Al-Ijarah' },
+    { security: 'Corporate sukuk', current: 11.00, target_label: '0% - 30%', target_min: 0, target_max: 30, shariah_contract: 'Sukuk Al-Wakalah' },
+    { security: 'Mudarabah', current: 7.00, target_label: '0% - 25%', target_min: 0, target_max: 25, shariah_contract: 'Profit-Sharing' },
+    { security: 'Murabaha', current: 4.00, target_label: '0% - 20%', target_min: 0, target_max: 20, shariah_contract: 'Cost-Plus Trade' },
+    { security: 'Ijarah sukuk', current: 1.00, target_label: '0% - 15%', target_min: 0, target_max: 15, shariah_contract: 'Leasing Sukuk' },
+    { security: 'Cash', current: 1.00, target_label: '0% - 10%', target_min: 0, target_max: 10, shariah_contract: 'Non-Interest Cash' },
+  ],
+  monthly_yield_2026: [
+    { month: 'Jan', yield: 17.06, benchmark: 16.40 },
+    { month: 'Feb', yield: 17.05, benchmark: 16.29 },
+    { month: 'Mar', yield: 17.49, benchmark: 16.17 },
+    { month: 'Apr', yield: 18.28, benchmark: 16.48 },
+    { month: 'May', yield: 18.47, benchmark: 16.83 },
+    { month: 'Jun', yield: 18.51, benchmark: 17.47 },
+    { month: 'Jul', yield: 18.21, benchmark: 17.75 },
+    { month: 'Aug', yield: 18.12, benchmark: 17.14 },
+    { month: 'Sep', yield: 17.95, benchmark: 16.56 },
+    { month: 'Oct', yield: 17.72, benchmark: 16.73 },
+  ],
+  maturity_profile: [
+    { bucket: '<1 yr', pct: 19 },
+    { bucket: '1 to 3 yr', pct: 14 },
+    { bucket: '>3 yr', pct: 27 },
+    { bucket: 'Equity', pct: 40 },
+  ],
+  distribution_per_unit: [
+    { quarter: 'Q4 25', amount: 3.60 },
+    { quarter: 'Q1 26', amount: 3.45 },
+    { quarter: 'Q2 26', amount: 3.52 },
+    { quarter: 'Q3 26', amount: 3.05 },
+  ],
+  trailing_12m_distribution: 13.62,
+  performance_metrics: [
+    { label: 'Year to Date', value: '31.40%' },
+    { label: '1 Year', value: '36.90%' },
+    { label: '3 Years P.A.', value: '27.80%' },
+    { label: 'Since Launch P.A.', value: '19.60%' },
+  ],
+};
+
 export const SAMPLE_UPLOAD_CSV = `Symbol,Name,Shares,Avg_Price
 DANGCEM,Dangote Cement PLC,120000,1380.00
 MTNN,MTN Nigeria Communications PLC,180000,790.00
@@ -185,4 +303,70 @@ export function formatNaira(amount, compact = false) {
     if (Math.abs(num) >= 1e6) return `₦${(num / 1e6).toFixed(2)}m`;
   }
   return `₦${num.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+export function computeFundValidation(meta, holdings = [], summary = {}, isNorrenberger = false, isBalanced = false) {
+  const holdingsSum = holdings.reduce((acc, h) => acc + Number(h.weight_pct || 0), 0);
+  const allocationWeightsSum = isNorrenberger || isBalanced
+    ? (meta.allocation_list || []).reduce((acc, r) => acc + Number(r.current || 0), 0)
+    : holdingsSum;
+
+  const weightSumTarget = holdings.length > 0 || isNorrenberger || isBalanced
+    ? (allocationWeightsSum > 0 ? allocationWeightsSum : 100)
+    : 0;
+  const weightsPass = holdings.length === 0 && !isNorrenberger && !isBalanced
+    ? false
+    : Math.abs(weightSumTarget - 100) <= 1.0;
+
+  const nav = Number(meta.nav_per_unit || 0);
+  const fundSize = Number(meta.fund_size_ngn || summary.total_aum || 0);
+  const units = Number(meta.units_in_issue || 0);
+  const derivedUnits = nav > 0 && fundSize > 0 ? fundSize / nav : 0;
+  const unitsPass = nav > 0 && fundSize > 0 && (
+    units === 0 || Math.abs(derivedUnits - units) / Math.max(1, units) <= 0.03
+  );
+
+  const feeSum = (meta.fee_lines || []).reduce((acc, f) => acc + Number(f.pct || 0), 0);
+  const statedTer = Number(meta.expense_ratio_pct || 0);
+  const feesPass = statedTer === 0 || feeSum === 0 || Math.abs(feeSum - statedTer) <= 0.05;
+
+  const signOffPass = Boolean((meta.shariah_board || '').trim() && (meta.approved_by || '').trim());
+
+  const checks = [
+    {
+      id: 'weights',
+      title: 'Holdings & Sector Weights = 100%',
+      pass: weightsPass,
+      detail: weightSumTarget > 0
+        ? `Reconciled weight sum: ${weightSumTarget.toFixed(2)}%`
+        : 'Upload or select holdings to verify weight sum.',
+    },
+    {
+      id: 'nav_units',
+      title: 'Fund Size ÷ NAV Matches Units in Issue',
+      pass: unitsPass,
+      detail: nav > 0 && fundSize > 0
+        ? `Derived ${(derivedUnits / 1e6).toFixed(2)}M units from ${formatNaira(fundSize, true)} ÷ ₦${nav.toFixed(2)}`
+        : 'Provide Fund Size & NAV per Unit for automated derivation.',
+    },
+    {
+      id: 'ter_fees',
+      title: 'Fee Lines Sum to Stated Total Expense Ratio',
+      pass: feesPass,
+      detail: feeSum > 0
+        ? `Itemized fees total ${feeSum.toFixed(2)}% vs stated TER ${statedTer.toFixed(2)}%`
+        : 'Using single TER / management fee input.',
+    },
+    {
+      id: 'governance',
+      title: 'Shari\'ah Adviser & Manager Publication Sign-Off',
+      pass: signOffPass,
+      detail: signOffPass
+        ? `Cut-off: ${meta.factsheet_date || 'Today'} · Approved by ${meta.approved_by}`
+        : 'Enter Approver Name under Sign-Off before institutional publication.',
+    },
+  ];
+
+  const passCount = checks.filter((c) => c.pass).length;
+  return { checks, passCount, totalChecks: checks.length, derivedUnits, feeSum };
 }

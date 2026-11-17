@@ -4,61 +4,54 @@ import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend,
 } from 'recharts';
 import {
-  Printer, ShieldCheck, CheckCircle2, SlidersHorizontal,
-  Layers, Activity, Droplet, Info
+  Printer, ShieldCheck, CheckCircle2, SlidersHorizontal, FileText, LayoutGrid
 } from 'lucide-react';
-import { LOTUS_FALLBACK_DATA, NORRENBERGER_FALLBACK_DATA, formatNaira } from './institutionalFixtures';
+import {
+  LOTUS_FALLBACK_DATA,
+  NORRENBERGER_FALLBACK_DATA,
+  BALANCED_FALLBACK_DATA,
+  formatNaira,
+  computeFundValidation,
+} from './institutionalFixtures';
+import InstitutionalFundInputsDrawer from './InstitutionalFundInputsDrawer';
 
-const SECTOR_PALETTE = ['#297D66', '#45A58A', '#D1A562', '#1E4D40', '#74C6A9', '#0F766E', '#64748B'];
-
-const FACTSHEET_THEMES = {
-  emerald: {
-    label: 'Irshad Teal',
-    primary: '#297D66',
-    accent: '#D1A562',
-    dark: '#1E4D40',
-    grad: 'linear-gradient(135deg, #1E5E4D 0%, #297D66 55%, #45A58A 100%)',
-    light: '#F2F9F5',
-    border: 'rgba(69, 165, 138, 0.35)',
-    railBg: '#F7FCF9',
-    tableHeader: '#1E4D40',
-  },
-  navy: {
-    label: 'Executive Navy',
-    primary: '#1E3A8A',
-    accent: '#D1A562',
-    dark: '#0F172A',
-    grad: 'linear-gradient(135deg, #0F172A 0%, #1E3A8A 65%, #1D4ED8 100%)',
-    light: '#EFF6FF',
-    border: '#BFDBFE',
-    railBg: '#F8FAFC',
-    tableHeader: '#0F172A',
-  },
-  lotus: {
-    label: 'Burgundy',
-    primary: '#991B1B',
-    accent: '#D1A562',
-    dark: '#450A0A',
-    grad: 'linear-gradient(135deg, #450A0A 0%, #991B1B 65%, #B91C1C 100%)',
-    light: '#FEF2F2',
-    border: '#FECACA',
-    railBg: '#FEF9F9',
-    tableHeader: '#450A0A',
-  },
+// Official Irshad Brand Palette (Deep Forest Teal, Irshad Teal, Irshad Mint, Antique Gold)
+const IRSHAD = {
+  forest: '#1E4D40',
+  forestDark: '#13372D',
+  teal: '#297D66',
+  mint: '#45A58A',
+  mintSoft: '#74C6A9',
+  gold: '#D1A562',
+  goldDark: '#856527',
+  goldBg: '#F9F5EB',
+  canvas: '#F7FCF9',
+  border: '#DCECE4',
+  slate: '#64748B',
 };
+
+const IRSHAD_CHART_PALETTE = [
+  '#1E4D40',
+  '#297D66',
+  '#45A58A',
+  '#74C6A9',
+  '#D1A562',
+  '#856527',
+  '#64748B',
+];
 
 function AaoifiGaugeBar({ label, value, threshold, suffix = '%' }) {
   const numericVal = value === null || value === undefined ? null : Number(value);
   const pctFill = numericVal === null ? 0 : Math.min(100, (numericVal / threshold) * 100);
   const isBreach = numericVal !== null && numericVal >= threshold;
   const isNear = numericVal !== null && !isBreach && numericVal >= threshold * 0.8;
-  const barColor = isBreach ? '#DC2626' : isNear ? '#D97706' : '#059669';
+  const barColor = isBreach ? '#B91C1C' : isNear ? IRSHAD.goldDark : IRSHAD.teal;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.73rem' }}>
-        <span style={{ color: '#475569', fontWeight: 600 }}>{label}</span>
-        <span style={{ fontWeight: 800, color: numericVal === null ? '#64748B' : barColor }}>
+        <span style={{ color: '#334155', fontWeight: 600 }}>{label}</span>
+        <span style={{ fontWeight: 800, color: numericVal === null ? IRSHAD.slate : barColor }}>
           {numericVal === null ? 'N/A' : `${numericVal.toFixed(2)}${suffix}`}{' '}
           <span style={{ color: '#94A3B8', fontWeight: 600 }}>/ &lt;{threshold}{suffix}</span>
         </span>
@@ -76,9 +69,93 @@ function AaoifiGaugeBar({ label, value, threshold, suffix = '%' }) {
   );
 }
 
+function RiskScaleSeven({ level = 4, max = 7 }) {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${max}, 1fr)`, gap: 4 }}>
+      {Array.from({ length: max }, (_, idx) => idx + 1).map((step) => (
+        <div
+          key={step}
+          style={{
+            height: 10,
+            borderRadius: 2,
+            background: step <= level
+              ? (step >= 5 ? IRSHAD.goldDark : IRSHAD.teal)
+              : '#E2E8F0',
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function ShariahComplianceBanner({
+  guidanceText,
+  screensLabel,
+  screensDetail,
+  purificationAmount,
+  purificationNote,
+  zakatAmount,
+  zakatNote,
+  footerRuleText,
+}) {
+  return (
+    <section style={{
+      background: `linear-gradient(135deg, ${IRSHAD.forestDark} 0%, ${IRSHAD.forest} 55%, ${IRSHAD.teal} 100%)`,
+      color: '#FFFFFF',
+      borderRadius: 12,
+      padding: '18px 22px',
+    }}>
+      <div style={{ fontSize: '0.72rem', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', color: IRSHAD.mintSoft, marginBottom: 12 }}>
+        SHARI&apos;AH COMPLIANCE
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(175px, 1fr))', gap: 18 }}>
+        <div>
+          <div style={{ fontSize: '0.7rem', color: IRSHAD.mintSoft, fontWeight: 700, marginBottom: 4 }}>Guidance</div>
+          <div style={{ fontSize: '0.75rem', lineHeight: 1.5, color: 'rgba(255,255,255,0.92)' }}>
+            {guidanceText}
+          </div>
+        </div>
+        <div>
+          <div style={{ fontSize: '0.7rem', color: IRSHAD.mintSoft, fontWeight: 700, marginBottom: 4 }}>{screensLabel}</div>
+          <div style={{ fontSize: '0.75rem', lineHeight: 1.5, color: 'rgba(255,255,255,0.92)' }}>
+            {screensDetail}
+          </div>
+        </div>
+        <div>
+          <div style={{ fontSize: '0.7rem', color: IRSHAD.mintSoft, fontWeight: 700, marginBottom: 4 }}>Purification</div>
+          <div style={{ fontSize: '1.15rem', fontWeight: 900, lineHeight: 1.15 }}>
+            {purificationAmount} <span style={{ fontSize: '0.74rem', fontWeight: 600, opacity: 0.9 }}>per unit</span>
+          </div>
+          <div style={{ fontSize: '0.71rem', lineHeight: 1.45, opacity: 0.85, marginTop: 4 }}>{purificationNote}</div>
+        </div>
+        <div>
+          <div style={{ fontSize: '0.7rem', color: IRSHAD.mintSoft, fontWeight: 700, marginBottom: 4 }}>Zakat (Indicative)</div>
+          <div style={{ fontSize: '1.15rem', fontWeight: 900, lineHeight: 1.15, color: '#FDE68A' }}>
+            {zakatAmount} <span style={{ fontSize: '0.74rem', fontWeight: 600, opacity: 0.9 }}>per unit</span>
+          </div>
+          <div style={{ fontSize: '0.71rem', lineHeight: 1.45, opacity: 0.85, marginTop: 4 }}>{zakatNote}</div>
+        </div>
+      </div>
+      {footerRuleText && (
+        <div style={{
+          marginTop: 14,
+          paddingTop: 10,
+          borderTop: '1px solid rgba(255,255,255,0.18)',
+          fontSize: '0.7rem',
+          color: 'rgba(255,255,255,0.85)',
+          lineHeight: 1.45,
+        }}>
+          {footerRuleText}
+        </div>
+      )}
+    </section>
+  );
+}
+
 export default function InstitutionalFactsheetView({
   lotusData,
   norrenbergerData,
+  balancedData,
   screened,
   activePresetId,
   customFundName,
@@ -87,32 +164,36 @@ export default function InstitutionalFactsheetView({
   onChangeFactsheetMeta,
   allowedTemplates = ['lotus', 'norrenberger', 'custom'],
 }) {
-  const [showCustomizer, setShowCustomizer] = useState(false);
+  void allowedTemplates;
+  const [viewMode, setViewMode] = useState('summary'); // 'summary' (One-Page Summary) | 'full' (7-Section Fact Sheet)
+  const [showInputsDrawer, setShowInputsDrawer] = useState(false);
 
   const isLotus = activePresetId === 'lotus_etf';
   const isNorrenberger = activePresetId === 'norrenberger_fund';
+  const isBalanced = activePresetId === 'balanced_fund';
+  const isFixedOrBalanced = isNorrenberger || isBalanced;
+
   const lotus = useMemo(() => ({ ...LOTUS_FALLBACK_DATA, ...(lotusData || {}) }), [lotusData]);
   const norren = useMemo(() => ({ ...NORRENBERGER_FALLBACK_DATA, ...(norrenbergerData || {}) }), [norrenbergerData]);
-  void allowedTemplates;
-
-  const defaultThemeKey = 'emerald';
+  const balanced = useMemo(() => ({ ...BALANCED_FALLBACK_DATA, ...(balancedData || {}) }), [balancedData]);
 
   const holdings = useMemo(() => {
     if (isLotus) return lotusData?.screening_result?.holdings || screened?.holdings || [];
+    if (isBalanced) return balancedData?.screening_result?.holdings || screened?.holdings || [];
     return screened?.holdings || [];
-  }, [isLotus, lotusData?.screening_result?.holdings, screened?.holdings]);
+  }, [isLotus, isBalanced, lotusData?.screening_result?.holdings, balancedData?.screening_result?.holdings, screened?.holdings]);
 
   const summary = useMemo(() => {
     if (isLotus) return lotusData?.screening_result?.summary || screened?.summary || {};
+    if (isBalanced) return balancedData?.screening_result?.summary || screened?.summary || {};
     return screened?.summary || {};
-  }, [isLotus, lotusData?.screening_result?.summary, screened?.summary]);
+  }, [isLotus, isBalanced, lotusData?.screening_result?.summary, balancedData?.screening_result?.summary, screened?.summary]);
 
   const sectors = useMemo(() => {
     if (isLotus) return lotus.sector_allocation || screened?.sector_allocation || [];
     return screened?.sector_allocation || [];
   }, [isLotus, lotus.sector_allocation, screened?.sector_allocation]);
 
-  // Compute fallback weighted AAOIFI health ratios cleanly from holdings if summary lacks them
   const healthMetrics = useMemo(() => {
     if (summary?.weighted_debt_ratio !== undefined || summary?.weighted_impure_ratio !== undefined) {
       return {
@@ -141,9 +222,7 @@ export default function InstitutionalFactsheetView({
         cashW += mv;
         cashSum += mv * Number(h.cash_ratio);
       }
-      if (mv > 0) {
-        impureSum += mv * Number(h.impure_ratio || 0);
-      }
+      if (mv > 0) impureSum += mv * Number(h.impure_ratio || 0);
     });
     return {
       debt: debtW > 0 ? debtSum / debtW : null,
@@ -156,894 +235,1056 @@ export default function InstitutionalFactsheetView({
   const defaults = useMemo(() => {
     if (isLotus) {
       return {
-        theme: defaultThemeKey,
         institution_name: lotus.institution_name,
         fund_name: lotus.fund_name,
-        mandate_type: 'Shariah Equity Exchange Traded Fund',
+        subtitle: "Shari'ah-compliant equity exchange traded fund tracking the NGX Lotus Islamic Index",
+        mandate_type: 'Shariah Equity ETF',
         ticker: lotus.ticker,
+        bloomberg_ticker: lotus.bloomberg_ticker,
         isin: lotus.isin,
         factsheet_date: lotus.factsheet_date,
         currency: lotus.currency,
-        benchmark: lotus.benchmark_index,
+        fund_size_ngn: lotus.fund_size_ngn,
+        nav_per_unit: lotus.nav_per_unit,
+        closing_price: lotus.closing_price,
+        units_in_issue: lotus.units_in_issue,
+        expense_ratio_pct: lotus.expense_ratio_pct,
         management_fee: lotus.management_fee,
+        bid_offer_spread_pct: lotus.bid_offer_spread_pct,
+        replication: lotus.replication,
+        holding_period: lotus.holding_period,
+        last_distribution: lotus.last_distribution,
+        benchmark: lotus.benchmark_index,
         rebalancing_frequency: lotus.rebalancing_frequency,
-        risk_level: 3,
-        risk_label: 'Moderate Growth',
+        risk_level: lotus.risk_rating || 6,
+        risk_label: lotus.risk_label || '6 of 7',
+        volatility_3y_pct: lotus.volatility_3y_pct || 24.5,
+        purification_per_unit_input: lotus.purification_per_unit_fy25,
+        zakat_per_unit_input: lotus.zakat_per_unit,
+        parties: lotus.parties,
+        fee_lines: lotus.fee_lines,
         objective: lotus.overview,
         commentary: lotus.index_commentary,
         investor_profile: lotus.investor_profile,
         benefits: lotus.benefits,
         contact: lotus.contact,
         disclaimer: lotus.disclaimer,
+        shariah_board: lotus.parties?.shariah_board,
+        approved_by: 'Lotus Investment & Shariah Committee',
       };
     }
+
+    if (isBalanced) {
+      return {
+        institution_name: balanced.institution_name,
+        fund_name: balanced.fund_name,
+        subtitle: balanced.subtitle,
+        mandate_type: 'Balanced Islamic Fund (60/40)',
+        ticker: 'IRSH-BAL6040',
+        isin: 'NGIRSHBAL6040',
+        factsheet_date: balanced.factsheet_date,
+        currency: 'Naira (NGN)',
+        fund_size_ngn: balanced.fund_size_ngn,
+        nav_per_unit: balanced.unit_price,
+        closing_price: null,
+        units_in_issue: balanced.units_in_issue,
+        expense_ratio_pct: balanced.expense_ratio_pct,
+        management_fee: balanced.management_fee,
+        holding_period: balanced.holding_period,
+        last_distribution: `Q3 2026: ₦3.05/unit (TTM: ₦${balanced.trailing_12m_distribution})`,
+        benchmark: balanced.benchmark,
+        rebalancing_frequency: 'Monthly / Quarterly',
+        risk_level: balanced.risk_rating,
+        risk_label: balanced.risk_label,
+        volatility_3y_pct: balanced.volatility_3y_pct,
+        purification_per_unit_input: balanced.purification_per_unit_fy25,
+        zakat_per_unit_input: balanced.zakat_per_unit,
+        parties: balanced.parties,
+        fee_lines: balanced.fee_lines,
+        allocation_list: balanced.allocation,
+        objective: balanced.objective,
+        commentary: 'Blended 40% screened NGX equity sleeve with 60% FGN Sukuk, Corporate Sukuk, Mudarabah, and Murabaha placements. Equity purification applies solely to the 40% equity sleeve.',
+        investor_profile: 'Built for institutions, endowments, and retail ethical investors seeking both equity upside and regular quarterly non-interest distributions.',
+        benefits: ['60% certified Sukuk & Mudarabah income floor', '40% live AAOIFI-screened NGX equity growth', 'Quarterly cash distributions', 'Daily liquidity within 3 business days'],
+        contact: 'Buy through the fund manager platform or authorised distributor · iirshad.com',
+        disclaimer: 'Figures blend the 3 July 2026 screened NGX equity weights scaled to 40% with October 2026 Islamic fixed-income market context. Indicative simulation for institutional reporting.',
+        shariah_board: balanced.parties?.shariah_board,
+        approved_by: 'Irshad Institutional Compliance',
+      };
+    }
+
     if (isNorrenberger) {
       return {
-        theme: defaultThemeKey,
         institution_name: norren.institution_name,
         fund_name: norren.fund_name,
-        mandate_type: 'Islamic Fixed Income Mutual Fund',
+        subtitle: "Open-ended Shari'ah-compliant fixed-income fund investing in investment-grade Sukuk and non-interest placements",
+        mandate_type: 'Islamic Fixed Income Fund',
         ticker: 'NORR-ISLAMIC',
         isin: 'NGNORRENIS01',
         factsheet_date: norren.factsheet_date,
         currency: 'Naira (NGN)',
+        fund_size_ngn: 6810000000,
+        nav_per_unit: 108.27,
+        closing_price: null,
+        units_in_issue: 62900000,
+        expense_ratio_pct: 1.90,
+        management_fee: '1.50% p.a.',
+        holding_period: 'Minimum 90–180 days recommended',
+        last_distribution: 'Q3 2026: ₦3.05/unit',
         benchmark: norren.benchmark,
-        management_fee: '1.50% p.a. (1.90% TER)',
-        rebalancing_frequency: 'Quarterly Review',
-        risk_level: norren.risk_profile?.level || 1,
-        risk_label: norren.risk_profile?.label || 'Conservative',
+        rebalancing_frequency: 'Monthly',
+        risk_level: 2,
+        risk_label: 'Conservative, 2 of 7',
+        volatility_3y_pct: 3.4,
+        purification_per_unit_input: 0.00,
+        zakat_per_unit_input: 2.71,
+        parties: {
+          fund_manager: norren.institution_name,
+          sec_status: 'SEC Nigeria Licensed & Regulated',
+          shariah_board: 'Irshad Tech Ltd & Certified Sukuk Shariah Panel',
+        },
+        fee_lines: [
+          { label: 'Management Fee', pct: 1.50 },
+          { label: 'Custody, Trustee & Audit', pct: 0.40 },
+        ],
+        allocation_list: norren.allocation,
         objective: norren.objective,
         commentary: norren.commentary,
-        investor_profile: 'Suitable for institutional treasuries, Takaful operators, endowments, and capital-preservation mandates requiring non-interest Sukuk and Mudarabah liquidity.',
-        benefits: [
-          'Capital preservation in Sukuk & Mudarabah contracts',
-          'Quarterly distribution payouts',
-          'Full SEC Nigeria & AAOIFI Shariah supervision',
-          'Competitive yield vs 3-Year FGN Sukuk Benchmark',
-        ],
-        contact: norren.footer_note || 'Norrenberger Asset Management Limited | SEC Nigeria Regulated',
+        investor_profile: 'Suitable for institutional treasuries, Takaful operators, and investors seeking steady non-interest liquidity.',
+        benefits: ['Capital preservation in Sukuk & Mudarabah contracts', 'Quarterly distribution payouts', 'SEC Nigeria & Shariah supervision', 'Benchmark outperformance (+99 bps YTD)'],
+        contact: norren.footer_note,
         disclaimer: norren.disclaimer,
+        shariah_board: 'Irshad Tech Ltd & Fund Shariah Panel',
+        approved_by: 'Norrenberger Asset Management',
       };
     }
 
+    const totalAum = Number(summary.total_aum || 0);
     return {
-      theme: defaultThemeKey,
       institution_name: institutionName || 'Irshad Institutional Shariah Desk',
       fund_name: customFundName || 'Institutional Screened Equity Mandate',
-      mandate_type: 'AAOIFI Screened Equity Mandate',
+      subtitle: "Live AAOIFI Standard No. 21 screened institutional equity portfolio & purification schedule",
+      mandate_type: 'Screened Equity Mandate',
       ticker: 'IRSHAD-MANDATE',
       isin: 'NG-INST-SCREEN',
       factsheet_date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
       currency: 'Naira (NGN)',
+      fund_size_ngn: totalAum,
+      nav_per_unit: null,
+      closing_price: null,
+      units_in_issue: null,
+      expense_ratio_pct: 0.75,
+      management_fee: '0.75%',
+      holding_period: 'Three years or more',
+      last_distribution: 'Per corporate dividend calendar',
       benchmark: 'NGX Lotus Islamic Index (NGXLII)',
-      management_fee: '0.75% p.a.',
       rebalancing_frequency: 'Continuous / Pre-Trade',
-      risk_level: 3,
-      risk_label: 'Balanced Equity',
-      objective: 'Deliver institutional capital appreciation while maintaining strict compliance with AAOIFI Shariah Standard No. 21 (<30% debt, <30% interest-bearing cash, <5% impermissible revenue) and automated dividend purification.',
-      commentary: Number(summary.non_compliant_count || 0) > 0
-        ? `Irshad detected ${summary.non_compliant_count} non-compliant holding(s) representing ${Number(summary.non_compliant_pct || 0).toFixed(1)}% of portfolio AUM. Divestment and replacement with verified Halal sector peers are itemized in this audit schedule.`
-        : 'All evaluated constituents currently satisfy AAOIFI qualitative business screening and quantitative financial ratios. Portfolio purification liability has been computed down to the per-unit level.',
-      investor_profile: 'Designed for Pension Fund Administrators (PFAs), Islamic asset managers, ethical endowments, and institutional brokerage desks.',
-      benefits: [
-        'Automated AAOIFI Standard No. 21 screening on NGX filings',
-        'Per-unit & total charity purification schedule included',
-        'Proactive Drift Watch monitoring near threshold limits',
-        'Pre-trade & post-trade compliance audit trail',
+      risk_level: 4,
+      risk_label: 'Balanced Equity, 4 of 7',
+      volatility_3y_pct: 18.2,
+      purification_per_unit_input: null,
+      zakat_per_unit_input: null,
+      parties: {
+        fund_manager: institutionName || 'Institutional Desk',
+        sec_status: 'Institutional Compliance Mandate',
+        shariah_board: 'Irshad Tech Ltd (AAOIFI Standard No. 21 Automated Engine)',
+      },
+      fee_lines: [
+        { label: 'Management Fee', pct: 0.55 },
+        { label: 'Custody & Shariah Compliance', pct: 0.20 },
       ],
-      contact: `${institutionName || 'Irshad Institutional'} · Powered by Irshad Shariah Infrastructure (iirshad.com)`,
-      disclaimer: 'All Shariah ratios and purification figures are derived from latest NGX audited financial statements and corporate disclosures under AAOIFI Standard No. 21. This factsheet is an institutional compliance & reporting instrument and does not constitute investment advice.',
+      objective: 'Achieve long-term ethical capital appreciation strictly within AAOIFI Standard No. 21 boundaries (<30% debt, <30% interest-bearing cash, <5% impermissible revenue) with automated dividend purification.',
+      commentary: Number(summary.non_compliant_count || 0) > 0
+        ? `Irshad detected ${summary.non_compliant_count} non-compliant position(s) totaling ${Number(summary.non_compliant_pct || 0).toFixed(1)}% of AUM. Remediation replacements have been identified.`
+        : 'All portfolio holdings satisfy AAOIFI qualitative business screens and quantitative debt, cash, and impermissible income thresholds.',
+      investor_profile: 'Built for Pension Fund Administrators (PFAs), Islamic asset managers, trustees, and institutional brokerage compliance desks.',
+      benefits: ['Live AAOIFI screening tied to NGX filings', 'Per-unit & total purification liability tracking', 'Indicative 2.5% zakat computation', 'Drift Watch alerts for threshold proximity'],
+      contact: `${institutionName || 'Irshad Institutional'} · Powered by Irshad Tech Ltd (iirshad.com)`,
+      disclaimer: 'Ratios, verdicts, and purification figures reflect live NGX corporate disclosures evaluated under AAOIFI Standard No. 21 via Irshad Tech Ltd.',
+      shariah_board: 'Irshad Tech Ltd Automated AAOIFI Audit',
+      approved_by: '',
     };
-  }, [isLotus, isNorrenberger, defaultThemeKey, lotus, norren, institutionName, customFundName, summary]);
+  }, [isLotus, isBalanced, isNorrenberger, lotus, balanced, norren, institutionName, customFundName, summary]);
 
   const meta = useMemo(() => ({ ...defaults, ...(factsheetMeta || {}) }), [defaults, factsheetMeta]);
-  const theme = FACTSHEET_THEMES[meta.theme] || FACTSHEET_THEMES.emerald;
 
-  const updateMeta = (key, val) => {
-    if (onChangeFactsheetMeta) {
-      onChangeFactsheetMeta({ ...meta, [key]: val });
+  const navVal = Number(meta.nav_per_unit || 0);
+  const priceVal = Number(meta.closing_price || 0);
+  const premiumPct = navVal > 0 && priceVal > 0 ? ((priceVal / navVal) - 1) * 100 : null;
+  const fundSizeVal = Number(meta.fund_size_ngn || summary.total_aum || 0);
+  const unitsVal = Number(meta.units_in_issue || (navVal > 0 && fundSizeVal > 0 ? Math.round(fundSizeVal / navVal) : 0));
+
+  const purificationPerUnit = meta.purification_per_unit_input !== null && meta.purification_per_unit_input !== undefined
+    ? Number(meta.purification_per_unit_input)
+    : Number(summary.weighted_purification_per_unit || 0);
+
+  const zakatPerUnit = meta.zakat_per_unit_input !== null && meta.zakat_per_unit_input !== undefined
+    ? Number(meta.zakat_per_unit_input)
+    : (Number(summary.indicative_zakat_per_unit || 0) > 0
+      ? Number(summary.indicative_zakat_per_unit)
+      : (navVal > 0 ? navVal * 0.025 : 0));
+
+  const top5Pct = isLotus
+    ? (lotus.top_5_concentration_pct || 66.5)
+    : Number(summary.top_5_concentration_pct || holdings.slice(0, 5).reduce((s, h) => s + Number(h.weight_pct || 0), 0));
+
+  const topHoldingsBars = useMemo(() => {
+    if (holdings.length === 0) return [];
+    const top6 = holdings.slice(0, 6).map((h) => ({
+      name: h.name || h.symbol,
+      symbol: h.symbol,
+      weight: Number(h.weight_pct || 0),
+      isOther: false,
+    }));
+    const restWeight = holdings.slice(6).reduce((acc, h) => acc + Number(h.weight_pct || 0), 0);
+    if (holdings.length > 6 && restWeight > 0) {
+      top6.push({
+        name: `Other ${holdings.length - 6} holdings`,
+        symbol: 'OTHER',
+        weight: Number(restWeight.toFixed(2)),
+        isOther: true,
+      });
     }
-  };
+    return top6;
+  }, [holdings]);
 
-  // Unified 4 Hero KPIs tailored cleanly to mandate type
+  const validation = useMemo(
+    () => computeFundValidation(meta, holdings, summary, isNorrenberger, isBalanced),
+    [meta, holdings, summary, isNorrenberger, isBalanced]
+  );
+
+  // Build uniform 5 Hero KPI Cards matching 1.b & 2.b
   const heroKpis = useMemo(() => {
-    if (isLotus) {
+    if (isFixedOrBalanced) {
       return [
-        { label: 'Fund Size (AUM)', value: lotus.fund_size_label || formatNaira(summary.total_aum, true), sub: `${lotus.holdings_count || holdings.length} NGX Constituents` },
-        { label: 'NAV / NGX Price', value: `₦${Number(lotus.nav_per_unit || 95.17).toFixed(2)}`, sub: `Close: ₦${Number(lotus.closing_price || 127.90).toFixed(2)}` },
-        { label: 'Shariah Compliance', value: `${Number(summary.compliant_pct ?? 100).toFixed(1)}%`, sub: `YTD Return: +54.17%` },
-        { label: 'Purification (FY25)', value: `₦${Number(lotus.purification_per_unit_fy25 || 0.46).toFixed(2)} / unit`, sub: lotus.last_distribution || 'Annual Audit Rate' },
+        { label: 'UNIT PRICE', value: navVal > 0 ? `₦${navVal.toFixed(2)}` : '₦108.27', highlight: false },
+        { label: 'YIELD, YEAR TO DATE', value: `${isBalanced ? balanced.ytd_yield : norren.ytd_yield}%`, highlight: false },
+        { label: 'FUND SIZE', value: fundSizeVal > 0 ? formatNaira(fundSizeVal, true) : '₦6.81bn', highlight: false },
+        { label: 'TOTAL EXPENSE RATIO', value: `${Number(meta.expense_ratio_pct || 1.60).toFixed(2)}%`, highlight: false },
+        { label: 'RISK RATING', value: meta.risk_label || `${meta.risk_level} of 7`, highlight: true },
       ];
     }
-    if (isNorrenberger) {
+    if (navVal > 0 && priceVal > 0) {
       return [
-        { label: 'Fund Size (AUM)', value: '₦6.81bn', sub: 'Open Ended · Fixed Income' },
-        { label: 'Unit Price', value: '₦108.27', sub: 'Min: 50 Units initial' },
-        { label: 'YTD Yield / Shariah', value: '17.72%', sub: '100.0% Islamic Contracts' },
-        { label: 'Expense Ratio', value: '1.90%', sub: 'Q3 2026 Dist: ₦3.05/unit' },
+        { label: 'NAV PER UNIT', value: `₦${navVal.toFixed(2)}`, highlight: false },
+        { label: 'NGX PRICE', value: `₦${priceVal.toFixed(2)}`, highlight: false },
+        {
+          label: premiumPct >= 0 ? 'PREMIUM TO NAV' : 'DISCOUNT TO NAV',
+          value: `${premiumPct >= 0 ? '+' : ''}${premiumPct.toFixed(1)}%`,
+          highlight: true,
+        },
+        { label: 'FUND SIZE', value: formatNaira(fundSizeVal, true), highlight: false },
+        { label: 'EXPENSE RATIO', value: `${Number(meta.expense_ratio_pct || 0.95).toFixed(2)}%`, highlight: false },
       ];
     }
     return [
-      { label: 'Screened Portfolio AUM', value: formatNaira(summary.total_aum, true), sub: `${summary.holdings_count || holdings.length} Holdings · ${sectors.length} Sectors` },
-      { label: 'Shariah Compliance Rate', value: `${Number(summary.compliant_pct || 0).toFixed(1)}%`, sub: `${summary.compliant_count || 0} Pass · ${summary.non_compliant_count || 0} Flagged` },
-      { label: 'Non-Compliant Exposure', value: formatNaira(summary.non_compliant_aum || 0, true), sub: `${Number(summary.non_compliant_pct || 0).toFixed(2)}% of total book` },
-      { label: 'Total Purification Due', value: formatNaira(summary.total_purification_due || 0), sub: `₦${Number(summary.weighted_purification_per_unit || 0).toFixed(4)} / unit avg` },
+      { label: 'SCREENED AUM', value: formatNaira(summary.total_aum || 0, true), highlight: false },
+      { label: 'SHARIAH PASS RATE', value: `${Number(summary.compliant_pct || 0).toFixed(1)}%`, highlight: false },
+      {
+        label: 'TOP 5 CONCENTRATION',
+        value: `${top5Pct.toFixed(1)}%`,
+        highlight: Number(summary.non_compliant_count || 0) > 0,
+      },
+      { label: 'TOTAL PURIFICATION DUE', value: formatNaira(summary.total_purification_due || 0), highlight: false },
+      { label: 'RISK RATING', value: meta.risk_label || `${meta.risk_level} of 7`, highlight: true },
     ];
-  }, [isLotus, isNorrenberger, lotus, summary, holdings.length, sectors.length]);
+  }, [isFixedOrBalanced, isBalanced, balanced.ytd_yield, norren.ytd_yield, navVal, priceVal, premiumPct, fundSizeVal, meta, summary, top5Pct]);
 
-  const removedNascon = lotusData?.rebalance_removed || null;
-  const topHoldingsChartData = useMemo(
-    () => holdings.slice(0, 8).map((h) => ({
-      symbol: h.symbol,
-      weight: Number(h.weight_pct || 0),
-      impure: Number(h.impure_ratio || 0),
-    })),
-    [holdings]
-  );
-
-  const keyFactsRows = useMemo(() => {
-    const base = [
-      ['Institution', meta.institution_name],
-      ['Mandate Code', meta.ticker],
-      ['ISIN / Ref', meta.isin],
-      ['Base Currency', meta.currency],
-      ['Benchmark', meta.benchmark],
-      ['Management Fee', meta.management_fee],
-      ['Rebalancing Cycle', meta.rebalancing_frequency],
-      ['Shariah Standard', 'AAOIFI Standard No. 21'],
-      ['As-Of Date', meta.factsheet_date],
-    ];
-    if (isLotus) {
-      base.splice(3, 0, ['Launch / Listing', `${lotus.launch_date} / ${lotus.listing_date}`]);
-      base.splice(7, 0, ['Last Rebalance', lotus.last_rebalancing]);
-    }
-    if (isNorrenberger) {
-      base.splice(3, 0, ['Launch Date', 'May 2021 (NGX Listed)']);
-      base.splice(7, 0, ['Initial / Addl', '50 Units / 10 Units']);
-    }
-    return base;
-  }, [meta, isLotus, isNorrenberger, lotus]);
+  const activeAllocationList = useMemo(() => {
+    if (isBalanced) return balanced.allocation;
+    if (isNorrenberger) return norren.allocation;
+    return [];
+  }, [isBalanced, isNorrenberger, balanced.allocation, norren.allocation]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {/* Executive Control Toolbar (hidden on print) */}
+      {/* Executive Control Toolbar */}
       <div className="no-print" style={{
         display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center',
         gap: 12, padding: '12px 18px', borderRadius: 14,
         background: 'var(--bg)', border: '1px solid var(--border)',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            padding: '4px 10px', borderRadius: 999,
-            background: theme.light, color: theme.primary, border: `1px solid ${theme.border}`,
-            fontSize: '0.72rem', fontWeight: 800,
-          }}>
-            <ShieldCheck size={13} /> Irshad Uniform Factsheet
-          </span>
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-            Standardized AAOIFI executive format for <strong style={{ color: 'var(--text-dark)' }}>{meta.fund_name}</strong>
-          </span>
-        </div>
-
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
           <button
             type="button"
-            onClick={() => setShowCustomizer((v) => !v)}
+            onClick={() => setViewMode('summary')}
             style={{
-              display: 'inline-flex', alignItems: 'center', gap: 7,
-              padding: '9px 14px', borderRadius: 10,
-              background: showCustomizer ? 'var(--primary-50)' : 'var(--bg-section)',
-              color: showCustomizer ? 'var(--primary)' : 'var(--text-dark)',
-              border: `1px solid ${showCustomizer ? 'var(--primary)' : 'var(--border-strong)'}`,
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              padding: '8px 13px', borderRadius: 10, cursor: 'pointer', fontSize: '0.78rem', fontWeight: 700,
+              border: `1.5px solid ${viewMode === 'summary' ? IRSHAD.teal : 'var(--border)'}`,
+              background: viewMode === 'summary' ? 'rgba(69, 165, 138, 0.12)' : 'var(--bg-section)',
+              color: viewMode === 'summary' ? IRSHAD.forest : 'var(--text-muted)',
+            }}
+          >
+            <LayoutGrid size={14} /> One-Page Summary
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('full')}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              padding: '8px 13px', borderRadius: 10, cursor: 'pointer', fontSize: '0.78rem', fontWeight: 700,
+              border: `1.5px solid ${viewMode === 'full' ? IRSHAD.teal : 'var(--border)'}`,
+              background: viewMode === 'full' ? 'rgba(69, 165, 138, 0.12)' : 'var(--bg-section)',
+              color: viewMode === 'full' ? IRSHAD.forest : 'var(--text-muted)',
+            }}
+          >
+            <FileText size={14} /> Full 7-Section Fact Sheet
+          </button>
+        </div>
+
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+          <span style={{
+            padding: '6px 10px', borderRadius: 999, fontSize: '0.7rem', fontWeight: 800,
+            background: validation.passCount === validation.totalChecks ? 'var(--halal-bg)' : IRSHAD.goldBg,
+            color: validation.passCount === validation.totalChecks ? IRSHAD.teal : IRSHAD.goldDark,
+          }}>
+            {validation.passCount}/{validation.totalChecks} Checks Verified
+          </span>
+          <button
+            type="button"
+            onClick={() => setShowInputsDrawer((v) => !v)}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              padding: '8px 14px', borderRadius: 10,
+              background: showInputsDrawer ? 'var(--primary-50)' : 'var(--bg-section)',
+              color: showInputsDrawer ? IRSHAD.forest : 'var(--text-dark)',
+              border: `1px solid ${showInputsDrawer ? IRSHAD.teal : 'var(--border-strong)'}`,
               fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
             }}
           >
-            <SlidersHorizontal size={14} /> {showCustomizer ? 'Close Editor' : 'Customize Sheet'}
+            <SlidersHorizontal size={14} /> {showInputsDrawer ? 'Hide Manager Inputs' : 'Fund Setup & Checks'}
           </button>
           <button
             type="button"
             onClick={() => window.print()}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 7,
-              padding: '9px 16px', borderRadius: 10,
-              background: theme.tableHeader, color: '#fff',
+              padding: '8px 16px', borderRadius: 10,
+              background: IRSHAD.forest, color: '#fff',
               border: 'none', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
             }}
           >
-            <Printer size={14} /> Print / Export PDF
+            <Printer size={14} /> Print / Save PDF
           </button>
         </div>
       </div>
 
-      {/* Collapsible Branding & Copy Editor */}
-      {showCustomizer && (
-        <div className="no-print" style={{
-          background: 'var(--bg)',
-          borderRadius: 16,
-          padding: 18,
-          border: '1px solid var(--border)',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
-          gap: 12,
-        }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: 4 }}>INSTITUTION NAME</label>
-            <input type="text" value={meta.institution_name} onChange={(e) => updateMeta('institution_name', e.target.value)} style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border-strong)', background: 'var(--bg-section)', color: 'var(--text-dark)', fontSize: '0.8rem' }} />
-          </div>
-          <div>
-            <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: 4 }}>FUND / MANDATE TITLE</label>
-            <input type="text" value={meta.fund_name} onChange={(e) => updateMeta('fund_name', e.target.value)} style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border-strong)', background: 'var(--bg-section)', color: 'var(--text-dark)', fontSize: '0.8rem' }} />
-          </div>
-          <div>
-            <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: 4 }}>TICKER &amp; ISIN</label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-              <input type="text" value={meta.ticker} onChange={(e) => updateMeta('ticker', e.target.value)} style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border-strong)', background: 'var(--bg-section)', color: 'var(--text-dark)', fontSize: '0.78rem' }} />
-              <input type="text" value={meta.isin} onChange={(e) => updateMeta('isin', e.target.value)} style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border-strong)', background: 'var(--bg-section)', color: 'var(--text-dark)', fontSize: '0.78rem' }} />
-            </div>
-          </div>
-          <div>
-            <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: 4 }}>BENCHMARK &amp; FEE</label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 6 }}>
-              <input type="text" value={meta.benchmark} onChange={(e) => updateMeta('benchmark', e.target.value)} style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border-strong)', background: 'var(--bg-section)', color: 'var(--text-dark)', fontSize: '0.78rem' }} />
-              <input type="text" value={meta.management_fee} onChange={(e) => updateMeta('management_fee', e.target.value)} style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border-strong)', background: 'var(--bg-section)', color: 'var(--text-dark)', fontSize: '0.78rem' }} />
-            </div>
-          </div>
-          <div>
-            <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: 4 }}>RISK LEVEL (1–5)</label>
-            <select
-              value={meta.risk_level}
-              onChange={(e) => {
-                const lvl = Number(e.target.value);
-                const labels = { 1: 'Conservative', 2: 'Moderate Conservative', 3: 'Balanced Growth', 4: 'Growth', 5: 'Aggressive Equity' };
-                onChangeFactsheetMeta?.({ ...meta, risk_level: lvl, risk_label: labels[lvl] });
-              }}
-              style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border-strong)', background: 'var(--bg-section)', color: 'var(--text-dark)', fontSize: '0.8rem' }}
-            >
-              <option value={1}>1 - Conservative</option>
-              <option value={2}>2 - Moderate Conservative</option>
-              <option value={3}>3 - Balanced Growth</option>
-              <option value={4}>4 - Growth</option>
-              <option value={5}>5 - Aggressive Equity</option>
-            </select>
-          </div>
-          <div>
-            <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: 4 }}>INSTITUTIONAL ACCENT</label>
-            <div style={{ display: 'flex', gap: 6 }}>
-              {Object.entries(FACTSHEET_THEMES).map(([k, th]) => (
-                <button
-                  key={k}
-                  type="button"
-                  onClick={() => updateMeta('theme', k)}
-                  style={{
-                    flex: 1, padding: '8px 6px', borderRadius: 8, cursor: 'pointer', fontSize: '0.7rem', fontWeight: 800,
-                    border: `2px solid ${meta.theme === k ? th.primary : 'var(--border)'}`,
-                    background: meta.theme === k ? th.light : 'var(--bg-section)',
-                    color: th.primary,
-                  }}
-                >
-                  {th.label.split(' ')[0]}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div style={{ gridColumn: '1 / -1', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 12 }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: 4 }}>MANDATE OBJECTIVE</label>
-              <textarea rows={2} value={meta.objective} onChange={(e) => updateMeta('objective', e.target.value)} style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border-strong)', background: 'var(--bg-section)', color: 'var(--text-dark)', fontSize: '0.78rem', fontFamily: 'inherit' }} />
-            </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: 4 }}>MANAGER &amp; SHARIAH COMMENTARY</label>
-              <textarea rows={2} value={meta.commentary} onChange={(e) => updateMeta('commentary', e.target.value)} style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border-strong)', background: 'var(--bg-section)', color: 'var(--text-dark)', fontSize: '0.78rem', fontFamily: 'inherit' }} />
-            </div>
-          </div>
-        </div>
+      {/* Collapsible 10-Group Manager Inputs & Validation Gate */}
+      {showInputsDrawer && (
+        <InstitutionalFundInputsDrawer
+          meta={meta}
+          onChangeMeta={onChangeFactsheetMeta}
+          holdings={holdings}
+          summary={summary}
+          isNorrenberger={isNorrenberger}
+          isBalanced={isBalanced}
+        />
       )}
 
-      {/* ════════════════════════════════════════════════════════════════ */}
-      {/* UNIFORM IRSHAD INSTITUTIONAL FACTSHEET                          */}
-      {/* ════════════════════════════════════════════════════════════════ */}
+      {/* ════════════════════════════════════════════════════════════════════ */}
+      {/* IRSHAD UNIFORM DOCUMENT CANVAS (ONE-PAGE SUMMARY & FULL FACT SHEET)  */}
+      {/* ════════════════════════════════════════════════════════════════════ */}
       <article className="institutional-factsheet-sheet" style={{
-        background: '#FFFFFF',
-        color: '#0F172A',
-        borderRadius: 18,
-        border: '1px solid #E2E8F0',
+        background: IRSHAD.canvas,
+        color: '#111827',
+        borderRadius: 16,
+        border: `1px solid ${IRSHAD.border}`,
         boxShadow: 'var(--shadow-md)',
-        padding: '30px 34px',
+        overflow: 'hidden',
         fontFamily: 'var(--sans)',
       }}>
-        {/* 1. Executive Masthead */}
+        {/* SIGNATURE IRSHAD DEEP FOREST MASTHEAD */}
         <header style={{
-          display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start',
-          gap: 16, paddingBottom: 16, borderBottom: `2.5px solid ${theme.primary}`, marginBottom: 18,
+          background: `linear-gradient(135deg, ${IRSHAD.forestDark} 0%, ${IRSHAD.forest} 60%, ${IRSHAD.teal} 100%)`,
+          color: '#FFFFFF',
+          padding: '22px 28px',
+          display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 16,
         }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-            <div style={{
-              width: 46, height: 46, borderRadius: 12,
-              background: theme.grad, color: '#FFFFFF',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '1.15rem', fontWeight: 900, letterSpacing: '-0.5px', flexShrink: 0,
-            }}>
-              {(meta.institution_name || 'IR').slice(0, 2).toUpperCase()}
+          <div>
+            <div style={{ fontSize: '0.7rem', fontWeight: 800, color: IRSHAD.mintSoft, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 4 }}>
+              {meta.institution_name} · {meta.mandate_type}
             </div>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: theme.primary, textTransform: 'uppercase', letterSpacing: '1px' }}>
-                  {meta.institution_name}
-                </span>
-                <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: '#F1F5F9', color: '#475569' }}>
-                  {meta.mandate_type}
-                </span>
-              </div>
-              <h1 style={{ margin: '4px 0 0', fontSize: '1.48rem', fontWeight: 900, color: '#0F172A', letterSpacing: '-0.4px' }}>
-                {meta.fund_name}
-              </h1>
-              <div style={{ fontSize: '0.76rem', color: '#64748B', marginTop: 4, fontWeight: 600 }}>
-                Fact Sheet · As of <strong style={{ color: '#334155' }}>{meta.factsheet_date}</strong> · Ticker: <strong>{meta.ticker}</strong> · Currency: <strong>{meta.currency}</strong>
-              </div>
-            </div>
+            <h1 style={{ margin: 0, fontSize: '1.65rem', fontWeight: 900, letterSpacing: '-0.4px', color: '#FFFFFF' }}>
+              {meta.fund_name}
+            </h1>
+            <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: 'rgba(255,255,255,0.86)' }}>
+              {meta.subtitle}
+            </p>
           </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
-            <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: 7,
-              padding: '7px 13px', borderRadius: 10,
-              background: theme.light, border: `1px solid ${theme.border}`,
-              color: theme.primary, fontSize: '0.74rem', fontWeight: 800,
-            }}>
-              <ShieldCheck size={15} />
-              <span>IRSHAD SHARIAH VERIFIED · AAOIFI STD. 21</span>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '0.68rem', fontWeight: 800, letterSpacing: '1.2px', color: IRSHAD.mintSoft, textTransform: 'uppercase' }}>
+              {viewMode === 'summary' ? 'ONE-PAGE SUMMARY' : 'INSTITUTIONAL FACT SHEET'}
             </div>
-            <div style={{ fontSize: '0.68rem', color: '#64748B', fontWeight: 600 }}>
-              Benchmark: {meta.benchmark}
+            <div style={{ fontSize: '1.15rem', fontWeight: 900, marginTop: 2 }}>{meta.factsheet_date}</div>
+            <div style={{ fontSize: '0.74rem', color: 'rgba(255,255,255,0.82)', marginTop: 2 }}>
+              NGX / Ref: <strong>{meta.ticker}</strong>
             </div>
           </div>
         </header>
 
-        {/* 2. Signature 4-Metric KPI Ribbon */}
-        <section style={{
-          background: theme.grad,
-          borderRadius: 14,
-          padding: '18px 22px',
-          color: '#FFFFFF',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
-          gap: 18,
-          marginBottom: 22,
-        }}>
-          {heroKpis.map((kpi, idx) => (
-            <div
-              key={kpi.label}
-              style={{
-                borderRight: idx < heroKpis.length - 1 ? '1px solid rgba(255,255,255,0.22)' : 'none',
-                paddingRight: 10,
-              }}
-            >
-              <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.7px', opacity: 0.85 }}>
-                {kpi.label}
-              </div>
-              <div style={{ fontSize: '1.52rem', fontWeight: 900, lineHeight: 1.15, marginTop: 4 }}>
-                {kpi.value}
-              </div>
-              <div style={{ fontSize: '0.72rem', opacity: 0.88, marginTop: 4 }}>
-                {kpi.sub}
-              </div>
-            </div>
-          ))}
-        </section>
-
-        {/* 3. Main 2-Column Editorial Layout (Left Dossier Rail + Right Analytical Body) */}
-        <section style={{ display: 'grid', gridTemplateColumns: 'minmax(265px, 315px) 1fr', gap: 22, alignItems: 'start', marginBottom: 24 }} className="mobile-col">
-          {/* Left Rail */}
-          <aside style={{
-            background: theme.railBg || '#F7FCF9',
-            border: `1px solid ${theme.border}`,
-            borderRadius: 14,
-            padding: '18px 16px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 18,
+        <div style={{ padding: '22px 26px', display: 'flex', flexDirection: 'column', gap: 18 }}>
+          {/* 5 HERO KPI TILES (Matching 1.b & 2.b) */}
+          <section style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+            gap: 12,
           }}>
-            {/* Mandate Objective */}
-            <div>
-              <div style={{ fontSize: '0.72rem', fontWeight: 800, color: theme.primary, textTransform: 'uppercase', letterSpacing: '0.9px', marginBottom: 6 }}>
-                Investment Objective
-              </div>
-              <p style={{ margin: 0, fontSize: '0.76rem', color: '#334155', lineHeight: 1.6 }}>
-                {meta.objective}
-              </p>
-            </div>
-
-            {/* Key Facts Ledger */}
-            <div>
-              <div style={{ fontSize: '0.72rem', fontWeight: 800, color: theme.primary, textTransform: 'uppercase', letterSpacing: '0.9px', marginBottom: 8 }}>
-                Key Mandate Facts
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {keyFactsRows.map(([k, v]) => (
-                  <div key={k} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10, fontSize: '0.73rem', paddingBottom: 5, borderBottom: '1px solid #E2E8F0' }}>
-                    <span style={{ color: '#64748B', flexShrink: 0 }}>{k}</span>
-                    <span style={{ fontWeight: 700, color: '#0F172A', textAlign: 'right' }}>{v}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Irshad AAOIFI Quantitative Health Check */}
-            {!isNorrenberger && (
-              <div style={{ background: '#FFFFFF', borderRadius: 10, padding: '12px', border: '1px solid #E2E8F0' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                  <span style={{ fontSize: '0.71rem', fontWeight: 800, color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.7px' }}>
-                    Portfolio AAOIFI Ratios
-                  </span>
-                  {healthMetrics.nearCount > 0 && (
-                    <span style={{ fontSize: '0.64rem', fontWeight: 800, padding: '2px 6px', borderRadius: 999, background: '#FEF3C7', color: '#B45309' }}>
-                      {healthMetrics.nearCount} Drift Watch
-                    </span>
-                  )}
+            {heroKpis.map((kpi) => (
+              <div
+                key={kpi.label}
+                style={{
+                  background: kpi.highlight
+                    ? `linear-gradient(135deg, ${IRSHAD.goldDark} 0%, #6D511E 100%)`
+                    : '#FFFFFF',
+                  color: kpi.highlight ? '#FFFFFF' : '#111827',
+                  border: kpi.highlight ? 'none' : `1px solid ${IRSHAD.border}`,
+                  borderRadius: 10,
+                  padding: '14px 16px',
+                }}
+              >
+                <div style={{
+                  fontSize: '0.66rem',
+                  fontWeight: 800,
+                  letterSpacing: '0.6px',
+                  textTransform: 'uppercase',
+                  color: kpi.highlight ? 'rgba(255,255,255,0.85)' : IRSHAD.slate,
+                }}>
+                  {kpi.label}
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
-                  <AaoifiGaugeBar label="Weighted Debt / Cap" value={healthMetrics.debt} threshold={30} />
-                  <AaoifiGaugeBar label="Weighted Cash & Int." value={healthMetrics.cash} threshold={30} />
-                  <AaoifiGaugeBar label="Weighted Impure Rev." value={healthMetrics.impure} threshold={5} />
+                <div style={{ fontSize: '1.38rem', fontWeight: 900, marginTop: 5, lineHeight: 1.15 }}>
+                  {kpi.value}
                 </div>
               </div>
-            )}
+            ))}
+          </section>
 
-            {/* Risk Profile Meter */}
-            <div>
-              <div style={{ fontSize: '0.72rem', fontWeight: 800, color: theme.primary, textTransform: 'uppercase', letterSpacing: '0.9px', marginBottom: 7 }}>
-                Risk Profile
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 4, marginBottom: 5 }}>
-                {[1, 2, 3, 4, 5].map((step) => (
-                  <div
-                    key={step}
-                    style={{
-                      height: 11,
-                      borderRadius: 3,
-                      background: step <= Number(meta.risk_level || 3) ? theme.primary : '#E2E8F0',
-                    }}
-                  />
-                ))}
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0F172A' }}>{meta.risk_label}</span>
-                <span style={{ fontSize: '0.67rem', color: '#64748B' }}>Lower ↔ Higher Risk</span>
-              </div>
-            </div>
-
-            {/* Investor Suitability & Benefits */}
-            <div>
-              <div style={{ fontSize: '0.72rem', fontWeight: 800, color: theme.primary, textTransform: 'uppercase', letterSpacing: '0.9px', marginBottom: 6 }}>
-                Investor Suitability &amp; Benefits
-              </div>
-              <p style={{ margin: '0 0 8px', fontSize: '0.73rem', color: '#475569', lineHeight: 1.55 }}>
-                {meta.investor_profile}
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                {(meta.benefits || []).map((b) => (
-                  <div key={b} style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: '0.72rem', color: '#1E293B', fontWeight: 600 }}>
-                    <CheckCircle2 size={13} color={theme.primary} style={{ marginTop: 2, flexShrink: 0 }} />
-                    <span>{b}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </aside>
-
-          {/* Right Analytical Body */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-            {/* Row A: Fixed-Income Allocation vs Equity Sector Allocation */}
-            {isNorrenberger ? (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
-                <div style={{ border: '1px solid #E2E8F0', borderRadius: 12, padding: 14 }}>
-                  <div style={{ fontSize: '0.76rem', fontWeight: 800, color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: 10 }}>
-                    Shariah Contract Allocation vs Mandate Band
-                  </div>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.73rem' }}>
-                    <thead>
-                      <tr style={{ background: theme.tableHeader, color: '#FFFFFF' }}>
-                        <th style={{ padding: '7px 8px', textAlign: 'left' }}>Instrument Class</th>
-                        <th style={{ padding: '7px 8px', textAlign: 'right' }}>Current</th>
-                        <th style={{ padding: '7px 8px', textAlign: 'right' }}>Target Band</th>
-                        <th style={{ padding: '7px 8px', textAlign: 'center' }}>Check</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {norren.allocation.map((row) => {
-                        const outOfBand = row.current < row.target_min || row.current > row.target_max;
-                        return (
-                          <tr key={row.security} style={{ borderBottom: '1px solid #E2E8F0' }}>
-                            <td style={{ padding: '7px 8px' }}>
-                              <div style={{ fontWeight: 700, color: '#0F172A' }}>{row.security}</div>
-                              <div style={{ fontSize: '0.64rem', color: '#64748B' }}>{row.shariah_contract}</div>
-                            </td>
-                            <td style={{ padding: '7px 8px', textAlign: 'right', fontWeight: 800 }}>{row.current.toFixed(2)}%</td>
-                            <td style={{ padding: '7px 8px', textAlign: 'right', color: '#64748B' }}>{row.target_label}</td>
-                            <td style={{ padding: '7px 8px', textAlign: 'center' }}>
-                              <span style={{
-                                padding: '2px 7px', borderRadius: 999, fontSize: '0.64rem', fontWeight: 800,
-                                background: outOfBand ? '#FEF3C7' : '#ECFDF5',
-                                color: outOfBand ? '#B45309' : '#047857',
-                              }}>
-                                {outOfBand ? 'Below Band' : 'Compliant'}
-                              </span>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-
-                <div style={{ border: '1px solid #E2E8F0', borderRadius: 12, padding: 14 }}>
-                  <div style={{ fontSize: '0.76rem', fontWeight: 800, color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: 10 }}>
-                    Fund Maturity Profile
-                  </div>
-                  <div style={{ height: 190 }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={norren.maturity_profile} margin={{ top: 6, right: 8, left: -16, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                        <XAxis dataKey="bucket" tick={{ fontSize: 11 }} />
-                        <YAxis tick={{ fontSize: 10 }} />
-                        <Tooltip formatter={(v) => `${v}%`} />
-                        <Bar dataKey="pct" name="Share %" fill={theme.primary} radius={[5, 5, 0, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(265px, 1fr))', gap: 16 }}>
-                {/* Sector Allocation Donut */}
-                <div style={{ border: '1px solid #E2E8F0', borderRadius: 12, padding: 14 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.76rem', fontWeight: 800, color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: 8 }}>
-                    <Layers size={14} color={theme.primary} /> Sector Exposure Breakdown
-                  </div>
-                  {sectors.length > 0 ? (
-                    <div style={{ display: 'grid', gridTemplateColumns: '155px 1fr', gap: 10, alignItems: 'center' }}>
-                      <div style={{ height: 165 }}>
+          {/* ════════════════════════════════════════════════════════════════ */}
+          {/* MODE 1: ONE-PAGE SUMMARY (1.b & 2.b Architecture)               */}
+          {/* ════════════════════════════════════════════════════════════════ */}
+          {viewMode === 'summary' && (
+            <>
+              {isFixedOrBalanced ? (
+                <>
+                  {/* Balanced / Fixed-Income Row 1: Monthly Yield Chart + Fund Allocation Donut */}
+                  <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
+                    <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16 }}>
+                      <div style={{ fontSize: '0.73rem', fontWeight: 800, letterSpacing: '0.6px', textTransform: 'uppercase', color: IRSHAD.forest, marginBottom: 10 }}>
+                        Monthly Yield Against Benchmark, 2026, %
+                      </div>
+                      <div style={{ height: 195 }}>
                         <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                            <Pie data={sectors} dataKey="weight_pct" nameKey="sector" innerRadius={40} outerRadius={68} paddingAngle={2}>
-                              {sectors.map((s, idx) => (
-                                <Cell key={s.sector} fill={SECTOR_PALETTE[idx % SECTOR_PALETTE.length]} />
-                              ))}
-                            </Pie>
+                          <BarChart
+                            data={isBalanced ? balanced.monthly_yield_2026 : norren.monthly_performance_2026}
+                            margin={{ top: 6, right: 6, left: -18, bottom: 0 }}
+                          >
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                            <XAxis dataKey="month" tick={{ fontSize: 10 }} />
+                            <YAxis domain={[0, 21]} tick={{ fontSize: 10 }} />
                             <Tooltip formatter={(v) => `${v}%`} />
-                          </PieChart>
+                            <Legend wrapperStyle={{ fontSize: 11 }} />
+                            <Bar dataKey="yield" name="Fund yield" fill={IRSHAD.forest} radius={[3, 3, 0, 0]} />
+                            <Bar dataKey="benchmark" name={isBalanced ? 'Blended benchmark' : 'Benchmark'} fill={IRSHAD.gold} radius={[3, 3, 0, 0]} />
+                          </BarChart>
                         </ResponsiveContainer>
                       </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                        {sectors.slice(0, 7).map((s, idx) => (
-                          <div key={s.sector} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.72rem' }}>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#334155', fontWeight: 600 }}>
-                              <span style={{ width: 9, height: 9, borderRadius: 2, background: SECTOR_PALETTE[idx % SECTOR_PALETTE.length], display: 'inline-block' }} />
-                              {s.sector}
+                      <div style={{ fontSize: '0.7rem', color: IRSHAD.slate, marginTop: 8 }}>
+                        Yield is the annualised income yield on NAV. Scale runs to 20%+.
+                      </div>
+                    </div>
+
+                    <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16 }}>
+                      <div style={{ fontSize: '0.73rem', fontWeight: 800, letterSpacing: '0.6px', textTransform: 'uppercase', color: IRSHAD.forest, marginBottom: 10 }}>
+                        Fund Allocation
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '165px 1fr', gap: 12, alignItems: 'center' }}>
+                        <div style={{ position: 'relative', height: 170 }}>
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie data={activeAllocationList} dataKey="current" nameKey="security" innerRadius={48} outerRadius={76} paddingAngle={1.5}>
+                                {activeAllocationList.map((entry, i) => (
+                                  <Cell key={entry.security} fill={IRSHAD_CHART_PALETTE[i % IRSHAD_CHART_PALETTE.length]} />
+                                ))}
+                              </Pie>
+                              <Tooltip formatter={(v) => `${Number(v).toFixed(2)}%`} />
+                            </PieChart>
+                          </ResponsiveContainer>
+                          <div style={{
+                            position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
+                            alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', textAlign: 'center',
+                          }}>
+                            <span style={{ fontSize: '1rem', fontWeight: 900, color: IRSHAD.forest }}>
+                              {isBalanced ? '60/40' : '100%'}
                             </span>
-                            <strong style={{ color: '#0F172A' }}>{Number(s.weight_pct).toFixed(2)}%</strong>
+                            <span style={{ fontSize: '0.6rem', color: IRSHAD.slate, fontWeight: 700, lineHeight: 1.2 }}>
+                              {isBalanced ? 'fixed / equity' : 'Islamic FI'}
+                            </span>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          {activeAllocationList.map((row, idx) => (
+                            <div key={row.security} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.74rem' }}>
+                              <span style={{ display: 'flex', alignItems: 'center', gap: 7, color: '#334155', fontWeight: 600 }}>
+                                <span style={{ width: 9, height: 9, borderRadius: 2, background: IRSHAD_CHART_PALETTE[idx % IRSHAD_CHART_PALETTE.length], display: 'inline-block' }} />
+                                {row.security}
+                              </span>
+                              <strong style={{ fontVariantNumeric: 'tabular-nums' }}>{row.current.toFixed(2)}%</strong>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+
+                  {/* Balanced / Fixed-Income Row 2: Maturity Profile + Distributions */}
+                  <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+                    <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16 }}>
+                      <div style={{ fontSize: '0.73rem', fontWeight: 800, letterSpacing: '0.6px', textTransform: 'uppercase', color: IRSHAD.forest, marginBottom: 10 }}>
+                        Maturity Profile, % of Fund
+                      </div>
+                      <div style={{ height: 170 }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart
+                            data={isBalanced ? balanced.maturity_profile : norren.maturity_profile}
+                            margin={{ top: 10, right: 8, left: -18, bottom: 0 }}
+                          >
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                            <XAxis dataKey="bucket" tick={{ fontSize: 10 }} />
+                            <YAxis tick={{ fontSize: 10 }} />
+                            <Tooltip formatter={(v) => `${v}%`} />
+                            <Bar dataKey="pct" name="% Share" radius={[4, 4, 0, 0]}>
+                              {(isBalanced ? balanced.maturity_profile : norren.maturity_profile).map((entry) => (
+                                <Cell key={entry.bucket} fill={entry.bucket === 'Equity' ? IRSHAD.forest : IRSHAD.gold} />
+                              ))}
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                      <div style={{ fontSize: '0.7rem', color: IRSHAD.slate, marginTop: 6 }}>
+                        {isBalanced
+                          ? 'Fixed income is 60% of the fund, spread across three maturity bands. Equity has no maturity.'
+                          : 'Majority of Sukuk & Murabaha paper matures inside 12 months for daily liquidity.'}
+                      </div>
+                    </div>
+
+                    <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                      <div>
+                        <div style={{ fontSize: '0.73rem', fontWeight: 800, letterSpacing: '0.6px', textTransform: 'uppercase', color: IRSHAD.forest, marginBottom: 10 }}>
+                          Distribution Per Unit (₦)
+                        </div>
+                        <div style={{ height: 155 }}>
+                          <ResponsiveContainer width="100%" height="100%">
+                            <LineChart
+                              data={isBalanced ? balanced.distribution_per_unit : norren.distribution_per_unit}
+                              margin={{ top: 8, right: 10, left: -14, bottom: 0 }}
+                            >
+                              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                              <XAxis dataKey="quarter" tick={{ fontSize: 10 }} />
+                              <YAxis domain={[2.5, 4.8]} tick={{ fontSize: 10 }} />
+                              <Tooltip formatter={(v) => `₦${v}`} />
+                              <Line type="monotone" dataKey="amount" name="Distribution (₦)" stroke={IRSHAD.forest} strokeWidth={2.6} dot={{ r: 4, fill: IRSHAD.forest }} />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: `1px solid ${IRSHAD.border}`, paddingTop: 10, fontSize: '0.78rem' }}>
+                        <span style={{ color: IRSHAD.slate, fontWeight: 600 }}>Trailing 12 months</span>
+                        <strong style={{ fontSize: '0.92rem', color: IRSHAD.forest }}>
+                          {isBalanced ? `₦${balanced.trailing_12m_distribution.toFixed(2)} per unit` : '₦14.81 per unit'}
+                        </strong>
+                      </div>
+                    </div>
+                  </section>
+
+                  {/* Balanced / Fixed-Income Row 3: Performance Strip + Risk Profile */}
+                  <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+                    <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16 }}>
+                      <div style={{ fontSize: '0.73rem', fontWeight: 800, letterSpacing: '0.6px', textTransform: 'uppercase', color: IRSHAD.forest, marginBottom: 12 }}>
+                        Performance, % Return
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
+                        {(isBalanced
+                          ? balanced.performance_metrics
+                          : norren.historical_performance.map((h) => ({ label: h.period, value: `${h.yield}%` }))
+                        ).map((pm) => (
+                          <div key={pm.label}>
+                            <div style={{ fontSize: '0.63rem', fontWeight: 800, color: IRSHAD.slate, textTransform: 'uppercase' }}>{pm.label}</div>
+                            <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#111827', marginTop: 3 }}>{pm.value}</div>
                           </div>
                         ))}
                       </div>
+                      <div style={{ fontSize: '0.7rem', color: IRSHAD.slate, marginTop: 12 }}>
+                        {isBalanced
+                          ? `Blended benchmark: 33.10 YTD, 38.70 for 1Y. Tracking difference: ${balanced.tracking_difference_ytd} YTD.`
+                          : `FGN 3-Year Sukuk benchmark outperformed by +99 bps YTD (17.72% vs 16.73%).`}
+                      </div>
                     </div>
-                  ) : (
-                    <div style={{ color: '#64748B', fontSize: '0.78rem' }}>Upload or select a mandate to generate sector breakdown.</div>
-                  )}
-                </div>
 
-                {/* Purification & Shariah Audit Snapshot */}
-                <div style={{ border: '1px solid #E2E8F0', borderRadius: 12, padding: 14, background: '#F8FAFC' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.76rem', fontWeight: 800, color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: 10 }}>
-                    <Droplet size={14} color="#D97706" /> Shariah Audit &amp; Purification Ledger
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: '0.75rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #E2E8F0', paddingBottom: 6 }}>
-                      <span style={{ color: '#64748B' }}>Compliant Equity AUM</span>
-                      <strong style={{ color: '#047857' }}>{formatNaira(summary.compliant_aum || 0)} ({Number(summary.compliant_pct || 0).toFixed(1)}%)</strong>
+                    <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                      <div>
+                        <div style={{ fontSize: '0.73rem', fontWeight: 800, letterSpacing: '0.6px', textTransform: 'uppercase', color: IRSHAD.forest, marginBottom: 10 }}>
+                          Risk Profile ({meta.risk_label})
+                        </div>
+                        <RiskScaleSeven level={Number(meta.risk_level || 4)} max={7} />
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: IRSHAD.slate, marginTop: 6 }}>
+                          <span>Lower risk</span>
+                          <span>Higher risk</span>
+                        </div>
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: IRSHAD.slate, marginTop: 12 }}>
+                        Volatility <strong>{meta.volatility_3y_pct}%</strong> a year over three years. Recommended holding period: {meta.holding_period}.
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #E2E8F0', paddingBottom: 6 }}>
-                      <span style={{ color: '#64748B' }}>Flagged Non-Compliant AUM</span>
-                      <strong style={{ color: Number(summary.non_compliant_aum || 0) > 0 ? '#B91C1C' : '#047857' }}>
-                        {formatNaira(summary.non_compliant_aum || 0)} ({Number(summary.non_compliant_pct || 0).toFixed(2)}%)
-                      </strong>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #E2E8F0', paddingBottom: 6 }}>
-                      <span style={{ color: '#64748B' }}>Positions Requiring Purification</span>
-                      <strong style={{ color: '#0F172A' }}>{summary.purify_required_count || 0} of {summary.holdings_count || holdings.length}</strong>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #E2E8F0', paddingBottom: 6 }}>
-                      <span style={{ color: '#64748B' }}>Weighted Purification / Unit</span>
-                      <strong style={{ color: '#B45309' }}>₦{Number(summary.weighted_purification_per_unit || 0).toFixed(4)}</strong>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ color: '#64748B' }}>Total Book Purification Due</span>
-                      <strong style={{ color: '#B45309', fontSize: '0.84rem' }}>{formatNaira(summary.total_purification_due || 0)}</strong>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Row B: Performance / Top Position Concentration */}
-            {isLotus && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(265px, 1fr))', gap: 16 }}>
-                <div style={{ border: '1px solid #E2E8F0', borderRadius: 12, padding: 14 }}>
-                  <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: 8 }}>
-                    LHE ETF NAV vs NGXLII Benchmark
-                  </div>
-                  <div style={{ height: 185 }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={lotus.nav_vs_benchmark_series} margin={{ top: 5, right: 10, left: -16, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                        <XAxis dataKey="date" tick={{ fontSize: 10 }} />
-                        <YAxis tick={{ fontSize: 10 }} />
-                        <Tooltip />
-                        <Legend wrapperStyle={{ fontSize: 11 }} />
-                        <Line type="monotone" dataKey="etf" name="LHE ETF NAV/Unit" stroke={theme.primary} strokeWidth={2.4} dot={false} />
-                        <Line type="monotone" dataKey="benchmark" name="NGXLII Benchmark" stroke={theme.accent || '#D1A562'} strokeWidth={2.2} dot={false} />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-
-                <div style={{ border: '1px solid #E2E8F0', borderRadius: 12, padding: 14, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 12 }}>
-                  <div>
-                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: 8 }}>
-                      Trailing Performance Returns
-                    </div>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.74rem' }}>
-                      <thead>
-                        <tr style={{ background: theme.tableHeader, color: '#FFFFFF' }}>
-                          <th style={{ padding: '6px 8px', textAlign: 'left' }}>Metric</th>
-                          <th style={{ padding: '6px 8px', textAlign: 'right' }}>7D</th>
-                          <th style={{ padding: '6px 8px', textAlign: 'right' }}>30D</th>
-                          <th style={{ padding: '6px 8px', textAlign: 'right' }}>YTD</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {lotus.performance_table.map((row) => (
-                          <tr key={row.metric} style={{ borderBottom: '1px solid #E2E8F0' }}>
-                            <td style={{ padding: '6px 8px', fontWeight: 700 }}>{row.metric}</td>
-                            <td style={{ padding: '6px 8px', textAlign: 'right', color: row.d7.startsWith('-') ? '#B91C1C' : '#047857', fontWeight: 700 }}>{row.d7}</td>
-                            <td style={{ padding: '6px 8px', textAlign: 'right', color: row.d30.startsWith('-') ? '#B91C1C' : '#047857', fontWeight: 700 }}>{row.d30}</td>
-                            <td style={{ padding: '6px 8px', textAlign: 'right', color: '#047857', fontWeight: 800 }}>{row.ytd}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                  <div style={{ padding: '8px 10px', borderRadius: 8, background: '#FFFBEB', border: '1px solid #FDE68A', fontSize: '0.7rem', color: '#92400E' }}>
-                    <strong>Historical Purification / Unit:</strong>{' '}
-                    {(lotus.purification_history || []).map((p) => `${p.year}: ₦${Number(p.per_unit).toFixed(2)}`).join(' · ')}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {isNorrenberger && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
-                  <div style={{ border: '1px solid #E2E8F0', borderRadius: 12, padding: 14 }}>
-                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: 8 }}>
-                      2026 Monthly Yield vs Benchmark (%)
-                    </div>
-                    <div style={{ height: 175 }}>
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={norren.monthly_performance_2026} margin={{ top: 5, right: 8, left: -16, bottom: 0 }}>
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                          <XAxis dataKey="month" tick={{ fontSize: 10 }} />
-                          <YAxis domain={[12, 20]} tick={{ fontSize: 10 }} />
-                          <Tooltip formatter={(v) => `${v}%`} />
-                          <Legend wrapperStyle={{ fontSize: 11 }} />
-                          <Bar dataKey="yield" name="Yield %" fill={theme.primary} radius={[3, 3, 0, 0]} />
-                          <Bar dataKey="benchmark" name="Benchmark %" fill={theme.accent || '#D1A562'} radius={[3, 3, 0, 0]} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-
-                  <div style={{ border: '1px solid #E2E8F0', borderRadius: 12, padding: 14 }}>
-                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: 8 }}>
-                      Quarterly Distribution Per Unit (₦)
-                    </div>
-                    <div style={{ height: 175 }}>
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={norren.distribution_per_unit} margin={{ top: 5, right: 10, left: -16, bottom: 0 }}>
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                          <XAxis dataKey="quarter" tick={{ fontSize: 9 }} />
-                          <YAxis domain={[2.5, 4.8]} tick={{ fontSize: 10 }} />
-                          <Tooltip formatter={(v) => `₦${v}`} />
-                          <Line type="monotone" dataKey="amount" name="Distribution (₦)" stroke={theme.primary} strokeWidth={2.5} dot={{ r: 3.5 }} />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Historical Returns + Macro Indicators Strip */}
-                {Array.isArray(norren.historical_performance) && norren.historical_performance.length > 0 && (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 8 }}>
-                    {norren.historical_performance.map((hp) => (
-                      <div key={hp.period} style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 10, padding: '8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748B' }}>{hp.period} Yield</span>
-                        <span style={{ fontSize: '0.84rem', fontWeight: 900, color: theme.primary }}>
-                          {hp.yield}% <span style={{ fontSize: '0.68rem', color: '#94A3B8', fontWeight: 600 }}>vs {hp.benchmark}%</span>
+                  </section>
+                </>
+              ) : (
+                <>
+                  {/* EQUITY ONE-PAGE SUMMARY ROW 1: Performance Grouped Bars + Price Against NAV */}
+                  <section style={{ display: 'grid', gridTemplateColumns: isLotus || (navVal > 0 && priceVal > 0) ? '1.35fr 1fr' : '1fr', gap: 16 }} className="mobile-col">
+                    <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                        <span style={{ fontSize: '0.73rem', fontWeight: 800, letterSpacing: '0.6px', textTransform: 'uppercase', color: IRSHAD.forest }}>
+                          {isLotus ? 'Performance, % Return' : 'Top Holdings Weight (%) & AAOIFI Impermissible Ratio (%)'}
                         </span>
+                      </div>
+                      <div style={{ height: 195 }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          {isLotus ? (
+                            <BarChart data={lotus.multi_period_returns} margin={{ top: 10, right: 8, left: -16, bottom: 0 }}>
+                              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                              <XAxis dataKey="period" tick={{ fontSize: 11 }} />
+                              <YAxis tick={{ fontSize: 10 }} />
+                              <Tooltip formatter={(v) => `${v}%`} />
+                              <Legend wrapperStyle={{ fontSize: 11 }} />
+                              <Bar dataKey="fund" name="Fund NAV" fill={IRSHAD.forest} radius={[3, 3, 0, 0]} />
+                              <Bar dataKey="benchmark" name="Islamic index" fill={IRSHAD.gold} radius={[3, 3, 0, 0]} />
+                              <Bar dataKey="all_share" name="All-Share" fill="#94A3B8" radius={[3, 3, 0, 0]} />
+                            </BarChart>
+                          ) : (
+                            <BarChart data={holdings.slice(0, 8)} margin={{ top: 10, right: 8, left: -16, bottom: 0 }}>
+                              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                              <XAxis dataKey="symbol" tick={{ fontSize: 10 }} />
+                              <YAxis tick={{ fontSize: 10 }} />
+                              <Tooltip />
+                              <Legend wrapperStyle={{ fontSize: 11 }} />
+                              <Bar dataKey="weight_pct" name="Portfolio Weight %" fill={IRSHAD.forest} radius={[3, 3, 0, 0]} />
+                              <Bar dataKey="impure_ratio" name="Impure Rev %" fill={IRSHAD.gold} radius={[3, 3, 0, 0]} />
+                            </BarChart>
+                          )}
+                        </ResponsiveContainer>
+                      </div>
+                      <div style={{ fontSize: '0.7rem', color: IRSHAD.slate, marginTop: 8 }}>
+                        {isLotus
+                          ? `NAV trails index by ${Math.abs(lotus.tracking_difference_ytd_pct)} pts YTD. 3-year tracking error: ${lotus.tracking_error_3y_pct}%. Returns net of costs.`
+                          : `Top 5 holding concentration: ${top5Pct.toFixed(1)}% · Portfolio weighted impure income: ${Number(healthMetrics.impure || 0).toFixed(2)}% (<5.0% limit).`}
+                      </div>
+                    </div>
+
+                    {(isLotus || (navVal > 0 && priceVal > 0)) && (
+                      <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                        <div>
+                          <div style={{ fontSize: '0.73rem', fontWeight: 800, letterSpacing: '0.6px', textTransform: 'uppercase', color: IRSHAD.forest, marginBottom: 10 }}>
+                            Price Against NAV
+                          </div>
+                          <div style={{ height: 175 }}>
+                            <ResponsiveContainer width="100%" height="100%">
+                              <BarChart
+                                data={[
+                                  { label: 'NAV', amount: navVal },
+                                  { label: 'Market', amount: priceVal },
+                                ]}
+                                margin={{ top: 10, right: 16, left: -10, bottom: 0 }}
+                              >
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                                <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+                                <YAxis tick={{ fontSize: 10 }} />
+                                <Tooltip formatter={(v) => `₦${Number(v).toFixed(2)}`} />
+                                <Bar dataKey="amount" name="₦ per Unit" radius={[4, 4, 0, 0]} barSize={58}>
+                                  <Cell fill={IRSHAD.forest} />
+                                  <Cell fill={IRSHAD.gold} />
+                                </Bar>
+                              </BarChart>
+                            </ResponsiveContainer>
+                          </div>
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: '#334155', lineHeight: 1.45, borderTop: `1px solid ${IRSHAD.border}`, paddingTop: 8 }}>
+                          {premiumPct > 0 ? (
+                            <>A buyer at market price pays <strong>{premiumPct.toFixed(1)}% more</strong> than the underlying shares are worth. Compare price with NAV before trading.</>
+                          ) : (
+                            <>Market price trades at <strong>{Math.abs(premiumPct || 0).toFixed(1)}% discount</strong> relative to underlying equity NAV.</>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </section>
+
+                  {/* EQUITY ONE-PAGE SUMMARY ROW 2: Sector Allocation Donut + Largest Holdings Horizontal Bars */}
+                  <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
+                    <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                      <div>
+                        <div style={{ fontSize: '0.73rem', fontWeight: 800, letterSpacing: '0.6px', textTransform: 'uppercase', color: IRSHAD.forest, marginBottom: 10 }}>
+                          Sector Allocation
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '165px 1fr', gap: 12, alignItems: 'center' }}>
+                          <div style={{ position: 'relative', height: 170 }}>
+                            <ResponsiveContainer width="100%" height="100%">
+                              <PieChart>
+                                <Pie data={sectors} dataKey="weight_pct" nameKey="sector" innerRadius={48} outerRadius={76} paddingAngle={1.5}>
+                                  {sectors.map((s, idx) => (
+                                    <Cell key={s.sector} fill={IRSHAD_CHART_PALETTE[idx % IRSHAD_CHART_PALETTE.length]} />
+                                  ))}
+                                </Pie>
+                                <Tooltip formatter={(v) => `${Number(v).toFixed(2)}%`} />
+                              </PieChart>
+                            </ResponsiveContainer>
+                            <div style={{
+                              position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
+                              alignItems: 'center', justifyContent: 'center', pointerEvents: 'none',
+                            }}>
+                              <span style={{ fontSize: '1.2rem', fontWeight: 900, color: IRSHAD.forest }}>{holdings.length}</span>
+                              <span style={{ fontSize: '0.65rem', color: IRSHAD.slate, fontWeight: 700 }}>holdings</span>
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                            {sectors.slice(0, 7).map((s, idx) => (
+                              <div key={s.sector} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.74rem' }}>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: 7, color: '#334155', fontWeight: 600 }}>
+                                  <span style={{ width: 9, height: 9, borderRadius: 2, background: IRSHAD_CHART_PALETTE[idx % IRSHAD_CHART_PALETTE.length], display: 'inline-block' }} />
+                                  {s.sector}
+                                </span>
+                                <strong>{Number(s.weight_pct).toFixed(2)}%</strong>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ fontSize: '0.7rem', color: IRSHAD.slate, borderTop: `1px solid ${IRSHAD.border}`, paddingTop: 8, marginTop: 10 }}>
+                        {isLotus
+                          ? `Index rebalanced ${lotus.rebalancing_frequency.toLowerCase()}. Last: ${lotus.last_rebalancing}. Next: ${lotus.next_rebalancing}.`
+                          : 'Exposures derived live from evaluated holdings and NGX sector classifications.'}
+                      </div>
+                    </div>
+
+                    <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                      <div>
+                        <div style={{ fontSize: '0.73rem', fontWeight: 800, letterSpacing: '0.6px', textTransform: 'uppercase', color: IRSHAD.forest, marginBottom: 12 }}>
+                          Largest Holdings
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                          {topHoldingsBars.map((item) => (
+                            <div key={item.symbol} style={{ display: 'grid', gridTemplateColumns: '125px 1fr 48px', alignItems: 'center', gap: 8, fontSize: '0.73rem' }}>
+                              <span style={{ color: '#334155', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {item.name}
+                              </span>
+                              <div style={{ height: 10, borderRadius: 3, background: '#EDF2EF', overflow: 'hidden' }}>
+                                <div style={{
+                                  width: `${Math.min(100, (item.weight / 35) * 100)}%`,
+                                  height: '100%',
+                                  background: item.isOther ? '#94A3B8' : IRSHAD.teal,
+                                  borderRadius: 3,
+                                }} />
+                              </div>
+                              <span style={{ textAlign: 'right', fontWeight: 800, fontVariantNumeric: 'tabular-nums' }}>
+                                {item.weight.toFixed(2)}%
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div style={{
+                        display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between',
+                        gap: 12, borderTop: `1px solid ${IRSHAD.border}`, paddingTop: 12, marginTop: 12,
+                      }}>
+                        <div>
+                          <div style={{ fontSize: '0.62rem', fontWeight: 800, color: IRSHAD.slate }}>TOP 5</div>
+                          <div style={{ fontSize: '0.92rem', fontWeight: 900 }}>{top5Pct.toFixed(1)}%</div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '0.62rem', fontWeight: 800, color: IRSHAD.slate }}>VOLATILITY</div>
+                          <div style={{ fontSize: '0.92rem', fontWeight: 900 }}>{Number(meta.volatility_3y_pct || 24.5).toFixed(1)}%</div>
+                        </div>
+                        <div style={{ flex: '1 1 130px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.62rem', fontWeight: 800, color: IRSHAD.slate, marginBottom: 4 }}>
+                            <span>RISK RATING</span>
+                            <span>{meta.risk_level} of 7</span>
+                          </div>
+                          <RiskScaleSeven level={Number(meta.risk_level || 6)} max={7} />
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+                </>
+              )}
+
+              {/* FULL-WIDTH SHARI'AH COMPLIANCE BANNER (Matching 1.b & 2.b) */}
+              <ShariahComplianceBanner
+                guidanceText={meta.shariah_board || meta.parties?.shariah_board}
+                screensLabel={isNorrenberger ? 'Fixed income' : 'Screens'}
+                screensDetail={isNorrenberger
+                  ? 'Certified FGN & Corporate Sukuk and non-interest bank Mudarabah/Murabaha placements only. No conventional interest bonds.'
+                  : `AAOIFI thresholds: debt (<30%: ${healthMetrics.debt !== null ? `${healthMetrics.debt.toFixed(1)}%` : 'OK'}), cash (<30%: ${healthMetrics.cash !== null ? `${healthMetrics.cash.toFixed(1)}%` : 'OK'}), impure income (<5%: ${Number(healthMetrics.impure || 0).toFixed(2)}%).`}
+                purificationAmount={`₦${purificationPerUnit.toFixed(2)}`}
+                purificationNote={isBalanced
+                  ? 'Derived from the 40% equity sleeve only; donated to approved charities.'
+                  : 'Deducted/quantified under AAOIFI rules for disbursement to approved charities.'}
+                zakatAmount={`₦${zakatPerUnit.toFixed(2)}`}
+                zakatNote="Indicative zakatable amount (2.5% basis). Each investor pays their own."
+                footerRuleText={isNorrenberger
+                  ? 'Strict compliance with SEC Nigeria non-interest fund rules and certified Islamic contracts.'
+                  : 'Excludes conventional banking and insurance, alcohol, gambling, pork, tobacco, weapons and adult entertainment. Jaiz Bank is a non-interest bank, the only one listed on NGX.'}
+              />
+
+              {/* BOTTOM 2 CARDS: FUND FACTS & HOW TO INVEST */}
+              <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: 16 }}>
+                <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16 }}>
+                  <div style={{ fontSize: '0.73rem', fontWeight: 800, letterSpacing: '0.6px', textTransform: 'uppercase', color: IRSHAD.forest, marginBottom: 10 }}>
+                    Fund Facts
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 18px', fontSize: '0.75rem' }}>
+                    {[
+                      ['Launched', isLotus ? lotus.launch_date : (isBalanced ? balanced.launch_date : (isNorrenberger ? norren.launch_date : meta.factsheet_date))],
+                      ['Management fee', meta.management_fee],
+                      ['Units in issue', unitsVal > 0 ? `${(unitsVal / 1e6).toFixed(1)} million` : `${holdings.length} positions`],
+                      ['Last distribution', meta.last_distribution],
+                      [isLotus ? 'Replication' : 'SEC Status', isLotus ? meta.replication : meta.parties?.sec_status],
+                      ['Benchmark', meta.benchmark],
+                      [isLotus ? 'Bid / offer spread' : 'ISIN / Ref', isLotus ? `${meta.bid_offer_spread_pct}%` : meta.isin],
+                      ['Holding period', meta.holding_period],
+                    ].map(([k, v]) => (
+                      <div key={k} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, borderBottom: '1px solid #EEF2F0', paddingBottom: 4 }}>
+                        <span style={{ color: IRSHAD.slate }}>{k}</span>
+                        <strong style={{ color: '#111827', textAlign: 'right' }}>{v}</strong>
                       </div>
                     ))}
                   </div>
-                )}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10 }}>
-                  {norren.market_indicators.map((ind) => (
-                    <div key={ind.title} style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 10, padding: '10px 12px' }}>
-                      <div style={{ fontSize: '1.05rem', fontWeight: 900, color: theme.primary }}>{ind.value}</div>
-                      <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0F172A', marginTop: 2 }}>{ind.title}</div>
-                      <div style={{ fontSize: '0.64rem', color: '#64748B', marginTop: 2 }}>{ind.sub}</div>
+                </div>
+
+                <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div>
+                    <div style={{ fontSize: '0.73rem', fontWeight: 800, letterSpacing: '0.6px', textTransform: 'uppercase', color: IRSHAD.forest, marginBottom: 8 }}>
+                      How to Invest &amp; Contact
                     </div>
-                  ))}
+                    <p style={{ margin: 0, fontSize: '0.76rem', color: '#334155', lineHeight: 1.55 }}>
+                      {meta.investor_profile}
+                    </p>
+                  </div>
+                  <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px solid ${IRSHAD.border}`, fontSize: '0.74rem', fontWeight: 700, color: IRSHAD.teal }}>
+                    {meta.contact}
+                  </div>
                 </div>
-              </div>
-            )}
+              </section>
+            </>
+          )}
 
-            {!isLotus && !isNorrenberger && topHoldingsChartData.length > 0 && (
-              <div style={{ border: '1px solid #E2E8F0', borderRadius: 12, padding: 14 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', fontWeight: 800, color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
-                    <Activity size={14} color={theme.primary} /> Top Constituents Weight (%) &amp; Impermissible Income (%)
-                  </span>
+          {/* ════════════════════════════════════════════════════════════════ */}
+          {/* MODE 2: FULL 7-SECTION FACT SHEET (Field Map Sections 1–7)      */}
+          {/* ════════════════════════════════════════════════════════════════ */}
+          {viewMode === 'full' && (
+            <>
+              {/* Objective */}
+              <section style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16 }}>
+                <div style={{ fontSize: '0.73rem', fontWeight: 800, color: IRSHAD.forest, textTransform: 'uppercase', letterSpacing: '0.7px', marginBottom: 6 }}>
+                  Objective · Benchmark: {meta.benchmark}
                 </div>
-                <div style={{ height: 180 }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={topHoldingsChartData} margin={{ top: 6, right: 10, left: -16, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                      <XAxis dataKey="symbol" tick={{ fontSize: 10 }} />
-                      <YAxis tick={{ fontSize: 10 }} />
-                      <Tooltip />
-                      <Legend wrapperStyle={{ fontSize: 11 }} />
-                      <Bar dataKey="weight" name="Portfolio Weight %" fill={theme.primary} radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="impure" name="Impure Ratio %" fill="#D97706" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
+                <p style={{ margin: 0, fontSize: '0.8rem', color: '#334155', lineHeight: 1.6 }}>{meta.objective}</p>
+              </section>
+
+              {/* Sections 1, 2, 4 Grid */}
+              <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: 16 }}>
+                {/* 1. Fund Facts & Parties */}
+                <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16 }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 800, color: IRSHAD.forest, textTransform: 'uppercase', marginBottom: 10 }}>
+                    1. Fund Facts &amp; Governance Parties
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: '0.74rem' }}>
+                    {[
+                      ['Fund Manager', meta.parties?.fund_manager || meta.institution_name],
+                      ['SEC Registration', meta.parties?.sec_status || 'SEC Nigeria Supervised'],
+                      ['Trustee', meta.parties?.trustee || 'Registered Institutional Trustee'],
+                      ['Custodian', meta.parties?.custodian || 'Licensed Custodian'],
+                      ['Registrar / Auditor', `${meta.parties?.registrar || 'Approved'} / ${meta.parties?.auditor || 'External'}`],
+                      ['Ticker / ISIN', `${meta.ticker} / ${meta.isin}`],
+                      ['Rebalancing Cycle', meta.rebalancing_frequency],
+                    ].map(([k, v]) => (
+                      <div key={k} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #EEF2F0', paddingBottom: 4, gap: 8 }}>
+                        <span style={{ color: IRSHAD.slate }}>{k}</span>
+                        <strong style={{ textAlign: 'right' }}>{v}</strong>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
 
-            {/* Row C: Investment Commentary + Shariah Governance Note */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
-              <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 12, padding: '12px 14px' }}>
-                <div style={{ fontSize: '0.72rem', fontWeight: 800, color: theme.primary, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 5 }}>
-                  Market &amp; Portfolio Commentary
+                {/* 2. Pricing, Valuation & Liquidity */}
+                <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16 }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 800, color: IRSHAD.forest, textTransform: 'uppercase', marginBottom: 10 }}>
+                    2. Pricing, Valuation &amp; Liquidity
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: '0.74rem' }}>
+                    {[
+                      ['Fund Size (AUM)', formatNaira(fundSizeVal)],
+                      ['NAV / Unit Price', navVal > 0 ? `₦${navVal.toFixed(2)}` : 'Computed from equity holdings'],
+                      ['NGX Closing Price', priceVal > 0 ? `₦${priceVal.toFixed(2)}` : 'N/A (Open-ended / Private book)'],
+                      ['Premium / Discount to NAV', premiumPct !== null ? `${premiumPct >= 0 ? '+' : ''}${premiumPct.toFixed(2)}%` : 'N/A'],
+                      ['Derived Units in Issue', unitsVal > 0 ? unitsVal.toLocaleString() : `${holdings.length} holdings`],
+                      ['Last Distribution', meta.last_distribution],
+                      ['Holding Period', meta.holding_period],
+                    ].map(([k, v]) => (
+                      <div key={k} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #EEF2F0', paddingBottom: 4, gap: 8 }}>
+                        <span style={{ color: IRSHAD.slate }}>{k}</span>
+                        <strong style={{ textAlign: 'right' }}>{v}</strong>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <p style={{ margin: 0, fontSize: '0.75rem', color: '#334155', lineHeight: 1.6 }}>
-                  {meta.commentary}
-                </p>
-              </div>
 
-              <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 12, padding: '12px 14px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.72rem', fontWeight: 800, color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 5 }}>
-                  <Info size={13} color={theme.primary} /> Irshad Shariah Governance Note
+                {/* 4. Fees, Portfolio Health & Risk */}
+                <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 12 }}>
+                  <div>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: IRSHAD.forest, textTransform: 'uppercase', marginBottom: 10 }}>
+                      4. Fees &amp; Portfolio Risk Controls
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 5, fontSize: '0.74rem', marginBottom: 12 }}>
+                      {(meta.fee_lines || []).map((fl) => (
+                        <div key={fl.label} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #EEF2F0', paddingBottom: 4 }}>
+                          <span style={{ color: IRSHAD.slate }}>{fl.label}</span>
+                          <strong>{Number(fl.pct || 0).toFixed(2)}%</strong>
+                        </div>
+                      ))}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 2, color: IRSHAD.forest }}>
+                        <strong>Total Expense Ratio (TER)</strong>
+                        <strong>{Number(meta.expense_ratio_pct || 0).toFixed(2)}%</strong>
+                      </div>
+                    </div>
+                  </div>
+                  {!isNorrenberger && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      <AaoifiGaugeBar label="Weighted Debt / Cap" value={healthMetrics.debt} threshold={30} />
+                      <AaoifiGaugeBar label="Weighted Cash & Int." value={healthMetrics.cash} threshold={30} />
+                      <AaoifiGaugeBar label="Weighted Impure Rev." value={healthMetrics.impure} threshold={5} />
+                    </div>
+                  )}
                 </div>
-                {removedNascon ? (
-                  <p style={{ margin: 0, fontSize: '0.75rem', color: '#991B1B', lineHeight: 1.6 }}>
-                    <strong>Rebalance Confirmation:</strong> Removed ticker <strong>{removedNascon.symbol}</strong> fails AAOIFI Impermissible Income (&lt;5%) at <strong>{Number(removedNascon.impure_ratio || 0).toFixed(2)}%</strong>. All remaining 13 constituents pass screening.
-                  </p>
-                ) : Number(summary.non_compliant_count || 0) > 0 ? (
-                  <p style={{ margin: 0, fontSize: '0.75rem', color: '#991B1B', lineHeight: 1.6 }}>
-                    <strong>Compliance Action Required:</strong> {summary.non_compliant_count} position(s) require divestment before issuing a Halal certification. Use the Rebalance panel on Portfolio &amp; Verdicts to swap into compliant peers.
-                  </p>
-                ) : (
-                  <p style={{ margin: 0, fontSize: '0.75rem', color: '#047857', lineHeight: 1.6 }}>
-                    <strong>Clean Audit Certificate:</strong> 100% of evaluated holdings conform to AAOIFI Shariah Standard No. 21 thresholds (&lt;30% debt, &lt;30% cash/interest securities, &lt;5% non-permissible income).
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        </section>
+              </section>
 
-        {/* 4. Full-Width Constituent AAOIFI Screening & Purification Schedule */}
-        {holdings.length > 0 && (
-          <section style={{ marginBottom: 18 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-              <div style={{ fontSize: '0.82rem', fontWeight: 900, color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.7px' }}>
-                Constituent Holdings, AAOIFI Financial Ratios &amp; Purification Schedule ({holdings.length})
-              </div>
-              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748B' }}>
-                Thresholds: Debt &lt; 30% · Cash &lt; 30% · Impure &lt; 5%
-              </span>
-            </div>
+              {/* 5 & 6. Full Constituent Screening & Purification Schedule */}
+              {holdings.length > 0 && (
+                <section style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16 }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, gap: 8 }}>
+                    <div style={{ fontSize: '0.78rem', fontWeight: 900, color: IRSHAD.forest, textTransform: 'uppercase', letterSpacing: '0.6px' }}>
+                      5 &amp; 6. Constituent Screening, AAOIFI Ratios &amp; Purification Schedule ({holdings.length})
+                    </div>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700, color: IRSHAD.slate }}>
+                      Top 5 Concentration: {top5Pct.toFixed(1)}% · Compliant AUM: {formatNaira(summary.compliant_aum || 0, true)}
+                    </span>
+                  </div>
+                  <div style={{ overflowX: 'auto', border: `1px solid ${IRSHAD.border}`, borderRadius: 8 }}>
+                    <table style={{ width: '100%', minWidth: 740, borderCollapse: 'collapse', fontSize: '0.74rem' }}>
+                      <thead>
+                        <tr style={{ background: IRSHAD.forest, color: '#FFFFFF' }}>
+                          <th style={{ padding: '8px 10px', textAlign: 'center', width: 32 }}>#</th>
+                          <th style={{ padding: '8px 10px', textAlign: 'left' }}>Security</th>
+                          <th style={{ padding: '8px 10px', textAlign: 'right' }}>Units</th>
+                          <th style={{ padding: '8px 10px', textAlign: 'right' }}>Market Value</th>
+                          <th style={{ padding: '8px 10px', textAlign: 'right' }}>Weight</th>
+                          <th style={{ padding: '8px 10px', textAlign: 'center' }}>Verdict</th>
+                          <th style={{ padding: '8px 10px', textAlign: 'right' }}>Debt / Cash / Impure</th>
+                          <th style={{ padding: '8px 10px', textAlign: 'right' }}>Purify / Unit</th>
+                          <th style={{ padding: '8px 10px', textAlign: 'right' }}>Purification Due</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {holdings.map((h, i) => {
+                          const ok = h.status === 'halal';
+                          return (
+                            <tr key={h.symbol} style={{ borderBottom: `1px solid ${IRSHAD.border}`, background: i % 2 === 1 ? '#F9FCFA' : '#FFFFFF' }}>
+                              <td style={{ padding: '7px 10px', textAlign: 'center', color: IRSHAD.slate, fontWeight: 700 }}>{i + 1}</td>
+                              <td style={{ padding: '7px 10px' }}>
+                                <div style={{ fontWeight: 800 }}>{h.symbol}</div>
+                                <div style={{ fontSize: '0.67rem', color: IRSHAD.slate }}>{h.name} · {h.sector}</div>
+                              </td>
+                              <td style={{ padding: '7px 10px', textAlign: 'right' }}>{Number(h.shares || 0).toLocaleString()}</td>
+                              <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 700 }}>{formatNaira(h.market_value)}</td>
+                              <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 700 }}>{Number(h.weight_pct || 0).toFixed(2)}%</td>
+                              <td style={{ padding: '7px 10px', textAlign: 'center' }}>
+                                <span style={{
+                                  padding: '2px 8px', borderRadius: 999, fontSize: '0.65rem', fontWeight: 800,
+                                  background: ok ? 'rgba(69, 165, 138, 0.14)' : '#FEF2F2',
+                                  color: ok ? IRSHAD.forest : '#B91C1C',
+                                }}>
+                                  {ok ? 'COMPLIANT' : String(h.status || 'NON-COMPLIANT').toUpperCase()}
+                                </span>
+                              </td>
+                              <td style={{ padding: '7px 10px', textAlign: 'right', color: '#475569' }}>
+                                {h.debt_ratio ?? '—'}% / {h.cash_ratio ?? '—'}% / {Number(h.impure_ratio || 0).toFixed(2)}%
+                              </td>
+                              <td style={{ padding: '7px 10px', textAlign: 'right', color: IRSHAD.slate }}>
+                                ₦{Number(h.purification_per_unit || 0).toFixed(4)}
+                              </td>
+                              <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 800, color: IRSHAD.goldDark }}>
+                                {formatNaira(h.purification_due)}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                      <tfoot>
+                        <tr style={{ background: '#EFF7F3', fontWeight: 800, borderTop: `2px solid ${IRSHAD.border}` }}>
+                          <td colSpan={3} style={{ padding: '8px 10px', color: IRSHAD.forest }}>TOTAL BOOK AUDIT</td>
+                          <td style={{ padding: '8px 10px', textAlign: 'right' }}>{formatNaira(summary.total_aum)}</td>
+                          <td style={{ padding: '8px 10px', textAlign: 'right' }}>100.00%</td>
+                          <td style={{ padding: '8px 10px', textAlign: 'center', color: IRSHAD.teal }}>{Number(summary.compliant_pct || 0).toFixed(1)}% Pass</td>
+                          <td style={{ padding: '8px 10px', textAlign: 'right' }}>
+                            {healthMetrics.debt !== null ? `${healthMetrics.debt.toFixed(1)}%` : '—'} / {healthMetrics.cash !== null ? `${healthMetrics.cash.toFixed(1)}%` : '—'} / {Number(healthMetrics.impure || 0).toFixed(2)}%
+                          </td>
+                          <td style={{ padding: '8px 10px', textAlign: 'right', color: IRSHAD.goldDark }}>₦{purificationPerUnit.toFixed(4)}</td>
+                          <td style={{ padding: '8px 10px', textAlign: 'right', color: IRSHAD.goldDark }}>{formatNaira(summary.total_purification_due)}</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                </section>
+              )}
 
-            <div style={{ overflowX: 'auto', border: '1px solid #CBD5E1', borderRadius: 10 }}>
-              <table style={{ width: '100%', minWidth: 740, borderCollapse: 'collapse', fontSize: '0.74rem' }}>
-                <thead>
-                  <tr style={{ background: theme.tableHeader, color: '#FFFFFF' }}>
-                    <th style={{ padding: '8px 10px', textAlign: 'center', width: 34 }}>#</th>
-                    <th style={{ padding: '8px 10px', textAlign: 'left' }}>Security</th>
-                    <th style={{ padding: '8px 10px', textAlign: 'right' }}>Units</th>
-                    <th style={{ padding: '8px 10px', textAlign: 'right' }}>Market Value</th>
-                    <th style={{ padding: '8px 10px', textAlign: 'right' }}>Weight</th>
-                    <th style={{ padding: '8px 10px', textAlign: 'center' }}>Shariah Verdict</th>
-                    <th style={{ padding: '8px 10px', textAlign: 'right' }}>Debt / Cash / Impure</th>
-                    <th style={{ padding: '8px 10px', textAlign: 'right' }}>Purify / Unit</th>
-                    <th style={{ padding: '8px 10px', textAlign: 'right' }}>Purification Due</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {holdings.map((h, i) => {
-                    const isHalal = h.status === 'halal';
-                    return (
-                      <tr key={h.symbol} style={{ borderBottom: '1px solid #E2E8F0', background: i % 2 === 1 ? '#F8FAFC' : '#FFFFFF' }}>
-                        <td style={{ padding: '7px 10px', textAlign: 'center', color: '#64748B', fontWeight: 700 }}>{i + 1}</td>
-                        <td style={{ padding: '7px 10px' }}>
-                          <div style={{ fontWeight: 800, color: '#0F172A' }}>{h.symbol}</div>
-                          <div style={{ fontSize: '0.67rem', color: '#64748B' }}>{h.name} · {h.sector}</div>
-                        </td>
-                        <td style={{ padding: '7px 10px', textAlign: 'right', color: '#334155' }}>
-                          {Number(h.shares || 0).toLocaleString()}
-                        </td>
-                        <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 700, color: '#0F172A' }}>
-                          {formatNaira(h.market_value)}
-                        </td>
-                        <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 700 }}>
-                          {Number(h.weight_pct || 0).toFixed(2)}%
-                        </td>
-                        <td style={{ padding: '7px 10px', textAlign: 'center' }}>
-                          <span style={{
-                            display: 'inline-flex', alignItems: 'center', gap: 4,
-                            padding: '2px 8px', borderRadius: 999, fontSize: '0.66rem', fontWeight: 800,
-                            background: isHalal ? '#ECFDF5' : '#FEF2F2',
-                            color: isHalal ? '#047857' : '#B91C1C',
-                          }}>
-                            {isHalal ? 'COMPLIANT' : String(h.status || 'NON-COMPLIANT').toUpperCase()}
-                            {h.is_near_threshold ? ' · WATCH' : ''}
-                          </span>
-                        </td>
-                        <td style={{ padding: '7px 10px', textAlign: 'right', color: '#475569', fontVariantNumeric: 'tabular-nums' }}>
-                          {h.debt_ratio ?? '—'}% / {h.cash_ratio ?? '—'}% / {Number(h.impure_ratio || 0).toFixed(2)}%
-                        </td>
-                        <td style={{ padding: '7px 10px', textAlign: 'right', color: '#64748B' }}>
-                          ₦{Number(h.purification_per_unit || 0).toFixed(4)}
-                        </td>
-                        <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 800, color: '#B45309' }}>
-                          {formatNaira(h.purification_due)}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-                <tfoot>
-                  <tr style={{ background: '#F1F5F9', fontWeight: 800, borderTop: '2px solid #CBD5E1' }}>
-                    <td colSpan={3} style={{ padding: '8px 10px', color: '#0F172A' }}>TOTAL PORTFOLIO AUDIT</td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#0F172A' }}>{formatNaira(summary.total_aum)}</td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#0F172A' }}>100.00%</td>
-                    <td style={{ padding: '8px 10px', textAlign: 'center', color: '#047857' }}>{Number(summary.compliant_pct || 0).toFixed(1)}% Pass</td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#475569' }}>
-                      {healthMetrics.debt !== null ? `${healthMetrics.debt.toFixed(1)}%` : '—'} / {healthMetrics.cash !== null ? `${healthMetrics.cash.toFixed(1)}%` : '—'} / {Number(healthMetrics.impure || 0).toFixed(2)}%
-                    </td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#B45309' }}>₦{Number(summary.weighted_purification_per_unit || 0).toFixed(4)}</td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#B45309' }}>{formatNaira(summary.total_purification_due)}</td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-          </section>
-        )}
+              {/* Sign-Off Audit Trail Strip */}
+              <section style={{
+                background: '#FFFFFF',
+                border: `1px solid ${IRSHAD.border}`,
+                borderRadius: 12,
+                padding: '12px 16px',
+                display: 'flex',
+                flexWrap: 'wrap',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: 10,
+                fontSize: '0.74rem',
+              }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 700, color: IRSHAD.forest }}>
+                  <ShieldCheck size={15} /> Shariah Board: {meta.shariah_board}
+                </span>
+                <span style={{ color: IRSHAD.slate }}>
+                  <CheckCircle2 size={13} style={{ verticalAlign: 'middle', marginRight: 4, color: IRSHAD.teal }} />
+                  Cut-Off: <strong>{meta.factsheet_date}</strong> · Approver: <strong>{meta.approved_by || 'Pending Final Sign-Off'}</strong>
+                </span>
+              </section>
+            </>
+          )}
 
-        {/* 5. Footer & Regulatory Disclosures */}
-        <footer style={{
-          paddingTop: 14,
-          borderTop: '1px solid #CBD5E1',
-          fontSize: '0.68rem',
-          color: '#64748B',
-          lineHeight: 1.55,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 4,
-        }}>
-          <div style={{ fontWeight: 700, color: theme.primary }}>{meta.contact}</div>
-          <div><strong>Disclosure &amp; Shariah Basis:</strong> {meta.disclaimer}</div>
-        </footer>
+          {/* REGULATORY DISCLAIMER FOOTER */}
+          <footer style={{
+            paddingTop: 12,
+            borderTop: `1px solid ${IRSHAD.border}`,
+            fontSize: '0.68rem',
+            color: IRSHAD.slate,
+            lineHeight: 1.55,
+          }}>
+            {meta.disclaimer}
+          </footer>
+        </div>
       </article>
     </div>
   );

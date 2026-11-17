@@ -390,7 +390,15 @@ class InstitutionPortalTest extends TestCase
         $res = $this->getJson('/api/v1/institution/demo-presets');
         $res->assertStatus(200)
             ->assertJsonPath('data.lotus_etf.ticker', 'LOTUSHAL15')
-            ->assertJsonPath('data.norrenberger_fund.fund_name', 'Norrenberger Islamic Fund');
+            ->assertJsonPath('data.norrenberger_fund.fund_name', 'Norrenberger Islamic Fund')
+            ->assertJsonPath('data.balanced_fund.id', 'balanced_fund')
+            ->assertJsonStructure([
+                'data' => [
+                    'mixed_institutional_book' => [
+                        'summary' => ['top_5_concentration_pct', 'indicative_zakat_per_unit', 'total_zakatable_amount'],
+                    ],
+                ],
+            ]);
     }
 
     public function test_workspace_isolates_tenant_information_per_institution(): void

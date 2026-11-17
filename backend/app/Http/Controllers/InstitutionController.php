@@ -123,8 +123,74 @@ class InstitutionController extends Controller
             'benchmark_index' => 'NGX Lotus Islamic Index (NGXLII)',
             'launch_date' => 'Aug-14',
             'listing_date' => 'Nov-14',
+            'units_in_issue' => 33400000,
+            'expense_ratio_pct' => 0.95,
+            'bid_offer_spread_pct' => 1.4,
+            'replication' => 'Full physical',
+            'holding_period' => 'Five years or more',
+            'volatility_3y_pct' => 24.5,
+            'top_5_concentration_pct' => 66.5,
+            'tracking_error_3y_pct' => 4.8,
+            'risk_rating' => 6,
+            'risk_max' => 7,
+            'zakat_per_unit' => 21.40,
             'screening_result' => $lotusScreened,
             'rebalance_removed' => $removedNascon['holdings'][0] ?? null,
+        ];
+    }
+
+    protected function buildBalancedPreset(): array
+    {
+        $equitySleeve = $this->evaluateHoldingsArray([
+            ['symbol' => 'ARADEL',    'label' => 'Aradel Holdings PLC',              'sector' => 'Oil & Gas',          'shares' => 183200],
+            ['symbol' => 'MTNN',      'label' => 'MTN Nigeria Communications PLC',   'sector' => 'Telecommunications', 'shares' => 218800],
+            ['symbol' => 'DANGCEM',   'label' => 'Dangote Cement PLC',               'sector' => 'Industrial Goods',   'shares' => 152000],
+            ['symbol' => 'BUACEMENT', 'label' => 'BUA Cement PLC',                   'sector' => 'Industrial Goods',   'shares' => 478000],
+            ['symbol' => 'HBMNG',     'label' => 'Lafarge Africa PLC (HBMNG)',       'sector' => 'Industrial Goods',   'shares' => 164000],
+            ['symbol' => 'BUAFOODS',  'label' => 'BUA Foods PLC',                    'sector' => 'Consumer Goods',     'shares' => 164800],
+            ['symbol' => 'JAIZBANK',  'label' => 'Jaiz Bank PLC',                    'sector' => 'Banking',            'shares' => 2240000],
+        ]);
+
+        return [
+            'id' => 'balanced_fund',
+            'institution_name' => 'Irshad Shariah Fund Benchmark',
+            'fund_name' => 'Halal Balanced Fund (60/40 Model)',
+            'factsheet_date' => 'October 2026',
+            'unit_price' => 108.27,
+            'ytd_yield' => 17.72,
+            'fund_size_label' => '₦6.81bn',
+            'fund_size_ngn' => 6810000000,
+            'units_in_issue' => 62900000,
+            'total_expense_ratio' => '1.60%',
+            'management_fee' => '1.25%',
+            'launch_date' => 'January 2025',
+            'status' => 'Open Ended',
+            'bias' => '60% Islamic Fixed Income / 40% Halal Equities',
+            'initial_investment' => '50 Units',
+            'distributions' => 'Quarterly',
+            'redemption' => 'Daily, 3 business days',
+            'risk_rating' => 4,
+            'risk_max' => 7,
+            'risk_label' => 'Moderate',
+            'volatility_3y_pct' => 11.8,
+            'purification_per_unit_fy25' => 0.18,
+            'zakat_per_unit' => 16.80,
+            'allocation' => [
+                ['security' => 'Halal NGX Equities',      'current' => 40.00, 'target_min' => 30, 'target_max' => 50, 'target_label' => '30% - 50%', 'shariah_contract' => 'Screened Common Equity', 'status' => 'Within Mandate'],
+                ['security' => 'FGN Sukuk',               'current' => 36.00, 'target_min' => 25, 'target_max' => 60, 'target_label' => '25% - 60%', 'shariah_contract' => 'Sukuk Al-Ijarah',        'status' => 'Within Mandate'],
+                ['security' => 'Corporate Sukuk',         'current' => 11.00, 'target_min' => 0,  'target_max' => 30, 'target_label' => '0% - 30%',  'shariah_contract' => 'Sukuk Al-Wakalah',       'status' => 'Within Mandate'],
+                ['security' => 'Mudarabah Placements',    'current' => 7.00,  'target_min' => 0,  'target_max' => 25, 'target_label' => '0% - 25%',  'shariah_contract' => 'Profit-Sharing',         'status' => 'Within Mandate'],
+                ['security' => 'Murabaha Contracts',      'current' => 4.00,  'target_min' => 0,  'target_max' => 20, 'target_label' => '0% - 20%',  'shariah_contract' => 'Cost-Plus Trade',        'status' => 'Within Mandate'],
+                ['security' => 'Ijarah Sukuk',            'current' => 1.00,  'target_min' => 0,  'target_max' => 15, 'target_label' => '0% - 15%',  'shariah_contract' => 'Leasing Sukuk',          'status' => 'Within Mandate'],
+                ['security' => 'Non-Interest Cash',       'current' => 1.00,  'target_min' => 0,  'target_max' => 10, 'target_label' => '0% - 10%',  'shariah_contract' => 'Wadiah / Current',       'status' => 'Within Mandate'],
+            ],
+            'maturity_profile' => [
+                ['bucket' => '<1 yr', 'pct' => 19],
+                ['bucket' => '1 to 3 yr', 'pct' => 14],
+                ['bucket' => '>3 yr', 'pct' => 27],
+                ['bucket' => 'Equity', 'pct' => 40],
+            ],
+            'screening_result' => $equitySleeve,
         ];
     }
 
@@ -211,6 +277,9 @@ class InstitutionController extends Controller
         if ($tenantKey === 'norrenberger' || $isAdmin) {
             $payload['norrenberger_fund'] = $this->buildNorrenbergerPreset();
         }
+        if ($isAdmin) {
+            $payload['balanced_fund'] = $this->buildBalancedPreset();
+        }
 
         return $this->success($payload);
     }
@@ -238,6 +307,7 @@ class InstitutionController extends Controller
         return $this->success([
             'lotus_etf' => $this->buildLotusPreset(),
             'norrenberger_fund' => $this->buildNorrenbergerPreset(),
+            'balanced_fund' => $this->buildBalancedPreset(),
             'mixed_institutional_book' => $mixedBook,
         ]);
     }
@@ -711,6 +781,10 @@ class InstitutionController extends Controller
             $impureWeightedSum += $w * (float) ($h['impure_ratio'] ?? 0);
         }
 
+        $top5Concentration = round(array_sum(array_map(fn ($h) => (float) ($h['weight_pct'] ?? 0), array_slice($evaluated, 0, 5))), 2);
+        $top10Concentration = round(array_sum(array_map(fn ($h) => (float) ($h['weight_pct'] ?? 0), array_slice($evaluated, 0, 10))), 2);
+        $totalZakatable = round($compliantAum * 0.025, 2);
+
         return [
             'holdings' => $evaluated,
             'sector_allocation' => $sectorAllocation,
@@ -722,6 +796,8 @@ class InstitutionController extends Controller
                 'doubtful_count' => $doubtfulCount,
                 'purify_required_count' => $purifyRequiredCount,
                 'near_threshold_count' => $nearThresholdCount,
+                'top_5_concentration_pct' => $top5Concentration,
+                'top_10_concentration_pct' => $top10Concentration,
                 'weighted_debt_ratio' => $debtWeightDenom > 0 ? round($debtWeightedSum / $debtWeightDenom, 2) : null,
                 'weighted_cash_ratio' => $cashWeightDenom > 0 ? round($cashWeightedSum / $cashWeightDenom, 2) : null,
                 'weighted_impure_ratio' => $impureWeightDenom > 0 ? round($impureWeightedSum / $impureWeightDenom, 2) : 0,
@@ -735,6 +811,8 @@ class InstitutionController extends Controller
                 'unmapped_aum' => round($unmappedAum, 2),
                 'total_purification_due' => round($totalPurification, 2),
                 'weighted_purification_per_unit' => $totalUnits > 0 ? round($totalPurification / $totalUnits, 4) : 0,
+                'total_zakatable_amount' => $totalZakatable,
+                'indicative_zakat_per_unit' => $totalUnits > 0 ? round($totalZakatable / $totalUnits, 4) : 0,
                 'screened_at' => now()->toISOString(),
             ],
         ];

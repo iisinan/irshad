@@ -24,6 +24,7 @@ import InstitutionalApiPanel from './InstitutionalApiPanel';
 import {
   LOTUS_FALLBACK_DATA,
   NORRENBERGER_FALLBACK_DATA,
+  BALANCED_FALLBACK_DATA,
   SAMPLE_UPLOAD_CSV,
   formatNaira,
 } from './institutionalFixtures';
@@ -99,6 +100,7 @@ export default function InstitutionalDashboard({ demoMode = false }) {
             setPresets({
               lotus_etf: ws.lotus_etf || null,
               norrenberger_fund: ws.norrenberger_fund || null,
+              balanced_fund: ws.balanced_fund || null,
             });
             const saved = ws.saved_portfolios || [];
             setSavedPortfolios(saved);
@@ -145,6 +147,7 @@ export default function InstitutionalDashboard({ demoMode = false }) {
   const activeScreened = useMemo(() => {
     if (activePresetId === 'uploaded') return customScreened || { holdings: [], summary: {}, sector_allocation: [] };
     if (activePresetId === 'lotus_etf') return presets?.lotus_etf?.screening_result || { holdings: [], summary: {}, sector_allocation: [] };
+    if (activePresetId === 'balanced_fund') return presets?.balanced_fund?.screening_result || { holdings: [], summary: {}, sector_allocation: [] };
     if (activePresetId === 'mixed_institutional_book' && showDemoFeatures) {
       return presets?.mixed_institutional_book || { holdings: [], summary: {}, sector_allocation: [] };
     }
@@ -157,6 +160,7 @@ export default function InstitutionalDashboard({ demoMode = false }) {
   const activeTitle = useMemo(() => {
     if (activePresetId === 'lotus_etf') return LOTUS_FALLBACK_DATA.fund_name;
     if (activePresetId === 'norrenberger_fund') return NORRENBERGER_FALLBACK_DATA.fund_name;
+    if (activePresetId === 'balanced_fund') return BALANCED_FALLBACK_DATA.fund_name;
     if (activePresetId === 'mixed_institutional_book') return 'Sample Mixed Brokerage Equity Book';
     return customFundName;
   }, [activePresetId, customFundName]);
@@ -451,6 +455,7 @@ export default function InstitutionalDashboard({ demoMode = false }) {
     const opts = [];
     if (showDemoFeatures) {
       opts.push({ value: 'preset:lotus_etf', label: 'Lotus Halal Equity ETF (13 Stocks)' });
+      opts.push({ value: 'preset:balanced_fund', label: 'Halal Balanced Fund (60/40 Model)' });
       opts.push({ value: 'preset:norrenberger_fund', label: 'Norrenberger Islamic Fund (Oct 2026)' });
       opts.push({ value: 'preset:mixed_institutional_book', label: 'Sample Mixed Broker Book' });
     } else {
@@ -1157,6 +1162,7 @@ export default function InstitutionalDashboard({ demoMode = false }) {
             key={`${activePresetId}-${tenantKey}`}
             lotusData={presets?.lotus_etf}
             norrenbergerData={presets?.norrenberger_fund}
+            balancedData={presets?.balanced_fund}
             screened={activeScreened}
             activePresetId={activePresetId}
             customFundName={activeTitle}
