@@ -4,7 +4,7 @@ import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend,
 } from 'recharts';
 import {
-  Printer, ShieldCheck, CheckCircle2, SlidersHorizontal, FileText, LayoutGrid, Download
+  Printer, ShieldCheck, CheckCircle2, SlidersHorizontal, FileText, LayoutGrid
 } from 'lucide-react';
 import {
   LOTUS_FALLBACK_DATA,
@@ -558,36 +558,6 @@ export default function InstitutionalFactsheetView({
             }}
           >
             <SlidersHorizontal size={14} /> {showInputsDrawer ? 'Hide Manager Inputs' : 'Fund Setup & Checks'}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              const payload = {
-                generated_at: new Date().toISOString(),
-                identity: { institution: meta.institution_name, fund: meta.fund_name, ticker: meta.ticker, isin: meta.isin, cut_off_date: meta.factsheet_date },
-                pricing: { fund_size_ngn: fundSizeVal, nav_per_unit: navVal, closing_price: priceVal, premium_to_nav_pct: premiumPct, units_in_issue: unitsVal },
-                shariah_audit: { ...healthMetrics, purification_per_unit: purificationPerUnit, zakat_per_unit: zakatPerUnit, compliance_pct: summary.compliant_pct ?? 100 },
-                validation_checks: validation.checks,
-                non_compliance_events: meta.non_compliance_events || [],
-                holdings,
-              };
-              const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = `${(meta.ticker || 'irshad-factsheet').toLowerCase()}-audit.json`;
-              a.click();
-              URL.revokeObjectURL(url);
-            }}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              padding: '8px 13px', borderRadius: 10,
-              background: 'var(--bg-section)', color: 'var(--text-dark)',
-              border: '1px solid var(--border-strong)',
-              fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer',
-            }}
-          >
-            <Download size={14} /> Audit JSON
           </button>
           <button
             type="button"

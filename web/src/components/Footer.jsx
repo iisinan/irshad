@@ -102,7 +102,7 @@ const Footer = () => (
 
     {/* Bottom bar */}
     <div className="footer-bottom">
-      <span>© {new Date().getFullYear()} Irshad Financial Services Ltd. All rights reserved.</span>
+      <span>© {new Date().getFullYear()} Irshad Technology Ltd. All rights reserved.</span>
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         <Link to="/privacy" className="footer-bottom-link">Privacy</Link>
         <Link to="/terms" className="footer-bottom-link">Terms</Link>

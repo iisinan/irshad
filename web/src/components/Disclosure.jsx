@@ -79,7 +79,7 @@ const DisclosurePage = () => {
                 Regulatory Non-Advisory Status
               </h2>
               <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: 1.75 }}>
-                Irshad Financial Services Ltd is a financial data and Shariah technology provider. Irshad is <strong>not registered as an Investment Adviser, Broker-Dealer, Portfolio Manager, or Rating Agency</strong> with the Securities and Exchange Commission (SEC) Nigeria or any international securities authority. None of the content, ratings, scores, or lists constitutes a solicitation, recommendation, endorsement, or offer to buy or sell any security.
+                Irshad Technology Ltd is a financial data and Shariah technology provider. Irshad is <strong>not registered as an Investment Adviser, Broker-Dealer, Portfolio Manager, or Rating Agency</strong> with the Securities and Exchange Commission (SEC) Nigeria or any international securities authority. None of the content, ratings, scores, or lists constitutes a solicitation, recommendation, endorsement, or offer to buy or sell any security.
               </p>
             </div>
 

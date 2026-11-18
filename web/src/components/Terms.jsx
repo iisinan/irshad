@@ -132,7 +132,7 @@ const TermsPage = () => {
                 Intellectual Property
               </h2>
               <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: 1.75 }}>
-                The Irshad name, logo, algorithm implementations, purification engine, user interface design, and aggregated screening database are the exclusive intellectual property of Irshad Financial Services Ltd. You may not scrape, redistribute, or reverse engineer any portion of the service without express written permission.
+                The Irshad name, logo, algorithm implementations, purification engine, user interface design, and aggregated screening database are the exclusive intellectual property of Irshad Technology Ltd. You may not scrape, redistribute, or reverse engineer any portion of the service without express written permission.
               </p>
             </div>
 

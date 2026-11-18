@@ -8,26 +8,7 @@ class UpdatesIpoTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ipoData = {
-      'id': 'dangote-refinery',
-      'name': 'Dangote Refinery',
-      'status': 'OPEN',
-      'statusColor': context.appColors.halal,
-      'statusBg': context.appColors.halalBg,
-      'sector': 'Oil & Gas',
-      'exchange': 'NGX (Planned)',
-      'valuation': '~\$20B+',
-      'logo': 'assets/logos/DPRP.png',
-      'timeline': 'Q4 2026 - Q1 2027 (Est.)',
-      'capacity': '650,000 barrels per day',
-      'listingLocation': 'Nigerian Exchange (NGX), London (LSE)',
-      'shariahAssessment': 'As a refining business, the core activity (petroleum processing) is permissible (Halal). The H1 2026 audited statements have been analyzed: The company holds ₦5.66B in debt (0.0086% Debt Ratio) and ₦4.26B in cash (0.0065% Cash Ratio), while impure income stands safely at 0.35%. It passes all AAOIFI quantitative financial screening ratios. Status: 100% HALAL.',
-      'description': "The Dangote Petroleum Refinery and Petrochemicals FZE initial public offering is now live. The offering involves 4.1 billion ordinary shares aimed at raising ₦2.15 trillion (\$1.6 billion), representing one of the largest IPOs in African history. Minimum subscription is 10 shares (₦5,250), with subsequent multiples of 10. The offering is officially certified as Shariah-compliant.",
-      'dateStart': 'Sept 14, 2026',
-      'dateEnd': 'Oct 13, 2026',
-      'price': '₦525/share',
-      'sourceUrl': 'https://acrobat.adobe.com/id/urn:aaid:sc:EU:9676fb4f-2d53-4785-a994-5cac81b2c454?viewer%21megaVerb=group-discover'
-    };
+    final List<Map<String, dynamic>> ipoList = [];
 
     return ListView(
       shrinkWrap: true,
@@ -36,7 +17,51 @@ class UpdatesIpoTab extends StatelessWidget {
       children: [
         _buildHeader(context),
         const SizedBox(height: 24),
-        _buildIPOCard(context, ipoData),
+        if (ipoList.isEmpty)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 48),
+            decoration: BoxDecoration(
+              color: context.bgAlt,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: context.appColors.divider),
+            ),
+            alignment: Alignment.center,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: context.primary.withOpacity(0.08),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.rocket_launch_outlined, size: 28, color: context.primary),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'No Upcoming IPOs',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: context.textDark,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'There are currently no active or announced IPOs. Check back for new listings and Shariah assessments.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: context.textMuted,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          for (final ipo in ipoList) _buildIPOCard(context, ipo),
       ],
     );
   }

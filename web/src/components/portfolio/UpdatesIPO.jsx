@@ -2,28 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Rocket, FileText, BarChart2, Building, Calendar, Info, X, DollarSign, Clock, Shield, ChevronRight, ExternalLink } from 'lucide-react';
 
-const IPO_LIST = [
-  {
-    id: 'dangote-refinery',
-    name: 'Dangote Refinery',
-    status: 'OPEN',
-    statusColor: 'var(--halal)',
-    statusBg: 'var(--halal-bg)',
-    sector: 'Oil & Gas',
-    exchange: 'NGX (Planned)',
-    valuation: '~$20B+',
-    logo: 'https://raw.githubusercontent.com/iisinan/irshad/main/mobile/assets/logos/DPRP.png',
-    timeline: 'Q4 2026 - Q1 2027 (Est.)',
-    capacity: '650,000 barrels per day',
-    listingLocation: 'Nigerian Exchange (NGX), London (LSE)',
-    shariahAssessment: 'As a refining business, the core activity (petroleum processing) is permissible (Halal). The H1 2026 audited statements have been analyzed: The company holds ₦5.66B in debt (0.0086% Debt Ratio) and ₦4.26B in cash (0.0065% Cash Ratio), while impure income stands safely at 0.35%. It passes all AAOIFI quantitative financial screening ratios. Status: 100% HALAL.',
-    description: "The Dangote Petroleum Refinery and Petrochemicals FZE initial public offering is now live. The offering involves 4.1 billion ordinary shares aimed at raising ₦2.15 trillion ($1.6 billion), representing one of the largest IPOs in African history. Minimum subscription is 10 shares (₦5,250), with subsequent multiples of 10. The offering is officially certified as Shariah-compliant.",
-    dateStart: 'September 14, 2026',
-    dateEnd: 'October 13, 2026',
-    price: '₦525 per share',
-    sourceUrl: 'https://acrobat.adobe.com/id/urn:aaid:sc:EU:9676fb4f-2d53-4785-a994-5cac81b2c454?viewer%21megaVerb=group-discover'
-  }
-];
+const IPO_LIST = [];
 
 function IPOCard({ ipo, onClick }) {
   return (
