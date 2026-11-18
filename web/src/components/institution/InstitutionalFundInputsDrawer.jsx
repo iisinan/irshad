@@ -1,11 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import {
   CheckCircle2, AlertTriangle, Building2, TrendingUp, Percent, ShieldCheck,
-  Save, Plus, Trash2, Sparkles, Loader2
+  Save, Plus, Trash2
 } from 'lucide-react';
 import { computeFundValidation } from './institutionalFixtures';
-import { smartAutofillInstitutionFactsheet } from '../../services/api';
-import { toastError, toastSuccess } from '../../utils/toast';
 
 const SUB_TABS = [
   { id: 'identity', label: '1. Identity & Parties', icon: Building2 },
@@ -60,8 +58,6 @@ export default function InstitutionalFundInputsDrawer({
   const [newLogSymbol, setNewLogSymbol] = useState('');
   const [newLogAction, setNewLogAction] = useState('Removed from Mandate');
   const [newLogDetail, setNewLogDetail] = useState('');
-  const [isAutoFilling, setIsAutoFilling] = useState(false);
-  const [autofillSummary, setAutofillSummary] = useState(null);
 
   const update = (key, value) => {
     onChangeMeta({ ...meta, [key]: value });
@@ -127,93 +123,6 @@ export default function InstitutionalFundInputsDrawer({
     [meta, holdings, summary, isNorrenberger, isBalanced]
   );
 
-  const applyAutofillData = (auto, filledFields = [], aiEnhanced = false) => {
-    const existingEvents = Array.isArray(meta.non_compliance_events) ? meta.non_compliance_events : [];
-    const suggestedEvents = Array.isArray(auto.suggested_events) ? auto.suggested_events : [];
-    const mergedEvents = existingEvents.length > 0 ? existingEvents : suggestedEvents;
-
-    onChangeMeta({
-      ...meta,
-      ticker: auto.ticker ?? meta.ticker,
-      factsheet_date: auto.factsheet_date ?? meta.factsheet_date,
-      fund_size_ngn: auto.fund_size_ngn ?? meta.fund_size_ngn,
-      nav_per_unit: auto.nav_per_unit ?? meta.nav_per_unit,
-      units_in_issue: auto.units_in_issue ?? meta.units_in_issue,
-      benchmark: auto.benchmark ?? meta.benchmark,
-      risk_level: auto.risk_level ?? meta.risk_level,
-      risk_label: auto.risk_label ?? meta.risk_label,
-      volatility_3y_pct: auto.volatility_3y_pct ?? meta.volatility_3y_pct,
-      holding_period: auto.holding_period ?? meta.holding_period,
-      rebalancing_frequency: auto.rebalancing_frequency ?? meta.rebalancing_frequency,
-      fee_lines: auto.fee_lines ?? meta.fee_lines,
-      expense_ratio_pct: auto.expense_ratio_pct ?? meta.expense_ratio_pct,
-      management_fee: auto.management_fee ?? meta.management_fee,
-      purification_per_unit_input: auto.purification_per_unit_input ?? meta.purification_per_unit_input,
-      zakat_per_unit_input: auto.zakat_per_unit_input ?? meta.zakat_per_unit_input,
-      shariah_board: auto.shariah_board ?? meta.shariah_board,
-      objective: auto.objective ?? meta.objective,
-      commentary: auto.commentary ?? meta.commentary,
-      investor_profile: auto.investor_profile ?? meta.investor_profile,
-      non_compliance_events: mergedEvents,
-    });
-    setAutofillSummary({ filledFields, aiEnhanced });
-  };
-
-  const handleSmartAutofill = async () => {
-    setIsAutoFilling(true);
-    try {
-      if (isAuthenticatedInstitution) {
-        const res = await smartAutofillInstitutionFactsheet({
-          fund_name: meta.fund_name,
-          institution_name: meta.institution_name,
-          mandate_type: meta.mandate_type,
-          preset_id: activePresetId,
-          ticker: meta.ticker,
-          nav_per_unit: meta.nav_per_unit || undefined,
-          expense_ratio_pct: meta.expense_ratio_pct,
-          fee_lines: meta.fee_lines,
-          holdings: holdings.map((h) => ({
-            symbol: h.symbol,
-            shares: h.shares,
-            avg_price: h.current_price,
-          })),
-        });
-        if (res?.data?.autofill) {
-          applyAutofillData(res.data.autofill, res.data.filled_fields || [], Boolean(res.data.ai_enhanced));
-          toastSuccess(`Smart Auto-Fill updated ${res.data.filled_fields?.length || 6} field groups.`);
-          return;
-        }
-      }
-
-      // Deterministic client-side Smart Auto-Fill for unauthenticated / demo presentations
-      const feeLines = meta.fee_lines?.length ? meta.fee_lines : [{ label: 'Management Fee', pct: 0.75 }];
-      const terSum = Number(feeLines.reduce((acc, f) => acc + Number(f.pct || 0), 0).toFixed(2));
-      const nextRisk = smartBrief?.risk_classification;
-      const top5 = Number(summary?.top_5_concentration_pct || 60);
-      const localAuto = {
-        fund_size_ngn: Number(summary?.total_aum || meta.fund_size_ngn || 0) || null,
-        units_in_issue: Number(meta.nav_per_unit || 0) > 0 && Number(summary?.total_aum || meta.fund_size_ngn || 0) > 0
-          ? Math.round(Number(summary?.total_aum || meta.fund_size_ngn) / Number(meta.nav_per_unit))
-          : meta.units_in_issue,
-        risk_level: nextRisk?.level || meta.risk_level,
-        risk_label: nextRisk?.label || meta.risk_label,
-        volatility_3y_pct: isNorrenberger ? 3.4 : isBalanced ? 11.8 : Number(Math.min(32, Math.max(12.5, 11 + top5 * 0.18)).toFixed(1)),
-        fee_lines: feeLines,
-        expense_ratio_pct: terSum,
-        management_fee: `${Number(feeLines[0]?.pct || terSum).toFixed(2)}%`,
-        commentary: smartBrief?.suggested_commentary || meta.commentary,
-        purification_per_unit_input: Number(summary?.weighted_purification_per_unit ?? meta.purification_per_unit_input ?? 0),
-        zakat_per_unit_input: Number(summary?.indicative_zakat_per_unit ?? meta.zakat_per_unit_input ?? 0),
-      };
-      applyAutofillData(localAuto, ['Risk & Volatility', 'TER Fees', 'Commentary', 'Purification & Zakat'], false);
-      toastSuccess('Smart Auto-Fill populated derived metrics & commentary.');
-    } catch (err) {
-      toastError(err?.response?.data?.message || 'Smart Auto-Fill failed. Please check inputs.');
-    } finally {
-      setIsAutoFilling(false);
-    }
-  };
-
   return (
     <div className="no-print" style={{
       background: 'var(--bg)',
@@ -235,21 +144,6 @@ export default function InstitutionalFundInputsDrawer({
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <button
-            type="button"
-            disabled={isAutoFilling}
-            onClick={handleSmartAutofill}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 7,
-              padding: '8px 14px', borderRadius: 10, border: 'none',
-              background: 'linear-gradient(135deg, #1E4D40 0%, #297D66 100%)',
-              color: '#fff', fontSize: '0.76rem', fontWeight: 700, cursor: 'pointer',
-              opacity: isAutoFilling ? 0.75 : 1,
-            }}
-          >
-            {isAutoFilling ? <Loader2 size={13} /> : <Sparkles size={13} />}
-            {isAutoFilling ? 'Auto-Filling...' : 'Smart Auto-Fill'}
-          </button>
           <span style={{
             padding: '6px 12px',
             borderRadius: 999,
@@ -262,24 +156,6 @@ export default function InstitutionalFundInputsDrawer({
           </span>
         </div>
       </div>
-
-      {/* Auto-Fill Confirmation Strip */}
-      {autofillSummary && (
-        <div style={{
-          display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 8,
-          padding: '9px 14px', borderRadius: 10,
-          background: 'rgba(69, 165, 138, 0.09)', border: '1px solid rgba(69, 165, 138, 0.28)',
-          fontSize: '0.74rem', color: '#1E4D40',
-        }}>
-          <span>
-            <Sparkles size={13} style={{ verticalAlign: 'middle', marginRight: 6 }} />
-            <strong>Smart Auto-Fill applied:</strong> {autofillSummary.filledFields.join(' · ')}
-          </span>
-          <span style={{ fontWeight: 700, fontSize: '0.7rem', color: '#297D66' }}>
-            {autofillSummary.aiEnhanced ? 'AI + Live Screening Synthesis' : 'Quantitative Formula Engine'}
-          </span>
-        </div>
-      )}
 
       {/* Sub-navigation */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, borderBottom: '1px solid var(--border)', paddingBottom: 12 }}>
