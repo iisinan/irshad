@@ -1,14 +1,113 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:irshad_mobile/core/api/api_service.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
+import 'package:irshad_mobile/features/portfolio/ui/tabs/resources_tab.dart';
 
+const Map<String, dynamic> _defaultDangoteUpdateVideo = {
+  'id': 40,
+  'title': 'Update on Dangote Refinery IPO',
+  'scholar': 'Irshad',
+  'type': 'video',
+  'category': 'Investing Literacy',
+  'url': 'https://irshad-backend-production.up.railway.app/api/v1/resources/media/fNUH0FFpAqm0ukNEo2yatrR0wfpadba5TuZWz0df.mp4',
+  'thumbnail': null,
+  'duration': null,
+  'description': 'Latest update and Shariah compliance analysis on the Dangote Petroleum Refinery & Petrochemicals Initial Public Offering (IPO).',
+};
 
-class UpdatesIpoTab extends StatelessWidget {
+class UpdatesIpoTab extends StatefulWidget {
   const UpdatesIpoTab({super.key});
 
   @override
+  State<UpdatesIpoTab> createState() => _UpdatesIpoTabState();
+}
+
+class _UpdatesIpoTabState extends State<UpdatesIpoTab> {
+  Map<String, dynamic> _dangoteVideo = Map<String, dynamic>.from(_defaultDangoteUpdateVideo);
+
+  @override
+  void initState() {
+    super.initState();
+    _syncDangoteVideoFromResources();
+  }
+
+  Map<String, dynamic>? _matchDangoteVideo(List<dynamic> list) {
+    for (final item in list) {
+      if (item is Map) {
+        final type = (item['type'] ?? '').toString().toLowerCase();
+        if (type != 'video') continue;
+        final title = (item['title'] ?? '').toString().toLowerCase();
+        final id = item['id'];
+        if (id == 40 || (title.contains('dangote') && (title.contains('ipo') || title.contains('refin')))) {
+          return Map<String, dynamic>.from(item);
+        }
+      }
+    }
+    return null;
+  }
+
+  Future<void> _syncDangoteVideoFromResources() async {
+    try {
+      final box = await Hive.openBox('resourcesBox');
+      final cachedStr = box.get('resources_data');
+      if (cachedStr != null) {
+        final Map<String, dynamic> cached = jsonDecode(cachedStr);
+        final List<dynamic> list = cached['data'] ?? [];
+        final matched = _matchDangoteVideo(list);
+        if (matched != null && mounted) {
+          setState(() {
+            _dangoteVideo = {
+              ..._defaultDangoteUpdateVideo,
+              ...matched,
+            };
+          });
+        }
+      }
+    } catch (_) {}
+
+    try {
+      final response = await ApiService().get('resources');
+      if (response.statusCode == 200) {
+        final List<dynamic> list = response.data['data'] ?? [];
+        final matched = _matchDangoteVideo(list);
+        if (matched != null && mounted) {
+          setState(() {
+            _dangoteVideo = {
+              ..._defaultDangoteUpdateVideo,
+              ...matched,
+            };
+          });
+        }
+      }
+    } catch (_) {}
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final List<Map<String, dynamic>> ipoList = [];
+    final ipoData = {
+      'id': 'dangote-refinery',
+      'name': 'Dangote Refinery',
+      'status': 'OPEN',
+      'statusColor': context.appColors.halal,
+      'statusBg': context.appColors.halalBg,
+      'sector': 'Oil & Gas',
+      'exchange': 'NGX (Planned)',
+      'valuation': '~\$20B+',
+      'logo': 'assets/logos/DPRP.png',
+      'timeline': 'Q4 2026 - Q1 2027 (Est.)',
+      'capacity': '650,000 barrels per day',
+      'listingLocation': 'Nigerian Exchange (NGX), London (LSE)',
+      'shariahAssessment': 'As a refining business, the core activity (petroleum processing) is permissible (Halal). The H1 2026 audited statements have been analyzed: The company holds ₦5.66B in debt (0.0086% Debt Ratio) and ₦4.26B in cash (0.0065% Cash Ratio), while impure income stands safely at 0.35%. It passes all AAOIFI quantitative financial screening ratios. Status: 100% HALAL.',
+      'description': "The Dangote Petroleum Refinery and Petrochemicals FZE initial public offering is now live. The offering involves 4.1 billion ordinary shares aimed at raising ₦2.15 trillion (\$1.6 billion), representing one of the largest IPOs in African history. Minimum subscription is 10 shares (₦5,250), with subsequent multiples of 10. The offering is officially certified as Shariah-compliant.",
+      'dateStart': 'Sept 14, 2026',
+      'dateEnd': 'Oct 13, 2026',
+      'price': '₦525/share',
+      'sourceUrl': 'https://acrobat.adobe.com/id/urn:aaid:sc:EU:9676fb4f-2d53-4785-a994-5cac81b2c454?viewer%21megaVerb=group-discover',
+      'updateVideo': _dangoteVideo,
+    };
 
     return ListView(
       shrinkWrap: true,
@@ -17,51 +116,7 @@ class UpdatesIpoTab extends StatelessWidget {
       children: [
         _buildHeader(context),
         const SizedBox(height: 24),
-        if (ipoList.isEmpty)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 48),
-            decoration: BoxDecoration(
-              color: context.bgAlt,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: context.appColors.divider),
-            ),
-            alignment: Alignment.center,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: context.primary.withOpacity(0.08),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(Icons.rocket_launch_outlined, size: 28, color: context.primary),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'No Upcoming IPOs',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: context.textDark,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'There are currently no active or announced IPOs. Check back for new listings and Shariah assessments.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: context.textMuted,
-                    height: 1.4,
-                  ),
-                ),
-              ],
-            ),
-          )
-        else
-          for (final ipo in ipoList) _buildIPOCard(context, ipo),
+        _buildIPOCard(context, ipoData),
       ],
     );
   }
@@ -92,7 +147,197 @@ class UpdatesIpoTab extends StatelessWidget {
     );
   }
 
+  Widget _buildVideoUpdateBanner(BuildContext context, Map<String, dynamic> video, {bool isModal = false}) {
+    final title = (video['title'] ?? 'Update on Dangote Refinery IPO').toString();
+    final scholar = (video['scholar'] ?? 'Irshad').toString();
+    final category = (video['category'] ?? 'Investing Literacy').toString();
+    final thumbnail = video['thumbnail']?.toString();
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => showResourceVideoModal(context, video),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: isModal ? 16 : 20, vertical: 16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              context.primary.withValues(alpha: 0.12),
+              context.bgAlt,
+            ],
+          ),
+          borderRadius: isModal
+              ? BorderRadius.circular(18)
+              : const BorderRadius.vertical(bottom: Radius.circular(20)),
+          border: isModal
+              ? Border.all(color: context.primary.withValues(alpha: 0.25))
+              : Border(top: BorderSide(color: context.appColors.divider)),
+        ),
+        child: Row(
+          children: [
+            // Video preview box with Play overlay
+            Container(
+              width: 86,
+              height: 56,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.16),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              clipBehavior: Clip.hardEdge,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  if (thumbnail != null && thumbnail.isNotEmpty)
+                    Image.network(
+                      thumbnail,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                    ),
+                  Container(color: Colors.black.withValues(alpha: 0.22)),
+                  Center(
+                    child: Container(
+                      width: 30,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color: context.primary,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 18),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: context.primary,
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.videocam_rounded, size: 10, color: Colors.white),
+                            SizedBox(width: 4),
+                            Text(
+                              'VIDEO UPDATE',
+                              style: TextStyle(
+                                fontSize: 8.5,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                                letterSpacing: 0.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          category,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: context.primary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w900,
+                      color: context.textDark,
+                      height: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    'By $scholar • Tap to watch video',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: context.textMuted,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: context.primary,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: context.primary.withValues(alpha: 0.25),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.play_arrow_rounded, size: 14, color: Colors.white),
+                  SizedBox(width: 4),
+                  Text(
+                    'Watch',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildIPOCard(BuildContext context, Map<String, dynamic> ipo) {
+    final updateVideo = ipo['updateVideo'] as Map<String, dynamic>?;
+
     return GestureDetector(
       onTap: () => _showModal(context, ipo),
       child: Container(
@@ -108,6 +353,7 @@ class UpdatesIpoTab extends StatelessWidget {
             BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 12, offset: const Offset(0, 4)),
           ],
         ),
+        clipBehavior: Clip.hardEdge,
         child: Column(
           children: [
             Padding(
@@ -192,6 +438,8 @@ class UpdatesIpoTab extends StatelessWidget {
                 ],
               ),
             ),
+            if (updateVideo != null)
+              _buildVideoUpdateBanner(context, updateVideo),
           ],
         ),
       ),
@@ -199,6 +447,8 @@ class UpdatesIpoTab extends StatelessWidget {
   }
 
   void _showModal(BuildContext context, Map<String, dynamic> ipo) {
+    final updateVideo = ipo['updateVideo'] as Map<String, dynamic>?;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -268,6 +518,10 @@ class UpdatesIpoTab extends StatelessWidget {
               child: ListView(
                 padding: const EdgeInsets.all(24),
                 children: [
+                  if (updateVideo != null) ...[
+                    _buildVideoUpdateBanner(context, updateVideo, isModal: true),
+                    const SizedBox(height: 20),
+                  ],
                   // Key Metrics
                   Row(
                     children: [

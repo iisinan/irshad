@@ -636,6 +636,69 @@ class _ResourcesTabState extends State<ResourcesTab> {
   }
 }
 
+void showResourceVideoModal(BuildContext context, dynamic r) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (context) {
+      return Container(
+        height: MediaQuery.of(context).size.height * 0.90,
+        decoration: BoxDecoration(
+          color: context.bg,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Header
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: context.divider)),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          r['title'] ?? 'Untitled',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: context.textDark, height: 1.2),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'By ${r['scholar'] ?? 'Irshad'}',
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: context.textMuted),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.close_rounded, color: context.textMuted),
+                    onPressed: () => Navigator.pop(context),
+                    style: IconButton.styleFrom(backgroundColor: context.bgAlt),
+                  ),
+                ],
+              ),
+            ),
+
+            // Content Area
+            Expanded(
+              child: Container(
+                color: context.bgAlt,
+                child: _VideoModalPlayer(r: r),
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
 class _VideoModalPlayer extends StatefulWidget {
   final dynamic r;
   const _VideoModalPlayer({required this.r});
