@@ -7,7 +7,7 @@ import {
   HeartHandshake, Calculator, BookOpen,
   User, LogOut, ChevronLeft, ChevronRight,
   X, Moon, Sun, Shield, FileText, Bell, HelpCircle, Star, CreditCard, Lock,
-  Building2, Upload, Key
+  Upload, Key
 } from 'lucide-react';
 
 const SidebarClock = () => {
@@ -64,7 +64,6 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
     { label: 'Profile & Settings', icon: User,         to: '/profile' },
     { label: 'Help & Guide',     icon: HelpCircle,     to: '/portfolio#guide' },
     ...(user?.role === 'admin' ? [
-      { label: 'Institutional Portal', icon: Building2, to: '/institution' },
       { label: 'Admin Dashboard', icon: Shield, to: '/admin' },
     ] : []),
   ];
