@@ -24,8 +24,8 @@ export default function InstitutionalApiPanel({ isAuthenticatedInstitution }) {
   const [copiedKey, setCopiedKey] = useState(false);
 
   // Pre-trade simulator
-  const [checkSymbol, setCheckSymbol] = useState('ZENITHBANK');
-  const [checkUnits, setCheckUnits] = useState('10000');
+  const [checkSymbol, setCheckSymbol] = useState('');
+  const [checkUnits, setCheckUnits] = useState('');
   const [checkingTrade, setCheckingTrade] = useState(false);
   const [tradeResult, setTradeResult] = useState(null);
 

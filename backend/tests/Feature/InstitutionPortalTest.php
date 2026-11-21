@@ -402,7 +402,7 @@ class InstitutionPortalTest extends TestCase
             ]);
     }
 
-    public function test_workspace_isolates_tenant_information_per_institution(): void
+    public function test_workspace_starts_empty_for_new_institutions_and_isolates_saved_data(): void
     {
         $this->seedSampleEquities();
 
@@ -421,30 +421,50 @@ class InstitutionPortalTest extends TestCase
             'email' => 'desk@stanbicbroker.example',
             'institution_name' => 'Stanbic Stockbrokers',
         ]);
+        $adminUser = User::factory()->create([
+            'role' => 'admin',
+            'email' => 'admin@iirshad.com',
+        ]);
 
-        // Lotus sees ONLY Lotus
+        // All newly created institution accounts start with zero pre-loaded data
+        foreach ([$lotusUser, $norrenUser, $brokerUser] as $instUser) {
+            $this->actingAs($instUser, 'sanctum')
+                ->getJson('/api/v1/institution/workspace')
+                ->assertStatus(200)
+                ->assertJsonPath('data.tenant_key', 'custom')
+                ->assertJsonPath('data.lotus_etf', null)
+                ->assertJsonPath('data.norrenberger_fund', null)
+                ->assertJsonPath('data.balanced_fund', null)
+                ->assertJsonCount(0, 'data.saved_portfolios');
+        }
+
+        // Once Lotus uploads & saves a mandate, ONLY Lotus sees it
+        $this->actingAs($lotusUser, 'sanctum')
+            ->postJson('/api/v1/institution/portfolios', [
+                'name' => 'Uploaded Lotus Book',
+                'holdings_payload' => [
+                    ['symbol' => 'DANGCEM', 'shares' => 250],
+                ],
+            ])
+            ->assertStatus(200);
+
         $this->actingAs($lotusUser, 'sanctum')
             ->getJson('/api/v1/institution/workspace')
             ->assertStatus(200)
-            ->assertJsonPath('data.tenant_key', 'lotus')
-            ->assertJsonPath('data.lotus_etf.ticker', 'LOTUSHAL15')
-            ->assertJsonPath('data.norrenberger_fund', null);
+            ->assertJsonCount(1, 'data.saved_portfolios')
+            ->assertJsonPath('data.saved_portfolios.0.name', 'Uploaded Lotus Book');
 
-        // Norrenberger sees ONLY Norrenberger
-        $this->actingAs($norrenUser, 'sanctum')
-            ->getJson('/api/v1/institution/workspace')
-            ->assertStatus(200)
-            ->assertJsonPath('data.tenant_key', 'norrenberger')
-            ->assertJsonPath('data.norrenberger_fund.fund_name', 'Norrenberger Islamic Fund')
-            ->assertJsonPath('data.lotus_etf', null);
-
-        // Other banks/brokers see NEITHER Lotus NOR Norrenberger
         $this->actingAs($brokerUser, 'sanctum')
             ->getJson('/api/v1/institution/workspace')
             ->assertStatus(200)
-            ->assertJsonPath('data.tenant_key', 'custom')
-            ->assertJsonPath('data.lotus_etf', null)
-            ->assertJsonPath('data.norrenberger_fund', null);
+            ->assertJsonCount(0, 'data.saved_portfolios');
+
+        // Admin still receives demo presets for review/demonstration
+        $this->actingAs($adminUser, 'sanctum')
+            ->getJson('/api/v1/institution/workspace')
+            ->assertStatus(200)
+            ->assertJsonPath('data.tenant_key', 'admin')
+            ->assertJsonPath('data.lotus_etf.ticker', 'LOTUSHAL15');
     }
 
     public function test_institution_can_generate_api_key_and_call_b2b_pretrade_guardrail_and_revoke(): void

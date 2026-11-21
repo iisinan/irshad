@@ -62,7 +62,7 @@ export default function InstitutionalDashboard({ demoMode = false }) {
   const [presets, setPresets] = useState(null);
   const [tenantKey, setTenantKey] = useState(isPrivatePortal ? 'custom' : 'admin');
   const [loadingPresets, setLoadingPresets] = useState(true);
-  const [activePresetId, setActivePresetId] = useState(isPrivatePortal ? 'loading' : 'lotus_etf');
+  const [activePresetId, setActivePresetId] = useState(isPrivatePortal ? 'uploaded' : 'lotus_etf');
   const [customScreened, setCustomScreened] = useState(null);
   const [customFundName, setCustomFundName] = useState('Institutional Equity Mandate');
   const [factsheetMeta, setFactsheetMeta] = useState(null);
@@ -97,25 +97,21 @@ export default function InstitutionalDashboard({ demoMode = false }) {
           if (mounted && res?.data) {
             const ws = res.data;
             setTenantKey(ws.tenant_key || 'custom');
-            setPresets({
-              lotus_etf: ws.lotus_etf || null,
-              norrenberger_fund: ws.norrenberger_fund || null,
-              balanced_fund: ws.balanced_fund || null,
-            });
+            setPresets(null);
             const saved = ws.saved_portfolios || [];
             setSavedPortfolios(saved);
 
-            if (ws.tenant_key === 'lotus' && ws.lotus_etf) {
-              setActivePresetId('lotus_etf');
-            } else if (ws.tenant_key === 'norrenberger' && ws.norrenberger_fund) {
-              setActivePresetId('norrenberger_fund');
-            } else if (saved.length > 0) {
+            if (saved.length > 0) {
               setCustomScreened(saved[0].screened);
               setCustomFundName(saved[0].name);
               setFactsheetMeta(saved[0].factsheet_meta || null);
               setSelectedSavedId(saved[0].id);
               setActivePresetId('uploaded');
             } else {
+              setCustomScreened(null);
+              setCustomFundName(ws.institution_name ? `${ws.institution_name} Mandate` : 'Institutional Mandate');
+              setFactsheetMeta(null);
+              setSelectedSavedId(null);
               setActivePresetId('uploaded');
             }
           }
@@ -369,10 +365,18 @@ export default function InstitutionalDashboard({ demoMode = false }) {
       const remaining = savedPortfolios.filter((p) => p.id !== id);
       setSavedPortfolios(remaining);
       if (selectedSavedId === id) {
-        setSelectedSavedId(null);
-        setCustomScreened(null);
-        if (tenantKey === 'lotus') setActivePresetId('lotus_etf');
-        else if (tenantKey === 'norrenberger') setActivePresetId('norrenberger_fund');
+        if (remaining.length > 0) {
+          setCustomScreened(remaining[0].screened);
+          setCustomFundName(remaining[0].name);
+          setFactsheetMeta(remaining[0].factsheet_meta || null);
+          setSelectedSavedId(remaining[0].id);
+          setActivePresetId('uploaded');
+        } else {
+          setSelectedSavedId(null);
+          setCustomScreened(null);
+          setFactsheetMeta(null);
+          setActivePresetId(isPrivatePortal ? 'uploaded' : 'lotus_etf');
+        }
       }
       toastSuccess('Removed saved mandate.');
     } catch {
@@ -734,7 +738,7 @@ export default function InstitutionalDashboard({ demoMode = false }) {
       </header>
 
       {/* 3 Clean KPI Cards */}
-      {(isNorrenbergerActive || hasHoldings || loadingPresets) && (
+      {(isNorrenbergerActive || hasHoldings || (!isPrivatePortal && loadingPresets)) && (
         <section className="no-print" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 14, marginBottom: 18 }}>
           <div style={{ background: 'var(--bg)', borderRadius: 16, padding: '16px 20px', border: '1px solid var(--border)' }}>
             <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
@@ -878,10 +882,14 @@ export default function InstitutionalDashboard({ demoMode = false }) {
                       <Sparkles size={13} /> Smart Format Auto-Detection
                     </div>
                     <h2 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-dark)' }}>
-                      Drop Any Institutional Portfolio Document
+                      {isPrivatePortal && !hasHoldings
+                        ? 'Upload Your Institutional Portfolio to Begin'
+                        : 'Drop Any Institutional Portfolio Document'}
                     </h2>
                     <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                      Irshad inspects file signatures &amp; layout automatically to extract holdings, run AAOIFI checks, compute purification, and populate your uniform Factsheet.
+                      {isPrivatePortal && !hasHoldings
+                        ? 'Your institutional workspace starts clean with no pre-loaded data. Upload a holdings statement, CSV/Excel workbook, PDF, or paste blotter rows to populate screening verdicts, purification, and your Factsheet.'
+                        : 'Irshad inspects file signatures & layout automatically to extract holdings, run AAOIFI checks, compute purification, and populate your uniform Factsheet.'}
                     </p>
                     <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 14 }}>
                       <button
@@ -1234,6 +1242,10 @@ export default function InstitutionalDashboard({ demoMode = false }) {
             screened={activeScreened}
             activePresetId={activePresetId}
             fundName={activeTitle}
+            onUploadClick={() => {
+              handleSelectTab('screening');
+              setShowUploadDrawer(true);
+            }}
           />
         )}
       </div>
@@ -1257,6 +1269,10 @@ export default function InstitutionalDashboard({ demoMode = false }) {
             isAuthenticatedInstitution={isAuthenticatedInstitution}
             smartBrief={activeScreened?.smart_brief}
             allowedTemplates={allowedFactsheetTemplates}
+            onUploadClick={() => {
+              handleSelectTab('screening');
+              setShowUploadDrawer(true);
+            }}
           />
         )}
       </div>

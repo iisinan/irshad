@@ -1,11 +1,12 @@
 import React, { useMemo, useState } from 'react';
-import { Droplet, Download, CheckCircle2, Building2, Calculator, Sparkles, ArrowRight } from 'lucide-react';
+import { Droplet, Download, CheckCircle2, Building2, Calculator, Sparkles, ArrowRight, Upload } from 'lucide-react';
 import { LOTUS_FALLBACK_DATA, BALANCED_FALLBACK_DATA, formatNaira } from './institutionalFixtures';
 
 export default function InstitutionalPurificationPanel({
   screened,
   activePresetId,
   fundName,
+  onUploadClick,
 }) {
   const [distributionMode, setDistributionMode] = useState('fund'); // 'fund' | 'investor'
   const [simulatedUnits, setSimulatedUnits] = useState(100000);
@@ -23,6 +24,51 @@ export default function InstitutionalPurificationPanel({
     () => holdings.reduce((acc, h) => acc + Number(h.shares || 0), 0),
     [holdings]
   );
+
+  if (holdings.length === 0) {
+    return (
+      <div style={{
+        background: 'var(--bg)',
+        borderRadius: 20,
+        padding: '48px 24px',
+        border: '1px dashed var(--border-strong)',
+        textAlign: 'center',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 12,
+      }}>
+        <div style={{
+          width: 52, height: 52, borderRadius: 16,
+          background: 'var(--primary-50)', color: 'var(--primary)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <Droplet size={24} />
+        </div>
+        <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-dark)' }}>
+          No Portfolio Data Uploaded Yet
+        </h2>
+        <p style={{ margin: 0, fontSize: '0.84rem', color: 'var(--text-muted)', maxWidth: 460, lineHeight: 1.55 }}>
+          Upload your institutional portfolio statement, spreadsheet, or blotter first to calculate AAOIFI Standard No. 21 dividend purification and per-unit unitholder disclosure rates.
+        </p>
+        {onUploadClick && (
+          <button
+            type="button"
+            onClick={onUploadClick}
+            style={{
+              marginTop: 6,
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              padding: '10px 18px', borderRadius: 12,
+              background: 'var(--primary)', color: '#fff',
+              border: 'none', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer',
+            }}
+          >
+            <Upload size={15} /> Upload Portfolio Data
+          </button>
+        )}
+      </div>
+    );
+  }
 
   const fundLevelTotalPurification = Number(summary.total_purification_due || 0);
   const etfPublishedPerUnit = isLotus

@@ -230,22 +230,14 @@ class InstitutionController extends Controller
 
     /**
      * Tenant-isolated institutional workspace payload.
-     * Ensures logged-in institutions only see their own funds and saved mandates.
+     * Institution accounts start with zero pre-loaded data until they upload and save their own portfolios.
+     * Admin accounts still receive the demo presets for review/demonstration.
      */
     public function workspace(Request $request): JsonResponse
     {
         $user = $request->user();
-        $identity = strtolower(trim(($user->institution_name ?? '') . ' ' . ($user->email ?? '')));
         $isAdmin = $user->role === 'admin';
-
-        $tenantKey = 'custom';
-        if ($isAdmin) {
-            $tenantKey = 'admin';
-        } elseif (str_contains($identity, 'lotus')) {
-            $tenantKey = 'lotus';
-        } elseif (str_contains($identity, 'norrenberger')) {
-            $tenantKey = 'norrenberger';
-        }
+        $tenantKey = $isAdmin ? 'admin' : 'custom';
 
         $savedPortfolios = InstitutionalPortfolio::where('user_id', $user->id)
             ->orderByDesc('updated_at')
@@ -272,15 +264,12 @@ class InstitutionController extends Controller
             'saved_portfolios' => $savedPortfolios,
             'lotus_etf' => null,
             'norrenberger_fund' => null,
+            'balanced_fund' => null,
         ];
 
-        if ($tenantKey === 'lotus' || $isAdmin) {
-            $payload['lotus_etf'] = $this->buildLotusPreset();
-        }
-        if ($tenantKey === 'norrenberger' || $isAdmin) {
-            $payload['norrenberger_fund'] = $this->buildNorrenbergerPreset();
-        }
         if ($isAdmin) {
+            $payload['lotus_etf'] = $this->buildLotusPreset();
+            $payload['norrenberger_fund'] = $this->buildNorrenbergerPreset();
             $payload['balanced_fund'] = $this->buildBalancedPreset();
         }
 

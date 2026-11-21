@@ -4,7 +4,7 @@ import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend,
 } from 'recharts';
 import {
-  Printer, ShieldCheck, CheckCircle2, SlidersHorizontal, FileText, LayoutGrid
+  Printer, ShieldCheck, CheckCircle2, SlidersHorizontal, FileText, LayoutGrid, Upload
 } from 'lucide-react';
 import {
   LOTUS_FALLBACK_DATA,
@@ -167,6 +167,7 @@ export default function InstitutionalFactsheetView({
   isAuthenticatedInstitution = false,
   smartBrief = null,
   allowedTemplates = ['lotus', 'norrenberger', 'custom'],
+  onUploadClick,
 }) {
   void allowedTemplates;
   const [viewMode, setViewMode] = useState('summary'); // 'summary' (One-Page Summary) | 'full' (7-Section Fact Sheet)
@@ -499,6 +500,51 @@ export default function InstitutionalFactsheetView({
     if (isNorrenberger) return norren.allocation;
     return [];
   }, [isBalanced, isNorrenberger, balanced.allocation, norren.allocation]);
+
+  if (!isFixedOrBalanced && !isLotus && holdings.length === 0) {
+    return (
+      <div style={{
+        background: 'var(--bg)',
+        borderRadius: 20,
+        padding: '48px 24px',
+        border: '1px dashed var(--border-strong)',
+        textAlign: 'center',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 12,
+      }}>
+        <div style={{
+          width: 52, height: 52, borderRadius: 16,
+          background: 'var(--primary-50)', color: 'var(--primary)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <FileText size={24} />
+        </div>
+        <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-dark)' }}>
+          No Portfolio Data Uploaded Yet
+        </h2>
+        <p style={{ margin: 0, fontSize: '0.84rem', color: 'var(--text-muted)', maxWidth: 460, lineHeight: 1.55 }}>
+          Your institutional factsheet, AAOIFI ratios, sector exposures, and purification disclosures are generated automatically from your uploaded holdings.
+        </p>
+        {onUploadClick && (
+          <button
+            type="button"
+            onClick={onUploadClick}
+            style={{
+              marginTop: 6,
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              padding: '10px 18px', borderRadius: 12,
+              background: 'var(--primary)', color: '#fff',
+              border: 'none', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer',
+            }}
+          >
+            <Upload size={15} /> Upload Portfolio Data
+          </button>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
