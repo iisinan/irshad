@@ -10,7 +10,6 @@ import 'updates/updates_dividends_tab.dart';
 import 'resources_tab.dart';
 import 'updates/updates_compliance_tab.dart';
 import 'updates/updates_ipo_tab.dart';
-import 'updates/updates_inbox_tab.dart';
 import 'guide_tab.dart';
 import '../widgets/islamic_quote_widget.dart';
 import 'package:irshad_mobile/core/widgets/upgrade_paywall_bottom_sheet.dart';
@@ -51,7 +50,6 @@ class _UpdateTabState extends State<UpdateTab> {
 
   final List<Map<String, dynamic>> _tabs = [
     {'id': 'news', 'label': 'News & Insights', 'icon': Icons.newspaper_rounded},
-    {'id': 'inbox', 'label': 'Inbox', 'icon': Icons.notifications_none_rounded},
     {'id': 'resources', 'label': 'Resources', 'icon': Icons.menu_book_rounded},
     {'id': 'guide', 'label': 'Navigation Guide', 'icon': Icons.explore_outlined},
     {'id': 'compliance', 'label': 'Quarterly Compliance Brief', 'icon': Icons.shield_outlined},
@@ -208,7 +206,7 @@ class _UpdateTabState extends State<UpdateTab> {
   }
 
   bool _isTabLocked(String tabId, BuildContext context) {
-    if (tabId == 'news' || tabId == 'inbox' || tabId == 'resources' || tabId == 'guide' || tabId == 'ipo') return false;
+    if (tabId == 'news' || tabId == 'resources' || tabId == 'guide' || tabId == 'ipo') return false;
     final tier = Provider.of<AppStateProvider>(context, listen: false).userProfile?['tier'];
     final userTier = tier?['slug'] ?? 'free';
     final features = tier?['features'] as Map<String, dynamic>? ?? {};
@@ -225,14 +223,14 @@ class _UpdateTabState extends State<UpdateTab> {
       child: Row(
         children: _tabs.map((tab) {
           final isActive = _activeTabId == tab['id'];
-          final hasNew = (tab['id'] == 'inbox' && _unreadInbox > 0) || (tab['id'] == 'news' && _unreadNews > 0);
+          final hasNew = tab['id'] == 'news' && _unreadNews > 0;
           
           final isLocked = _isTabLocked(tab['id'], context);
           
           return GestureDetector(
             onTap: () {
               if (GuestGate.isGuest(context) &&
-                  (tab['id'] == 'inbox' || tab['id'] == 'dividends' || tab['id'] == 'compliance')) {
+                  (tab['id'] == 'dividends' || tab['id'] == 'compliance')) {
                 GuestGate.showAuthPrompt(
                   context,
                   title: 'Create a Free Account',
@@ -320,12 +318,6 @@ class _UpdateTabState extends State<UpdateTab> {
     switch (_activeTabId) {
       case 'news':
         return const UpdatesNewsTab();
-      case 'inbox':
-        return UpdatesInboxTab(
-          onUnreadCountChanged: (count) {
-            if (mounted) setState(() => _unreadInbox = count);
-          },
-        );
       case 'compliance':
         return const UpdatesComplianceTab();
       case 'ipo':
