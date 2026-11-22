@@ -1,6 +1,6 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import { Routes, Route, Link, useLocation, Navigate, useParams } from 'react-router-dom';
-import { Shield, Home, Scale, Info, BookOpen, Settings, LayoutDashboard, Moon, Sun, CreditCard, Wallet } from 'lucide-react';
+import { Shield, Home, Scale, Info, BookOpen, Settings, LayoutDashboard, Moon, Sun, CreditCard } from 'lucide-react';
 import DashboardLayout from './components/DashboardLayout';
 import AdminLayout from './components/AdminLayout';
 import { LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage } from './components/AuthPages';
@@ -210,7 +210,6 @@ const TopNavbar = () => {
           <Link to="/shariah" className={navLinkClass('/shariah')}>Shariah Framework</Link>
           <Link to="/pricing" className={navLinkClass('/pricing')}>Pricing</Link>
           <Link to="/resources" className={navLinkClass('/resources')}>Resources</Link>
-          <Link to="/rizq-planner" className={navLinkClass('/rizq-planner')}>Rizq Planner</Link>
           <Link to="/about" className={navLinkClass('/about')}>About Us</Link>
           {user && (
             <Link to={user?.role === 'institution' ? '/institution' : '/portfolio'} className={navLinkClass(user?.role === 'institution' ? '/institution' : '/portfolio')}>Dashboard</Link>
@@ -275,9 +274,6 @@ const TopNavbar = () => {
         </Link>
         <Link to="/resources" className={navLinkClass('/resources')} onClick={() => setMenuOpen(false)}>
           <BookOpen size={18} /> Resources
-        </Link>
-        <Link to="/rizq-planner" className={navLinkClass('/rizq-planner')} onClick={() => setMenuOpen(false)}>
-          <Wallet size={18} /> Rizq Planner
         </Link>
         <Link to="/about" className={navLinkClass('/about')} onClick={() => setMenuOpen(false)}>
           <Info size={18} /> About Us
