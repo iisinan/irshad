@@ -289,6 +289,39 @@ class _RizqPlannerScreenState extends State<RizqPlannerScreen> {
     _saveOfflineState();
   }
 
+  void _autoBalanceTo100() {
+    final currentTotal = _allocations.values.fold(0.0, (a, b) => a + b);
+    final delta = ((100 - currentTotal) * 10).roundToDouble() / 10;
+    if (delta.abs() < 0.05) return;
+
+    setState(() {
+      if (delta > 0) {
+        final nextInv = (((_allocations['investments'] ?? 0) + delta) * 10).roundToDouble() / 10;
+        _allocations['investments'] = nextInv;
+        _pctControllers['investments']?.text = _formatPct(nextInv);
+      } else {
+        final curLifestyle = _allocations['lifestyle'] ?? 0;
+        if (curLifestyle + delta >= 0) {
+          final nextLifestyle = ((curLifestyle + delta) * 10).roundToDouble() / 10;
+          _allocations['lifestyle'] = nextLifestyle;
+          _pctControllers['lifestyle']?.text = _formatPct(nextLifestyle);
+        } else if (currentTotal > 0) {
+          double sum = 0;
+          for (int i = 0; i < _rizqCategories.length; i++) {
+            final cat = _rizqCategories[i];
+            final nextVal = i == _rizqCategories.length - 1
+                ? math.max(0.0, ((100 - sum) * 10).roundToDouble() / 10)
+                : ((((_allocations[cat.key] ?? 0) / currentTotal) * 100) * 10).roundToDouble() / 10;
+            _allocations[cat.key] = nextVal;
+            _pctControllers[cat.key]?.text = _formatPct(nextVal);
+            sum += nextVal;
+          }
+        }
+      }
+    });
+    _saveOfflineState();
+  }
+
   void _togglePaydayEnvelope(String key) {
     setState(() {
       _checkedCategories[key] = !(_checkedCategories[key] ?? false);
@@ -709,22 +742,68 @@ class _RizqPlannerScreenState extends State<RizqPlannerScreen> {
                                 trackColor: context.bgSection,
                               ),
                             ),
-                            Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  '${_formatPct(totalPct)}%',
-                                  style: TextStyle(
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.w900,
-                                    color: totalPct > 100 ? context.haram : context.primary,
-                                  ),
-                                ),
-                                Text(
-                                  'allocated',
-                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: context.textMuted),
-                                ),
-                              ],
+                            Builder(
+                              builder: (context) {
+                                final activeCat = _activeKey == null
+                                    ? null
+                                    : _rizqCategories.cast<_RizqCategory?>().firstWhere(
+                                          (c) => c?.key == _activeKey,
+                                          orElse: () => null,
+                                        );
+                                if (activeCat != null) {
+                                  final catPct = _allocations[activeCat.key] ?? 0;
+                                  final catAmt = (_income * catPct) / 100;
+                                  return SizedBox(
+                                    width: 112,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          activeCat.label,
+                                          textAlign: TextAlign.center,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 10.5,
+                                            fontWeight: FontWeight.w800,
+                                            color: activeCat.color,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          '${_formatPct(catPct)}%',
+                                          style: TextStyle(
+                                            fontSize: 22,
+                                            fontWeight: FontWeight.w900,
+                                            color: context.textDark,
+                                          ),
+                                        ),
+                                        Text(
+                                          _ngnFormatter.format(catAmt.round()),
+                                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: context.textMuted),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }
+                                return Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      '${_formatPct(totalPct)}%',
+                                      style: TextStyle(
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.w900,
+                                        color: totalPct > 100 ? context.haram : context.primary,
+                                      ),
+                                    ),
+                                    Text(
+                                      'allocated',
+                                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: context.textMuted),
+                                    ),
+                                  ],
+                                );
+                              },
                             ),
                           ],
                         ),
@@ -758,6 +837,24 @@ class _RizqPlannerScreenState extends State<RizqPlannerScreen> {
                           ),
                         ),
                       ),
+                      if (!isExact100) ...[
+                        const SizedBox(height: 8),
+                        OutlinedButton(
+                          onPressed: _autoBalanceTo100,
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                            side: BorderSide(color: context.primary),
+                            backgroundColor: context.primary.withValues(alpha: 0.08),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                          ),
+                          child: Text(
+                            totalPct < 100
+                                ? 'Send ${_formatPct(diffPct)}% → Halal investments (100%)'
+                                : 'Auto-balance shares to 100%',
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: context.primary),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -924,35 +1021,50 @@ class _RizqPlannerScreenState extends State<RizqPlannerScreen> {
 
                 // Payday Checklist Progress
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   decoration: BoxDecoration(
                     color: context.bgSection,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Expanded(
-                        child: Text(
-                          'Payday checklist (${_currentMonthKey()}): $movedCount/${_rizqCategories.length} moved · ${_ngnFormatter.format(movedAmount.round())}',
-                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: context.textDark),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Payday checklist (${_currentMonthKey()}): $movedCount/${_rizqCategories.length} moved · ${_ngnFormatter.format(movedAmount.round())}',
+                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: context.textDark),
+                            ),
+                          ),
+                          if (movedCount > 0)
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  for (final cat in _rizqCategories) {
+                                    _checkedCategories[cat.key] = false;
+                                  }
+                                });
+                                _saveOfflineState();
+                              },
+                              child: Text(
+                                'Clear',
+                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: context.primary),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(999),
+                        child: LinearProgressIndicator(
+                          value: movedCount / _rizqCategories.length,
+                          minHeight: 5,
+                          backgroundColor: context.divider,
+                          valueColor: AlwaysStoppedAnimation<Color>(context.primary),
                         ),
                       ),
-                      if (movedCount > 0)
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              for (final cat in _rizqCategories) {
-                                _checkedCategories[cat.key] = false;
-                              }
-                            });
-                            _saveOfflineState();
-                          },
-                          child: Text(
-                            'Clear',
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: context.primary),
-                          ),
-                        ),
                     ],
                   ),
                 ),

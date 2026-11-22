@@ -276,6 +276,45 @@ export default function RizqPlannerTab({ standalone = false }) {
     }));
   };
 
+  const handleAutoBalance = () => {
+    const currentTotal = CATEGORIES.reduce((sum, c) => sum + Number(allocations[c.key] || 0), 0);
+    const delta = Math.round((100 - currentTotal) * 10) / 10;
+    if (Math.abs(delta) < 0.05) return;
+
+    if (delta > 0) {
+      const nextInv = Math.round((Number(allocations.investments || 0) + delta) * 10) / 10;
+      setAllocations((prev) => ({ ...prev, investments: nextInv }));
+      toastSuccess(`Added remaining ${delta}% to Halal investments.`);
+      return;
+    }
+
+    const curLifestyle = Number(allocations.lifestyle || 0);
+    if (curLifestyle + delta >= 0) {
+      setAllocations((prev) => ({
+        ...prev,
+        lifestyle: Math.round((curLifestyle + delta) * 10) / 10,
+      }));
+      toastSuccess(`Adjusted Personal & lifestyle by ${delta}% to balance at 100%.`);
+      return;
+    }
+
+    if (currentTotal > 0) {
+      const normalized = {};
+      let sum = 0;
+      CATEGORIES.forEach((cat, idx) => {
+        if (idx === CATEGORIES.length - 1) {
+          normalized[cat.key] = Math.max(0, Math.round((100 - sum) * 10) / 10);
+        } else {
+          const val = Math.round(((Number(allocations[cat.key] || 0) / currentTotal) * 100) * 10) / 10;
+          normalized[cat.key] = val;
+          sum += val;
+        }
+      });
+      setAllocations(normalized);
+      toastSuccess('Normalized all shares proportionally to 100%.');
+    }
+  };
+
   const togglePaydayEnvelope = (key) => {
     setCheckedCategories((prev) => ({ ...prev, [key]: !prev[key] }));
   };
@@ -546,6 +585,7 @@ export default function RizqPlannerTab({ standalone = false }) {
 
       {/* Main Planner Card */}
       <div
+        className="rizq-planner-card"
         style={{
           background: 'var(--bg)',
           border: '1px solid var(--border)',
@@ -555,6 +595,43 @@ export default function RizqPlannerTab({ standalone = false }) {
           marginBottom: '20px',
         }}
       >
+        <style>{`
+          .rizq-pct-input::-webkit-outer-spin-button,
+          .rizq-pct-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+          }
+          .rizq-pct-input {
+            -moz-appearance: textfield;
+          }
+          .rizq-input-wrap:focus-within {
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 3px rgba(69, 165, 138, 0.14);
+          }
+          .rizq-btn-lift {
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+          }
+          .rizq-btn-lift:hover {
+            transform: translateY(-1px);
+          }
+          .rizq-row {
+            display: grid;
+            grid-template-columns: auto 1fr auto auto;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 8px;
+          }
+          @media (max-width: 600px) {
+            .rizq-planner-card {
+              padding: 18px 16px !important;
+              border-radius: 20px !important;
+            }
+            .rizq-row {
+              gap: 8px !important;
+              padding: 10px 4px !important;
+            }
+          }
+        `}</style>
         {/* Take-home Income Strip */}
         <div
           style={{
@@ -576,6 +653,7 @@ export default function RizqPlannerTab({ standalone = false }) {
               Monthly take-home income
             </label>
             <div
+              className="rizq-input-wrap"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -585,6 +663,7 @@ export default function RizqPlannerTab({ standalone = false }) {
                 borderRadius: '14px',
                 padding: '10px 16px',
                 minWidth: '210px',
+                transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
               }}
             >
               <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-muted)' }}>₦</span>
@@ -779,39 +858,82 @@ export default function RizqPlannerTab({ standalone = false }) {
               </svg>
 
               {/* Center Callout */}
-              <div
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  pointerEvents: 'none',
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: '2.15rem',
-                    fontWeight: 800,
-                    color: totalPct > 100 ? 'var(--non-compliant)' : 'var(--primary)',
-                    fontFamily: 'Georgia, "Times New Roman", serif',
-                    lineHeight: 1.05,
-                  }}
-                >
-                  {totalPct}%
-                </span>
-                <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)', fontWeight: 600, marginTop: '2px' }}>
-                  allocated
-                </span>
-              </div>
+              {(() => {
+                const hoveredCat = hoveredKey ? CATEGORIES.find((c) => c.key === hoveredKey) : null;
+                const hoveredPct = hoveredCat ? Number(allocations[hoveredCat.key] || 0) : 0;
+                const hoveredAmt = (income * hoveredPct) / 100;
+                return (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: '26px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      textAlign: 'center',
+                      pointerEvents: 'none',
+                    }}
+                  >
+                    {hoveredCat ? (
+                      <>
+                        <span
+                          style={{
+                            fontSize: '0.66rem',
+                            fontWeight: 800,
+                            color: hoveredCat.color,
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.4px',
+                            lineHeight: 1.2,
+                            maxWidth: '124px',
+                          }}
+                        >
+                          {hoveredCat.label}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: '1.55rem',
+                            fontWeight: 800,
+                            color: 'var(--text-dark)',
+                            fontFamily: 'Georgia, "Times New Roman", serif',
+                            lineHeight: 1.15,
+                            marginTop: '2px',
+                          }}
+                        >
+                          {hoveredPct}%
+                        </span>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>
+                          {fmtNaira(hoveredAmt)}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span
+                          style={{
+                            fontSize: '2.15rem',
+                            fontWeight: 800,
+                            color: totalPct > 100 ? 'var(--non-compliant)' : 'var(--primary)',
+                            fontFamily: 'Georgia, "Times New Roman", serif',
+                            lineHeight: 1.05,
+                          }}
+                        >
+                          {totalPct}%
+                        </span>
+                        <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)', fontWeight: 600, marginTop: '2px' }}>
+                          allocated
+                        </span>
+                      </>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Status Pill */}
             <div
               style={{
                 width: '100%',
-                maxWidth: '280px',
+                maxWidth: '285px',
                 textAlign: 'center',
                 padding: '9px 14px',
                 borderRadius: '10px',
@@ -854,6 +976,28 @@ export default function RizqPlannerTab({ standalone = false }) {
                 </>
               )}
             </div>
+
+            {!isExact100 && (
+              <button
+                type="button"
+                onClick={handleAutoBalance}
+                className="rizq-btn-lift no-print"
+                style={{
+                  padding: '7px 14px',
+                  borderRadius: '999px',
+                  border: '1px solid var(--primary)',
+                  background: 'var(--primary-50)',
+                  color: 'var(--primary)',
+                  fontSize: '0.74rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                }}
+              >
+                {totalPct < 100
+                  ? `Send ${pctDiff}% → Halal investments (100%)`
+                  : 'Auto-balance shares to 100%'}
+              </button>
+            )}
           </div>
 
           {/* Right: 8 Interactive Category Rows */}
@@ -867,14 +1011,10 @@ export default function RizqPlannerTab({ standalone = false }) {
                 return (
                   <div
                     key={cat.key}
+                    className="rizq-row"
                     onMouseEnter={() => setHoveredKey(cat.key)}
                     onMouseLeave={() => setHoveredKey(null)}
                     style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'auto 1fr auto auto',
-                      alignItems: 'center',
-                      gap: '12px',
-                      padding: '10px 8px',
                       borderBottom: '1px solid var(--border)',
                       borderRadius: '8px',
                       background: isActive ? 'var(--bg-section)' : 'transparent',
@@ -926,6 +1066,7 @@ export default function RizqPlannerTab({ standalone = false }) {
 
                     {/* Editable Percentage Box */}
                     <div
+                      className="rizq-input-wrap"
                       style={{
                         display: 'inline-flex',
                         alignItems: 'center',
@@ -934,9 +1075,11 @@ export default function RizqPlannerTab({ standalone = false }) {
                         borderRadius: '10px',
                         background: 'var(--bg-section)',
                         border: '1px solid var(--border)',
+                        transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
                       }}
                     >
                       <input
+                        className="rizq-pct-input"
                         type="number"
                         min="0"
                         max="100"
@@ -945,7 +1088,7 @@ export default function RizqPlannerTab({ standalone = false }) {
                         value={pct}
                         onChange={(e) => handlePctChange(cat.key, e.target.value)}
                         style={{
-                          width: '44px',
+                          width: '38px',
                           textAlign: 'right',
                           border: 'none',
                           outline: 'none',
@@ -1007,39 +1150,50 @@ export default function RizqPlannerTab({ standalone = false }) {
             <div
               style={{
                 display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: '10px',
+                flexDirection: 'column',
+                gap: '8px',
                 marginTop: '10px',
-                padding: '9px 12px',
+                padding: '10px 12px',
                 borderRadius: '10px',
                 background: 'var(--bg-section)',
                 fontSize: '0.76rem',
                 color: 'var(--text-muted)',
               }}
             >
-              <span>
-                <strong style={{ color: 'var(--text-dark)' }}>Payday checklist ({currentMonthKey()}):</strong>{' '}
-                {movedPaydayStats.count}/{CATEGORIES.length} moved · {fmtNaira(movedPaydayStats.amount)}
-              </span>
-              {movedPaydayStats.count > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setCheckedCategories({})}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                <span>
+                  <strong style={{ color: 'var(--text-dark)' }}>Payday checklist ({currentMonthKey()}):</strong>{' '}
+                  {movedPaydayStats.count}/{CATEGORIES.length} moved · {fmtNaira(movedPaydayStats.amount)}
+                </span>
+                {movedPaydayStats.count > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setCheckedCategories({})}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--primary)',
+                      fontWeight: 700,
+                      fontSize: '0.74rem',
+                      cursor: 'pointer',
+                      padding: 0,
+                    }}
+                  >
+                    Clear checks
+                  </button>
+                )}
+              </div>
+              <div style={{ width: '100%', height: '5px', borderRadius: '999px', background: 'var(--border)', overflow: 'hidden' }}>
+                <div
                   style={{
-                    background: 'none',
-                    border: 'none',
-                    color: 'var(--primary)',
-                    fontWeight: 700,
-                    fontSize: '0.74rem',
-                    cursor: 'pointer',
-                    padding: 0,
+                    width: `${(movedPaydayStats.count / CATEGORIES.length) * 100}%`,
+                    height: '100%',
+                    borderRadius: '999px',
+                    background: 'var(--primary)',
+                    transition: 'width 0.25s ease',
                   }}
-                >
-                  Clear checks
-                </button>
-              )}
+                />
+              </div>
             </div>
           </div>
         </div>
