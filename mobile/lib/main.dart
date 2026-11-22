@@ -34,6 +34,7 @@ import 'features/profile/ui/history_screen.dart';
 import 'features/brokerage/ui/brokerage_link_screen.dart';
 import 'features/portfolio/ui/portfolio_screen.dart';
 import 'features/portfolio/ui/zakat_calculator_screen.dart';
+import 'features/portfolio/ui/rizq_planner_screen.dart';
 import 'features/admin/ui/admin_dashboard_screen.dart';
 import 'features/admin/providers/admin_provider.dart'; // Added
 import 'features/profile/providers/alerts_provider.dart'; // Added
@@ -327,6 +328,7 @@ class _IrshadAppState extends State<IrshadApp> with WidgetsBindingObserver {
         '/submit_product':   (context) => const UserSubmissionScreen(),
         '/brokerage/link':   (context) => const BrokerageLinkScreen(),
         '/zakat_calculator': (context) => const ZakatCalculatorScreen(),
+        '/rizq_planner':     (context) => const RizqPlannerScreen(),
       },
     );
   }

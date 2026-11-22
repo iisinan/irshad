@@ -1,6 +1,6 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import { Routes, Route, Link, useLocation, Navigate, useParams } from 'react-router-dom';
-import { Shield, Home, Scale, Info, BookOpen, Settings, LayoutDashboard, Moon, Sun, CreditCard } from 'lucide-react';
+import { Shield, Home, Scale, Info, BookOpen, Settings, LayoutDashboard, Moon, Sun, CreditCard, Wallet } from 'lucide-react';
 import DashboardLayout from './components/DashboardLayout';
 import AdminLayout from './components/AdminLayout';
 import { LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage } from './components/AuthPages';
@@ -79,6 +79,7 @@ const PrivacyPage = lazyWithRetry(() => import('./components/Privacy'));
 const DisclosurePage = lazyWithRetry(() => import('./components/Disclosure'));
 const AdminFinancialReviewQueue = lazyWithRetry(() => import('./components/AdminFinancialReviewQueue'));
 const InstitutionalDashboard = lazyWithRetry(() => import('./components/institution/InstitutionalDashboard'));
+const RizqPlannerTab = lazyWithRetry(() => import('./components/portfolio/RizqPlannerTab'));
 const DASHBOARD_ROUTES = ['/portfolio', '/profile', '/admin', '/institution'];
 
 /* ─── Animated Routes Wrapper ─────────────────────────────── */
@@ -136,6 +137,7 @@ const DocumentTitleUpdater = () => {
     else if (path.startsWith('/terms')) title = 'Terms of Service | Irshad';
     else if (path.startsWith('/privacy')) title = 'Privacy Policy | Irshad';
     else if (path.startsWith('/disclosure')) title = 'General Disclosures & Risk | Irshad';
+    else if (path.startsWith('/rizq-planner')) title = 'Monthly Rizq Compounder Planner | Irshad';
     else if (path.startsWith('/admin/finances')) title = 'Finances | Irshad Admin';
     else if (path.startsWith('/admin')) title = 'Admin Dashboard | Irshad';
     else if (path.startsWith('/institution/demo')) title = 'Institutional Demo & Presentation | Irshad';
@@ -208,6 +210,7 @@ const TopNavbar = () => {
           <Link to="/shariah" className={navLinkClass('/shariah')}>Shariah Framework</Link>
           <Link to="/pricing" className={navLinkClass('/pricing')}>Pricing</Link>
           <Link to="/resources" className={navLinkClass('/resources')}>Resources</Link>
+          <Link to="/rizq-planner" className={navLinkClass('/rizq-planner')}>Rizq Planner</Link>
           <Link to="/about" className={navLinkClass('/about')}>About Us</Link>
           {user && (
             <Link to={user?.role === 'institution' ? '/institution' : '/portfolio'} className={navLinkClass(user?.role === 'institution' ? '/institution' : '/portfolio')}>Dashboard</Link>
@@ -272,6 +275,9 @@ const TopNavbar = () => {
         </Link>
         <Link to="/resources" className={navLinkClass('/resources')} onClick={() => setMenuOpen(false)}>
           <BookOpen size={18} /> Resources
+        </Link>
+        <Link to="/rizq-planner" className={navLinkClass('/rizq-planner')} onClick={() => setMenuOpen(false)}>
+          <Wallet size={18} /> Rizq Planner
         </Link>
         <Link to="/about" className={navLinkClass('/about')} onClick={() => setMenuOpen(false)}>
           <Info size={18} /> About Us
@@ -391,6 +397,7 @@ function App() {
                   <Route path="/privacy" element={<PrivacyPage />} />
                   <Route path="/disclosure" element={<DisclosurePage />} />
                   <Route path="/disclosures" element={<Navigate to="/disclosure" replace />} />
+                  <Route path="/rizq-planner" element={<RizqPlannerTab standalone={true} />} />
                   <Route path="/market" element={<Navigate to="/portfolio" replace />} />
                   <Route path="/market/:symbol" element={<NavigateToAaoifi />} />
                   <Route path="/market/:symbol/aaoifi" element={

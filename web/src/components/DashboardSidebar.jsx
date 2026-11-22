@@ -7,7 +7,7 @@ import {
   HeartHandshake, Calculator, BookOpen,
   User, LogOut, ChevronLeft, ChevronRight,
   X, Moon, Sun, Shield, FileText, Bell, HelpCircle, Star, CreditCard, Lock,
-  Upload, Key
+  Upload, Key, Wallet
 } from 'lucide-react';
 
 const SidebarClock = () => {
@@ -57,6 +57,7 @@ export default function DashboardSidebar({ collapsed, setCollapsed, mobileOpen, 
     { section: 'Islamic Finance' },
     { label: 'Purification',     icon: HeartHandshake, to: '/portfolio#purification', className: 'tour-purification-tab' },
     { label: 'Zakat',            icon: Calculator,     to: '/portfolio#zakat', className: 'tour-zakat-tab' },
+    { label: 'Rizq Planner',     icon: Wallet,         to: '/portfolio#rizq' },
     { label: 'Resources',        icon: BookOpen,       to: '/portfolio#lectures' },
     { section: 'Account' },
     { label: 'Pricing Plans',    icon: CreditCard,     to: '/pricing' },

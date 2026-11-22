@@ -12,6 +12,7 @@ import 'package:irshad_mobile/core/theme/app_theme.dart';
 import '../../chat/ui/chat_assistant_sheet.dart';
 import '../providers/portfolio_provider.dart';
 import 'zakat_calculator_screen.dart';
+import 'rizq_planner_screen.dart';
 
 class PortfolioScreen extends StatefulWidget {
   const PortfolioScreen({super.key});
@@ -41,7 +42,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> with WidgetsBindingOb
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
     _tabController.addListener(() {
       if (_tabController.indexIsChanging || _tabController.index != _currentIndex) {
         setState(() => _currentIndex = _tabController.index);
@@ -280,6 +281,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> with WidgetsBindingOb
               Tab(text: 'Holdings'),
               Tab(text: 'Purification'),
               Tab(text: 'Zakat'),
+              Tab(text: 'Rizq Planner'),
             ],
           ),
         ),
@@ -290,6 +292,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> with WidgetsBindingOb
             PortfolioOverviewTab(),
             PurificationTab(),
             ZakatCalculatorScreen(isTab: true),
+            RizqPlannerScreen(isTab: true),
           ],
         ),
     );

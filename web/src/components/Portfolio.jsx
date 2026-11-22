@@ -16,6 +16,7 @@ import ZakatTab from './portfolio/ZakatTab';
 import PurificationTab from './portfolio/PurificationTab';
 import LecturesTab from './portfolio/LecturesTab';
 import StatementTab from './portfolio/StatementTab';
+import RizqPlannerTab from './portfolio/RizqPlannerTab';
 import UpdatesTab from './portfolio/UpdatesTab';
 import GuideTab from './portfolio/GuideTab';
 import HalalFundsTab from './portfolio/HalalFundsTab';
@@ -78,7 +79,7 @@ export default function Portfolio() {
   const location = useLocation();
   const getTabFromHash = (hash) => {
     const h = hash.replace('#', '');
-    return ['holdings', 'market', 'funds', 'baskets', 'watchlist', 'zakat', 'purification', 'lectures', 'statement', 'updates', 'guide'].includes(h) ? h : 'updates';
+    return ['holdings', 'market', 'funds', 'baskets', 'watchlist', 'zakat', 'purification', 'rizq', 'lectures', 'statement', 'updates', 'guide'].includes(h) ? h : 'updates';
   };
   
   const [activeTab, setActiveTab] = useState(() => getTabFromHash(location.hash));
@@ -262,9 +263,9 @@ export default function Portfolio() {
     );
   }
   
-  if (loading) return <Skeleton />;
+  if (loading && activeTab !== 'rizq') return <Skeleton />;
   
-  if (error) return (
+  if (error && activeTab !== 'rizq') return (
     <div style={{ textAlign:'center', padding:'100px 20px' }}>
       <h3 style={{ color:'var(--non-compliant)', marginBottom:'10px' }}>Error Loading Portfolio</h3>
       <p style={{ color:'var(--text-muted)', marginBottom:'20px' }}>{error}</p>
@@ -455,6 +456,11 @@ export default function Portfolio() {
           {mountedTabs.includes('purification') && (
             <div style={{ display: activeTab === 'purification' ? 'block' : 'none' }}>
               <PurificationTab data={data} initialSymbol={initialHoldingSymbol} refreshData={loadData} onClearInitialSymbol={() => setInitialHoldingSymbol(null)} onUpgrade={() => setShowUpgradeModal(true)} />
+            </div>
+          )}
+          {mountedTabs.includes('rizq') && (
+            <div style={{ display: activeTab === 'rizq' ? 'block' : 'none' }}>
+              <RizqPlannerTab />
             </div>
           )}
           {mountedTabs.includes('lectures') && (
