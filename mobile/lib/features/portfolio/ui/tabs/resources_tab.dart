@@ -82,9 +82,10 @@ class _ResourcesTabState extends State<ResourcesTab> {
         }
       }
     } catch (e) {
+      debugPrint('Error loading resources: $e');
       if (mounted && _resources.isEmpty) {
         setState(() {
-          _error = 'Error loading resources: $e';
+          _error = 'Unable to load resources right now. Please check your connection and try again.';
           _isLoading = false;
         });
       }

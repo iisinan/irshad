@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'dart:ui';
 import 'dart:convert';
 import 'dart:io';
@@ -122,6 +123,14 @@ void callbackDispatcher() {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Ensure modern ISRG / Let's Encrypt roots (including Generation-Y chains) are trusted on all Android devices
+  try {
+    final ByteData caData = await rootBundle.load('assets/ca/isrg_roots.pem');
+    SecurityContext.defaultContext.setTrustedCertificatesBytes(caData.buffer.asUint8List());
+  } catch (e) {
+    debugPrint("Failed to load bundled CA certificates: $e");
+  }
 
   // Catch any unhandled Flutter framework errors
   FlutterError.onError = (FlutterErrorDetails details) {

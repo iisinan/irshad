@@ -468,7 +468,7 @@ class _StockScreenerScreenState extends State<StockScreenerScreen> {
   Widget _buildStockItem(dynamic stock) {
     final priceChange = double.tryParse(stock['price_change']?.toString() ?? '0') ?? 0.0;
     final priceChangePct = double.tryParse(stock['price_change_pct']?.toString() ?? '0') ?? 0.0;
-    final isPositive = priceChange >= 0;
+    final isPositive = priceChangePct != 0 ? priceChangePct >= 0 : priceChange >= 0;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),

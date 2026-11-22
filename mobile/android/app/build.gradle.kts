@@ -60,7 +60,7 @@ android {
                 "proguard-rules.pro"
             )
             ndk {
-                debugSymbolLevel = "none"
+                debugSymbolLevel = "symbol_table"
             }
         }
     }

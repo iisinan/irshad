@@ -486,7 +486,7 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
             children: [
               Text(
                 '${isPositive ? '+' : ''}${changePct.toStringAsFixed(2)}%',
-                style: TextStyle(color: context.halal, fontWeight: FontWeight.bold, fontSize: 16),
+                style: TextStyle(color: isPositive ? context.halal : context.haram, fontWeight: FontWeight.bold, fontSize: 16),
               ),
               const SizedBox(height: 2),
               Text('Today', style: TextStyle(color: context.textMuted, fontSize: 11)),
@@ -501,9 +501,10 @@ class _BasketDetailScreenState extends State<BasketDetailScreen> {
     final statusObj = company['status'];
     
     final latestPrice = num.tryParse(company['latest_price']?.toString() ?? '0') ?? 0.0;
-    final isPositive = (double.tryParse(company['price_change']?.toString() ?? '0') ?? 0) >= 0;
     final priceStr = '₦ ${latestPrice.toStringAsFixed(2)}';
     final changePct = num.tryParse(company['price_change_pct']?.toString() ?? '0') ?? 0.0;
+    final rawPriceChange = double.tryParse(company['price_change']?.toString() ?? '0') ?? 0.0;
+    final isPositive = changePct != 0 ? changePct >= 0 : rawPriceChange >= 0;
     final changeStr = '${isPositive ? '+' : ''}${changePct.toStringAsFixed(2)}%';
 
     return Container(
