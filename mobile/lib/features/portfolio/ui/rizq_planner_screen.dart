@@ -112,12 +112,23 @@ class _RizqPlannerScreenState extends State<RizqPlannerScreen> {
   double _income = 500000;
   double _annualReturnPct = 12;
   double _emergencySaved = 0;
+  double _annualRent = 1200000;
+  double _monthlyUtilities = 50000;
+  bool _showRentHelper = false;
   String? _activeKey;
 
   late final TextEditingController _incomeController;
   late final TextEditingController _emergencySavedController;
+  late final TextEditingController _annualRentController;
+  late final TextEditingController _monthlyUtilitiesController;
   final Map<String, double> _allocations = {};
   final Map<String, TextEditingController> _pctControllers = {};
+  final Map<String, bool> _checkedCategories = {};
+
+  String _currentMonthKey() {
+    final now = DateTime.now();
+    return '${now.year}-${now.month.toString().padLeft(2, '0')}';
+  }
 
   @override
   void initState() {
@@ -125,9 +136,12 @@ class _RizqPlannerScreenState extends State<RizqPlannerScreen> {
     for (final cat in _rizqCategories) {
       _allocations[cat.key] = cat.defaultPct;
       _pctControllers[cat.key] = TextEditingController(text: _formatPct(cat.defaultPct));
+      _checkedCategories[cat.key] = false;
     }
     _incomeController = TextEditingController(text: _plainNumberFormatter.format(_income));
     _emergencySavedController = TextEditingController(text: '0');
+    _annualRentController = TextEditingController(text: _annualRent.round().toString());
+    _monthlyUtilitiesController = TextEditingController(text: _monthlyUtilities.round().toString());
     _loadOfflineState();
   }
 
@@ -135,6 +149,8 @@ class _RizqPlannerScreenState extends State<RizqPlannerScreen> {
   void dispose() {
     _incomeController.dispose();
     _emergencySavedController.dispose();
+    _annualRentController.dispose();
+    _monthlyUtilitiesController.dispose();
     for (final c in _pctControllers.values) {
       c.dispose();
     }
@@ -173,6 +189,22 @@ class _RizqPlannerScreenState extends State<RizqPlannerScreen> {
           _emergencySaved = savedEm;
           _emergencySavedController.text = _emergencySaved.round().toString();
         }
+        final savedRent = double.tryParse(decoded['annualRent']?.toString() ?? '');
+        if (savedRent != null && savedRent >= 0) {
+          _annualRent = savedRent;
+          _annualRentController.text = _annualRent.round().toString();
+        }
+        final savedUtil = double.tryParse(decoded['monthlyUtilities']?.toString() ?? '');
+        if (savedUtil != null && savedUtil >= 0) {
+          _monthlyUtilities = savedUtil;
+          _monthlyUtilitiesController.text = _monthlyUtilities.round().toString();
+        }
+        if (decoded['checkedMonth'] == _currentMonthKey() && decoded['checkedCategories'] is Map) {
+          final checked = decoded['checkedCategories'] as Map;
+          for (final cat in _rizqCategories) {
+            _checkedCategories[cat.key] = checked[cat.key] == true;
+          }
+        }
 
         final allocMap = decoded['allocations'];
         if (allocMap is Map) {
@@ -196,6 +228,10 @@ class _RizqPlannerScreenState extends State<RizqPlannerScreen> {
         'allocations': _allocations,
         'annualReturnPct': _annualReturnPct,
         'emergencySaved': _emergencySaved,
+        'annualRent': _annualRent,
+        'monthlyUtilities': _monthlyUtilities,
+        'checkedMonth': _currentMonthKey(),
+        'checkedCategories': _checkedCategories,
         'updatedAt': DateTime.now().toIso8601String(),
       });
       await prefs.setString(_storageKey, payload);
@@ -251,6 +287,65 @@ class _RizqPlannerScreenState extends State<RizqPlannerScreen> {
       _pctControllers['investments']?.text = _formatPct(nextInv);
     });
     _saveOfflineState();
+  }
+
+  void _togglePaydayEnvelope(String key) {
+    setState(() {
+      _checkedCategories[key] = !(_checkedCategories[key] ?? false);
+    });
+    _saveOfflineState();
+  }
+
+  double get _monthlyHousingNeed => (_annualRent / 12) + _monthlyUtilities;
+
+  double get _recommendedHousingPct {
+    if (_income <= 0) return 0;
+    return math.min(100.0, ((_monthlyHousingNeed / _income) * 1000).roundToDouble() / 10);
+  }
+
+  void _applyHousingFromRent() {
+    if (_income <= 0) return;
+    final pct = _recommendedHousingPct;
+    setState(() {
+      _allocations['housing'] = pct;
+      _pctControllers['housing']?.text = _formatPct(pct);
+    });
+    _saveOfflineState();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Housing share updated to ${_formatPct(pct)}% (${_ngnFormatter.format(_monthlyHousingNeed.round())}/mo).'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  Future<void> _copyPlan() async {
+    final plannedTotal = (_income * _totalPct) / 100;
+    final wealthNgn = (_income * _wealthPct) / 100;
+    final lines = [
+      'Irshad Monthly Rizq Compounder (${_currentMonthKey()})',
+      'Monthly Take-Home Income: ${_ngnFormatter.format(_income.round())}',
+      '',
+      ..._rizqCategories.map((c) {
+        final pct = _allocations[c.key] ?? 0;
+        final amt = (_income * pct) / 100;
+        final mark = (_checkedCategories[c.key] ?? false) ? '[x]' : '[ ]';
+        return '$mark ${c.label}: ${_formatPct(pct)}% (${_ngnFormatter.format(amt.round())})';
+      }),
+      '',
+      'Savings + Halal Investments: ${_formatPct(_wealthPct)}% (${_ngnFormatter.format(wealthNgn.round())})',
+      'Planned Total: ${_formatPct(_totalPct)}% (${_ngnFormatter.format(plannedTotal.round())})',
+    ].join('\n');
+
+    await Clipboard.setData(ClipboardData(text: lines));
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Payday allocation plan copied to clipboard.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   double get _totalPct {
@@ -332,6 +427,14 @@ class _RizqPlannerScreenState extends State<RizqPlannerScreen> {
     final isExact100 = (totalPct - 100).abs() < 0.05;
     final diffPct = ((100 - totalPct).abs() * 10).roundToDouble() / 10;
     final projection = _simulateCompounding();
+    int movedCount = 0;
+    double movedAmount = 0;
+    for (final cat in _rizqCategories) {
+      if (_checkedCategories[cat.key] == true) {
+        movedCount++;
+        movedAmount += (_income * (_allocations[cat.key] ?? 0)) / 100;
+      }
+    }
 
     final bodyContent = SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(20, widget.isTab ? 16 : 8, 20, 110),
@@ -452,25 +555,135 @@ class _RizqPlannerScreenState extends State<RizqPlannerScreen> {
                 Wrap(
                   spacing: 8,
                   runSpacing: 6,
-                  children: [250000.0, 500000.0, 1000000.0, 2000000.0].map((preset) {
-                    final selected = (_income - preset).abs() < 1;
-                    final label = preset >= 1000000 ? '₦${(preset / 1000000).round()}M' : '₦${(preset / 1000).round()}K';
-                    return ChoiceChip(
-                      label: Text(label),
-                      selected: selected,
-                      onSelected: (_) => _applyIncomePreset(preset),
-                      selectedColor: context.primary.withValues(alpha: 0.14),
-                      backgroundColor: context.bgSection,
+                  children: [
+                    ...[250000.0, 500000.0, 1000000.0, 2000000.0].map((preset) {
+                      final selected = (_income - preset).abs() < 1;
+                      final label = preset >= 1000000 ? '₦${(preset / 1000000).round()}M' : '₦${(preset / 1000).round()}K';
+                      return ChoiceChip(
+                        label: Text(label),
+                        selected: selected,
+                        onSelected: (_) => _applyIncomePreset(preset),
+                        selectedColor: context.primary.withValues(alpha: 0.14),
+                        backgroundColor: context.bgSection,
+                        labelStyle: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          color: selected ? context.primary : context.textMuted,
+                        ),
+                        side: BorderSide(color: selected ? context.primary : context.divider),
+                        showCheckmark: false,
+                      );
+                    }),
+                    ActionChip(
+                      avatar: Icon(Icons.home_outlined, size: 15, color: _showRentHelper ? context.primary : context.textDark),
+                      label: const Text('Yearly Rent 1/12'),
+                      onPressed: () => setState(() => _showRentHelper = !_showRentHelper),
+                      backgroundColor: _showRentHelper ? context.primary.withValues(alpha: 0.12) : context.bgSection,
                       labelStyle: TextStyle(
                         fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                        color: selected ? context.primary : context.textMuted,
+                        fontWeight: FontWeight.w700,
+                        color: _showRentHelper ? context.primary : context.textDark,
                       ),
-                      side: BorderSide(color: selected ? context.primary : context.divider),
-                      showCheckmark: false,
-                    );
-                  }).toList(),
+                      side: BorderSide(color: _showRentHelper ? context.primary : context.divider),
+                    ),
+                  ],
                 ),
+
+                if (_showRentHelper) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: context.bgSection,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: context.divider),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('ANNUAL RENT (₦/YR)', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: context.textMuted)),
+                                  const SizedBox(height: 4),
+                                  TextField(
+                                    controller: _annualRentController,
+                                    keyboardType: TextInputType.number,
+                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                    onChanged: (v) {
+                                      setState(() => _annualRent = double.tryParse(v) ?? 0);
+                                      _saveOfflineState();
+                                    },
+                                    style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: context.textDark),
+                                    decoration: InputDecoration(
+                                      isDense: true,
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                      filled: true,
+                                      fillColor: context.bgAlt,
+                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: context.divider)),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('POWER / FUEL / DATA (₦/MO)', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: context.textMuted)),
+                                  const SizedBox(height: 4),
+                                  TextField(
+                                    controller: _monthlyUtilitiesController,
+                                    keyboardType: TextInputType.number,
+                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                    onChanged: (v) {
+                                      setState(() => _monthlyUtilities = double.tryParse(v) ?? 0);
+                                      _saveOfflineState();
+                                    },
+                                    style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: context.textDark),
+                                    decoration: InputDecoration(
+                                      isDense: true,
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                      filled: true,
+                                      fillColor: context.bgAlt,
+                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: context.divider)),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Monthly housing need: ${_ngnFormatter.format(_monthlyHousingNeed.round())} (${_formatPct(_recommendedHousingPct)}%)',
+                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: context.textMuted),
+                              ),
+                            ),
+                            ElevatedButton(
+                              onPressed: _applyHousingFromRent,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: context.primary,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              ),
+                              child: Text('Apply ${_formatPct(_recommendedHousingPct)}%', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
 
                 const SizedBox(height: 22),
                 Divider(height: 1, color: context.divider),
@@ -556,37 +769,60 @@ class _RizqPlannerScreenState extends State<RizqPlannerScreen> {
                   final pct = _allocations[cat.key] ?? 0;
                   final amount = (_income * pct) / 100;
                   final isHighlighted = _activeKey == cat.key;
+                  final isMoved = _checkedCategories[cat.key] == true;
                   return InkWell(
                     borderRadius: BorderRadius.circular(10),
                     onTap: () => setState(() => _activeKey = isHighlighted ? null : cat.key),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
                       decoration: BoxDecoration(
                         color: isHighlighted ? context.bgSection : Colors.transparent,
                         border: Border(bottom: BorderSide(color: context.divider)),
                       ),
                       child: Row(
                         children: [
+                          GestureDetector(
+                            onTap: () => _togglePaydayEnvelope(cat.key),
+                            child: Container(
+                              width: 20,
+                              height: 20,
+                              margin: const EdgeInsets.only(right: 8),
+                              decoration: BoxDecoration(
+                                color: isMoved ? context.primary : Colors.transparent,
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(
+                                  color: isMoved ? context.primary : context.textMuted.withValues(alpha: 0.45),
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: isMoved ? const Icon(Icons.check_rounded, size: 13, color: Colors.white) : null,
+                            ),
+                          ),
                           Container(
-                            width: 12,
-                            height: 12,
+                            width: 11,
+                            height: 11,
                             decoration: BoxDecoration(
                               color: cat.color,
                               borderRadius: BorderRadius.circular(3.5),
                             ),
                           ),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   cat.label,
-                                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: context.textDark),
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: isMoved ? context.textMuted : context.textDark,
+                                    decoration: isMoved ? TextDecoration.lineThrough : null,
+                                  ),
                                 ),
                                 Text(
                                   cat.subtitle,
-                                  style: TextStyle(fontSize: 11.5, color: context.textMuted),
+                                  style: TextStyle(fontSize: 11, color: context.textMuted),
                                 ),
                               ],
                             ),
@@ -684,7 +920,44 @@ class _RizqPlannerScreenState extends State<RizqPlannerScreen> {
                   ],
                 ),
 
-                const SizedBox(height: 18),
+                const SizedBox(height: 12),
+
+                // Payday Checklist Progress
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                  decoration: BoxDecoration(
+                    color: context.bgSection,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Payday checklist (${_currentMonthKey()}): $movedCount/${_rizqCategories.length} moved · ${_ngnFormatter.format(movedAmount.round())}',
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: context.textDark),
+                        ),
+                      ),
+                      if (movedCount > 0)
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              for (final cat in _rizqCategories) {
+                                _checkedCategories[cat.key] = false;
+                              }
+                            });
+                            _saveOfflineState();
+                          },
+                          child: Text(
+                            'Clear',
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: context.primary),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 16),
 
                 // Action Buttons
                 Wrap(
@@ -699,6 +972,19 @@ class _RizqPlannerScreenState extends State<RizqPlannerScreen> {
                         backgroundColor: context.primary,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: _copyPlan,
+                      icon: Icon(Icons.copy_rounded, size: 16, color: context.textDark),
+                      label: Text(
+                        'Copy Plan',
+                        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5, color: context.textDark),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        side: BorderSide(color: context.divider),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                     ),
@@ -761,6 +1047,20 @@ class _RizqPlannerScreenState extends State<RizqPlannerScreen> {
                         ),
                       ],
                     ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: () => Navigator.pushNamed(context, '/zakat_calculator'),
+                  icon: Icon(Icons.calculate_outlined, size: 16, color: context.primary),
+                  label: Text(
+                    'Open Zakat Calculator',
+                    style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: context.primary),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: context.divider),
+                    backgroundColor: context.bgAlt,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                 ),
               ],

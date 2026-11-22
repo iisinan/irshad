@@ -172,6 +172,15 @@ Color get cardBg => context.bgAlt;
                         child: const Text('Sign In', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                       ),
                     ),
+                    const SizedBox(height: 12),
+                    TextButton.icon(
+                      onPressed: () => Navigator.pushNamed(context, '/rizq_planner'),
+                      icon: Icon(Icons.pie_chart_outline_rounded, size: 18, color: context.primary),
+                      label: Text(
+                        'Open Offline Rizq Planner',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: context.primary),
+                      ),
+                    ),
                   ],
                 ),
               ),
