@@ -94,8 +94,6 @@ const currentMonthKey = () => new Date().toISOString().slice(0, 7);
 const DEFAULT_STATE = {
   income: 500000,
   allocations: { ...DEFAULT_ALLOCATIONS },
-  annualReturnPct: 12,
-  emergencySaved: 0,
   annualRent: 1200000,
   monthlyUtilities: 50000,
   checkedMonth: currentMonthKey(),
@@ -115,8 +113,6 @@ function loadInitialStateSync() {
       }
     });
     const income = Number(parsed?.income);
-    const annualReturnPct = Number(parsed?.annualReturnPct);
-    const emergencySaved = Number(parsed?.emergencySaved);
     const annualRent = Number(parsed?.annualRent);
     const monthlyUtilities = Number(parsed?.monthlyUtilities);
     const thisMonth = currentMonthKey();
@@ -124,8 +120,6 @@ function loadInitialStateSync() {
     return {
       income: !Number.isNaN(income) && income >= 0 ? income : DEFAULT_STATE.income,
       allocations: mergedAlloc,
-      annualReturnPct: !Number.isNaN(annualReturnPct) && annualReturnPct >= 0 && annualReturnPct <= 40 ? annualReturnPct : 12,
-      emergencySaved: !Number.isNaN(emergencySaved) && emergencySaved >= 0 ? emergencySaved : 0,
       annualRent: !Number.isNaN(annualRent) && annualRent >= 0 ? annualRent : DEFAULT_STATE.annualRent,
       monthlyUtilities: !Number.isNaN(monthlyUtilities) && monthlyUtilities >= 0 ? monthlyUtilities : DEFAULT_STATE.monthlyUtilities,
       checkedMonth: thisMonth,
@@ -151,8 +145,6 @@ export default function RizqPlannerTab({ standalone = false }) {
   const [income, setIncome] = useState(initial.income);
   const [incomeInput, setIncomeInput] = useState(() => initial.income.toLocaleString('en-NG'));
   const [allocations, setAllocations] = useState(initial.allocations);
-  const [annualReturnPct, setAnnualReturnPct] = useState(initial.annualReturnPct);
-  const [emergencySaved, setEmergencySaved] = useState(initial.emergencySaved);
   const [annualRent, setAnnualRent] = useState(initial.annualRent);
   const [monthlyUtilities, setMonthlyUtilities] = useState(initial.monthlyUtilities);
   const [showRentHelper, setShowRentHelper] = useState(false);
@@ -187,12 +179,6 @@ export default function RizqPlannerTab({ standalone = false }) {
           if (cached.allocations && typeof cached.allocations === 'object') {
             setAllocations((prev) => ({ ...prev, ...cached.allocations }));
           }
-          if (typeof cached.annualReturnPct === 'number') {
-            setAnnualReturnPct(cached.annualReturnPct);
-          }
-          if (typeof cached.emergencySaved === 'number') {
-            setEmergencySaved(cached.emergencySaved);
-          }
           if (typeof cached.annualRent === 'number') {
             setAnnualRent(cached.annualRent);
           }
@@ -219,8 +205,6 @@ export default function RizqPlannerTab({ standalone = false }) {
     const payload = {
       income,
       allocations,
-      annualReturnPct,
-      emergencySaved,
       annualRent,
       monthlyUtilities,
       checkedMonth: currentMonthKey(),
@@ -231,7 +215,7 @@ export default function RizqPlannerTab({ standalone = false }) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     } catch { /* quota full ignore */ }
     localforage.setItem(STORAGE_KEY, payload).catch(() => {});
-  }, [income, allocations, annualReturnPct, emergencySaved, annualRent, monthlyUtilities, checkedCategories, hydratedFromForage]);
+  }, [income, allocations, annualRent, monthlyUtilities, checkedCategories, hydratedFromForage]);
 
   const handleIncomeChange = (raw) => {
     const cleaned = raw.replace(/[^0-9]/g, '');
@@ -417,74 +401,6 @@ export default function RizqPlannerTab({ standalone = false }) {
 
   const isExact100 = Math.abs(totalPct - 100) < 0.05;
   const pctDiff = Math.round(Math.abs(100 - totalPct) * 10) / 10;
-
-  // Offline 100% Halal Compounder Simulation
-  const compoundingStats = useMemo(() => {
-    const essentialMonthly = CATEGORIES
-      .filter((c) => c.isEssential)
-      .reduce((sum, c) => sum + (income * Number(allocations[c.key] || 0)) / 100, 0);
-    const sixMonthTarget = essentialMonthly * 6;
-    const monthlyEmergency = (income * Number(allocations.emergency || 0)) / 100;
-    const monthlyInvestment = (income * Number(allocations.investments || 0)) / 100;
-    const monthlyRate = (Number(annualReturnPct) || 0) / 100 / 12;
-
-    const remainingTarget = Math.max(0, sixMonthTarget - Number(emergencySaved || 0));
-    const monthsToEmergency =
-      remainingTarget <= 0
-        ? 0
-        : monthlyEmergency > 0
-          ? Math.ceil(remainingTarget / monthlyEmergency)
-          : null;
-
-    const projectMonths = (months) => {
-      let emBalance = Number(emergencySaved || 0);
-      let invBalance = 0;
-      let totalContributed = 0;
-
-      for (let m = 1; m <= months; m++) {
-        invBalance *= 1 + monthlyRate;
-        let emAdd = 0;
-        let invAdd = monthlyInvestment;
-
-        if (emBalance < sixMonthTarget && monthlyEmergency > 0) {
-          emAdd = monthlyEmergency;
-          emBalance += emAdd;
-          if (emBalance > sixMonthTarget) {
-            const overflow = emBalance - sixMonthTarget;
-            emBalance = sixMonthTarget;
-            invAdd += overflow;
-          }
-        } else if (monthlyEmergency > 0) {
-          // Once 6 months of essentials are covered, roll Emergency share into Halal investments
-          invAdd += monthlyEmergency;
-        }
-
-        invBalance += invAdd;
-        totalContributed += invAdd;
-      }
-
-      return {
-        investedValue: invBalance,
-        contributed: totalContributed,
-        gains: Math.max(0, invBalance - totalContributed),
-        emergencyReserve: emBalance,
-      };
-    };
-
-    return {
-      essentialMonthly,
-      sixMonthTarget,
-      monthlyEmergency,
-      monthlyInvestment,
-      monthsToEmergency,
-      horizons: [
-        { label: '1 Year', ...projectMonths(12) },
-        { label: '3 Years', ...projectMonths(36) },
-        { label: '5 Years', ...projectMonths(60) },
-        { label: '10 Years', ...projectMonths(120) },
-      ],
-    };
-  }, [income, allocations, annualReturnPct, emergencySaved]);
 
   // SVG Donut Geometry (normalized to 100% or proportional if > 0)
   const donutSegments = useMemo(() => {
@@ -1363,142 +1279,6 @@ export default function RizqPlannerTab({ standalone = false }) {
           >
             <TrendingUp size={14} /> {user ? 'Invest Monthly Share in Baskets' : 'Explore Halal Portfolios'} <ArrowRight size={13} />
           </button>
-        </div>
-      </div>
-
-      {/* Offline Rizq Compounding Projection */}
-      <div
-        style={{
-          background: 'var(--bg)',
-          border: '1px solid var(--border)',
-          borderRadius: '20px',
-          padding: '24px',
-          boxShadow: 'var(--shadow-sm)',
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-            flexWrap: 'wrap',
-            gap: '16px',
-            marginBottom: '18px',
-          }}
-        >
-          <div>
-            <h3
-              style={{
-                margin: '0 0 4px',
-                fontSize: '1rem',
-                fontWeight: 800,
-                color: 'var(--text-dark)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-              }}
-            >
-              <TrendingUp size={18} color="var(--primary)" /> Rizq Compounding Horizon
-            </h3>
-            <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-              Automatically models your 6-month emergency milestone, then compounds all {wealthPct}% wealth contributions into Halal investments.
-            </p>
-          </div>
-
-          <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', alignItems: 'center' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.67rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
-                Current Emergency Saved
-              </label>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'var(--bg-section)', border: '1px solid var(--border)', borderRadius: '10px', padding: '6px 10px' }}>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 700 }}>₦</span>
-                <input
-                  type="number"
-                  min="0"
-                  step="10000"
-                  value={emergencySaved}
-                  onChange={(e) => setEmergencySaved(Math.max(0, Number(e.target.value) || 0))}
-                  style={{ width: '105px', border: 'none', outline: 'none', background: 'transparent', fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-dark)' }}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '0.67rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>
-                Expected Halal Return ({annualReturnPct}% p.a.)
-              </label>
-              <input
-                type="range"
-                min="4"
-                max="24"
-                step="1"
-                value={annualReturnPct}
-                onChange={(e) => setAnnualReturnPct(Number(e.target.value))}
-                style={{ accentColor: 'var(--primary)', width: '140px', cursor: 'pointer' }}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Emergency Milestone Strip */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '10px',
-            padding: '12px 16px',
-            borderRadius: '12px',
-            background: 'var(--bg-section)',
-            border: '1px solid var(--border)',
-            marginBottom: '16px',
-            fontSize: '0.8rem',
-          }}
-        >
-          <span style={{ color: 'var(--text-dark)', fontWeight: 600 }}>
-            <strong>6-Month Essential Target:</strong> {fmtNaira(compoundingStats.sixMonthTarget)}{' '}
-            <span style={{ color: 'var(--text-muted)' }}>({fmtNaira(compoundingStats.essentialMonthly)}/mo essentials)</span>
-          </span>
-          <span style={{ color: 'var(--primary)', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-            {compoundingStats.monthsToEmergency === 0
-              ? 'Emergency target met — 100% of wealth split goes to investments'
-              : compoundingStats.monthsToEmergency === null
-                ? 'Allocate % to Emergency savings to compute timeline'
-                : `${compoundingStats.monthsToEmergency} months to fill at ${fmtNaira(compoundingStats.monthlyEmergency)}/mo`}
-            <ArrowRight size={13} />
-          </span>
-        </div>
-
-        {/* Projection Cards */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
-            gap: '12px',
-          }}
-        >
-          {compoundingStats.horizons.map((h) => (
-            <div
-              key={h.label}
-              style={{
-                padding: '14px 16px',
-                borderRadius: '14px',
-                background: 'var(--bg-section)',
-                border: '1px solid var(--border)',
-              }}
-            >
-              <div style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-                {h.label}
-              </div>
-              <div style={{ fontSize: '1.15rem', fontWeight: 900, color: 'var(--primary)', marginTop: '4px', fontVariantNumeric: 'tabular-nums' }}>
-                {fmtNaira(h.investedValue)}
-              </div>
-              <div style={{ fontSize: '0.71rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                Est. Halal growth: <strong style={{ color: 'var(--halal)' }}>+{fmtNaira(h.gains)}</strong>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
     </div>

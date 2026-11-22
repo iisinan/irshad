@@ -110,15 +110,12 @@ class _RizqPlannerScreenState extends State<RizqPlannerScreen> {
   final NumberFormat _plainNumberFormatter = NumberFormat('#,##0');
 
   double _income = 500000;
-  double _annualReturnPct = 12;
-  double _emergencySaved = 0;
   double _annualRent = 1200000;
   double _monthlyUtilities = 50000;
   bool _showRentHelper = false;
   String? _activeKey;
 
   late final TextEditingController _incomeController;
-  late final TextEditingController _emergencySavedController;
   late final TextEditingController _annualRentController;
   late final TextEditingController _monthlyUtilitiesController;
   final Map<String, double> _allocations = {};
@@ -139,7 +136,6 @@ class _RizqPlannerScreenState extends State<RizqPlannerScreen> {
       _checkedCategories[cat.key] = false;
     }
     _incomeController = TextEditingController(text: _plainNumberFormatter.format(_income));
-    _emergencySavedController = TextEditingController(text: '0');
     _annualRentController = TextEditingController(text: _annualRent.round().toString());
     _monthlyUtilitiesController = TextEditingController(text: _monthlyUtilities.round().toString());
     _loadOfflineState();
@@ -148,7 +144,6 @@ class _RizqPlannerScreenState extends State<RizqPlannerScreen> {
   @override
   void dispose() {
     _incomeController.dispose();
-    _emergencySavedController.dispose();
     _annualRentController.dispose();
     _monthlyUtilitiesController.dispose();
     for (final c in _pctControllers.values) {
@@ -179,15 +174,6 @@ class _RizqPlannerScreenState extends State<RizqPlannerScreen> {
         if (savedIncome != null && savedIncome >= 0) {
           _income = savedIncome;
           _incomeController.text = _plainNumberFormatter.format(_income.round());
-        }
-        final savedReturn = double.tryParse(decoded['annualReturnPct']?.toString() ?? '');
-        if (savedReturn != null && savedReturn >= 4 && savedReturn <= 24) {
-          _annualReturnPct = savedReturn;
-        }
-        final savedEm = double.tryParse(decoded['emergencySaved']?.toString() ?? '');
-        if (savedEm != null && savedEm >= 0) {
-          _emergencySaved = savedEm;
-          _emergencySavedController.text = _emergencySaved.round().toString();
         }
         final savedRent = double.tryParse(decoded['annualRent']?.toString() ?? '');
         if (savedRent != null && savedRent >= 0) {
@@ -226,8 +212,6 @@ class _RizqPlannerScreenState extends State<RizqPlannerScreen> {
       final payload = jsonEncode({
         'income': _income,
         'allocations': _allocations,
-        'annualReturnPct': _annualReturnPct,
-        'emergencySaved': _emergencySaved,
         'annualRent': _annualRent,
         'monthlyUtilities': _monthlyUtilities,
         'checkedMonth': _currentMonthKey(),
@@ -391,66 +375,6 @@ class _RizqPlannerScreenState extends State<RizqPlannerScreen> {
     return (raw * 10).roundToDouble() / 10;
   }
 
-  Map<String, dynamic> _simulateCompounding() {
-    final essentialMonthly = _rizqCategories
-        .where((c) => c.isEssential)
-        .fold(0.0, (sum, c) => sum + (_income * (_allocations[c.key] ?? 0)) / 100);
-    final sixMonthTarget = essentialMonthly * 6;
-    final monthlyEmergency = (_income * (_allocations['emergency'] ?? 0)) / 100;
-    final monthlyInvestment = (_income * (_allocations['investments'] ?? 0)) / 100;
-    final monthlyRate = _annualReturnPct / 100 / 12;
-
-    final remainingTarget = math.max(0.0, sixMonthTarget - _emergencySaved);
-    int? monthsToEmergency;
-    if (remainingTarget <= 0) {
-      monthsToEmergency = 0;
-    } else if (monthlyEmergency > 0) {
-      monthsToEmergency = (remainingTarget / monthlyEmergency).ceil();
-    }
-
-    Map<String, double> project(int months) {
-      double emBalance = _emergencySaved;
-      double invBalance = 0;
-      double contributed = 0;
-
-      for (int m = 1; m <= months; m++) {
-        invBalance *= 1 + monthlyRate;
-        double invAdd = monthlyInvestment;
-
-        if (emBalance < sixMonthTarget && monthlyEmergency > 0) {
-          emBalance += monthlyEmergency;
-          if (emBalance > sixMonthTarget) {
-            invAdd += emBalance - sixMonthTarget;
-            emBalance = sixMonthTarget;
-          }
-        } else if (monthlyEmergency > 0) {
-          invAdd += monthlyEmergency;
-        }
-
-        invBalance += invAdd;
-        contributed += invAdd;
-      }
-
-      return {
-        'invested': invBalance,
-        'gains': math.max(0.0, invBalance - contributed),
-      };
-    }
-
-    return {
-      'essentialMonthly': essentialMonthly,
-      'sixMonthTarget': sixMonthTarget,
-      'monthlyEmergency': monthlyEmergency,
-      'monthsToEmergency': monthsToEmergency,
-      'horizons': [
-        {'label': '1 Year', ...project(12)},
-        {'label': '3 Years', ...project(36)},
-        {'label': '5 Years', ...project(60)},
-        {'label': '10 Years', ...project(120)},
-      ],
-    };
-  }
-
   @override
   Widget build(BuildContext context) {
     final totalPct = _totalPct;
@@ -459,7 +383,6 @@ class _RizqPlannerScreenState extends State<RizqPlannerScreen> {
     final wealthNgn = (_income * wealthPct) / 100;
     final isExact100 = (totalPct - 100).abs() < 0.05;
     final diffPct = ((100 - totalPct).abs() * 10).roundToDouble() / 10;
-    final projection = _simulateCompounding();
     int movedCount = 0;
     double movedAmount = 0;
     for (final cat in _rizqCategories) {
@@ -1174,160 +1097,6 @@ class _RizqPlannerScreenState extends State<RizqPlannerScreen> {
                     backgroundColor: context.bgAlt,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 18),
-
-          // Offline Compounding Projection Card
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: context.bgAlt,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: context.divider),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.trending_up_rounded, size: 19, color: context.primary),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Rizq Compounding Horizon (Offline)',
-                        style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w900, color: context.textDark),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Models reaching your 6-month essential buffer, then rolling ${_formatPct(wealthPct)}% monthly into Halal investments.',
-                  style: TextStyle(fontSize: 12.5, color: context.textMuted, height: 1.4),
-                ),
-                const SizedBox(height: 14),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'CURRENT EMERGENCY SAVED (₦)',
-                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: context.textMuted),
-                          ),
-                          const SizedBox(height: 6),
-                          TextField(
-                            controller: _emergencySavedController,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                            onChanged: (v) {
-                              setState(() => _emergencySaved = double.tryParse(v) ?? 0);
-                              _saveOfflineState();
-                            },
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: context.textDark),
-                            decoration: InputDecoration(
-                              isDense: true,
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                              filled: true,
-                              fillColor: context.bgSection,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide(color: context.divider),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'HALAL RETURN (${_annualReturnPct.round()}% P.A.)',
-                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: context.textMuted),
-                          ),
-                          Slider(
-                            value: _annualReturnPct,
-                            min: 4,
-                            max: 24,
-                            divisions: 20,
-                            activeColor: context.primary,
-                            onChanged: (val) {
-                              setState(() => _annualReturnPct = val);
-                              _saveOfflineState();
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: context.bgSection,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: context.divider),
-                  ),
-                  child: Text(
-                    '6-Month Target: ${_ngnFormatter.format((projection['sixMonthTarget'] as double).round())}  ·  '
-                    '${projection['monthsToEmergency'] == 0 ? 'Buffer funded!' : projection['monthsToEmergency'] == null ? 'Set Emergency %' : '${projection['monthsToEmergency']} mos to fill'}',
-                    style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: context.primary),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                GridView.count(
-                  crossAxisCount: 2,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  mainAxisSpacing: 10,
-                  crossAxisSpacing: 10,
-                  childAspectRatio: 1.85,
-                  children: (projection['horizons'] as List<Map<String, dynamic>>).map((h) {
-                    return Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: context.bgSection,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: context.divider),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            (h['label'] as String).toUpperCase(),
-                            style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: context.textMuted),
-                          ),
-                          const SizedBox(height: 4),
-                          FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              _ngnFormatter.format((h['invested'] as double).round()),
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: context.primary),
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              '+${_ngnFormatter.format((h['gains'] as double).round())} Halal growth',
-                              style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: context.halal),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
                 ),
               ],
             ),
