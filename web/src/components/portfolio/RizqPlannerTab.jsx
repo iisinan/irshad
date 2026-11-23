@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import {
   RotateCcw, ArrowRight, Wifi, WifiOff, CheckCircle2,
   AlertTriangle, Sparkles, TrendingUp, ShieldCheck, Info,
-  Download, Copy, Printer, Check, Home, Calculator
+  Download, Copy, Printer, Check, Home, Calculator,
+  Lock, Unlock, Minus, Plus
 } from 'lucide-react';
 import localforage from 'localforage';
-import { toastSuccess } from '../../utils/toast';
+import { toastSuccess, toastError, toastInfo } from '../../utils/toast';
 import { useAuth } from '../../context/AuthContext';
 
 const STORAGE_KEY = 'irshad_rizq_planner_v1';
@@ -98,6 +99,7 @@ const DEFAULT_STATE = {
   monthlyUtilities: 50000,
   checkedMonth: currentMonthKey(),
   checkedCategories: {},
+  lockedCategories: {},
 };
 
 function loadInitialStateSync() {
@@ -126,6 +128,9 @@ function loadInitialStateSync() {
       checkedCategories: sameMonth && parsed?.checkedCategories && typeof parsed.checkedCategories === 'object'
         ? parsed.checkedCategories
         : {},
+      lockedCategories: parsed?.lockedCategories && typeof parsed.lockedCategories === 'object'
+        ? parsed.lockedCategories
+        : {},
     };
   } catch {
     return DEFAULT_STATE;
@@ -136,6 +141,8 @@ const fmtNaira = (amount) => {
   const num = Number(amount || 0);
   return `₦${Math.round(num).toLocaleString('en-NG')}`;
 };
+
+const round1 = (val) => Math.round(val * 10) / 10;
 
 export default function RizqPlannerTab({ standalone = false }) {
   const navigate = useNavigate();
@@ -149,6 +156,9 @@ export default function RizqPlannerTab({ standalone = false }) {
   const [monthlyUtilities, setMonthlyUtilities] = useState(initial.monthlyUtilities);
   const [showRentHelper, setShowRentHelper] = useState(false);
   const [checkedCategories, setCheckedCategories] = useState(initial.checkedCategories);
+  const [lockedCategories, setLockedCategories] = useState(initial.lockedCategories);
+  const [editingPct, setEditingPct] = useState(null); // { key, value }
+  const [editingAmount, setEditingAmount] = useState(null); // { key, value }
   const [hoveredKey, setHoveredKey] = useState(null);
   const [isOnline, setIsOnline] = useState(() => (typeof navigator !== 'undefined' ? navigator.onLine : true));
   const [hydratedFromForage, setHydratedFromForage] = useState(false);
@@ -188,6 +198,9 @@ export default function RizqPlannerTab({ standalone = false }) {
           if (cached.checkedMonth === currentMonthKey() && cached.checkedCategories && typeof cached.checkedCategories === 'object') {
             setCheckedCategories(cached.checkedCategories);
           }
+          if (cached.lockedCategories && typeof cached.lockedCategories === 'object') {
+            setLockedCategories(cached.lockedCategories);
+          }
         })
         .catch(() => {})
         .finally(() => {
@@ -209,13 +222,14 @@ export default function RizqPlannerTab({ standalone = false }) {
       monthlyUtilities,
       checkedMonth: currentMonthKey(),
       checkedCategories,
+      lockedCategories,
       updatedAt: new Date().toISOString(),
     };
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     } catch { /* quota full ignore */ }
     localforage.setItem(STORAGE_KEY, payload).catch(() => {});
-  }, [income, allocations, annualRent, monthlyUtilities, checkedCategories, hydratedFromForage]);
+  }, [income, allocations, annualRent, monthlyUtilities, checkedCategories, lockedCategories, hydratedFromForage]);
 
   const handleIncomeChange = (raw) => {
     const cleaned = raw.replace(/[^0-9]/g, '');
@@ -234,19 +248,80 @@ export default function RizqPlannerTab({ standalone = false }) {
     setIncomeInput(val.toLocaleString('en-NG'));
   };
 
+  const handlePctFocus = (key, currentPct, e) => {
+    setEditingPct({ key, value: String(currentPct) });
+    const target = e.currentTarget;
+    requestAnimationFrame(() => target.select());
+  };
+
   const handlePctChange = (key, raw) => {
-    const cleaned = raw.replace(/[^0-9.]/g, '');
-    if (cleaned === '') {
+    // Allow digits and at most one decimal dot while editing
+    const digitsAndDots = raw.replace(/[^0-9.]/g, '');
+    const firstDotIdx = digitsAndDots.indexOf('.');
+    const sanitized = firstDotIdx === -1
+      ? digitsAndDots
+      : `${digitsAndDots.slice(0, firstDotIdx + 1)}${digitsAndDots.slice(firstDotIdx + 1).replace(/\./g, '')}`;
+
+    setEditingPct({ key, value: sanitized });
+
+    if (sanitized === '' || sanitized === '.') {
       setAllocations((prev) => ({ ...prev, [key]: 0 }));
       return;
     }
-    let val = parseFloat(cleaned);
+    let val = parseFloat(sanitized);
     if (Number.isNaN(val)) val = 0;
-    val = Math.max(0, Math.min(100, Math.round(val * 10) / 10));
+    val = Math.max(0, Math.min(100, round1(val)));
     setAllocations((prev) => ({ ...prev, [key]: val }));
   };
 
+  const handlePctBlur = () => {
+    setEditingPct(null);
+  };
+
+  const stepPct = (key, delta) => {
+    setEditingPct(null);
+    setAllocations((prev) => {
+      const next = Math.max(0, Math.min(100, round1(Number(prev[key] || 0) + delta)));
+      return { ...prev, [key]: next };
+    });
+  };
+
+  const startAmountEdit = (catKey, currentAmount) => {
+    if (income <= 0) {
+      toastInfo('Enter your monthly take-home income first to budget by Naira amount.');
+      return;
+    }
+    setEditingAmount({
+      key: catKey,
+      value: Math.round(currentAmount).toLocaleString('en-NG'),
+    });
+  };
+
+  const handleAmountChange = (catKey, raw) => {
+    const cleaned = raw.replace(/[^0-9]/g, '');
+    if (cleaned === '') {
+      setEditingAmount({ key: catKey, value: '' });
+      setAllocations((prev) => ({ ...prev, [catKey]: 0 }));
+      return;
+    }
+    const nairaVal = Math.min(income, Number(cleaned));
+    const formatted = nairaVal.toLocaleString('en-NG');
+    setEditingAmount({ key: catKey, value: formatted });
+    const nextPct = income > 0 ? Math.max(0, Math.min(100, round1((nairaVal / income) * 100))) : 0;
+    setAllocations((prev) => ({ ...prev, [catKey]: nextPct }));
+  };
+
+  const commitAmountEdit = () => {
+    setEditingAmount(null);
+  };
+
+  const toggleLockCategory = (key) => {
+    setLockedCategories((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
   const handleReset = () => {
+    setEditingPct(null);
+    setEditingAmount(null);
     setAllocations({ ...DEFAULT_ALLOCATIONS });
   };
 
@@ -256,47 +331,92 @@ export default function RizqPlannerTab({ standalone = false }) {
     setAllocations((prev) => ({
       ...prev,
       emergency: 0,
-      investments: Math.round((Number(prev.investments || 0) + em) * 10) / 10,
+      investments: round1(Number(prev.investments || 0) + em),
     }));
   };
 
   const handleAutoBalance = () => {
-    const currentTotal = CATEGORIES.reduce((sum, c) => sum + Number(allocations[c.key] || 0), 0);
-    const delta = Math.round((100 - currentTotal) * 10) / 10;
+    const currentTotal = round1(CATEGORIES.reduce((sum, c) => sum + Number(allocations[c.key] || 0), 0));
+    const delta = round1(100 - currentTotal);
     if (Math.abs(delta) < 0.05) return;
 
-    if (delta > 0) {
-      const nextInv = Math.round((Number(allocations.investments || 0) + delta) * 10) / 10;
-      setAllocations((prev) => ({ ...prev, investments: nextInv }));
-      toastSuccess(`Added remaining ${delta}% to Halal investments.`);
+    const unlockedCats = CATEGORIES.filter((c) => !lockedCategories[c.key]);
+    if (unlockedCats.length === 0) {
+      toastError('All categories are locked. Unlock at least one category to auto-balance.');
       return;
     }
 
+    if (delta > 0) {
+      if (!lockedCategories.investments) {
+        const nextInv = round1(Number(allocations.investments || 0) + delta);
+        setAllocations((prev) => ({ ...prev, investments: nextInv }));
+        toastSuccess(`Added remaining ${delta}% to Halal investments.`);
+        return;
+      }
+      // Distribute positive delta proportionally across unlocked categories (or evenly if all unlocked are 0)
+      const unlockedSum = unlockedCats.reduce((s, c) => s + Number(allocations[c.key] || 0), 0);
+      const nextAlloc = { ...allocations };
+      let added = 0;
+      unlockedCats.forEach((cat, idx) => {
+        if (idx === unlockedCats.length - 1) {
+          nextAlloc[cat.key] = Math.min(100, round1(Number(allocations[cat.key] || 0) + (delta - added)));
+        } else {
+          const share = unlockedSum > 0
+            ? round1((Number(allocations[cat.key] || 0) / unlockedSum) * delta)
+            : round1(delta / unlockedCats.length);
+          nextAlloc[cat.key] = Math.min(100, round1(Number(allocations[cat.key] || 0) + share));
+          added = round1(added + share);
+        }
+      });
+      setAllocations(nextAlloc);
+      toastSuccess(`Added ${delta}% across unlocked categories to reach 100%.`);
+      return;
+    }
+
+    // Over-allocated (delta < 0): trim unlocked lifestyle first if it can absorb the excess
     const curLifestyle = Number(allocations.lifestyle || 0);
-    if (curLifestyle + delta >= 0) {
+    if (!lockedCategories.lifestyle && curLifestyle + delta >= 0) {
       setAllocations((prev) => ({
         ...prev,
-        lifestyle: Math.round((curLifestyle + delta) * 10) / 10,
+        lifestyle: round1(curLifestyle + delta),
       }));
       toastSuccess(`Adjusted Personal & lifestyle by ${delta}% to balance at 100%.`);
       return;
     }
 
-    if (currentTotal > 0) {
-      const normalized = {};
-      let sum = 0;
-      CATEGORIES.forEach((cat, idx) => {
-        if (idx === CATEGORIES.length - 1) {
-          normalized[cat.key] = Math.max(0, Math.round((100 - sum) * 10) / 10);
-        } else {
-          const val = Math.round(((Number(allocations[cat.key] || 0) / currentTotal) * 100) * 10) / 10;
-          normalized[cat.key] = val;
-          sum += val;
-        }
-      });
-      setAllocations(normalized);
-      toastSuccess('Normalized all shares proportionally to 100%.');
+    // Otherwise scale only unlocked categories to fill remaining room (100 - lockedSum)
+    const lockedSum = round1(
+      CATEGORIES.reduce((s, c) => s + (lockedCategories[c.key] ? Number(allocations[c.key] || 0) : 0), 0)
+    );
+    const targetUnlockedSum = round1(100 - lockedSum);
+    if (targetUnlockedSum < 0) {
+      toastError(`Locked categories already total ${lockedSum}%. Unlock one to balance to 100%.`);
+      return;
     }
+
+    const unlockedCurrentSum = unlockedCats.reduce((s, c) => s + Number(allocations[c.key] || 0), 0);
+    if (unlockedCurrentSum <= 0) {
+      toastError('Unlock a category with an allocation > 0% to trim excess.');
+      return;
+    }
+
+    const nextAlloc = { ...allocations };
+    let running = 0;
+    unlockedCats.forEach((cat, idx) => {
+      if (idx === unlockedCats.length - 1) {
+        nextAlloc[cat.key] = Math.max(0, round1(targetUnlockedSum - running));
+      } else {
+        const val = round1((Number(allocations[cat.key] || 0) / unlockedCurrentSum) * targetUnlockedSum);
+        nextAlloc[cat.key] = val;
+        running = round1(running + val);
+      }
+    });
+    setAllocations(nextAlloc);
+    toastSuccess(
+      lockedSum > 0
+        ? 'Balanced unlocked shares to 100% (kept locked categories fixed).'
+        : 'Normalized all shares proportionally to 100%.'
+    );
   };
 
   const togglePaydayEnvelope = (key) => {
@@ -512,13 +632,20 @@ export default function RizqPlannerTab({ standalone = false }) {
         }}
       >
         <style>{`
-          .rizq-pct-input::-webkit-outer-spin-button,
-          .rizq-pct-input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
+          .rizq-pct-input,
+          .rizq-income-input,
+          .rizq-amount-input {
+            padding: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
           }
-          .rizq-pct-input {
-            -moz-appearance: textfield;
+          .rizq-pct-input:focus,
+          .rizq-income-input:focus,
+          .rizq-amount-input:focus {
+            box-shadow: none !important;
+            border: none !important;
+            outline: none !important;
           }
           .rizq-input-wrap:focus-within {
             border-color: var(--primary) !important;
@@ -530,21 +657,88 @@ export default function RizqPlannerTab({ standalone = false }) {
           .rizq-btn-lift:hover {
             transform: translateY(-1px);
           }
-          .rizq-row {
-            display: grid;
-            grid-template-columns: auto 1fr auto auto;
+          .rizq-stepper-btn {
+            width: 24px;
+            height: 26px;
+            display: inline-flex;
             align-items: center;
-            gap: 12px;
-            padding: 10px 8px;
+            justify-content: center;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0;
+            border-radius: 7px;
+            transition: background 0.12s ease, color 0.12s ease;
           }
-          @media (max-width: 600px) {
+          .rizq-stepper-btn:hover:not(:disabled) {
+            background: var(--bg);
+            color: var(--primary);
+          }
+          .rizq-stepper-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+          }
+          .rizq-lock-btn {
+            width: 26px;
+            height: 26px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 0;
+            transition: all 0.15s ease;
+          }
+          .rizq-amount-btn {
+            min-width: 102px;
+            text-align: right;
+            border: 1px dashed transparent;
+            background: transparent;
+            padding: 4px 6px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            font-variant-numeric: tabular-nums;
+            cursor: pointer;
+            transition: background 0.15s ease, border-color 0.15s ease;
+          }
+          .rizq-amount-btn:hover {
+            background: var(--bg-section);
+            border-color: var(--border-strong);
+          }
+          .rizq-row {
+            position: relative;
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr) auto auto;
+            grid-template-areas: "check label lock controls";
+            align-items: center;
+            gap: 10px;
+            padding: 10px 8px 12px;
+          }
+          .rizq-row-controls {
+            grid-area: controls;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+          }
+          @media (max-width: 640px) {
             .rizq-planner-card {
               padding: 18px 16px !important;
               border-radius: 20px !important;
             }
             .rizq-row {
-              gap: 8px !important;
-              padding: 10px 4px !important;
+              grid-template-columns: auto minmax(0, 1fr) auto;
+              grid-template-areas:
+                "check label lock"
+                ". controls controls";
+              gap: 8px 10px !important;
+              padding: 12px 4px 13px !important;
+            }
+            .rizq-row-controls {
+              justify-content: space-between;
             }
           }
         `}</style>
@@ -585,6 +779,7 @@ export default function RizqPlannerTab({ standalone = false }) {
               <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-muted)' }}>₦</span>
               <input
                 id="rizq-income-input"
+                className="rizq-income-input"
                 type="text"
                 inputMode="numeric"
                 value={incomeInput}
@@ -595,9 +790,6 @@ export default function RizqPlannerTab({ standalone = false }) {
                   }
                 }}
                 style={{
-                  border: 'none',
-                  outline: 'none',
-                  background: 'transparent',
                   color: 'var(--text-dark)',
                   fontSize: '1.25rem',
                   fontWeight: 800,
@@ -924,6 +1116,9 @@ export default function RizqPlannerTab({ standalone = false }) {
                 const amount = (income * pct) / 100;
                 const isActive = hoveredKey === cat.key;
                 const isMoved = Boolean(checkedCategories[cat.key]);
+                const isLocked = Boolean(lockedCategories[cat.key]);
+                const pctInputValue = editingPct?.key === cat.key ? editingPct.value : String(pct);
+                const isEditingAmt = editingAmount?.key === cat.key;
                 return (
                   <div
                     key={cat.key}
@@ -943,6 +1138,7 @@ export default function RizqPlannerTab({ standalone = false }) {
                       aria-label={`Mark ${cat.label} moved for payday`}
                       title={isMoved ? 'Marked moved this month' : 'Check off once moved on payday'}
                       style={{
+                        gridArea: 'check',
                         width: '20px',
                         height: '20px',
                         borderRadius: '6px',
@@ -960,7 +1156,7 @@ export default function RizqPlannerTab({ standalone = false }) {
                       {isMoved && <Check size={12} strokeWidth={3} />}
                     </button>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+                    <div style={{ gridArea: 'label', display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
                       <span
                         style={{
                           width: '12px',
@@ -980,70 +1176,175 @@ export default function RizqPlannerTab({ standalone = false }) {
                       </div>
                     </div>
 
-                    {/* Editable Percentage Box */}
-                    <div
-                      className="rizq-input-wrap"
+                    {/* Lock Toggle for Auto-Balance */}
+                    <button
+                      type="button"
+                      className="rizq-lock-btn no-print"
+                      onClick={() => toggleLockCategory(cat.key)}
+                      aria-label={isLocked ? `Unlock ${cat.label}` : `Lock ${cat.label} during auto-balance`}
+                      title={isLocked ? 'Locked during auto-balance (click to unlock)' : 'Pin this bucket so auto-balance keeps it fixed'}
                       style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        padding: '6px 10px',
-                        borderRadius: '10px',
-                        background: 'var(--bg-section)',
-                        border: '1px solid var(--border)',
-                        transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
+                        gridArea: 'lock',
+                        border: `1px solid ${isLocked ? 'var(--gold-border)' : 'transparent'}`,
+                        background: isLocked ? 'var(--gold-50)' : 'transparent',
+                        color: isLocked ? '#92400e' : 'var(--text-light)',
                       }}
                     >
-                      <input
-                        className="rizq-pct-input"
-                        type="number"
-                        min="0"
-                        max="100"
-                        step="1"
-                        aria-label={`${cat.label} percentage`}
-                        value={pct}
-                        onChange={(e) => handlePctChange(cat.key, e.target.value)}
+                      {isLocked ? <Lock size={13} /> : <Unlock size={13} />}
+                    </button>
+
+                    {/* Percentage Stepper + Click-to-Edit Naira Amount */}
+                    <div className="rizq-row-controls">
+                      <div
+                        className="rizq-input-wrap"
                         style={{
-                          width: '38px',
-                          textAlign: 'right',
-                          border: 'none',
-                          outline: 'none',
-                          background: 'transparent',
-                          color: 'var(--text-dark)',
-                          fontSize: '0.88rem',
-                          fontWeight: 800,
-                          fontVariantNumeric: 'tabular-nums',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '2px',
+                          padding: '4px 6px',
+                          borderRadius: '10px',
+                          background: 'var(--bg-section)',
+                          border: '1px solid var(--border)',
+                          transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
                         }}
-                      />
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 700 }}>%</span>
+                      >
+                        <button
+                          type="button"
+                          className="rizq-stepper-btn no-print"
+                          onClick={(e) => stepPct(cat.key, e.shiftKey ? -5 : -1)}
+                          disabled={pct <= 0}
+                          aria-label={`Decrease ${cat.label} percentage`}
+                          title="Decrease by 1% (Shift+click for 5%)"
+                        >
+                          <Minus size={12} />
+                        </button>
+                        <input
+                          className="rizq-pct-input"
+                          type="text"
+                          inputMode="decimal"
+                          aria-label={`${cat.label} percentage`}
+                          value={pctInputValue}
+                          onFocus={(e) => handlePctFocus(cat.key, pct, e)}
+                          onChange={(e) => handlePctChange(cat.key, e.target.value)}
+                          onBlur={handlePctBlur}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === 'Escape') {
+                              e.currentTarget.blur();
+                            } else if (e.key === 'ArrowUp') {
+                              e.preventDefault();
+                              stepPct(cat.key, e.shiftKey ? 5 : 1);
+                            } else if (e.key === 'ArrowDown') {
+                              e.preventDefault();
+                              stepPct(cat.key, e.shiftKey ? -5 : -1);
+                            }
+                          }}
+                          style={{
+                            width: '44px',
+                            minWidth: '44px',
+                            textAlign: 'right',
+                            color: 'var(--text-dark)',
+                            fontSize: '0.88rem',
+                            fontWeight: 800,
+                            fontVariantNumeric: 'tabular-nums',
+                          }}
+                        />
+                        <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 700, paddingRight: '2px' }}>%</span>
+                        <button
+                          type="button"
+                          className="rizq-stepper-btn no-print"
+                          onClick={(e) => stepPct(cat.key, e.shiftKey ? 5 : 1)}
+                          disabled={pct >= 100}
+                          aria-label={`Increase ${cat.label} percentage`}
+                          title="Increase by 1% (Shift+click for 5%)"
+                        >
+                          <Plus size={12} />
+                        </button>
+                      </div>
+
+                      {/* Computed or Direct-Editable Naira Value */}
+                      {isEditingAmt ? (
+                        <div
+                          className="rizq-input-wrap"
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '3px',
+                            minWidth: '102px',
+                            padding: '4px 8px',
+                            borderRadius: '8px',
+                            background: 'var(--bg-section)',
+                            border: '1px solid var(--primary)',
+                          }}
+                        >
+                          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)' }}>₦</span>
+                          <input
+                            autoFocus
+                            className="rizq-amount-input"
+                            type="text"
+                            inputMode="numeric"
+                            aria-label={`${cat.label} monthly Naira amount`}
+                            value={editingAmount.value}
+                            onFocus={(e) => e.currentTarget.select()}
+                            onChange={(e) => handleAmountChange(cat.key, e.target.value)}
+                            onBlur={commitAmountEdit}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === 'Escape') {
+                                commitAmountEdit();
+                              }
+                            }}
+                            style={{
+                              width: '78px',
+                              textAlign: 'right',
+                              color: 'var(--text-dark)',
+                              fontSize: '0.84rem',
+                              fontWeight: 800,
+                              fontVariantNumeric: 'tabular-nums',
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          className="rizq-amount-btn"
+                          onClick={() => startAmountEdit(cat.key, amount)}
+                          title="Click to enter exact Naira amount"
+                          aria-label={`${cat.label} amount ${fmtNaira(amount)}, click to edit`}
+                        >
+                          {fmtNaira(amount)}
+                        </button>
+                      )}
                     </div>
 
-                    {/* Computed Naira Value */}
+                    {/* Subtle Proportional Color Bar */}
                     <div
+                      aria-hidden="true"
                       style={{
-                        minWidth: '88px',
-                        textAlign: 'right',
-                        fontSize: '0.85rem',
-                        fontWeight: 700,
-                        color: 'var(--text-dark)',
-                        fontVariantNumeric: 'tabular-nums',
+                        position: 'absolute',
+                        left: '8px',
+                        bottom: 0,
+                        height: '2.5px',
+                        width: `calc(${Math.min(100, pct)}% - 16px)`,
+                        minWidth: pct > 0 ? '4px' : 0,
+                        background: cat.color,
+                        opacity: isMoved ? 0.35 : 0.72,
+                        borderRadius: '999px',
+                        transition: 'width 0.2s ease, opacity 0.2s ease',
+                        pointerEvents: 'none',
                       }}
-                    >
-                      {fmtNaira(amount)}
-                    </div>
+                    />
                   </div>
                 );
               })}
             </div>
 
-            {/* Footer Totals */}
+            {/* Footer Totals + Always-Visible Balance Status */}
             <div
               style={{
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 flexWrap: 'wrap',
-                gap: '12px',
+                gap: '10px',
                 paddingTop: '14px',
                 fontSize: '0.82rem',
               }}
@@ -1054,11 +1355,55 @@ export default function RizqPlannerTab({ standalone = false }) {
                   {wealthPct}% · {fmtNaira(wealthAmount)}
                 </strong>
               </div>
-              <div style={{ color: 'var(--text-muted)', fontWeight: 600 }}>
-                Planned total:{' '}
-                <strong style={{ color: isExact100 ? 'var(--primary)' : 'var(--text-dark)' }}>
-                  {fmtNaira(plannedTotal)}
-                </strong>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                {!isExact100 ? (
+                  <button
+                    type="button"
+                    onClick={handleAutoBalance}
+                    className="no-print"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      padding: '4px 10px',
+                      borderRadius: '999px',
+                      fontSize: '0.72rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      border: `1px solid ${totalPct > 100 ? 'var(--non-compliant-border)' : 'var(--doubtful-border)'}`,
+                      background: totalPct > 100 ? 'var(--non-compliant-bg)' : 'var(--doubtful-bg)',
+                      color: totalPct > 100 ? 'var(--non-compliant)' : 'var(--doubtful)',
+                    }}
+                    title="Click to auto-balance unlocked categories to 100%"
+                  >
+                    {totalPct > 100
+                      ? `${totalPct}% (${pctDiff}% over) · Balance`
+                      : `${totalPct}% (${pctDiff}% left) · Balance`}
+                  </button>
+                ) : (
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      padding: '3px 9px',
+                      borderRadius: '999px',
+                      fontSize: '0.71rem',
+                      fontWeight: 800,
+                      background: 'var(--halal-bg)',
+                      color: 'var(--halal)',
+                      border: '1px solid var(--halal-border)',
+                    }}
+                  >
+                    <CheckCircle2 size={12} /> 100%
+                  </span>
+                )}
+                <div style={{ color: 'var(--text-muted)', fontWeight: 600 }}>
+                  Planned total:{' '}
+                  <strong style={{ color: isExact100 ? 'var(--primary)' : totalPct > 100 ? 'var(--non-compliant)' : 'var(--text-dark)' }}>
+                    {fmtNaira(plannedTotal)}
+                  </strong>
+                </div>
               </div>
             </div>
 
