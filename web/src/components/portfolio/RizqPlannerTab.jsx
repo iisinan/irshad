@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   RotateCcw, ArrowRight, Wifi, WifiOff, CheckCircle2,
   AlertTriangle, Sparkles, TrendingUp, ShieldCheck, Info,
   Download, Copy, Printer, Check, Home, Calculator,
-  Lock, Unlock, Minus, Plus
+  Lock, Unlock, Minus, Plus, X
 } from 'lucide-react';
 import localforage from 'localforage';
 import { toastSuccess, toastError, toastInfo } from '../../utils/toast';
@@ -102,6 +102,121 @@ const DEFAULT_STATE = {
   lockedCategories: {},
 };
 
+const round1 = (val) => Math.round(val * 10) / 10;
+
+const TRIM_PRIORITY = ['lifestyle', 'transport', 'investments', 'emergency', 'food', 'housing', 'health', 'sadaqa'];
+
+function sumAllocations(alloc) {
+  return round1(CATEGORIES.reduce((s, c) => s + Number(alloc?.[c.key] || 0), 0));
+}
+
+function capAllocationsTo100(alloc) {
+  const next = { ...alloc };
+  const total = sumAllocations(next);
+  if (total <= 100 || total <= 0) return next;
+  let running = 0;
+  CATEGORIES.forEach((cat, idx) => {
+    if (idx === CATEGORIES.length - 1) {
+      next[cat.key] = Math.max(0, round1(100 - running));
+    } else {
+      const scaled = round1((Number(next[cat.key] || 0) / total) * 100);
+      next[cat.key] = scaled;
+      running = round1(running + scaled);
+    }
+  });
+  return next;
+}
+
+/**
+ * Updates targetKey to desiredPct while guaranteeing total <= 100% and respecting locked categories.
+ */
+function rebalanceWithCap(baseAlloc, targetKey, desiredPct, lockedMap = {}, options = {}) {
+  const { mode = 'priority', sourceKey = null } = options;
+  const lockedOtherSum = round1(
+    CATEGORIES.reduce((s, c) => s + (c.key !== targetKey && lockedMap[c.key] ? Number(baseAlloc[c.key] || 0) : 0), 0)
+  );
+  const maxAllowed = Math.max(0, round1(100 - lockedOtherSum));
+  const clampedDesired = Math.max(0, round1(desiredPct));
+  const finalTargetPct = Math.min(maxAllowed, clampedDesired);
+  const cappedByLocks = clampedDesired > maxAllowed;
+
+  const next = { ...baseAlloc, [targetKey]: finalTargetPct };
+  const rawTotal = sumAllocations(next);
+
+  if (rawTotal > 100) {
+    let excess = round1(rawTotal - 100);
+    const unlockedOthers = CATEGORIES.filter(
+      (c) => c.key !== targetKey && !lockedMap[c.key] && Number(next[c.key] || 0) > 0
+    );
+
+    if (mode === 'proportional') {
+      const unlockedSum = round1(unlockedOthers.reduce((s, c) => s + Number(next[c.key] || 0), 0));
+      if (unlockedSum > 0) {
+        unlockedOthers.forEach((c) => {
+          if (excess <= 0) return;
+          const avail = Number(next[c.key] || 0);
+          const cut = Math.min(avail, excess, round1((avail / unlockedSum) * excess));
+          next[c.key] = round1(avail - cut);
+          excess = round1(excess - cut);
+        });
+      }
+    }
+
+    // Priority cascade (or mop up any rounding remainder from proportional split)
+    const order = sourceKey
+      ? [sourceKey, ...TRIM_PRIORITY.filter((k) => k !== sourceKey)]
+      : TRIM_PRIORITY;
+
+    for (const k of order) {
+      if (excess <= 0) break;
+      if (k === targetKey || lockedMap[k]) continue;
+      const avail = Number(next[k] || 0);
+      if (avail <= 0) continue;
+      const cut = Math.min(avail, excess);
+      next[k] = round1(avail - cut);
+      excess = round1(excess - cut);
+    }
+
+    // Ironclad guard against 0.1 floating rounding pushing sum over 100
+    let guardSum = sumAllocations(next);
+    if (guardSum > 100) {
+      let over = round1(guardSum - 100);
+      const fallbackOrder = [...CATEGORIES]
+        .filter((c) => c.key !== targetKey && !lockedMap[c.key])
+        .sort((a, b) => Number(next[b.key] || 0) - Number(next[a.key] || 0));
+      for (const c of fallbackOrder) {
+        if (over <= 0) break;
+        const avail = Number(next[c.key] || 0);
+        const cut = Math.min(avail, over);
+        next[c.key] = round1(avail - cut);
+        over = round1(over - cut);
+      }
+      guardSum = sumAllocations(next);
+      if (guardSum > 100) {
+        next[targetKey] = Math.max(0, round1(next[targetKey] - (guardSum - 100)));
+      }
+    }
+  }
+
+  const trimmed = CATEGORIES
+    .filter((c) => c.key !== targetKey)
+    .map((c) => {
+      const from = Number(baseAlloc[c.key] || 0);
+      const to = Number(next[c.key] || 0);
+      return { key: c.key, label: c.label, from, to, delta: round1(to - from) };
+    })
+    .filter((item) => Math.abs(item.delta) >= 0.05);
+
+  return {
+    allocations: next,
+    maxAllowed,
+    cappedByLocks,
+    finalTargetPct: Number(next[targetKey] || 0),
+    trimmed,
+    remaining: Math.max(0, round1(100 - sumAllocations(next))),
+  };
+}
+
 function loadInitialStateSync() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -121,7 +236,7 @@ function loadInitialStateSync() {
     const sameMonth = parsed?.checkedMonth === thisMonth;
     return {
       income: !Number.isNaN(income) && income >= 0 ? income : DEFAULT_STATE.income,
-      allocations: mergedAlloc,
+      allocations: capAllocationsTo100(mergedAlloc),
       annualRent: !Number.isNaN(annualRent) && annualRent >= 0 ? annualRent : DEFAULT_STATE.annualRent,
       monthlyUtilities: !Number.isNaN(monthlyUtilities) && monthlyUtilities >= 0 ? monthlyUtilities : DEFAULT_STATE.monthlyUtilities,
       checkedMonth: thisMonth,
@@ -142,8 +257,6 @@ const fmtNaira = (amount) => {
   return `₦${Math.round(num).toLocaleString('en-NG')}`;
 };
 
-const round1 = (val) => Math.round(val * 10) / 10;
-
 export default function RizqPlannerTab({ standalone = false }) {
   const navigate = useNavigate();
   const auth = useAuth();
@@ -159,6 +272,9 @@ export default function RizqPlannerTab({ standalone = false }) {
   const [lockedCategories, setLockedCategories] = useState(initial.lockedCategories);
   const [editingPct, setEditingPct] = useState(null); // { key, value }
   const [editingAmount, setEditingAmount] = useState(null); // { key, value }
+  const [suggestion, setSuggestion] = useState(null); // { targetKey, fromPct, toPct, baseAlloc, currentAlloc, trimmed, remaining }
+  const editSessionRef = useRef(null); // { key, baseAlloc }
+  const lockNoticeRef = useRef(0);
   const [hoveredKey, setHoveredKey] = useState(null);
   const [isOnline, setIsOnline] = useState(() => (typeof navigator !== 'undefined' ? navigator.onLine : true));
   const [hydratedFromForage, setHydratedFromForage] = useState(false);
@@ -187,7 +303,7 @@ export default function RizqPlannerTab({ standalone = false }) {
             setIncomeInput(cached.income.toLocaleString('en-NG'));
           }
           if (cached.allocations && typeof cached.allocations === 'object') {
-            setAllocations((prev) => ({ ...prev, ...cached.allocations }));
+            setAllocations((prev) => capAllocationsTo100({ ...prev, ...cached.allocations }));
           }
           if (typeof cached.annualRent === 'number') {
             setAnnualRent(cached.annualRent);
@@ -248,7 +364,32 @@ export default function RizqPlannerTab({ standalone = false }) {
     setIncomeInput(val.toLocaleString('en-NG'));
   };
 
+  const buildSuggestionForChange = (baseAlloc, targetKey, res) => {
+    const fromPct = Number(baseAlloc[targetKey] || 0);
+    const toPct = Number(res.allocations[targetKey] || 0);
+    if (Math.abs(toPct - fromPct) < 0.05 && res.trimmed.length === 0) return null;
+    if (res.trimmed.length === 0 && res.remaining < 0.05) return null;
+    return {
+      targetKey,
+      fromPct,
+      toPct,
+      baseAlloc,
+      currentAlloc: res.allocations,
+      trimmed: res.trimmed,
+      remaining: res.remaining,
+    };
+  };
+
+  const notifyLockCap = (label, maxAllowed) => {
+    const now = Date.now();
+    if (now - lockNoticeRef.current > 2000) {
+      lockNoticeRef.current = now;
+      toastInfo(`Capped ${label} at ${maxAllowed}% because other categories are locked.`);
+    }
+  };
+
   const handlePctFocus = (key, currentPct, e) => {
+    editSessionRef.current = { key, baseAlloc: { ...allocations } };
     setEditingPct({ key, value: String(currentPct) });
     const target = e.currentTarget;
     requestAnimationFrame(() => target.select());
@@ -262,28 +403,78 @@ export default function RizqPlannerTab({ standalone = false }) {
       ? digitsAndDots
       : `${digitsAndDots.slice(0, firstDotIdx + 1)}${digitsAndDots.slice(firstDotIdx + 1).replace(/\./g, '')}`;
 
-    setEditingPct({ key, value: sanitized });
+    const sessionBase = editSessionRef.current?.key === key
+      ? editSessionRef.current.baseAlloc
+      : allocations;
 
     if (sanitized === '' || sanitized === '.') {
-      setAllocations((prev) => ({ ...prev, [key]: 0 }));
+      setEditingPct({ key, value: sanitized });
+      const res = rebalanceWithCap(sessionBase, key, 0, lockedCategories);
+      setAllocations(res.allocations);
       return;
     }
+
     let val = parseFloat(sanitized);
     if (Number.isNaN(val)) val = 0;
-    val = Math.max(0, Math.min(100, round1(val)));
-    setAllocations((prev) => ({ ...prev, [key]: val }));
+    const res = rebalanceWithCap(sessionBase, key, val, lockedCategories);
+
+    if (res.cappedByLocks) {
+      const catLabel = CATEGORIES.find((c) => c.key === key)?.label || 'category';
+      notifyLockCap(catLabel, res.maxAllowed);
+      setEditingPct({ key, value: String(res.finalTargetPct) });
+    } else if (round1(val) > 100) {
+      setEditingPct({ key, value: String(res.finalTargetPct) });
+    } else {
+      setEditingPct({ key, value: sanitized });
+    }
+
+    setAllocations(res.allocations);
   };
 
-  const handlePctBlur = () => {
+  const handlePctBlur = (key) => {
+    const session = editSessionRef.current;
+    editSessionRef.current = null;
     setEditingPct(null);
+    if (session && session.key === key) {
+      const next = buildSuggestionForChange(session.baseAlloc, key, {
+        allocations,
+        trimmed: CATEGORIES
+          .filter((c) => c.key !== key)
+          .map((c) => {
+            const from = Number(session.baseAlloc[c.key] || 0);
+            const to = Number(allocations[c.key] || 0);
+            return { key: c.key, label: c.label, from, to, delta: round1(to - from) };
+          })
+          .filter((item) => Math.abs(item.delta) >= 0.05),
+        remaining: Math.max(0, round1(100 - sumAllocations(allocations))),
+      });
+      if (next) setSuggestion(next);
+    }
+  };
+
+  const handlePctCancel = (key, e) => {
+    const session = editSessionRef.current;
+    editSessionRef.current = null;
+    setEditingPct(null);
+    if (session && session.key === key) {
+      setAllocations(session.baseAlloc);
+    }
+    e.currentTarget.blur();
   };
 
   const stepPct = (key, delta) => {
     setEditingPct(null);
-    setAllocations((prev) => {
-      const next = Math.max(0, Math.min(100, round1(Number(prev[key] || 0) + delta)));
-      return { ...prev, [key]: next };
-    });
+    editSessionRef.current = null;
+    const anchorBase = suggestion?.targetKey === key ? suggestion.baseAlloc : allocations;
+    const desired = round1(Number(allocations[key] || 0) + delta);
+    const res = rebalanceWithCap(anchorBase, key, desired, lockedCategories);
+    if (res.cappedByLocks) {
+      const catLabel = CATEGORIES.find((c) => c.key === key)?.label || 'category';
+      notifyLockCap(catLabel, res.maxAllowed);
+    }
+    setAllocations(res.allocations);
+    const nextSuggestion = buildSuggestionForChange(anchorBase, key, res);
+    setSuggestion(nextSuggestion);
   };
 
   const startAmountEdit = (catKey, currentAmount) => {
@@ -291,6 +482,7 @@ export default function RizqPlannerTab({ standalone = false }) {
       toastInfo('Enter your monthly take-home income first to budget by Naira amount.');
       return;
     }
+    editSessionRef.current = { key: catKey, baseAlloc: { ...allocations } };
     setEditingAmount({
       key: catKey,
       value: Math.round(currentAmount).toLocaleString('en-NG'),
@@ -299,29 +491,77 @@ export default function RizqPlannerTab({ standalone = false }) {
 
   const handleAmountChange = (catKey, raw) => {
     const cleaned = raw.replace(/[^0-9]/g, '');
+    const sessionBase = editSessionRef.current?.key === catKey
+      ? editSessionRef.current.baseAlloc
+      : allocations;
+
     if (cleaned === '') {
       setEditingAmount({ key: catKey, value: '' });
-      setAllocations((prev) => ({ ...prev, [catKey]: 0 }));
+      const res = rebalanceWithCap(sessionBase, catKey, 0, lockedCategories);
+      setAllocations(res.allocations);
       return;
     }
+
     const nairaVal = Math.min(income, Number(cleaned));
-    const formatted = nairaVal.toLocaleString('en-NG');
-    setEditingAmount({ key: catKey, value: formatted });
-    const nextPct = income > 0 ? Math.max(0, Math.min(100, round1((nairaVal / income) * 100))) : 0;
-    setAllocations((prev) => ({ ...prev, [catKey]: nextPct }));
+    const desiredPct = income > 0 ? round1((nairaVal / income) * 100) : 0;
+    const res = rebalanceWithCap(sessionBase, catKey, desiredPct, lockedCategories);
+
+    if (res.cappedByLocks) {
+      const catLabel = CATEGORIES.find((c) => c.key === catKey)?.label || 'category';
+      notifyLockCap(catLabel, res.maxAllowed);
+      const cappedNaira = Math.round((income * res.finalTargetPct) / 100);
+      setEditingAmount({ key: catKey, value: cappedNaira.toLocaleString('en-NG') });
+    } else {
+      setEditingAmount({ key: catKey, value: nairaVal.toLocaleString('en-NG') });
+    }
+    setAllocations(res.allocations);
   };
 
-  const commitAmountEdit = () => {
+  const commitAmountEdit = (catKey) => {
+    const session = editSessionRef.current;
+    editSessionRef.current = null;
     setEditingAmount(null);
+    if (session && session.key === catKey) {
+      const next = buildSuggestionForChange(session.baseAlloc, catKey, {
+        allocations,
+        trimmed: CATEGORIES
+          .filter((c) => c.key !== catKey)
+          .map((c) => {
+            const from = Number(session.baseAlloc[c.key] || 0);
+            const to = Number(allocations[c.key] || 0);
+            return { key: c.key, label: c.label, from, to, delta: round1(to - from) };
+          })
+          .filter((item) => Math.abs(item.delta) >= 0.05),
+        remaining: Math.max(0, round1(100 - sumAllocations(allocations))),
+      });
+      if (next) setSuggestion(next);
+    }
+  };
+
+  const cancelAmountEdit = (catKey) => {
+    const session = editSessionRef.current;
+    editSessionRef.current = null;
+    setEditingAmount(null);
+    if (session && session.key === catKey) {
+      setAllocations(session.baseAlloc);
+    }
   };
 
   const toggleLockCategory = (key) => {
     setLockedCategories((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
+  const applySuggestionVariant = (nextAlloc, feedback) => {
+    setAllocations(capAllocationsTo100(nextAlloc));
+    setSuggestion(null);
+    if (feedback) toastSuccess(feedback);
+  };
+
   const handleReset = () => {
     setEditingPct(null);
     setEditingAmount(null);
+    setSuggestion(null);
+    editSessionRef.current = null;
     setAllocations({ ...DEFAULT_ALLOCATIONS });
   };
 
@@ -345,6 +585,7 @@ export default function RizqPlannerTab({ standalone = false }) {
       toastError('All categories are locked. Unlock at least one category to auto-balance.');
       return;
     }
+    setSuggestion(null);
 
     if (delta > 0) {
       if (!lockedCategories.investments) {
@@ -435,8 +676,12 @@ export default function RizqPlannerTab({ standalone = false }) {
 
   const applyHousingFromRent = () => {
     if (income <= 0) return;
-    setAllocations((prev) => ({ ...prev, housing: recommendedHousingPct }));
-    toastSuccess(`Housing share updated to ${recommendedHousingPct}% (${fmtNaira(monthlyHousingNeed)}/mo).`);
+    const baseAlloc = { ...allocations };
+    const res = rebalanceWithCap(baseAlloc, 'housing', recommendedHousingPct, lockedCategories);
+    setAllocations(res.allocations);
+    const nextSuggestion = buildSuggestionForChange(baseAlloc, 'housing', res);
+    setSuggestion(nextSuggestion);
+    toastSuccess(`Housing share updated to ${res.finalTargetPct}% (${fmtNaira((income * res.finalTargetPct) / 100)}/mo).`);
   };
 
   const movedPaydayStats = useMemo(() => {
@@ -503,6 +748,135 @@ export default function RizqPlannerTab({ standalone = false }) {
     () => Math.round(CATEGORIES.reduce((sum, c) => sum + Number(allocations[c.key] || 0), 0) * 10) / 10,
     [allocations]
   );
+
+  const suggestionPanel = useMemo(() => {
+    if (!suggestion) return null;
+    const targetCat = CATEGORIES.find((c) => c.key === suggestion.targetKey);
+    if (!targetCat) return null;
+
+    const actions = [];
+    if (suggestion.trimmed.length > 0) {
+      // User raised targetKey and total was capped at 100% by trimming other buckets.
+      // Offer alternative ways to source that adjustment cleanly from baseAlloc.
+      const propRes = rebalanceWithCap(
+        suggestion.baseAlloc,
+        suggestion.targetKey,
+        suggestion.toPct,
+        lockedCategories,
+        { mode: 'proportional' }
+      );
+      const propDiffers = CATEGORIES.some(
+        (c) => Math.abs(Number(propRes.allocations[c.key] || 0) - Number(allocations[c.key] || 0)) >= 0.1
+      );
+      if (propDiffers) {
+        actions.push({
+          id: 'proportional-trim',
+          label: 'Split cut evenly across unlocked',
+          nextAlloc: propRes.allocations,
+          toast: 'Spread adjustment evenly across unlocked categories.',
+        });
+      }
+
+      const currentSoleSource = suggestion.trimmed.length === 1 ? suggestion.trimmed[0].key : null;
+      const singleCandidates = CATEGORIES.filter(
+        (c) =>
+          c.key !== suggestion.targetKey &&
+          c.key !== currentSoleSource &&
+          !lockedCategories[c.key] &&
+          Number(suggestion.baseAlloc[c.key] || 0) > 0
+      )
+        .sort((a, b) => Number(suggestion.baseAlloc[b.key] || 0) - Number(suggestion.baseAlloc[a.key] || 0))
+        .slice(0, 2);
+
+      singleCandidates.forEach((cand) => {
+        const res = rebalanceWithCap(
+          suggestion.baseAlloc,
+          suggestion.targetKey,
+          suggestion.toPct,
+          lockedCategories,
+          { sourceKey: cand.key }
+        );
+        const fromVal = Number(suggestion.baseAlloc[cand.key] || 0);
+        const toVal = Number(res.allocations[cand.key] || 0);
+        if (toVal < fromVal) {
+          actions.push({
+            id: `source-${cand.key}`,
+            label: `Take from ${cand.label.split(' ')[0]} (${fromVal}% → ${toVal}%)`,
+            nextAlloc: res.allocations,
+            toast: `Adjusted ${cand.label} (${fromVal}% → ${toVal}%) instead.`,
+          });
+        }
+      });
+    } else if (suggestion.remaining >= 0.05) {
+      const rem = suggestion.remaining;
+      const addTargets = [];
+      if (suggestion.targetKey !== 'investments' && !lockedCategories.investments) {
+        addTargets.push(CATEGORIES.find((c) => c.key === 'investments'));
+      }
+      if (suggestion.targetKey !== 'emergency' && !lockedCategories.emergency) {
+        addTargets.push(CATEGORIES.find((c) => c.key === 'emergency'));
+      }
+      if (addTargets.length < 2) {
+        CATEGORIES.filter(
+          (c) =>
+            c.key !== suggestion.targetKey &&
+            !lockedCategories[c.key] &&
+            !addTargets.some((t) => t?.key === c.key)
+        )
+          .slice(0, 2 - addTargets.length)
+          .forEach((c) => addTargets.push(c));
+      }
+
+      addTargets.filter(Boolean).forEach((dest) => {
+        const cur = Number(allocations[dest.key] || 0);
+        const nextVal = Math.min(100, round1(cur + rem));
+        const actualAdd = round1(nextVal - cur);
+        if (actualAdd >= 0.05) {
+          actions.push({
+            id: `boost-${dest.key}`,
+            label: `+${actualAdd}% → ${dest.label} (${cur}% → ${nextVal}%)`,
+            nextAlloc: { ...allocations, [dest.key]: nextVal },
+            toast: `Added +${actualAdd}% to ${dest.label}.`,
+          });
+        }
+      });
+
+      const unlockedOthers = CATEGORIES.filter(
+        (c) => c.key !== suggestion.targetKey && !lockedCategories[c.key]
+      );
+      if (unlockedOthers.length >= 2) {
+        const unlockedSum = unlockedOthers.reduce((s, c) => s + Number(allocations[c.key] || 0), 0);
+        const spreadAlloc = { ...allocations };
+        let distributed = 0;
+        unlockedOthers.forEach((c, idx) => {
+          const cur = Number(allocations[c.key] || 0);
+          if (idx === unlockedOthers.length - 1) {
+            spreadAlloc[c.key] = Math.min(100, round1(cur + (rem - distributed)));
+          } else {
+            const share = unlockedSum > 0 ? round1((cur / unlockedSum) * rem) : round1(rem / unlockedOthers.length);
+            spreadAlloc[c.key] = Math.min(100, round1(cur + share));
+            distributed = round1(distributed + share);
+          }
+        });
+        actions.push({
+          id: 'spread-freed',
+          label: `Split +${rem}% across unlocked`,
+          nextAlloc: capAllocationsTo100(spreadAlloc),
+          toast: `Distributed +${rem}% across unlocked categories.`,
+        });
+      }
+    }
+
+    return {
+      targetCat,
+      trimmed: suggestion.trimmed,
+      remaining: suggestion.remaining,
+      fromPct: suggestion.fromPct,
+      toPct: suggestion.toPct,
+      baseAlloc: suggestion.baseAlloc,
+      actions,
+    };
+  }, [suggestion, allocations, lockedCategories]);
 
   const plannedTotal = useMemo(
     () => (income * totalPct) / 100,
@@ -1110,6 +1484,104 @@ export default function RizqPlannerTab({ standalone = false }) {
 
           {/* Right: 8 Interactive Category Rows */}
           <div>
+            {suggestionPanel && (
+              <div
+                className="animate-fade-in no-print"
+                style={{
+                  background: suggestionPanel.trimmed.length > 0 ? 'var(--primary-50)' : 'var(--bg-section)',
+                  border: `1px solid ${suggestionPanel.trimmed.length > 0 ? 'var(--primary)' : 'var(--border-strong)'}`,
+                  borderRadius: '14px',
+                  padding: '12px 14px',
+                  marginBottom: '12px',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', marginBottom: suggestionPanel.actions.length > 0 ? '9px' : 0 }}>
+                  <div style={{ fontSize: '0.77rem', lineHeight: 1.45, color: 'var(--text-dark)' }}>
+                    {suggestionPanel.trimmed.length > 0 ? (
+                      <>
+                        <strong style={{ color: 'var(--primary)' }}>Capped at 100%:</strong>{' '}
+                        Adjusted{' '}
+                        <strong>
+                          {suggestionPanel.trimmed.map((t) => `${t.label} (${t.from}% → ${t.to}%)`).join(', ')}
+                        </strong>{' '}
+                        when raising {suggestionPanel.targetCat.label} ({suggestionPanel.fromPct}% → {suggestionPanel.toPct}%).
+                      </>
+                    ) : (
+                      <>
+                        <strong style={{ color: 'var(--primary)' }}>
+                          +{suggestionPanel.remaining}% ({fmtNaira((income * suggestionPanel.remaining) / 100)}) free:
+                        </strong>{' '}
+                        Lowered {suggestionPanel.targetCat.label} ({suggestionPanel.fromPct}% → {suggestionPanel.toPct}%). Adjust another bucket:
+                      </>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                    <button
+                      type="button"
+                      onClick={() => applySuggestionVariant(suggestionPanel.baseAlloc, 'Reverted last allocation change.')}
+                      style={{
+                        padding: '3px 8px',
+                        borderRadius: '7px',
+                        border: '1px solid var(--border-strong)',
+                        background: 'var(--bg)',
+                        color: 'var(--text-dark)',
+                        fontSize: '0.7rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Undo
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSuggestion(null)}
+                      aria-label="Dismiss adjustment suggestion"
+                      style={{
+                        width: '22px',
+                        height: '22px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        background: 'transparent',
+                        color: 'var(--text-muted)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        padding: 0,
+                      }}
+                    >
+                      <X size={13} />
+                    </button>
+                  </div>
+                </div>
+
+                {suggestionPanel.actions.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                    {suggestionPanel.actions.map((act) => (
+                      <button
+                        key={act.id}
+                        type="button"
+                        onClick={() => applySuggestionVariant(act.nextAlloc, act.toast)}
+                        style={{
+                          padding: '5px 10px',
+                          borderRadius: '999px',
+                          border: '1px solid var(--border)',
+                          background: 'var(--bg)',
+                          color: 'var(--text-dark)',
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          transition: 'border-color 0.15s ease',
+                        }}
+                      >
+                        {act.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               {CATEGORIES.map((cat) => {
                 const pct = Number(allocations[cat.key] || 0);
@@ -1117,6 +1589,10 @@ export default function RizqPlannerTab({ standalone = false }) {
                 const isActive = hoveredKey === cat.key;
                 const isMoved = Boolean(checkedCategories[cat.key]);
                 const isLocked = Boolean(lockedCategories[cat.key]);
+                const lockedOtherSum = round1(
+                  CATEGORIES.reduce((s, c) => s + (c.key !== cat.key && lockedCategories[c.key] ? Number(allocations[c.key] || 0) : 0), 0)
+                );
+                const maxAllowedForRow = Math.max(0, round1(100 - lockedOtherSum));
                 const pctInputValue = editingPct?.key === cat.key ? editingPct.value : String(pct);
                 const isEditingAmt = editingAmount?.key === cat.key;
                 return (
@@ -1226,10 +1702,12 @@ export default function RizqPlannerTab({ standalone = false }) {
                           value={pctInputValue}
                           onFocus={(e) => handlePctFocus(cat.key, pct, e)}
                           onChange={(e) => handlePctChange(cat.key, e.target.value)}
-                          onBlur={handlePctBlur}
+                          onBlur={() => handlePctBlur(cat.key)}
                           onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === 'Escape') {
+                            if (e.key === 'Enter') {
                               e.currentTarget.blur();
+                            } else if (e.key === 'Escape') {
+                              handlePctCancel(cat.key, e);
                             } else if (e.key === 'ArrowUp') {
                               e.preventDefault();
                               stepPct(cat.key, e.shiftKey ? 5 : 1);
@@ -1253,9 +1731,11 @@ export default function RizqPlannerTab({ standalone = false }) {
                           type="button"
                           className="rizq-stepper-btn no-print"
                           onClick={(e) => stepPct(cat.key, e.shiftKey ? 5 : 1)}
-                          disabled={pct >= 100}
+                          disabled={pct >= maxAllowedForRow}
                           aria-label={`Increase ${cat.label} percentage`}
-                          title="Increase by 1% (Shift+click for 5%)"
+                          title={pct >= maxAllowedForRow && maxAllowedForRow < 100
+                            ? `Max ${maxAllowedForRow}% while other categories are locked`
+                            : 'Increase by 1% (Shift+click for 5%)'}
                         >
                           <Plus size={12} />
                         </button>
@@ -1286,10 +1766,12 @@ export default function RizqPlannerTab({ standalone = false }) {
                             value={editingAmount.value}
                             onFocus={(e) => e.currentTarget.select()}
                             onChange={(e) => handleAmountChange(cat.key, e.target.value)}
-                            onBlur={commitAmountEdit}
+                            onBlur={() => commitAmountEdit(cat.key)}
                             onKeyDown={(e) => {
-                              if (e.key === 'Enter' || e.key === 'Escape') {
-                                commitAmountEdit();
+                              if (e.key === 'Enter') {
+                                commitAmountEdit(cat.key);
+                              } else if (e.key === 'Escape') {
+                                cancelAmountEdit(cat.key);
                               }
                             }}
                             style={{
