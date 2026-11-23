@@ -19,6 +19,31 @@ function FormField({ label, children }) {
   );
 }
 
+function ModalWrap({ children }) {
+  return createPortal(
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000, padding: '24px' }}>
+      <div className="animate-fade-in" style={{ background: 'var(--bg)', width: '100%', maxWidth: '460px', maxHeight: '90vh', overflowY: 'auto', borderRadius: '24px', boxShadow: '0 32px 64px rgba(0,0,0,0.25)', border: '1px solid var(--border)' }}>
+        {children}
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+function ModalHeader({ title, subtitle, onClose }) {
+  return (
+    <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--border)', background: 'var(--bg-section)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div>
+        {subtitle && <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>{subtitle}</div>}
+        <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-dark)' }}>{title}</h3>
+      </div>
+      <button type="button" onClick={onClose} style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--bg)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)' }}>
+        <X size={16} />
+      </button>
+    </div>
+  );
+}
+
 const inputStyle = {
   width: '100%', padding: '12px 16px', borderRadius: '12px',
   border: '1px solid var(--border)', background: 'var(--bg-section)',
@@ -230,28 +255,6 @@ const AdminUsers = () => {
       setFormLoading(false);
     }
   };
-
-  // ── Modal backdrop/container ──────────────────────────────
-  const ModalWrap = ({ children }) => createPortal(
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000, padding: '24px' }}>
-      <div className="animate-fade-in" style={{ background: 'var(--bg)', width: '100%', maxWidth: '440px', borderRadius: '24px', boxShadow: '0 32px 64px rgba(0,0,0,0.25)', overflow: 'hidden', border: '1px solid var(--border)' }}>
-        {children}
-      </div>
-    </div>,
-    document.body
-  );
-
-  const ModalHeader = ({ title, subtitle, onClose }) => (
-    <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--border)', background: 'var(--bg-section)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <div>
-        {subtitle && <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>{subtitle}</div>}
-        <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-dark)' }}>{title}</h3>
-      </div>
-      <button onClick={onClose} style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--bg)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)' }}>
-        <X size={16} />
-      </button>
-    </div>
-  );
 
   return (
     <div style={{ padding: '32px 40px', maxWidth: '1200px', margin: '0 auto' }}>
