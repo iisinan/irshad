@@ -1,17 +1,47 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { fetchAdminUsers, createAdminUser, updateAdminUser, deleteAdminUser, overrideAdminUserPlan } from '../services/api';
-import { Users, Shield, Plus, X, Search, Edit2, Trash2, Crown, ChevronRight, Activity, CreditCard, CheckCircle2, Building2 } from 'lucide-react';
+import { Users, Shield, Plus, X, Search, Edit2, Trash2, Crown, ChevronRight, Activity, CreditCard, CheckCircle2, Building2, Eye, EyeOff, Mail, User, GraduationCap } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import AdminUserAnalyticsModal from './AdminUserAnalyticsModal';
 
+const ROLE_OPTIONS = [
+  { id: 'user',        label: 'Investor',    Icon: User },
+  { id: 'institution', label: 'Institution', Icon: Building2 },
+  { id: 'scholar',     label: 'Scholar',     Icon: GraduationCap },
+  { id: 'admin',       label: 'Admin',       Icon: Shield },
+];
+
+const PLAN_OPTIONS = [
+  { slug: 'free', label: 'Miftah', tier: 'Free', color: 'var(--text-muted)', border: 'var(--border)' },
+  { slug: 'pro',  label: 'Rawdha', tier: 'Pro',  color: '#006B46',           border: '#006B46' },
+  { slug: 'max',  label: 'Noor',   tier: 'Max',  color: '#B8860B',           border: '#D9A05B' },
+];
+
+const INSTITUTION_TYPES = [
+  'Asset / Fund Manager',
+  'Stockbroking Firm',
+  'Non-Interest Bank',
+  'Commercial Bank',
+  'Custodian / Pension Fund',
+];
+
+function formatApiError(err, fallback) {
+  const errors = err.response?.data?.errors;
+  if (errors && typeof errors === 'object') {
+    const first = Object.values(errors).flat()[0];
+    if (first) return first;
+  }
+  return err.response?.data?.message || fallback;
+}
+
 // ─── Shared modal input ───────────────────────────────────
-function FormField({ label, children }) {
+function FormField({ label, children, style }) {
   return (
-    <div style={{ marginBottom: '20px' }}>
-      <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' }}>
+    <div style={{ marginBottom: '16px', ...style }}>
+      <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '7px' }}>
         {label}
       </label>
       {children}
@@ -19,10 +49,20 @@ function FormField({ label, children }) {
   );
 }
 
-function ModalWrap({ children }) {
+function ModalWrap({ children, onClose, maxWidth = '460px', flexColumn = false }) {
   return createPortal(
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000, padding: '24px' }}>
-      <div className="animate-fade-in" style={{ background: 'var(--bg)', width: '100%', maxWidth: '460px', maxHeight: '90vh', overflowY: 'auto', borderRadius: '24px', boxShadow: '0 32px 64px rgba(0,0,0,0.25)', border: '1px solid var(--border)' }}>
+    <div
+      onClick={e => { if (e.target === e.currentTarget && onClose) onClose(); }}
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000, padding: '20px' }}
+    >
+      <div
+        className="animate-fade-in"
+        style={{
+          background: 'var(--bg)', width: '100%', maxWidth, maxHeight: '90vh',
+          borderRadius: '24px', boxShadow: '0 32px 64px rgba(0,0,0,0.25)', border: '1px solid var(--border)',
+          ...(flexColumn ? { display: 'flex', flexDirection: 'column', overflow: 'hidden' } : { overflowY: 'auto' }),
+        }}
+      >
         {children}
       </div>
     </div>,
@@ -32,7 +72,7 @@ function ModalWrap({ children }) {
 
 function ModalHeader({ title, subtitle, onClose }) {
   return (
-    <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--border)', background: 'var(--bg-section)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div style={{ padding: '20px 26px', borderBottom: '1px solid var(--border)', background: 'var(--bg-section)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
       <div>
         {subtitle && <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>{subtitle}</div>}
         <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-dark)' }}>{title}</h3>
@@ -45,11 +85,163 @@ function ModalHeader({ title, subtitle, onClose }) {
 }
 
 const inputStyle = {
-  width: '100%', padding: '12px 16px', borderRadius: '12px',
+  width: '100%', boxSizing: 'border-box', padding: '11px 14px', borderRadius: '11px',
   border: '1px solid var(--border)', background: 'var(--bg-section)',
   color: 'var(--text-dark)', fontSize: '0.88rem', outline: 'none',
   fontFamily: 'inherit',
 };
+
+function UserFormFields({ formData, setFormData, formError, isEdit = false }) {
+  const [showPassword, setShowPassword] = useState(false);
+
+  return (
+    <>
+      {formError && (
+        <div style={{ background: 'var(--non-compliant-bg)', color: 'var(--non-compliant)', padding: '11px 14px', borderRadius: '10px', fontSize: '0.82rem', marginBottom: '16px', fontWeight: 600 }}>
+          {formError}
+        </div>
+      )}
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '14px' }}>
+        <FormField label="Full Name">
+          <input
+            required type="text"
+            value={formData.name}
+            onChange={e => setFormData({ ...formData, name: e.target.value })}
+            style={inputStyle}
+            placeholder={formData.role === 'institution' ? 'e.g. Amina Bello' : 'Jane Smith'}
+          />
+        </FormField>
+        <FormField label="Email Address">
+          <input
+            required type="email"
+            value={formData.email}
+            onChange={e => setFormData({ ...formData, email: e.target.value })}
+            style={inputStyle}
+            placeholder={formData.role === 'institution' ? 'desk@institution.com' : 'jane@irshad.app'}
+          />
+        </FormField>
+      </div>
+
+      {!isEdit && (
+        <FormField label="Password">
+          <div style={{ position: 'relative' }}>
+            <input
+              required
+              type={showPassword ? 'text' : 'password'}
+              value={formData.password}
+              onChange={e => setFormData({ ...formData, password: e.target.value })}
+              minLength={8}
+              style={{ ...inputStyle, paddingRight: '42px' }}
+              placeholder="Min 8 characters"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(v => !v)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              style={{
+                position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)',
+                background: 'none', border: 'none', padding: '4px', cursor: 'pointer',
+                color: 'var(--text-muted)', display: 'flex', alignItems: 'center',
+              }}
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
+        </FormField>
+      )}
+
+      <FormField label="Account Role">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(105px, 1fr))', gap: '8px' }}>
+          {ROLE_OPTIONS.map(({ id, label, Icon }) => {
+            const active = formData.role === id;
+            const isInst = id === 'institution';
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setFormData({ ...formData, role: id })}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                  padding: '10px 8px', borderRadius: '11px', border: '1.5px solid',
+                  borderColor: active ? (isInst ? '#D9A05B' : 'var(--primary)') : 'var(--border)',
+                  background: active ? (isInst ? 'var(--gold-50)' : 'var(--primary-50)') : 'var(--bg-section)',
+                  color: active ? (isInst ? '#92400e' : 'var(--primary)') : 'var(--text-muted)',
+                  fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer', transition: 'all 0.15s',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                <Icon size={14} />
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      </FormField>
+
+      {formData.role === 'institution' ? (
+        <div style={{ background: 'var(--bg-section)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px', marginBottom: '4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px', fontSize: '0.76rem', fontWeight: 800, color: '#92400e', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
+            <Building2 size={14} />
+            Institutional Partner Details
+          </div>
+          <FormField label="Institution Name *">
+            <input
+              required type="text"
+              value={formData.institution_name}
+              onChange={e => setFormData({ ...formData, institution_name: e.target.value })}
+              style={{ ...inputStyle, background: 'var(--bg)' }}
+              placeholder="e.g. Norrenberger Asset Management Ltd"
+            />
+          </FormField>
+          <FormField label="Institution Category" style={{ marginBottom: isEdit ? 0 : '12px' }}>
+            <select
+              value={formData.institution_type || INSTITUTION_TYPES[0]}
+              onChange={e => setFormData({ ...formData, institution_type: e.target.value })}
+              style={{ ...inputStyle, background: 'var(--bg)', cursor: 'pointer' }}
+            >
+              {INSTITUTION_TYPES.map(type => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+          </FormField>
+          {!isEdit && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.77rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+              <Mail size={14} style={{ flexShrink: 0, color: 'var(--primary)' }} />
+              <span>Grants Institutional Portal access and sends a welcome email immediately.</span>
+            </div>
+          )}
+        </div>
+      ) : (
+        <FormField label="Subscription Plan" style={{ marginBottom: 0 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '8px' }}>
+            {PLAN_OPTIONS.map(p => {
+              const active = formData.plan === p.slug;
+              return (
+                <button
+                  key={p.slug}
+                  type="button"
+                  onClick={() => setFormData({ ...formData, plan: p.slug })}
+                  style={{
+                    padding: '10px 8px', borderRadius: '11px',
+                    border: `1.5px solid ${active ? p.border : 'var(--border)'}`,
+                    background: active ? `${p.color}18` : 'var(--bg-section)',
+                    color: active ? p.color : 'var(--text-muted)',
+                    fontWeight: 800, fontSize: '0.8rem', cursor: 'pointer', transition: 'all 0.15s',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px',
+                  }}
+                >
+                  <span>{p.label}</span>
+                  <span style={{ fontSize: '0.67rem', fontWeight: 600, opacity: 0.78 }}>{p.tier}</span>
+                </button>
+              );
+            })}
+          </div>
+        </FormField>
+      )}
+    </>
+  );
+}
 
 const AdminUsers = () => {
   const { user } = useAuth();
@@ -134,17 +326,21 @@ const AdminUsers = () => {
     setFormLoading(true); setFormError('');
     try {
       const res = await createAdminUser(formData);
-      // If a paid plan was chosen, apply it via the override endpoint
-      if (formData.plan && formData.plan !== 'free') {
-        const userId = res?.data?.id ?? res?.id;
+      // Retail plans do not apply to institutional accounts
+      if (formData.role !== 'institution' && formData.plan && formData.plan !== 'free') {
+        const userId = res?.user?.id ?? res?.data?.id ?? res?.id;
         if (userId) await overrideAdminUserPlan(userId, formData.plan);
       }
-      toast.success('User created successfully');
+      toast.success(
+        res?.welcome_email_sent && formData.role === 'institution'
+          ? 'Institution created & welcome email sent'
+          : 'User created successfully'
+      );
       setShowCreateModal(false);
       setFormData({ name: '', email: '', password: '', role: 'user', institution_name: '', institution_type: 'Asset / Fund Manager', plan: 'free' });
       loadUsers(page, debouncedSearch);
     } catch (err) {
-      setFormError(err.response?.data?.message || 'Failed to create user');
+      setFormError(formatApiError(err, 'Failed to create user'));
     } finally {
       setFormLoading(false);
     }
@@ -222,9 +418,9 @@ const AdminUsers = () => {
         institution_name: formData.role === 'institution' ? formData.institution_name : null,
         institution_type: formData.role === 'institution' ? formData.institution_type : null,
       });
-      // Apply plan change via the subscription override system
+      // Apply plan change via the subscription override system for non-institutional users
       const currentSlug = selectedUser._planOverride || selectedUser.active_plan_slug || 'free';
-      if (formData.plan !== currentSlug) {
+      if (formData.role !== 'institution' && formData.plan !== currentSlug) {
         await overrideAdminUserPlan(selectedUser.id, formData.plan);
         // Update table row immediately
         setUsers(prev => prev.map(u => u.id === selectedUser.id
@@ -236,7 +432,7 @@ const AdminUsers = () => {
       setShowEditModal(false);
       loadUsers(page, debouncedSearch);
     } catch (err) {
-      setFormError(err.response?.data?.message || 'Failed to update user');
+      setFormError(formatApiError(err, 'Failed to update user'));
     } finally {
       setFormLoading(false);
     }
@@ -370,7 +566,12 @@ const AdminUsers = () => {
                   </td>
                   <td style={{ padding: '15px 20px', color: 'var(--text-muted)', fontSize: '0.83rem' }}>{u.email}</td>
                   <td style={{ padding: '15px 20px' }}>
-                    {(() => {
+                    {u.role === 'institution' ? (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 10px', borderRadius: '100px', fontSize: '0.72rem', fontWeight: 700, background: 'var(--gold-50)', color: '#92400e', border: '1px solid var(--gold-border)' }}>
+                        <Building2 size={11} />
+                        Institutional
+                      </span>
+                    ) : (() => {
                       const slug = u._planOverride || u.active_plan_slug || 'free';
                       const cycle = slug === 'free'
                         ? null
@@ -575,80 +776,22 @@ const AdminUsers = () => {
 
       {/* ── Create User Modal ──────────────────── */}
       {showCreateModal && (
-        <ModalWrap onClose={() => setShowCreateModal(false)}>
-          <ModalHeader title="Create User" subtitle="New Account" onClose={() => setShowCreateModal(false)} />
-          <form onSubmit={handleCreateAdmin} style={{ padding: '28px' }}>
-            {formError && <div style={{ background: 'var(--non-compliant-bg)', color: 'var(--non-compliant)', padding: '12px 16px', borderRadius: '10px', fontSize: '0.82rem', marginBottom: '20px', fontWeight: 600 }}>{formError}</div>}
-            <FormField label="Full Name">
-              <input required type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} style={inputStyle} placeholder="Jane Smith" />
-            </FormField>
-            <FormField label="Email Address">
-              <input required type="email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} style={inputStyle} placeholder="jane@irshad.app" />
-            </FormField>
-            <FormField label="Password">
-              <input required type="password" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} minLength={8} style={inputStyle} placeholder="Min 8 characters" />
-            </FormField>
-            
-            <div className="mobile-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' }}>Role</label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                  {['user', 'institution', 'scholar', 'admin'].map(t => (
-                    <button
-                      key={t} type="button"
-                      onClick={() => setFormData({...formData, role: t})}
-                      style={{
-                        padding: '9px 6px', borderRadius: '10px', border: '1.5px solid',
-                        borderColor: formData.role === t ? 'var(--primary)' : 'var(--border)',
-                        background: formData.role === t ? 'var(--primary-50)' : 'var(--bg-section)',
-                        color: formData.role === t ? 'var(--primary)' : 'var(--text-muted)',
-                        fontWeight: 700, fontSize: '0.76rem', cursor: 'pointer', transition: 'all 0.2s', textTransform: 'capitalize'
-                      }}
-                    >{t}</button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' }}>Plan</label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-                  {[
-                    { slug: 'free', label: 'Miftah', color: 'var(--text-muted)', border: 'var(--border)' },
-                    { slug: 'pro',  label: 'Rawdha', color: '#006B46', border: '#006B46' },
-                    { slug: 'max',  label: 'Noor',   color: '#B8860B', border: '#D9A05B' },
-                  ].map(p => (
-                    <button key={p.slug} type="button" onClick={() => setFormData({...formData, plan: p.slug})} style={{
-                      padding: '10px 4px', borderRadius: '10px',
-                      border: `1.5px solid ${formData.plan === p.slug ? p.border : 'var(--border)'}`,
-                      background: formData.plan === p.slug ? `${p.color}18` : 'var(--bg-section)',
-                      color: formData.plan === p.slug ? p.color : 'var(--text-muted)',
-                      fontWeight: 800, fontSize: '0.78rem', cursor: 'pointer', transition: 'all 0.2s',
-                    }}>{p.label}</button>
-                  ))}
-                </div>
-              </div>
+        <ModalWrap onClose={() => setShowCreateModal(false)} maxWidth="540px" flexColumn>
+          <ModalHeader
+            title={formData.role === 'institution' ? 'Create Institution' : 'Create User'}
+            subtitle={formData.role === 'institution' ? 'Institutional Partner' : 'New Account'}
+            onClose={() => setShowCreateModal(false)}
+          />
+          <form onSubmit={handleCreateAdmin} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+            <div style={{ padding: '22px 26px', overflowY: 'auto', flex: 1 }}>
+              <UserFormFields formData={formData} setFormData={setFormData} formError={formError} />
             </div>
-
-            {formData.role === 'institution' && (
-              <div className="mobile-col" style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: '12px' }}>
-                <FormField label="Institution / Bank / Broker Name *">
-                  <input required type="text" value={formData.institution_name} onChange={e => setFormData({ ...formData, institution_name: e.target.value })} style={inputStyle} placeholder="e.g. Norrenberger Asset Management" />
-                </FormField>
-                <FormField label="Institution Category">
-                  <select value={formData.institution_type || 'Asset / Fund Manager'} onChange={e => setFormData({ ...formData, institution_type: e.target.value })} style={inputStyle}>
-                    <option value="Asset / Fund Manager">Asset / Fund Manager</option>
-                    <option value="Stockbroking Firm">Stockbroking Firm</option>
-                    <option value="Non-Interest Bank">Non-Interest Bank</option>
-                    <option value="Commercial Bank">Commercial Bank</option>
-                    <option value="Custodian / Pension Fund">Custodian / Pension Fund</option>
-                  </select>
-                </FormField>
-              </div>
-            )}
-
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <button type="button" onClick={() => setShowCreateModal(false)} style={{ flex: 1, padding: '13px', borderRadius: '12px', background: 'var(--bg-section)', border: 'none', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
-              <button type="submit" disabled={formLoading} style={{ flex: 2, padding: '13px', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 700, cursor: formLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                {formLoading ? <div className="spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'white' }} /> : <><Plus size={15} /> Create User</>}
+            <div style={{ padding: '16px 26px', borderTop: '1px solid var(--border)', background: 'var(--bg-section)', display: 'flex', gap: '12px', flexShrink: 0 }}>
+              <button type="button" onClick={() => setShowCreateModal(false)} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
+              <button type="submit" disabled={formLoading} style={{ flex: 2, padding: '12px', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 700, cursor: formLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                {formLoading
+                  ? <div className="spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'white' }} />
+                  : <>{formData.role === 'institution' ? <Building2 size={15} /> : <Plus size={15} />} {formData.role === 'institution' ? 'Create Institution' : 'Create User'}</>}
               </button>
             </div>
           </form>
@@ -657,76 +800,15 @@ const AdminUsers = () => {
 
       {/* ── Edit User Modal ─────────────────────── */}
       {showEditModal && (
-        <ModalWrap onClose={() => setShowEditModal(false)}>
+        <ModalWrap onClose={() => setShowEditModal(false)} maxWidth="540px" flexColumn>
           <ModalHeader title={selectedUser?.name} subtitle="Edit Account" onClose={() => setShowEditModal(false)} />
-          <form onSubmit={handleUpdateUser} style={{ padding: '28px' }}>
-            {formError && <div style={{ background: 'var(--non-compliant-bg)', color: 'var(--non-compliant)', padding: '12px 16px', borderRadius: '10px', fontSize: '0.82rem', marginBottom: '20px', fontWeight: 600 }}>{formError}</div>}
-            <FormField label="Full Name">
-              <input required type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} style={inputStyle} />
-            </FormField>
-            <FormField label="Email Address">
-              <input required type="email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} style={inputStyle} />
-            </FormField>
-            
-            <div className="mobile-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' }}>Role</label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                  {['user', 'institution', 'scholar', 'admin'].map(t => (
-                    <button
-                      key={t} type="button"
-                      onClick={() => setFormData({...formData, role: t})}
-                      style={{
-                        padding: '9px 6px', borderRadius: '10px', border: '1.5px solid',
-                        borderColor: formData.role === t ? 'var(--primary)' : 'var(--border)',
-                        background: formData.role === t ? 'var(--primary-50)' : 'var(--bg-section)',
-                        color: formData.role === t ? 'var(--primary)' : 'var(--text-muted)',
-                        fontWeight: 700, fontSize: '0.76rem', cursor: 'pointer', transition: 'all 0.2s', textTransform: 'capitalize'
-                      }}
-                    >{t}</button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' }}>Plan</label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-                  {[
-                    { slug: 'free', label: 'Miftah', color: 'var(--text-muted)', border: 'var(--border)' },
-                    { slug: 'pro',  label: 'Rawdha', color: '#006B46', border: '#006B46' },
-                    { slug: 'max',  label: 'Noor',   color: '#B8860B', border: '#D9A05B' },
-                  ].map(p => (
-                    <button key={p.slug} type="button" onClick={() => setFormData({...formData, plan: p.slug})} style={{
-                      padding: '10px 4px', borderRadius: '10px',
-                      border: `1.5px solid ${formData.plan === p.slug ? p.border : 'var(--border)'}`,
-                      background: formData.plan === p.slug ? `${p.color}18` : 'var(--bg-section)',
-                      color: formData.plan === p.slug ? p.color : 'var(--text-muted)',
-                      fontWeight: 800, fontSize: '0.78rem', cursor: 'pointer', transition: 'all 0.2s',
-                    }}>{p.label}</button>
-                  ))}
-                </div>
-              </div>
+          <form onSubmit={handleUpdateUser} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+            <div style={{ padding: '22px 26px', overflowY: 'auto', flex: 1 }}>
+              <UserFormFields formData={formData} setFormData={setFormData} formError={formError} isEdit />
             </div>
-
-            {formData.role === 'institution' && (
-              <div className="mobile-col" style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: '12px' }}>
-                <FormField label="Institution / Bank / Broker Name *">
-                  <input required type="text" value={formData.institution_name} onChange={e => setFormData({ ...formData, institution_name: e.target.value })} style={inputStyle} placeholder="e.g. Lotus Capital Limited" />
-                </FormField>
-                <FormField label="Institution Category">
-                  <select value={formData.institution_type || 'Asset / Fund Manager'} onChange={e => setFormData({ ...formData, institution_type: e.target.value })} style={inputStyle}>
-                    <option value="Asset / Fund Manager">Asset / Fund Manager</option>
-                    <option value="Stockbroking Firm">Stockbroking Firm</option>
-                    <option value="Non-Interest Bank">Non-Interest Bank</option>
-                    <option value="Commercial Bank">Commercial Bank</option>
-                    <option value="Custodian / Pension Fund">Custodian / Pension Fund</option>
-                  </select>
-                </FormField>
-              </div>
-            )}
-
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <button type="button" onClick={() => setShowEditModal(false)} style={{ flex: 1, padding: '13px', borderRadius: '12px', background: 'var(--bg-section)', border: 'none', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
-              <button type="submit" disabled={formLoading} style={{ flex: 2, padding: '13px', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 700, cursor: formLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ padding: '16px 26px', borderTop: '1px solid var(--border)', background: 'var(--bg-section)', display: 'flex', gap: '12px', flexShrink: 0 }}>
+              <button type="button" onClick={() => setShowEditModal(false)} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text-muted)', fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
+              <button type="submit" disabled={formLoading} style={{ flex: 2, padding: '12px', borderRadius: '12px', background: 'var(--primary)', border: 'none', color: 'white', fontWeight: 700, cursor: formLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {formLoading ? <div className="spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'white' }} /> : 'Save Changes'}
               </button>
             </div>

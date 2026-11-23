@@ -271,7 +271,12 @@ class AuthController extends Controller
         }
 
         try {
-            Mail::to($user->email)->queue(new WelcomeEmail($user));
+            $mailable = new WelcomeEmail($user);
+            if ($user->role === 'institution') {
+                Mail::to($user->email)->sendNow($mailable);
+            } else {
+                Mail::to($user->email)->queue($mailable);
+            }
             if ($hasCol) {
                 $user->forceFill(['welcome_email_sent_at' => now()])->saveQuietly();
             }

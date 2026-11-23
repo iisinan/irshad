@@ -11,6 +11,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Schema;
+use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class WelcomeAndLaunchEmailTest extends TestCase
@@ -207,5 +208,60 @@ class WelcomeAndLaunchEmailTest extends TestCase
         $this->artisan('irshad:send-launch-email --force')
             ->assertExitCode(0);
         Mail::assertNothingQueued();
+    }
+
+    public function test_admin_creating_institution_sends_immediate_welcome_email(): void
+    {
+        Mail::fake();
+
+        $admin = User::factory()->create([
+            'role' => 'admin',
+            'email_verified_at' => now(),
+        ]);
+        Sanctum::actingAs($admin);
+
+        // Institution name is required for institution accounts
+        $this->postJson('/api/v1/admin/users', [
+            'name' => 'Amina Desk',
+            'email' => 'desk@acme-asset.ng',
+            'password' => 'StrongPass#2026!',
+            'role' => 'institution',
+        ])->assertStatus(422);
+
+        // Creating a valid institution sends an immediate synchronous welcome email
+        $res = $this->postJson('/api/v1/admin/users', [
+            'name' => 'Amina Desk',
+            'email' => 'desk@acme-asset.ng',
+            'password' => 'StrongPass#2026!',
+            'role' => 'institution',
+            'institution_name' => 'Acme Asset Management Ltd',
+            'institution_type' => 'Asset / Fund Manager',
+        ])->assertStatus(201)
+            ->assertJsonPath('welcome_email_sent', true)
+            ->assertJsonPath('user.role', 'institution')
+            ->assertJsonPath('user.institution_name', 'Acme Asset Management Ltd');
+
+        Mail::assertSent(WelcomeEmail::class, function (WelcomeEmail $mail) {
+            $envelope = $mail->envelope();
+            $content = $mail->content();
+            return $mail->hasTo('desk@acme-asset.ng')
+                && str_contains($envelope->subject, 'Acme Asset Management Ltd')
+                && $content->markdown === 'emails.welcome_institution'
+                && ($content->with['institutionName'] ?? null) === 'Acme Asset Management Ltd';
+        });
+
+        $created = User::where('email', 'desk@acme-asset.ng')->firstOrFail();
+        $this->assertNotNull($created->welcome_email_sent_at);
+
+        // Logging in afterward does not re-send welcome email
+        Mail::fake();
+        \Illuminate\Support\Facades\Auth::shouldUse('web');
+        $this->postJson('/api/v1/login', [
+            'email' => 'desk@acme-asset.ng',
+            'password' => 'StrongPass#2026!',
+        ])->assertOk();
+
+        Mail::assertNothingQueued();
+        Mail::assertNothingSent();
     }
 }

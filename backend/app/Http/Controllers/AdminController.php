@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\WelcomeEmail;
 use App\Models\AdminAlert;
 use App\Models\Company;
 use App\Models\News;
@@ -15,6 +16,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 
 class AdminController extends Controller
@@ -63,28 +67,60 @@ class AdminController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
             'role' => 'nullable|string|in:admin,user,scholar,institution',
-            'institution_name' => 'nullable|string|max:255',
+            'institution_name' => 'nullable|required_if:role,institution|string|max:255',
             'institution_type' => 'nullable|string|max:100',
             'plan' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return response()->json([
+                'message' => $validator->errors()->first(),
+                'errors' => $validator->errors(),
+            ], 422);
         }
+
+        $role = $request->input('role', 'admin');
+        $isInstitution = $role === 'institution';
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $request->input('role', 'admin'),
-            'institution_name' => $request->input('institution_name'),
-            'institution_type' => $request->input('institution_type'),
+            'role' => $role,
+            'institution_name' => $isInstitution ? $request->input('institution_name') : null,
+            'institution_type' => $isInstitution ? $request->input('institution_type', 'Asset / Fund Manager') : null,
             'plan' => $request->input('plan', 'free'),
         ]);
         $user->forceFill(['email_verified_at' => now()])->save();
 
+        $welcomeEmailSent = false;
+        if ($user->email && filter_var($user->email, FILTER_VALIDATE_EMAIL)) {
+            try {
+                $mailable = new WelcomeEmail($user);
+                if ($isInstitution) {
+                    Mail::to($user->email)->sendNow($mailable);
+                } else {
+                    Mail::to($user->email)->queue($mailable);
+                }
+
+                if (Schema::hasColumn('users', 'welcome_email_sent_at')) {
+                    $user->forceFill(['welcome_email_sent_at' => now()])->saveQuietly();
+                }
+                $welcomeEmailSent = true;
+            } catch (\Throwable $e) {
+                Log::warning('Admin create user welcome email failed', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
         return response()->json([
-            'message' => 'Account created successfully.',
+            'message' => $isInstitution && $welcomeEmailSent
+                ? 'Institution account created and welcome email sent.'
+                : 'Account created successfully.',
+            'welcome_email_sent' => $welcomeEmailSent,
             'user' => $user,
         ], 201);
     }

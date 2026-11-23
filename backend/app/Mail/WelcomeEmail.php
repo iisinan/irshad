@@ -23,6 +23,13 @@ class WelcomeEmail extends Mailable implements ShouldQueue
 
     public function envelope(): Envelope
     {
+        if ($this->user->role === 'institution') {
+            $institutionName = trim((string) ($this->user->institution_name ?: $this->user->name));
+            return new Envelope(
+                subject: "Welcome to Irshad Institutional — {$institutionName}",
+            );
+        }
+
         return new Envelope(
             subject: 'Welcome to Irshad — Your Shariah-Compliant Investment Companion',
         );
@@ -32,10 +39,24 @@ class WelcomeEmail extends Mailable implements ShouldQueue
     {
         $firstName = trim(explode(' ', (string) $this->user->name)[0] ?? '');
         if ($firstName === '') {
-            $firstName = 'Investor';
+            $firstName = $this->user->role === 'institution' ? 'Partner' : 'Investor';
         }
 
         $frontendUrl = rtrim((string) config('app.frontend_url', env('FRONTEND_URL', 'https://iirshad.com')), '/');
+
+        if ($this->user->role === 'institution') {
+            return new Content(
+                markdown: 'emails.welcome_institution',
+                with: [
+                    'firstName' => $firstName,
+                    'institutionName' => trim((string) ($this->user->institution_name ?: $this->user->name)),
+                    'institutionType' => trim((string) ($this->user->institution_type ?: 'Institutional Partner')),
+                    'userEmail' => $this->user->email,
+                    'institutionUrl' => $frontendUrl . '/institution',
+                    'loginUrl' => $frontendUrl . '/login',
+                ],
+            );
+        }
 
         return new Content(
             markdown: 'emails.welcome',
