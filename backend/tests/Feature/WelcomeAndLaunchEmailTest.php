@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Mail\LaunchAnnouncementEmail;
+use App\Mail\RizqPlannerAnnouncementEmail;
 use App\Mail\WelcomeEmail;
 use App\Models\User;
 use App\Notifications\VerifyEmailNotification;
@@ -41,6 +42,7 @@ class WelcomeAndLaunchEmailTest extends TestCase
             $table->timestamp('email_verified_at')->nullable();
             $table->timestamp('welcome_email_sent_at')->nullable();
             $table->timestamp('launch_announcement_sent_at')->nullable();
+            $table->timestamp('rizq_planner_email_sent_at')->nullable();
             $table->string('password')->nullable();
             $table->string('location')->nullable();
             $table->string('role')->default('user');
@@ -263,5 +265,58 @@ class WelcomeAndLaunchEmailTest extends TestCase
 
         Mail::assertNothingQueued();
         Mail::assertNothingSent();
+    }
+
+    public function test_rizq_planner_announcement_command_dry_run_preview_and_idempotent_send(): void
+    {
+        Mail::fake();
+
+        $verified = User::factory()->create([
+            'name' => 'Amina Investor',
+            'email' => 'amina@gmail.com',
+            'email_verified_at' => now(),
+        ]);
+        $unverified = User::factory()->create([
+            'name' => 'Bilal Investor',
+            'email' => 'bilal@gmail.com',
+            'email_verified_at' => null,
+        ]);
+        $synthetic = User::factory()->create([
+            'name' => 'Synthetic User',
+            'email' => 'synthetic@example.com',
+            'email_verified_at' => now(),
+        ]);
+
+        // Dry run sends nothing
+        $this->artisan('irshad:send-rizq-planner-email --dry-run')
+            ->assertExitCode(0);
+        Mail::assertNothingQueued();
+        Mail::assertNothingSent();
+
+        // Single preview email sends immediately via sendNow without stamping DB users
+        $this->artisan('irshad:send-rizq-planner-email --test-email=sinanismailaidris@gmail.com')
+            ->assertExitCode(0);
+        Mail::assertSent(RizqPlannerAnnouncementEmail::class, function (RizqPlannerAnnouncementEmail $mail) {
+            $content = $mail->content();
+            return $mail->hasTo('sinanismailaidris@gmail.com')
+                && $content->markdown === 'emails.rizq_planner_announcement'
+                && str_ends_with((string) ($content->with['rizqPlannerUrl'] ?? ''), '/rizq-planner');
+        });
+        $this->assertNull($verified->fresh()->rizq_planner_email_sent_at);
+
+        // Live blast sends to eligible real users once, skips synthetic domains, and is idempotent
+        Mail::fake();
+        $this->artisan('irshad:send-rizq-planner-email --force')
+            ->assertExitCode(0);
+
+        Mail::assertQueued(RizqPlannerAnnouncementEmail::class, 2);
+        $this->assertNotNull($verified->fresh()->rizq_planner_email_sent_at);
+        $this->assertNotNull($unverified->fresh()->rizq_planner_email_sent_at);
+        $this->assertNull($synthetic->fresh()->rizq_planner_email_sent_at);
+
+        Mail::fake();
+        $this->artisan('irshad:send-rizq-planner-email --force')
+            ->assertExitCode(0);
+        Mail::assertNothingQueued();
     }
 }
