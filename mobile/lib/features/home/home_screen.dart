@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/providers/app_state_provider.dart';
 import '../../core/widgets/guest_gate.dart';
+import '../../core/widgets/launch_countdown_banner.dart';
 import '../stocks/ui/stock_screener_screen.dart';
 import '../baskets/ui/baskets_screen.dart';
 import '../chat/ui/chat_assistant_sheet.dart';
@@ -153,7 +154,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 6),
+              const LaunchCountdownBanner(compact: true, dismissible: true),
+              const SizedBox(height: 8),
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 20),
                 padding: const EdgeInsets.all(4),

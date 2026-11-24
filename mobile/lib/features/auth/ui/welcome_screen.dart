@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
+import 'package:irshad_mobile/core/widgets/launch_countdown_banner.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -121,7 +122,15 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                   ),
                 ),
 
-                const Spacer(flex: 3),
+                const SizedBox(height: 20),
+
+                _FadeSlide(
+                  controller: _controller,
+                  delay: 0.5,
+                  child: const LaunchCountdownBanner(),
+                ),
+
+                const Spacer(flex: 2),
 
                 // Trust badges
                 _FadeSlide(

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Shield, ArrowRight, Search as SearchIcon, FileText, Globe, FileDigit, Sparkles, CheckCircle, Lock, Zap, BarChart2, Smartphone } from 'lucide-react';
 import { fetchOverviewStats, fetchRecentScreenings, fetchLatestReports, fetchBusinessNewsOverview } from '../services/api';
 import Footer from './Footer';
+import LaunchCountdown from './LaunchCountdown';
 
 // ─── Helpers ─────────────────────────────────────────────────
 
@@ -183,9 +184,12 @@ export default function LandingPage() {
             </h1>
 
             {/* Subheading */}
-            <p className="animate-slide-up stagger-2" style={{ fontSize: 'clamp(1rem, 1.3vw, 1.12rem)', color: 'var(--text-muted)', lineHeight: 1.82, maxWidth: 520, marginBottom: 40, fontWeight: 400 }}>
+            <p className="animate-slide-up stagger-2" style={{ fontSize: 'clamp(1rem, 1.3vw, 1.12rem)', color: 'var(--text-muted)', lineHeight: 1.82, maxWidth: 520, marginBottom: 24, fontWeight: 400 }}>
               Irshad screens Nigerian equities against rigorous AAOIFI standards — so you know exactly what you own, and whether it is permissible.
             </p>
+
+            {/* Launch Countdown */}
+            <LaunchCountdown variant="hero" />
 
             {/* CTAs */}
             <div className="animate-slide-up stagger-3" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 48 }}>

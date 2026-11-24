@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Menu, AlertCircle, Mail, X, SlidersHorizontal } from 'lucide-react';
 import DashboardSidebar from './DashboardSidebar';
 import UpdatesInbox from './portfolio/UpdatesInbox';
+import LaunchCountdown from './LaunchCountdown';
 import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { fetchUnreadCount } from '../services/api';
@@ -265,6 +266,8 @@ export default function DashboardLayout({ children }) {
             )}
           </div>
         )}
+
+        <LaunchCountdown variant="bar" />
 
         {children}
       </main>
