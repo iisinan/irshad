@@ -1,307 +1,565 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, ArrowRight, Search as SearchIcon, FileText, Globe, FileDigit, Sparkles, CheckCircle, Lock, Zap, BarChart2, Smartphone } from 'lucide-react';
-import { fetchOverviewStats, fetchRecentScreenings, fetchLatestReports, fetchBusinessNewsOverview } from '../services/api';
+import {
+  ArrowRight,
+  BarChart2,
+  Building2,
+  Calculator,
+  CheckCircle2,
+  FileDigit,
+  FileText,
+  Globe,
+  Lock,
+  Search as SearchIcon,
+  Shield,
+  Sparkles,
+  TrendingUp,
+} from 'lucide-react';
+import {
+  fetchBusinessNewsOverview,
+  fetchLatestReports,
+  fetchOverviewStats,
+  fetchRecentScreenings,
+  searchStocks,
+} from '../services/api';
 import Footer from './Footer';
 import LaunchCountdown from './LaunchCountdown';
+import './LandingPage.css';
 
-// ─── Helpers ─────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────
 
-const CompanyAvatar = ({ symbol, size = 40 }) => {
+const QUICK_TICKERS = ['DANGCEM', 'MTNN', 'BUACEMENT', 'SEPLAT', 'ARADEL'];
+
+const HERO_RULES = [
+  { threshold: '≤ 30%', label: 'Debt / Mkt Cap' },
+  { threshold: '≤ 30%', label: 'Interest Cash / Mkt Cap' },
+  { threshold: '≤ 5%', label: 'Impure Revenue' },
+];
+
+const CompanyAvatar = ({ symbol, logoUrl, size = 40 }) => {
   const [error, setError] = useState(false);
   const letter = (symbol || '').substring(0, 2).toUpperCase();
-  const radius = size * 0.22;
-  if (error || !symbol) {
+  const radius = Math.round(size * 0.24);
+
+  if (error || !logoUrl) {
     return (
-      <div style={{
-        width: size, height: size, borderRadius: radius,
-        background: 'var(--primary-50)', color: 'var(--primary)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontWeight: 800, fontSize: size * 0.38, border: '1px solid var(--primary-100)',
-        flexShrink: 0,
-      }}>
+      <div
+        aria-hidden="true"
+        style={{
+          width: size,
+          height: size,
+          borderRadius: radius,
+          background: 'var(--primary-50)',
+          color: 'var(--primary)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontWeight: 800,
+          fontSize: size * 0.36,
+          border: '1px solid var(--primary-100)',
+          flexShrink: 0,
+        }}
+      >
         {letter}
       </div>
     );
   }
+
   return (
     <img
-      src={`https://s3-symbol-logo.tradingview.com/${symbol.toLowerCase()}--big.svg`}
-      alt={symbol}
+      src={logoUrl}
+      alt=""
       onError={() => setError(true)}
-      style={{ width: size, height: size, borderRadius: radius, objectFit: 'contain', background: 'white', border: '1px solid var(--border)', flexShrink: 0 }}
+      style={{
+        width: size,
+        height: size,
+        borderRadius: radius,
+        objectFit: 'contain',
+        background: '#FFFFFF',
+        border: '1px solid var(--lp-hairline)',
+        flexShrink: 0,
+      }}
     />
   );
 };
 
-const useReveal = (threshold = 0.1) => {
+const StatusPill = ({ verdict }) => {
+  const rawStatus = typeof verdict === 'object' ? verdict?.status : verdict;
+  const purif = typeof verdict === 'object' ? verdict?.purification_required : false;
+  const key = (rawStatus || 'doubtful').toLowerCase();
+
+  const map = {
+    halal: {
+      label: purif ? 'Compliant · Purify' : 'Halal',
+      bg: purif ? 'rgba(245, 158, 11, 0.14)' : 'var(--halal-bg)',
+      color: purif ? '#D97706' : 'var(--halal)',
+      border: purif ? 'rgba(245, 158, 11, 0.35)' : 'var(--halal-border)',
+    },
+    compliant: {
+      label: purif ? 'Compliant · Purify' : 'Halal',
+      bg: purif ? 'rgba(245, 158, 11, 0.14)' : 'var(--halal-bg)',
+      color: purif ? '#D97706' : 'var(--halal)',
+      border: purif ? 'rgba(245, 158, 11, 0.35)' : 'var(--halal-border)',
+    },
+    non_compliant: {
+      label: 'Non-Compliant',
+      bg: 'var(--non-compliant-bg)',
+      color: 'var(--non-compliant)',
+      border: 'var(--non-compliant-border)',
+    },
+    'non-compliant': {
+      label: 'Non-Compliant',
+      bg: 'var(--non-compliant-bg)',
+      color: 'var(--non-compliant)',
+      border: 'var(--non-compliant-border)',
+    },
+    doubtful: {
+      label: 'Doubtful',
+      bg: 'var(--doubtful-bg)',
+      color: 'var(--doubtful)',
+      border: 'var(--doubtful-border)',
+    },
+  };
+
+  const s = map[key] || map.doubtful;
+
+  return (
+    <span
+      className="lp-status-pill"
+      style={{
+        background: s.bg,
+        color: s.color,
+        border: `1px solid ${s.border}`,
+      }}
+    >
+      {s.label}
+    </span>
+  );
+};
+
+const useReveal = (threshold = 0.08) => {
   const [visible, setVisible] = useState(false);
-  const ref = useRef();
+  const ref = useRef(null);
+
   useEffect(() => {
-    const obs = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) { setVisible(true); obs.disconnect(); }
-    }, { threshold });
-    if (ref.current) obs.observe(ref.current);
+    if (typeof window === 'undefined') return undefined;
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      setVisible(true);
+      return undefined;
+    }
+
+    const node = ref.current;
+    if (!node || typeof IntersectionObserver === 'undefined') {
+      setVisible(true);
+      return undefined;
+    }
+
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          obs.disconnect();
+        }
+      },
+      { threshold },
+    );
+
+    obs.observe(node);
     return () => obs.disconnect();
   }, [threshold]);
+
   return [ref, visible];
 };
 
-const Reveal = ({ children, delay = 0, y = 22, style: sx = {} }) => {
+const Reveal = ({ children, delay = 0, className = '', style }) => {
   const [ref, visible] = useReveal();
   return (
-    <div ref={ref} style={{
-      opacity: visible ? 1 : 0,
-      transform: visible ? 'none' : `translateY(${y}px)`,
-      transition: `opacity 0.65s cubic-bezier(0.22,1,0.36,1) ${delay}s, transform 0.65s cubic-bezier(0.22,1,0.36,1) ${delay}s`,
-      ...sx,
-    }}>
+    <div
+      ref={ref}
+      className={`lp-reveal ${className}`.trim()}
+      data-reveal={visible ? 'visible' : 'hidden'}
+      style={{ '--reveal-delay': `${delay}s`, ...style }}
+    >
       {children}
     </div>
   );
 };
 
 const AnimatedNumber = ({ value }) => {
-  const [count, setCount] = useState(0);
+  const target = parseInt(value, 10) || 0;
+  const [count, setCount] = useState(target);
   const [ref, visible] = useReveal();
+
   useEffect(() => {
-    if (!visible) return;
-    const end = parseInt(value) || 0;
-    if (!end) { setCount(value); return; }
+    if (!visible) return undefined;
+    if (!target || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      setCount(target);
+      return undefined;
+    }
+
+    let rafId = 0;
     let start = null;
-    const run = ts => {
+    const duration = 900;
+
+    const tick = (ts) => {
       if (!start) start = ts;
-      const p = Math.min((ts - start) / 1200, 1);
-      setCount(Math.floor((1 - Math.pow(1 - p, 3)) * end));
-      if (p < 1) requestAnimationFrame(run);
-      else setCount(value);
+      const progress = Math.min((ts - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.floor(eased * target));
+      if (progress < 1) {
+        rafId = requestAnimationFrame(tick);
+      } else {
+        setCount(target);
+      }
     };
-    requestAnimationFrame(run);
-  }, [value, visible]);
-  return <span ref={ref}>{count}</span>;
+
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, [target, visible]);
+
+  return <span ref={ref}>{count.toLocaleString()}</span>;
 };
 
-const StatusPill = ({ verdict }) => {
-  const v = typeof verdict === 'object' ? verdict?.status : verdict;
-  const purif = typeof verdict === 'object' ? verdict?.purification_required : false;
-
-  const map = {
-    halal:     { label: purif ? 'Shariah Compliant w/ Purify' : 'Shariah Compliant',     bg: purif ? 'rgba(245, 158, 11, 0.15)' : 'var(--halal-bg)',     color: purif ? '#f59e0b' : 'var(--halal)',     border: purif ? 'rgba(245, 158, 11, 0.4)' : 'var(--halal-border)'     },
-    compliant: { label: purif ? 'Shariah Compliant w/ Purify' : 'Shariah Compliant',     bg: purif ? 'rgba(245, 158, 11, 0.15)' : 'var(--halal-bg)',     color: purif ? '#f59e0b' : 'var(--halal)',     border: purif ? 'rgba(245, 158, 11, 0.4)' : 'var(--halal-border)'     },
-    non_compliant: { label: 'Shariah Non-Compliant', bg: 'var(--non-compliant-bg)', color: 'var(--non-compliant)', border: 'var(--non-compliant-border)' },
-    'non-compliant': { label: 'Shariah Non-Compliant', bg: 'var(--non-compliant-bg)', color: 'var(--non-compliant)', border: 'var(--non-compliant-border)' },
-    doubtful:  { label: 'Doubtful',  bg: 'var(--doubtful-bg)',  color: 'var(--doubtful)',  border: 'var(--doubtful-border)'  },
-  };
-  const s = map[v?.toLowerCase()] || map.doubtful;
-  return (
-    <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '3px 10px', borderRadius: 20, background: s.bg, color: s.color, border: `1px solid ${s.border}`, whiteSpace: 'nowrap', flexShrink: 0 }}>
-      {s.label}
-    </span>
-  );
-};
-
-// ─── Main ─────────────────────────────────────────────────────
+// ─── Main Landing Page ────────────────────────────────────────
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const searchInputId = useId();
   const [search, setSearch] = useState('');
-  const [stats, setStats]     = useState(null);
-  const [recent, setRecent]   = useState([]);
-  const [reports, setReports]   = useState([]);
-  const [news, setNews]         = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
+  const [searching, setSearching] = useState(false);
 
+  const [stats, setStats] = useState(null);
+  const [recent, setRecent] = useState([]);
+  const [reports, setReports] = useState([]);
+  const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
     (async () => {
       try {
-        const [s, r, rep, n] = await Promise.all([
-          fetchOverviewStats(), fetchRecentScreenings(), fetchLatestReports(), fetchBusinessNewsOverview()
+        const [s, r, rep, n] = await Promise.allSettled([
+          fetchOverviewStats(),
+          fetchRecentScreenings(),
+          fetchLatestReports(),
+          fetchBusinessNewsOverview(),
         ]);
-        setStats(s.data);
-        setRecent(r.data);
-        setReports(rep.data);
-        setNews(n.data);
-      } catch (e) { console.error(e); }
-      finally { setLoading(false); }
+        if (cancelled) return;
+        if (s.status === 'fulfilled') setStats(s.value.data);
+        if (r.status === 'fulfilled' && Array.isArray(r.value.data)) setRecent(r.value.data);
+        if (rep.status === 'fulfilled' && Array.isArray(rep.value.data)) setReports(rep.value.data);
+        if (n.status === 'fulfilled' && Array.isArray(n.value.data)) setNews(n.value.data);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const handleSearch = e => {
+  useEffect(() => {
+    const trimmed = search.trim();
+    if (trimmed.length < 2) {
+      setSearchResults([]);
+      setSearching(false);
+      return undefined;
+    }
+
+    let cancelled = false;
+    setSearching(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await searchStocks(trimmed);
+        const list = Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : [];
+        if (!cancelled) setSearchResults(list.slice(0, 5));
+      } catch {
+        if (!cancelled) setSearchResults([]);
+      } finally {
+        if (!cancelled) setSearching(false);
+      }
+    }, 220);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [search]);
+
+  const handleSearch = (e) => {
     e.preventDefault();
-    if (search.trim()) navigate('/market', { state: { query: search.trim() } });
+    const trimmed = search.trim();
+    if (!trimmed) return;
+
+    const exact = searchResults.find(
+      (item) => item.symbol?.toLowerCase() === trimmed.toLowerCase(),
+    );
+    const targetSymbol = exact?.symbol || searchResults[0]?.symbol;
+
+    if (targetSymbol) {
+      navigate(`/market/${encodeURIComponent(targetSymbol)}/aaoifi`);
+      return;
+    }
+
+    if (/^[A-Za-z0-9.-]{2,12}$/.test(trimmed)) {
+      navigate(`/market/${encodeURIComponent(trimmed.toUpperCase())}/aaoifi`);
+      return;
+    }
+
+    navigate('/portfolio');
   };
 
+  const uniqueRecent = Array.from(
+    new Map(
+      recent
+        .filter((item) => item?.symbol)
+        .map((item) => [item.symbol.toUpperCase(), item]),
+    ).values(),
+  );
+
   const statItems = [
-    { label: 'Equities Screened',     value: stats?.total_companies  ?? stats?.companies ?? 0,  suffix: '+',  icon: BarChart2,   color: 'var(--primary)'  },
-    { label: 'Reports Processed',     value: stats?.total_reports    ?? stats?.reports   ?? 0,  suffix: '+',  icon: FileText,    color: '#059669'         },
-    { label: 'News Articles',         value: stats?.total_news       ?? stats?.news      ?? 0, suffix: '+',  icon: Globe,       color: 'var(--gold)'     },
+    {
+      label: 'Equities Screened',
+      value: stats?.total_companies ?? stats?.companies ?? 0,
+      suffix: '+',
+      icon: BarChart2,
+      color: 'var(--primary)',
+    },
+    {
+      label: 'Halal Compliant',
+      value: stats?.halal_count ?? 0,
+      suffix: '',
+      icon: CheckCircle2,
+      color: 'var(--halal)',
+    },
+    {
+      label: 'Filings Processed',
+      value: stats?.total_reports ?? stats?.reports ?? 0,
+      suffix: '+',
+      icon: FileText,
+      color: '#0D9488',
+    },
+    {
+      label: 'Market Updates',
+      value: stats?.total_news ?? stats?.news ?? 0,
+      suffix: '+',
+      icon: Globe,
+      color: 'var(--gold)',
+    },
   ];
 
-  const features = [
-    { icon: Shield,      title: 'AAOIFI Standard 21', desc: 'Screening built on the gold standard for Islamic equity trading — strictly enforcing 30% debt, 30% cash, and 5% impure revenue limits.' },
-    { icon: Sparkles,    title: 'Dividend Purification', desc: 'Automatic calculation of non-compliant income fractions down to 2 decimal places so you can cleanse your dividends with precision.' },
-    { icon: Lock,        title: 'NGX Filing Evidence', desc: 'Zero black-box ratings. Every verdict links to official, timestamped regulatory reports from NGX Pulse.' },
-    { icon: CheckCircle, title: 'Continuous Monitoring', desc: 'Quarterly and annual financial statements trigger immediate recalculations and watchlist compliance alerts.' },
+  const pillars = [
+    {
+      icon: Shield,
+      title: 'AAOIFI Standard 21 Engine',
+      desc: 'Deterministic screening enforcing 30% interest debt, 30% interest cash, and 5% non-compliant revenue thresholds against live market capitalization.',
+      linkLabel: 'Explore methodology',
+      to: '/shariah',
+    },
+    {
+      icon: Sparkles,
+      title: 'Purification & Zakat Math',
+      desc: 'Automatically isolate non-compliant income fractions for dividend cleansing and compute annual equity Zakat without spreadsheet guesswork.',
+      linkLabel: 'Open portfolio tools',
+      to: '/portfolio',
+    },
+    {
+      icon: TrendingUp,
+      title: 'Monthly Rizq Planner',
+      desc: 'Model disciplined monthly NGX equity investing, reinvestment compounding, and Shariah-aligned wealth milestones in one workspace.',
+      linkLabel: 'Try Rizq Planner',
+      to: '/rizq-planner',
+    },
+    {
+      icon: Lock,
+      title: 'Auditable NGX Evidence',
+      desc: 'Zero black-box verdicts. Every compliance status traces directly back to regulatory filings and quarterly statements from NGX Pulse.',
+      linkLabel: 'View pricing & tiers',
+      to: '/pricing',
+    },
   ];
 
   const pipeline = [
-    { n: '01', title: 'Regulatory Ingestion',  desc: 'Audited filings & quarterly reports fetched from NGX Pulse',          icon: Globe      },
-    { n: '02', title: 'Business Purity Screen',desc: 'Rule 3/4/1 exclusion of conventional banking, alcohol & vice sectors',icon: Shield     },
-    { n: '03', title: '30% / 5% Ratio Testing', desc: 'Strict quantitative assessment against live Market Capitalisation',   icon: FileDigit  },
-    { n: '04', title: 'Purification & Verdict', desc: 'Instant Halal / Non-Compliant verdict with automated dividend cleansing', icon: Sparkles   },
+    {
+      n: '01',
+      title: 'Regulatory Ingestion',
+      desc: 'Audited annual reports and quarterly financial statements synced from NGX Pulse.',
+      icon: Globe,
+    },
+    {
+      n: '02',
+      title: 'Business Purity Screen',
+      desc: 'Sector and revenue screening excluding conventional interest banking, alcohol, and prohibited lines.',
+      icon: Shield,
+    },
+    {
+      n: '03',
+      title: '30% / 5% Ratio Testing',
+      desc: 'Strict quantitative checks dividing debt and interest cash against trailing market cap.',
+      icon: FileDigit,
+    },
+    {
+      n: '04',
+      title: 'Verdict & Purification',
+      desc: 'Instant Halal, Doubtful, or Non-Compliant verdict paired with dividend cleansing ratio.',
+      icon: Sparkles,
+    },
   ];
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100vh', display: 'flex', flexDirection: 'column', overflowX: 'hidden' }}>
+    <div className="lp-page">
+      {/* ── HERO ────────────────────────────────────────────── */}
+      <section className="lp-hero">
+        <div className="lp-hero-grid-bg" aria-hidden="true" />
+        <div className="lp-container">
+          <div className="lp-hero-grid">
+            {/* Left: Narrative, Launch Countdown & Actions */}
+            <div>
+              <div className="lp-eyebrow">
+                <span className="lp-live-dot" aria-hidden="true" />
+                AAOIFI Standard 21 · Nigerian Exchange (NGX)
+              </div>
 
-      {/* ── HERO ────────────────────────────────── */}
-      <section style={{ position: 'relative', padding: 'clamp(96px,14vw,152px) 20px clamp(80px,10vw,120px)', overflow: 'hidden' }}>
-        {/* Background glows */}
-        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 90% 70% at 50% -15%, rgba(69, 165, 138,0.1) 0%, transparent 60%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', top: '-5%', right: '-5%', width: 700, height: 700, borderRadius: '50%', background: 'radial-gradient(circle, rgba(209, 165, 98,0.08) 0%, transparent 65%)', pointerEvents: 'none', filter: 'blur(56px)' }} />
-        <div style={{ position: 'absolute', top: '15%', left: '-8%', width: 440, height: 440, borderRadius: '50%', background: 'radial-gradient(circle, rgba(69, 165, 138,0.09) 0%, transparent 65%)', pointerEvents: 'none', filter: 'blur(36px)' }} />
-        <div style={{ position: 'absolute', bottom: '10%', right: '20%', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(209, 165, 98,0.05) 0%, transparent 70%)', pointerEvents: 'none', filter: 'blur(30px)' }} />
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent 0%, var(--border-strong) 25%, var(--border-strong) 75%, transparent 100%)' }} />
+              <h1 className="lp-hero-title">
+                Clarity for every{' '}
+                <span className="lp-hero-title-accent">Islamic investment</span>{' '}
+                on the NGX.
+              </h1>
 
-        <div style={{ position: 'relative', maxWidth: 1260, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 480px), 1fr))', gap: 'clamp(40px, 8vw, 80px)', alignItems: 'center' }}>
-          
-          {/* Left: Copy */}
-          <div>
-            {/* Eyebrow badge */}
-            <div className="animate-slide-up" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(209, 165, 98,0.08)', border: '1px solid rgba(209, 165, 98,0.25)', padding: '6px 16px', borderRadius: 40, color: 'var(--gold)', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '1.1px', textTransform: 'uppercase', marginBottom: 28 }}>
-              <div style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--gold)', animation: 'pulse 2.5s infinite' }} />
-              AAOIFI-Certified Shariah Screening · NGX
+              <p className="lp-hero-lead">
+                Irshad screens Nigerian equities against rigorous AAOIFI rules, calculates exact
+                dividend purification &amp; Zakat, and gives both individual investors and
+                institutions source-backed certainty.
+              </p>
+
+              <div className="lp-countdown-slot">
+                <LaunchCountdown variant="hero" />
+              </div>
+
+              <div className="lp-cta-row">
+                <Link to="/portfolio" className="lp-btn lp-btn-primary">
+                  Start Screening <ArrowRight size={17} aria-hidden="true" />
+                </Link>
+                <Link to="/shariah" className="lp-btn lp-btn-secondary">
+                  Shariah Methodology
+                </Link>
+                <Link to="/institution/demo" className="lp-btn lp-btn-gold">
+                  Institutional Demo
+                </Link>
+              </div>
+
+              <ul className="lp-trust-list">
+                <li className="lp-trust-item">
+                  <Shield size={15} aria-hidden="true" /> AAOIFI Standard 21
+                </li>
+                <li className="lp-trust-item">
+                  <CheckCircle2 size={15} aria-hidden="true" /> Audited NGX Filings
+                </li>
+                <li className="lp-trust-item">
+                  <Calculator size={15} aria-hidden="true" /> Purification &amp; Zakat
+                </li>
+              </ul>
+
+              <div className="lp-store-row">
+                <a
+                  href="https://apps.apple.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="lp-store-badge"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
+                  </svg>
+                  <div>
+                    <div className="lp-store-caption">Download on the</div>
+                    <div className="lp-store-name">App Store</div>
+                  </div>
+                </a>
+
+                <a
+                  href="https://play.google.com/store/apps/details?id=com.irshad.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="lp-store-badge"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M3.18 23.76c.3.17.64.24.99.19L14.54 12 3.18.05C2.83.0 2.49.07 2.19.24 1.6.57 1.25 1.22 1.25 2v20c0 .78.35 1.43.93 1.76z" fill="#EA4335" />
+                    <path d="M22.45 10.29l-3.23-1.85L15.72 12l3.5 3.56 3.24-1.86c.93-.53.93-2.88-.01-3.41z" fill="#FBBC04" />
+                    <path d="M3.18.05l11.36 11.96L18.1 8.44 5.11.34A2.04 2.04 0 003.18.05z" fill="#4285F4" />
+                    <path d="M3.18 23.95c.6.36 1.35.32 1.93-.04l13-8.1-3.57-3.81L3.18 23.95z" fill="#34A853" />
+                  </svg>
+                  <div>
+                    <div className="lp-store-caption">Get it on</div>
+                    <div className="lp-store-name">Google Play</div>
+                  </div>
+                </a>
+              </div>
             </div>
 
-            {/* Headline */}
-            <h1 className="animate-slide-up stagger-1" style={{ fontSize: 'clamp(2.6rem, 5.2vw, 4.6rem)', fontWeight: 900, lineHeight: 1.03, letterSpacing: '-2.5px', color: 'var(--text-dark)', marginBottom: 22 }}>
-              The Intelligent Platform<br />
-              for{' '}
-              <span style={{ background: 'linear-gradient(130deg, var(--primary) 0%, var(--gold) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                Islamic Investing
-              </span>
-            </h1>
-
-            {/* Subheading */}
-            <p className="animate-slide-up stagger-2" style={{ fontSize: 'clamp(1rem, 1.3vw, 1.12rem)', color: 'var(--text-muted)', lineHeight: 1.82, maxWidth: 520, marginBottom: 24, fontWeight: 400 }}>
-              Irshad screens Nigerian equities against rigorous AAOIFI standards — so you know exactly what you own, and whether it is permissible.
-            </p>
-
-            {/* Launch Countdown */}
-            <LaunchCountdown variant="hero" />
-
-            {/* CTAs */}
-            <div className="animate-slide-up stagger-3" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 48 }}>
-              <Link to="/portfolio" className="btn-primary hover-lift" style={{ padding: '15px 36px', fontSize: '0.95rem', borderRadius: 13, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 8, boxShadow: '0 8px 28px rgba(69, 165, 138,0.24)', textDecoration: 'none', whiteSpace: 'nowrap' }}>
-                Explore Equities <ArrowRight size={17} />
-              </Link>
-              <Link to="/shariah" style={{ padding: '15px 30px', fontSize: '0.95rem', borderRadius: 13, fontWeight: 600, color: 'var(--text-body)', border: '1.5px solid var(--border-strong)', background: 'transparent', display: 'inline-flex', alignItems: 'center', gap: 8, transition: 'border-color 0.22s, color 0.22s', textDecoration: 'none', whiteSpace: 'nowrap' }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.color = 'var(--primary)'; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-strong)'; e.currentTarget.style.color = 'var(--text-body)'; }}>
-                Our Methodology
-              </Link>
-              <Link to="/institution/demo" style={{ padding: '15px 28px', fontSize: '0.95rem', borderRadius: 13, fontWeight: 700, color: 'var(--gold)', border: '1.5px solid var(--gold-border)', background: 'var(--gold-50)', display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none', whiteSpace: 'nowrap' }}>
-                Institutional Demo
-              </Link>
-            </div>
-
-            {/* Trust badges */}
-            <div className="animate-slide-up stagger-4" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', rowGap: 10, columnGap: 0 }}>
-              {[
-                { icon: Shield,      text: 'AAOIFI Std. 21' },
-                { icon: CheckCircle, text: 'Halal Verified'  },
-                { icon: Lock,        text: 'Fully Auditable'  },
-              ].map((b, i) => (
-                <React.Fragment key={i}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                    <b.icon size={13} color="var(--primary)" />
-                    {b.text}
+            {/* Right: Live Screening Intelligence Terminal */}
+            <div className="lp-hero-showcase">
+              <div className="lp-terminal-card">
+                <div className="lp-terminal-header">
+                  <div className="lp-terminal-title-wrap">
+                    <div className="lp-terminal-mark" aria-hidden="true">
+                      <Shield size={18} />
+                    </div>
+                    <div style={{ minInlineSize: 0 }}>
+                      <div className="lp-terminal-kicker">NGX Screening Feed</div>
+                      <h2 className="lp-terminal-title">Live Shariah Verdicts</h2>
+                    </div>
                   </div>
-                  {i < 2 && <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--border-strong)', margin: '0 16px' }} />}
-                </React.Fragment>
-              ))}
-            </div>
+                  <span className="lp-terminal-pill">
+                    <span className="lp-live-dot" aria-hidden="true" /> Rule 3/4/1
+                  </span>
+                </div>
 
-            {/* Store badges */}
-            <div className="animate-slide-up stagger-4" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 32 }}>
-              <a href="https://apps.apple.com" target="_blank" rel="noopener noreferrer"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 11, background: '#111', color: 'white', padding: '11px 20px', borderRadius: 13, textDecoration: 'none', transition: 'transform 0.2s, box-shadow 0.2s', boxShadow: '0 4px 16px rgba(0,0,0,0.18)', border: '1px solid rgba(255,255,255,0.06)' }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 10px 28px rgba(0,0,0,0.26)'; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.18)'; }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="white" style={{ flexShrink: 0 }}>
-                  <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
-                </svg>
-                <div style={{ lineHeight: 1 }}>
-                  <div style={{ fontSize: '0.58rem', opacity: 0.65, marginBottom: 3, fontWeight: 500, letterSpacing: '0.2px' }}>Download on the</div>
-                  <div style={{ fontSize: '0.9rem', fontWeight: 800, letterSpacing: '-0.3px' }}>App Store</div>
-                </div>
-              </a>
-
-              <a href="https://play.google.com/store/apps/details?id=com.irshad.com" target="_blank" rel="noopener noreferrer"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 11, background: '#111', color: 'white', padding: '11px 20px', borderRadius: 13, textDecoration: 'none', transition: 'transform 0.2s, box-shadow 0.2s', boxShadow: '0 4px 16px rgba(0,0,0,0.18)', border: '1px solid rgba(255,255,255,0.06)' }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 10px 28px rgba(0,0,0,0.26)'; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.18)'; }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
-                  <path d="M3.18 23.76c.3.17.64.24.99.19L14.54 12 3.18.05C2.83.0 2.49.07 2.19.24 1.6.57 1.25 1.22 1.25 2v20c0 .78.35 1.43.93 1.76z" fill="#EA4335"/>
-                  <path d="M22.45 10.29l-3.23-1.85L15.72 12l3.5 3.56 3.24-1.86c.93-.53.93-2.88-.01-3.41z" fill="#FBBC04"/>
-                  <path d="M3.18.05l11.36 11.96L18.1 8.44 5.11.34A2.04 2.04 0 003.18.05z" fill="#4285F4"/>
-                  <path d="M3.18 23.95c.6.36 1.35.32 1.93-.04l13-8.1-3.57-3.81L3.18 23.95z" fill="#34A853"/>
-                </svg>
-                <div style={{ lineHeight: 1 }}>
-                  <div style={{ fontSize: '0.58rem', opacity: 0.65, marginBottom: 3, fontWeight: 500, letterSpacing: '0.2px' }}>Get it on</div>
-                  <div style={{ fontSize: '0.9rem', fontWeight: 800, letterSpacing: '-0.3px' }}>Google Play</div>
-                </div>
-              </a>
-            </div>
-          </div>
-
-          
-          {/* Right: Phone Visual */}
-          <div className="animate-slide-up stagger-2" style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <div style={{ position: 'absolute', width: 280, height: 280, borderRadius: '50%', background: 'radial-gradient(circle, rgba(69, 165, 138,0.13) 0%, transparent 70%)', filter: 'blur(44px)', pointerEvents: 'none' }} />
-            <div style={{ position: 'relative', width: 'min(290px, 100%)', aspectRatio: '9/16.5' }}>
-              <div style={{ position: 'absolute', inset: 0, background: 'var(--bg)', borderRadius: 40, border: '1.5px solid var(--border-strong)', boxShadow: '0 40px 80px rgba(0,0,0,0.14), 0 0 0 6px var(--bg), 0 0 0 7.5px var(--border-strong)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                <div style={{ padding: '14px 20px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
-                  <span style={{ fontSize: '0.63rem', fontWeight: 800, color: 'var(--text-dark)' }}>9:41</span>
-                  <div style={{ display: 'flex', gap: 4, alignItems: 'flex-end' }}>
-                    {[4,6,8,10].map((h,i) => <div key={i} style={{ width: 3, height: h, background: 'var(--text-dark)', borderRadius: 1, opacity: 0.35 + i * 0.18 }} />)}
-                    <Smartphone size={10} color="var(--text-dark)" style={{ marginLeft: 3, opacity: 0.7 }} />
-                  </div>
-                </div>
-                <div style={{ padding: '16px 20px 12px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                    <span style={{ fontSize: '1.05rem', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-0.5px' }}>Irshad</span>
-                    <div style={{ width: 28, height: 28, borderRadius: 8, background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Shield size={13} color="white" /></div>
-                  </div>
-                  <div style={{ background: 'var(--primary-50)', border: '1px solid var(--border)', borderRadius: 9, padding: '7px 11px', display: 'flex', alignItems: 'center', gap: 7 }}>
-                    <SearchIcon size={11} color="var(--text-muted)" />
-                    <span style={{ fontSize: '0.68rem', color: 'var(--text-light)', fontWeight: 500 }}>Search equities…</span>
-                  </div>
-                </div>
-                <div style={{ flex: 1, overflow: 'hidden' }}>
-                  {[
-                    { sym: 'DANGCEM',    name: 'Dangote Cement',  verdict: 'halal'     },
-                    { sym: 'ZENITHBANK', name: 'Zenith Bank',      verdict: 'doubtful'  },
-                    { sym: 'MTNN',       name: 'MTN Nigeria',      verdict: 'halal'     },
-                    { sym: 'GTCO',       name: 'Guaranty Trust',   verdict: 'halal'     },
-                  ].map((co, i, arr) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 20px', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                      <div style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--primary-50)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.6rem', color: 'var(--primary)', flexShrink: 0, border: '1px solid var(--primary-100)' }}>{co.sym.substring(0,2)}</div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-dark)' }}>{co.sym}</div>
-                        <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{co.name}</div>
-                      </div>
+                {/* Rule 3/4/1 Quantitative Thresholds */}
+                <div className="lp-rule-strip" aria-label="AAOIFI quantitative screening thresholds">
+                  {HERO_RULES.map((rule) => (
+                    <div key={rule.label} className="lp-rule-box">
+                      <div className="lp-rule-value">{rule.threshold}</div>
+                      <div className="lp-rule-label">{rule.label}</div>
                     </div>
                   ))}
                 </div>
-                <div style={{ padding: '10px 0 18px', borderTop: '1px solid var(--border)', background: 'var(--bg)', display: 'flex', justifyContent: 'space-around', flexShrink: 0 }}>
-                  {[{icon:BarChart2,label:'Market',active:true},{icon:FileText,label:'Reports',active:false},{icon:Shield,label:'Screening',active:false},{icon:Globe,label:'News',active:false}].map((tab,i) => (
-                    <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-                      <tab.icon size={16} color={tab.active ? 'var(--primary)' : 'var(--text-light)'} />
-                      <span style={{ fontSize: '0.53rem', fontWeight: 600, color: tab.active ? 'var(--primary)' : 'var(--text-light)' }}>{tab.label}</span>
-                    </div>
-                  ))}
+
+                {/* Live API Recent Screenings */}
+                {loading ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
+                    {[0, 1, 2, 3].map((idx) => (
+                      <div key={idx} className="skeleton" style={{ height: 52, borderRadius: 12 }} />
+                    ))}
+                  </div>
+                ) : uniqueRecent.length > 0 ? (
+                  <ul className="lp-terminal-list">
+                    {uniqueRecent.slice(0, 4).map((co) => (
+                      <li key={co.id || co.symbol}>
+                        <Link to={`/market/${co.symbol}/aaoifi`} className="lp-terminal-row">
+                          <div className="lp-terminal-row-left">
+                            <CompanyAvatar symbol={co.symbol} logoUrl={co.logo_url} size={34} />
+                            <div style={{ minInlineSize: 0 }}>
+                              <div className="lp-terminal-sym">{co.symbol}</div>
+                              <div className="lp-terminal-name">{co.name}</div>
+                            </div>
+                          </div>
+                          <StatusPill verdict={co.status} />
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div style={{ padding: '1.25rem', borderRadius: 12, background: 'var(--lp-surface-subtle)', textAlign: 'center', color: 'var(--lp-muted)', fontSize: '0.84rem', marginBottom: '1rem' }}>
+                    Search any NGX ticker below to inspect its AAOIFI screening breakdown.
+                  </div>
+                )}
+
+                <div className="lp-terminal-footer">
+                  <span>Click any equity for full ratio audit</span>
+                  <Link to="/portfolio" className="lp-text-link">
+                    All equities <ArrowRight size={14} aria-hidden="true" />
+                  </Link>
                 </div>
               </div>
             </div>
@@ -309,226 +567,397 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── SEARCH & LIVE DATA ────────────────────────────── */}
-      <div style={{ maxWidth: 960, margin: '0 auto', padding: 'clamp(40px,7vw,64px) 20px clamp(56px,9vw,96px)', display: 'flex', flexDirection: 'column', gap: 'clamp(36px,6vw,52px)', width: '100%', boxSizing: 'border-box' }}>
-        
-        {/* Stats strip */}
-        <Reveal>
-          <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0, border: '1.5px solid var(--border-strong)', borderRadius: 18, overflow: 'hidden', boxShadow: '0 4px 20px rgba(69, 165, 138,0.05)' }}>
-            {statItems.map((s, i) => (
-              <div key={i} style={{ background: 'var(--bg)', padding: '20px 22px', borderRight: i < statItems.length - 1 ? '1px solid var(--border-strong)' : 'none', transition: 'background 0.2s' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(69, 165, 138,0.03)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'var(--bg)'}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-                  <s.icon size={13} color={s.color} style={{ opacity: 0.8 }} />
-                  <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.9px' }}>{s.label}</span>
-                </div>
-                <div style={{ fontSize: 'clamp(1.4rem, 2.2vw, 1.9rem)', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-0.8px', lineHeight: 1 }}>
-                  <AnimatedNumber value={s.value} />{s.suffix}
-                </div>
-              </div>
-            ))}
-          </div>
-        </Reveal>
-
-        {/* Search bar */}
-        <Reveal delay={0.06}>
-          <div style={{ position: 'relative' }}>
-            <div style={{ background: 'var(--bg)', border: '1.5px solid var(--border-strong)', borderRadius: 100, padding: '10px 10px 10px 26px', display: 'flex', alignItems: 'center', gap: 12, boxShadow: '0 4px 24px rgba(0,0,0,0.04)', transition: 'box-shadow 0.3s, border-color 0.3s' }}
-              onFocusCapture={e => { e.currentTarget.style.boxShadow = '0 0 0 4px rgba(69, 165, 138,0.1), 0 4px 24px rgba(0,0,0,0.06)'; e.currentTarget.style.borderColor = 'var(--primary)'; }}
-              onBlurCapture={e => { e.currentTarget.style.boxShadow = '0 4px 24px rgba(0,0,0,0.04)'; e.currentTarget.style.borderColor = 'var(--border-strong)'; }}>
-              <SearchIcon size={18} color="var(--text-muted)" style={{ flexShrink: 0 }} />
-              <form onSubmit={handleSearch} style={{ flex: 1, display: 'flex', gap: 8, alignItems: 'center' }}>
-                <input
-                  type="text" value={search} onChange={e => setSearch(e.target.value)}
-                  placeholder="Search by ticker or company name…"
-                  style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: '0.97rem', color: 'var(--text-dark)', fontWeight: 500, padding: '8px 0', minWidth: 0, fontFamily: 'inherit' }}
-                />
-                <button type="submit" className="btn-primary" style={{ padding: '12px 32px', borderRadius: 100, fontSize: '0.88rem', fontWeight: 700, whiteSpace: 'nowrap', flexShrink: 0 }}>
-                  Analyse
-                </button>
-              </form>
-            </div>
-          </div>
-        </Reveal>
-
-        {/* Live Screenings */}
-        <Reveal delay={0.08}>
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--halal)', animation: 'pulse 3s infinite', boxShadow: '0 0 0 2px rgba(5,150,105,0.2)' }} />
-                <span style={{ fontWeight: 700, fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>Recently Screened</span>
-              </div>
-              <Link to="/market" style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4, transition: 'gap 0.2s' }}
-                onMouseEnter={e => e.currentTarget.style.gap = '7px'}
-                onMouseLeave={e => e.currentTarget.style.gap = '4px'}>
-                View all <ArrowRight size={12} />
-              </Link>
-            </div>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10 }}>
-              {loading
-                ? [0,1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 72, borderRadius: 14 }} />)
-                : recent.slice(0, 4).map((co) => (
-                  <Link key={co.id} to={`/market/${co.symbol}/aaoifi`} style={{ padding: '16px', background: 'var(--bg)', border: '1.5px solid var(--border-strong)', borderRadius: 14, display: 'flex', flexDirection: 'column', gap: 14, textDecoration: 'none', transition: 'border-color 0.2s, box-shadow 0.2s, transform 0.2s' }}
-
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(69, 165, 138,0.35)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(69, 165, 138,0.09)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-strong)'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <CompanyAvatar symbol={co.symbol} size={42} />
-                    </div>
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--text-dark)', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{co.symbol}</div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{co.name}</div>
-                    </div>
-                  </Link>
-                ))}
-            </div>
-          </div>
-        </Reveal>
-      </div>
-
-      {/* ── MAIN ──────────────────────────────── */}
-      <div style={{ maxWidth: 1260, margin: '0 auto', padding: '0 20px clamp(72px,12vw,120px)', width: '100%', display: 'flex', flexDirection: 'column', gap: 'clamp(56px,9vw,96px)' }}>
-
-        {/* Features Grid */}
-        <Reveal delay={0.05}>
-          <div>
-            {/* Section header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 16, marginBottom: 40 }}>
-              <div>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-                  <div style={{ height: 1, width: 28, background: 'var(--primary)', opacity: 0.5 }} />
-                  <span style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', color: 'var(--primary)' }}>Why Irshad</span>
-                </div>
-                <h2 style={{ fontSize: 'clamp(1.8rem, 3.8vw, 2.6rem)', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-1.2px', lineHeight: 1.1, maxWidth: 460, margin: 0 }}>
-                  Built for the serious<br />Muslim investor
-                </h2>
-              </div>
-              <Link to="/portfolio" style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--primary)', display: 'inline-flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap', textDecoration: 'none', transition: 'gap 0.2s' }}
-                onMouseEnter={e => e.currentTarget.style.gap = '9px'}
-                onMouseLeave={e => e.currentTarget.style.gap = '5px'}>
-                Start for free <ArrowRight size={13} />
-              </Link>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: 0, border: '1.5px solid var(--border-strong)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 8px 32px rgba(69, 165, 138,0.07)' }}>
-              {features.map((f, i) => (
-                <Reveal key={i} delay={i * 0.07}>
-                  <div style={{
-                    padding: '36px 32px 40px',
-                    background: 'var(--bg)',
-                    borderRight: i % 2 === 0 ? '1px solid var(--border-strong)' : 'none',
-                    borderBottom: i < 2 ? '1px solid var(--border-strong)' : 'none',
-                    transition: 'background 0.25s, box-shadow 0.25s',
-                    height: '100%', boxSizing: 'border-box',
-                    position: 'relative', overflow: 'hidden',
-                  }}
-                    onMouseEnter={e => { e.currentTarget.style.background = 'linear-gradient(160deg, rgba(69, 165, 138,0.04) 0%, rgba(69, 165, 138,0.01) 100%)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg)'; }}>
-                    {/* Subtle step number */}
-                    <div style={{ position: 'absolute', top: 20, right: 24, fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-light)', letterSpacing: '1px', opacity: 0.5 }}>0{i + 1}</div>
-                    {/* Icon */}
-                    <div style={{ width: 48, height: 48, borderRadius: 14, background: 'linear-gradient(135deg, var(--primary) 0%, var(--gold) 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', marginBottom: 22, boxShadow: '0 6px 18px rgba(69, 165, 138,0.25)' }}>
-                      <f.icon size={21} />
-                    </div>
-                    <div style={{ fontWeight: 800, fontSize: '0.97rem', color: 'var(--text-dark)', marginBottom: 10, letterSpacing: '-0.3px' }}>{f.title}</div>
-                    <p style={{ fontSize: '0.81rem', color: 'var(--text-muted)', lineHeight: 1.7, margin: 0 }}>{f.desc}</p>
+      {/* ── TELEMETRY, LIVE SEARCH & MARKET INTELLIGENCE ─────── */}
+      <section className="lp-band">
+        <div className="lp-container lp-band-stack">
+          {/* 4-column Live Telemetry Strip */}
+          <Reveal>
+            <div className="lp-stats-bar">
+              {statItems.map((s) => (
+                <div key={s.label} className="lp-stat-cell">
+                  <div className="lp-stat-head">
+                    <s.icon size={15} color={s.color} aria-hidden="true" />
+                    <span>{s.label}</span>
                   </div>
-                </Reveal>
+                  <div className="lp-stat-value">
+                    <AnimatedNumber value={s.value} />
+                    {s.suffix}
+                  </div>
+                </div>
               ))}
             </div>
-          </div>
-        </Reveal>
+          </Reveal>
 
-        {/* Pipeline */}
-        <Reveal delay={0.05}>
-          <div style={{ position: 'relative', borderRadius: 26, overflow: 'hidden', border: '1.5px solid var(--border-strong)', boxShadow: '0 8px 32px rgba(69, 165, 138,0.06)' }}>
-            {/* Header strip */}
-            <div style={{ padding: 'clamp(32px,5vw,52px) clamp(28px,5vw,52px) 0', background: 'linear-gradient(160deg, rgba(69, 165, 138,0.05) 0%, rgba(69, 165, 138,0.01) 100%)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 16, marginBottom: 40 }}>
-                <div>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-                    <div style={{ height: 1, width: 28, background: 'var(--primary)', opacity: 0.5 }} />
-                    <span style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', color: 'var(--primary)' }}>Methodology</span>
-                  </div>
-                  <h2 style={{ fontSize: 'clamp(1.6rem, 3.2vw, 2.3rem)', fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '-1px', lineHeight: 1.15, margin: 0 }}>
-                    How the screening works
-                  </h2>
+          {/* Instant Equity Search */}
+          <Reveal delay={0.05}>
+            <div className="lp-search-wrap">
+              <div className="lp-search-shell">
+                <SearchIcon size={19} color="var(--lp-muted)" aria-hidden="true" style={{ flexShrink: 0 }} />
+                <form onSubmit={handleSearch} className="lp-search-form" role="search" aria-label="Screen an NGX stock">
+                  <label htmlFor={searchInputId} className="visually-hidden">
+                    Search by NGX ticker or company name
+                  </label>
+                  <input
+                    id={searchInputId}
+                    type="search"
+                    className="lp-search-input"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Check compliance for any NGX stock (e.g. DANGCEM, MTNN)…"
+                    autoComplete="off"
+                  />
+                  <button type="submit" className="lp-search-submit">
+                    Screen Stock
+                  </button>
+                </form>
+              </div>
+
+              {(searching || searchResults.length > 0) && (
+                <div className="lp-search-dropdown" aria-live="polite">
+                  {searching && searchResults.length === 0 ? (
+                    <div style={{ padding: '0.75rem 1rem', fontSize: '0.84rem', color: 'var(--lp-muted)' }}>
+                      Searching NGX equities…
+                    </div>
+                  ) : (
+                    searchResults.map((item) => (
+                      <Link
+                        key={item.id || item.symbol}
+                        to={`/market/${encodeURIComponent(item.symbol)}/aaoifi`}
+                        className="lp-search-result"
+                      >
+                        <div className="lp-terminal-row-left">
+                          <CompanyAvatar symbol={item.symbol} size={32} />
+                          <div style={{ minInlineSize: 0 }}>
+                            <div className="lp-terminal-sym">{item.symbol}</div>
+                            <div className="lp-terminal-name">
+                              {item.name}
+                              {item.sector ? ` · ${item.sector}` : ''}
+                            </div>
+                          </div>
+                        </div>
+                        <StatusPill verdict={item.status || item.current_status} />
+                      </Link>
+                    ))
+                  )}
                 </div>
-                <Link to="/shariah" style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--primary)', display: 'inline-flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap', textDecoration: 'none', transition: 'gap 0.2s' }}
-                  onMouseEnter={e => e.currentTarget.style.gap = '9px'}
-                  onMouseLeave={e => e.currentTarget.style.gap = '5px'}>
-                  Full methodology <ArrowRight size={13} />
+              )}
+
+              <div className="lp-search-chips">
+                <span className="lp-search-chip-label">Popular:</span>
+                {QUICK_TICKERS.map((ticker) => (
+                  <Link
+                    key={ticker}
+                    to={`/market/${ticker}/aaoifi`}
+                    className="lp-chip-link"
+                  >
+                    {ticker}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </Reveal>
+
+          {/* Recently Screened Cards + Latest Filings & Activity Pulse */}
+          <Reveal delay={0.07}>
+            <div>
+              <div className="lp-section-head">
+                <div>
+                  <div className="lp-section-kicker">Market Pulse</div>
+                  <h2 className="lp-section-title">Recently screened &amp; filings feed</h2>
+                </div>
+                <Link to="/portfolio" className="lp-text-link">
+                  Open full screener <ArrowRight size={15} aria-hidden="true" />
+                </Link>
+              </div>
+
+              <div className="lp-live-grid">
+                {loading
+                  ? [0, 1, 2, 3].map((i) => (
+                      <div key={i} className="skeleton" style={{ height: 112, borderRadius: 16 }} />
+                    ))
+                  : uniqueRecent.slice(0, 4).map((co) => (
+                      <Link
+                        key={co.id || co.symbol}
+                        to={`/market/${co.symbol}/aaoifi`}
+                        className="lp-equity-card"
+                      >
+                        <div className="lp-equity-top">
+                          <CompanyAvatar symbol={co.symbol} logoUrl={co.logo_url} size={42} />
+                          <StatusPill verdict={co.status} />
+                        </div>
+                        <div style={{ minInlineSize: 0 }}>
+                          <div className="lp-equity-symbol">{co.symbol}</div>
+                          <div className="lp-equity-name">{co.name}</div>
+                        </div>
+                      </Link>
+                    ))}
+              </div>
+
+              {(reports.length > 0 || news.length > 0) && (
+                <div className="lp-pulse-split">
+                  {reports.length > 0 && (
+                    <div className="lp-feed-panel">
+                      <h3 className="lp-feed-title">
+                        <FileText size={14} aria-hidden="true" /> Latest Audited Filings
+                      </h3>
+                      <ul className="lp-feed-list">
+                        {reports.slice(0, 3).map((rep) => (
+                          <li key={rep.id}>
+                            <Link
+                              to={
+                                rep.company?.symbol
+                                  ? `/market/${rep.company.symbol}/aaoifi`
+                                  : '/portfolio'
+                              }
+                              className="lp-feed-item"
+                            >
+                              <div style={{ minInlineSize: 0 }}>
+                                <div style={{ fontWeight: 700, fontSize: '0.88rem' }}>
+                                  {rep.company?.symbol || 'NGX'}{' '}
+                                  <span style={{ fontWeight: 500, color: 'var(--lp-muted)' }}>
+                                    — {rep.company?.name || 'Filing Update'}
+                                  </span>
+                                </div>
+                                <div style={{ fontSize: '0.76rem', color: 'var(--lp-muted)', marginTop: 2 }}>
+                                  {rep.reporting_period || 'Audited Statement'}
+                                </div>
+                              </div>
+                              <ArrowRight size={14} color="var(--primary)" style={{ flexShrink: 0, marginTop: 4 }} aria-hidden="true" />
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {news.length > 0 && (
+                    <div className="lp-feed-panel">
+                      <h3 className="lp-feed-title">
+                        <Globe size={14} aria-hidden="true" /> Corporate Disclosures
+                      </h3>
+                      <ul className="lp-feed-list">
+                        {news.slice(0, 3).map((item) => (
+                          <li key={item.id}>
+                            <Link
+                              to={
+                                item.company?.symbol
+                                  ? `/market/${item.company.symbol}/aaoifi`
+                                  : '/resources'
+                              }
+                              className="lp-feed-item"
+                            >
+                              <div style={{ minInlineSize: 0 }}>
+                                <div style={{ fontWeight: 700, fontSize: '0.88rem' }}>
+                                  {item.company?.symbol || 'NGX'}
+                                </div>
+                                <div style={{ fontSize: '0.78rem', color: 'var(--lp-muted)', lineHeight: 1.45, marginTop: 2 }}>
+                                  {item.summary || item.activity_type || 'Business activity disclosure tracked.'}
+                                </div>
+                              </div>
+                              <ArrowRight size={14} color="var(--gold)" style={{ flexShrink: 0, marginTop: 4 }} aria-hidden="true" />
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ── WHY IRSHAD: 4 CORE PILLARS ──────────────────────── */}
+      <section className="lp-band" style={{ paddingBlockStart: 0 }}>
+        <div className="lp-container">
+          <Reveal>
+            <div className="lp-section-head">
+              <div>
+                <div className="lp-section-kicker">Why Irshad</div>
+                <h2 className="lp-section-title">Built for serious Islamic investing</h2>
+                <p className="lp-section-desc">
+                  Institutional-grade AAOIFI compliance, dividend purification, and planning tools
+                  designed around Nigerian equities.
+                </p>
+              </div>
+              <Link to="/register" className="lp-text-link">
+                Create free account <ArrowRight size={15} aria-hidden="true" />
+              </Link>
+            </div>
+
+            <div className="lp-bento-grid">
+              {pillars.map((pillar, i) => (
+                <article key={pillar.title} className="lp-feature-card">
+                  <div className="lp-feature-top">
+                    <div className="lp-icon-badge" aria-hidden="true">
+                      <pillar.icon size={20} />
+                    </div>
+                    <span className="lp-step-num">0{i + 1}</span>
+                  </div>
+                  <div>
+                    <h3 className="lp-feature-title">{pillar.title}</h3>
+                    <p className="lp-feature-desc">{pillar.desc}</p>
+                  </div>
+                  <Link to={pillar.to} className="lp-text-link" style={{ fontSize: '0.84rem' }}>
+                    {pillar.linkLabel} <ArrowRight size={14} aria-hidden="true" />
+                  </Link>
+                </article>
+              ))}
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ── RETAIL & INSTITUTIONAL AUDIENCES ────────────────── */}
+      <section className="lp-band" style={{ paddingBlockStart: 0 }}>
+        <div className="lp-container">
+          <Reveal>
+            <div className="lp-section-head">
+              <div>
+                <div className="lp-section-kicker">Tailored Workspaces</div>
+                <h2 className="lp-section-title">From personal wealth to fund mandates</h2>
+              </div>
+            </div>
+
+            <div className="lp-audience-grid">
+              <div className="lp-audience-card">
+                <div>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: 'var(--primary)', fontWeight: 700, fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.6rem' }}>
+                    <TrendingUp size={15} aria-hidden="true" /> Individual Investors
+                  </div>
+                  <h3 className="lp-feature-title" style={{ fontSize: '1.3rem' }}>
+                    Screen, compound, and purify your portfolio
+                  </h3>
+                  <ul className="lp-audience-list">
+                    <li>
+                      <CheckCircle2 size={16} aria-hidden="true" />
+                      <span>Track NGX holdings, curated Halal thematic baskets, and dividend cleansing.</span>
+                    </li>
+                    <li>
+                      <CheckCircle2 size={16} aria-hidden="true" />
+                      <span>Plan recurring monthly investments with the built-in Rizq Compounder.</span>
+                    </li>
+                    <li>
+                      <CheckCircle2 size={16} aria-hidden="true" />
+                      <span>Receive watchlist alerts whenever a quarterly filing changes compliance status.</span>
+                    </li>
+                  </ul>
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+                  <Link to="/portfolio" className="lp-btn lp-btn-primary">
+                    Launch Portfolio <ArrowRight size={16} aria-hidden="true" />
+                  </Link>
+                  <Link to="/pricing" className="lp-btn lp-btn-secondary">
+                    Compare Plans
+                  </Link>
+                </div>
+              </div>
+
+              <div className="lp-audience-card lp-audience-card--inst">
+                <div>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: 'var(--gold)', fontWeight: 700, fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.6rem' }}>
+                    <Building2 size={15} aria-hidden="true" /> Asset Managers &amp; Funds
+                  </div>
+                  <h3 className="lp-feature-title" style={{ fontSize: '1.3rem' }}>
+                    Smart institutional fund screening &amp; oversight
+                  </h3>
+                  <ul className="lp-audience-list">
+                    <li>
+                      <CheckCircle2 size={16} aria-hidden="true" />
+                      <span>Upload fund holdings — auto-detects Fixed Income, Equity, or Balanced Fund structures.</span>
+                    </li>
+                    <li>
+                      <CheckCircle2 size={16} aria-hidden="true" />
+                      <span>Run mandate compliance checks, pre-trade verification, and purification schedules.</span>
+                    </li>
+                    <li>
+                      <CheckCircle2 size={16} aria-hidden="true" />
+                      <span>Generate auditable Shariah governance summaries backed by primary filings.</span>
+                    </li>
+                  </ul>
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+                  <Link to="/institution/demo" className="lp-btn lp-btn-gold">
+                    Explore Institutional Demo <ArrowRight size={16} aria-hidden="true" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ── METHODOLOGY PIPELINE ────────────────────────────── */}
+      <section className="lp-band" style={{ paddingBlockStart: 0 }}>
+        <div className="lp-container">
+          <Reveal>
+            <div className="lp-pipeline-shell">
+              <div className="lp-pipeline-head">
+                <div className="lp-section-head" style={{ marginBottom: 0 }}>
+                  <div>
+                    <div className="lp-section-kicker">Methodology</div>
+                    <h2 className="lp-section-title">How every verdict is produced</h2>
+                  </div>
+                  <Link to="/shariah" className="lp-text-link">
+                    Read AAOIFI Std. 21 rules <ArrowRight size={15} aria-hidden="true" />
+                  </Link>
+                </div>
+              </div>
+
+              <ol className="lp-pipeline-list">
+                {pipeline.map((step) => (
+                  <li key={step.n} className="lp-pipeline-step">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div className="lp-icon-badge" aria-hidden="true">
+                        <step.icon size={19} />
+                      </div>
+                      <span className="lp-pipeline-index" aria-hidden="true">{step.n}</span>
+                    </div>
+                    <h3 className="lp-feature-title" style={{ marginTop: '0.35rem' }}>{step.title}</h3>
+                    <p className="lp-feature-desc">{step.desc}</p>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ── HIGH-CONTRAST EMERALD CTA BANNER ────────────────── */}
+      <section className="lp-band" style={{ paddingBlockStart: 0 }}>
+        <div className="lp-container">
+          <Reveal>
+            <div className="lp-cta-banner">
+              <div>
+                <div className="lp-cta-kicker">
+                  <Shield size={13} aria-hidden="true" />
+                  Public Launch · December 1, 2026
+                </div>
+                <h2 className="lp-cta-title">
+                  Invest with conviction.
+                  <br />
+                  Screen with precision.
+                </h2>
+                <p className="lp-cta-copy">
+                  Every ratio, every ruling, and every filing verified so you can compound halal
+                  wealth across Nigerian markets with peace of mind.
+                </p>
+              </div>
+
+              <div className="lp-cta-actions">
+                <Link to="/register" className="lp-btn lp-btn-primary">
+                  Get Started Free <ArrowRight size={16} aria-hidden="true" />
+                </Link>
+                <Link to="/shariah" className="lp-btn lp-cta-btn-outline">
+                  Read Methodology
                 </Link>
               </div>
             </div>
+          </Reveal>
+        </div>
+      </section>
 
-            {/* Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: 0, background: 'var(--border-strong)' }}>
-              {pipeline.map((s, i) => (
-                <Reveal key={i} delay={i * 0.08}>
-                  <div style={{ background: 'var(--bg)', padding: '32px 28px 36px', borderRight: i < pipeline.length - 1 ? '1px solid var(--border-strong)' : 'none', height: '100%', boxSizing: 'border-box', transition: 'background 0.25s', position: 'relative' }}
-                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(69, 165, 138,0.03)'}
-                    onMouseLeave={e => e.currentTarget.style.background = 'var(--bg)'}>
-                    {/* Step number — large background accent */}
-                    <div style={{ fontSize: '2.8rem', fontWeight: 900, color: 'var(--primary)', opacity: 0.07, lineHeight: 1, marginBottom: -16, letterSpacing: '-3px', userSelect: 'none' }}>{s.n}</div>
-                    {/* Icon */}
-                    <div style={{ width: 44, height: 44, borderRadius: 13, background: 'linear-gradient(135deg, var(--primary) 0%, var(--gold) 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', marginBottom: 18, boxShadow: '0 6px 18px rgba(69, 165, 138,0.25)' }}>
-                      <s.icon size={19} />
-                    </div>
-                    <div style={{ fontWeight: 800, fontSize: '0.92rem', color: 'var(--text-dark)', marginBottom: 9, letterSpacing: '-0.2px' }}>{s.title}</div>
-                    <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.65, margin: 0 }}>{s.desc}</p>
-                    {/* Connector arrow (except last) */}
-                    {i < pipeline.length - 1 && (
-                      <div style={{ position: 'absolute', right: -9, top: '50%', transform: 'translateY(-50%)', width: 18, height: 18, background: 'var(--bg)', border: '1.5px solid var(--border-strong)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}>
-                        <ArrowRight size={9} color="var(--primary)" />
-                      </div>
-                    )}
-                  </div>
-                </Reveal>
-              ))}
-            </div>
-          </div>
-        </Reveal>
-
-        {/* CTA Banner */}
-        <Reveal delay={0.04}>
-          <div style={{ position: 'relative', borderRadius: 26, overflow: 'hidden', background: 'linear-gradient(135deg, #1A1020 0%, #2A1A2E 50%, var(--text-dark) 100%)', padding: 'clamp(44px,7vw,76px)', display: 'flex', flexWrap: 'wrap', gap: 40, alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 24px 60px rgba(0,0,0,0.35)', border: '1px solid rgba(209, 165, 98, 0.2)' }}>
-            {/* Decorative blobs */}
-            <div style={{ position: 'absolute', right: -80, top: -80, width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(209, 165, 98, 0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', left: -60, bottom: -100, width: 280, height: 280, borderRadius: '50%', background: 'radial-gradient(circle, rgba(209, 165, 98, 0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
-            {/* Radial spotlight */}
-            <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 60% 80% at 20% 50%, rgba(255,255,255,0.02) 0%, transparent 60%)', pointerEvents: 'none' }} />
-
-            <div style={{ position: 'relative', maxWidth: 540 }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: '0.68rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--primary)', border: '1px solid rgba(209, 165, 98, 0.3)', padding: '4px 13px', borderRadius: 20, marginBottom: 18, background: 'rgba(209, 165, 98, 0.08)' }}>
-                <Shield size={11} />
-                AAOIFI Standard No. 21
-              </div>
-              <h2 style={{ fontSize: 'clamp(1.7rem, 4vw, 2.8rem)', fontWeight: 900, color: 'white', letterSpacing: '-1.2px', lineHeight: 1.12, marginBottom: 16 }}>
-                Invest with conviction.<br />Screen with precision.
-              </h2>
-              <p style={{ fontSize: '0.98rem', color: 'rgba(255,255,255,0.65)', lineHeight: 1.72, margin: 0, maxWidth: 440 }}>
-                Every ratio. Every ruling. Every company — rigorously checked so you never have to guess.
-              </p>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, position: 'relative', minWidth: 200 }}>
-              <Link to="/portfolio" className="hover-lift" style={{ padding: '14px 32px', background: 'var(--primary)', color: 'white', fontWeight: 800, fontSize: '0.92rem', borderRadius: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: '0 8px 24px rgba(69, 165, 138,0.28)', textDecoration: 'none' }}>
-                Start Screening <ArrowRight size={15} />
-              </Link>
-              <Link to="/shariah" style={{ padding: '13px 32px', border: '1px solid rgba(255,255,255,0.16)', color: 'rgba(255,255,255,0.82)', fontWeight: 600, fontSize: '0.9rem', borderRadius: 13, textDecoration: 'none', transition: 'border-color 0.2s, color 0.2s', textAlign: 'center', display: 'block' }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.42)'; e.currentTarget.style.color = 'white'; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.16)'; e.currentTarget.style.color = 'rgba(255,255,255,0.82)'; }}>
-                Read the Methodology
-              </Link>
-            </div>
-          </div>
-        </Reveal>
-
-      </div>
       <Footer />
     </div>
   );
