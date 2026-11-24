@@ -893,6 +893,26 @@ export default function RizqPlannerTab({ standalone = false }) {
     [income, wealthPct]
   );
 
+  const essentialsPct = useMemo(
+    () => round1(CATEGORIES.filter((c) => c.isEssential).reduce((s, c) => s + Number(allocations[c.key] || 0), 0)),
+    [allocations]
+  );
+
+  const essentialsAmount = useMemo(
+    () => (income * essentialsPct) / 100,
+    [income, essentialsPct]
+  );
+
+  const lifestyleGivingPct = useMemo(
+    () => round1(Number(allocations.sadaqa || 0) + Number(allocations.lifestyle || 0)),
+    [allocations]
+  );
+
+  const lifestyleGivingAmount = useMemo(
+    () => (income * lifestyleGivingPct) / 100,
+    [income, lifestyleGivingPct]
+  );
+
   const isExact100 = Math.abs(totalPct - 100) < 0.05;
   const pctDiff = Math.round(Math.abs(100 - totalPct) * 10) / 10;
 
@@ -925,11 +945,12 @@ export default function RizqPlannerTab({ standalone = false }) {
 
   return (
     <div
-      className="animate-fade-in"
+      className={`animate-fade-in rizq-planner-shell ${standalone ? 'rizq-planner-shell--standalone' : ''}`}
       style={{
-        maxWidth: standalone ? '1060px' : '100%',
+        width: '100%',
+        maxWidth: standalone ? '1120px' : '100%',
         margin: standalone ? '0 auto' : 0,
-        padding: standalone ? '108px 20px 64px' : '0 0 40px',
+        padding: standalone ? '28px 20px 88px' : '0 0 80px',
       }}
     >
       {/* Header Row */}
@@ -959,16 +980,27 @@ export default function RizqPlannerTab({ standalone = false }) {
           <h1
             style={{
               margin: '0 0 6px',
-              fontSize: 'clamp(1.65rem, 3vw, 2.25rem)',
+              fontSize: 'clamp(1.6rem, 2.8vw, 2.2rem)',
               fontWeight: 800,
               letterSpacing: '-0.5px',
+              lineHeight: 1.2,
+              textWrap: 'balance',
               color: 'var(--text-dark)',
               fontFamily: 'Georgia, "Times New Roman", serif',
             }}
           >
             Monthly Rizq Compounder Planner
           </h1>
-          <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+          <p
+            style={{
+              margin: 0,
+              fontSize: '0.9rem',
+              color: 'var(--text-muted)',
+              fontWeight: 500,
+              lineHeight: 1.5,
+              textWrap: 'pretty',
+            }}
+          >
             Enter your take-home pay, then adjust each share to fit your life.
           </p>
         </div>
@@ -1006,6 +1038,25 @@ export default function RizqPlannerTab({ standalone = false }) {
         }}
       >
         <style>{`
+          .rizq-planner-card {
+            container: rizq-card / inline-size;
+          }
+          .rizq-planner-card button.rizq-check-btn,
+          .rizq-planner-card button.rizq-lock-btn,
+          .rizq-planner-card button.rizq-stepper-btn,
+          .rizq-planner-card button.rizq-suggestion-dismiss,
+          .rizq-planner-card button.rizq-clear-btn,
+          .rizq-planner-card button.rizq-preset-btn,
+          .rizq-planner-card button.rizq-rent-toggle,
+          .rizq-planner-card button.rizq-undo-btn,
+          .rizq-planner-card button.rizq-chip-btn {
+            min-width: 0;
+            min-height: 0;
+          }
+          .rizq-planner-card button.rizq-amount-btn {
+            min-height: 32px;
+            min-width: 96px;
+          }
           .rizq-pct-input,
           .rizq-income-input,
           .rizq-amount-input {
@@ -1013,6 +1064,17 @@ export default function RizqPlannerTab({ standalone = false }) {
             border: none !important;
             box-shadow: none !important;
             background: transparent !important;
+          }
+          @media (min-width: 641px) {
+            .rizq-pct-input {
+              font-size: 0.9rem !important;
+            }
+            .rizq-amount-input {
+              font-size: 0.88rem !important;
+            }
+            .rizq-income-input {
+              font-size: 1.25rem !important;
+            }
           }
           .rizq-pct-input:focus,
           .rizq-income-input:focus,
@@ -1031,9 +1093,43 @@ export default function RizqPlannerTab({ standalone = false }) {
           .rizq-btn-lift:hover {
             transform: translateY(-1px);
           }
+          .rizq-body-grid {
+            display: grid;
+            grid-template-columns: minmax(245px, 280px) minmax(0, 1fr);
+            gap: 30px;
+            align-items: start;
+          }
+          .rizq-donut-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            position: sticky;
+            top: 96px;
+          }
+          .rizq-rows-col {
+            min-width: 0;
+          }
+          .rizq-check-btn {
+            grid-area: check;
+            width: 20px;
+            height: 20px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 0;
+            flex-shrink: 0;
+            transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
+          }
+          .rizq-check-btn:hover {
+            border-color: var(--primary) !important;
+            background: var(--primary-50);
+          }
           .rizq-stepper-btn {
-            width: 24px;
-            height: 26px;
+            width: 26px;
+            height: 28px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -1054,8 +1150,8 @@ export default function RizqPlannerTab({ standalone = false }) {
             cursor: not-allowed;
           }
           .rizq-lock-btn {
-            width: 26px;
-            height: 26px;
+            width: 28px;
+            height: 28px;
             border-radius: 8px;
             display: inline-flex;
             align-items: center;
@@ -1064,14 +1160,17 @@ export default function RizqPlannerTab({ standalone = false }) {
             padding: 0;
             transition: all 0.15s ease;
           }
+          .rizq-lock-btn:hover {
+            background: var(--bg-section) !important;
+            border-color: var(--border-strong) !important;
+          }
           .rizq-amount-btn {
-            min-width: 102px;
             text-align: right;
             border: 1px dashed transparent;
             background: transparent;
-            padding: 4px 6px;
+            padding: 4px 8px;
             border-radius: 8px;
-            font-size: 0.85rem;
+            font-size: 0.88rem;
             font-weight: 700;
             color: var(--text-dark);
             font-variant-numeric: tabular-nums;
@@ -1085,11 +1184,17 @@ export default function RizqPlannerTab({ standalone = false }) {
           .rizq-row {
             position: relative;
             display: grid;
-            grid-template-columns: auto minmax(0, 1fr) auto auto;
+            grid-template-columns: 20px minmax(175px, 1fr) 28px auto;
             grid-template-areas: "check label lock controls";
             align-items: center;
-            gap: 10px;
-            padding: 10px 8px 12px;
+            gap: 12px;
+            padding: 12px 10px 14px;
+            border-bottom: 1px solid var(--border);
+            border-radius: 10px;
+            transition: background 0.15s ease;
+          }
+          .rizq-row:last-child {
+            border-bottom: none;
           }
           .rizq-row-controls {
             grid-area: controls;
@@ -1097,22 +1202,37 @@ export default function RizqPlannerTab({ standalone = false }) {
             align-items: center;
             justify-content: flex-end;
             gap: 10px;
+            flex-shrink: 0;
           }
-          @media (max-width: 640px) {
-            .rizq-planner-card {
-              padding: 18px 16px !important;
-              border-radius: 20px !important;
+          @container rizq-card (max-width: 740px) {
+            .rizq-body-grid {
+              grid-template-columns: minmax(0, 1fr);
+              gap: 24px;
             }
+            .rizq-donut-col {
+              position: static;
+            }
+          }
+          @container rizq-card (max-width: 560px) {
             .rizq-row {
-              grid-template-columns: auto minmax(0, 1fr) auto;
+              grid-template-columns: 20px minmax(0, 1fr) 28px;
               grid-template-areas:
                 "check label lock"
                 ". controls controls";
-              gap: 8px 10px !important;
-              padding: 12px 4px 13px !important;
+              gap: 10px !important;
+              padding: 12px 6px 14px !important;
             }
             .rizq-row-controls {
               justify-content: space-between;
+            }
+          }
+          @media (max-width: 640px) {
+            .rizq-planner-shell--standalone {
+              padding: 18px 14px 48px !important;
+            }
+            .rizq-planner-card {
+              padding: 18px 14px !important;
+              border-radius: 20px !important;
             }
           }
         `}</style>
@@ -1181,14 +1301,15 @@ export default function RizqPlannerTab({ standalone = false }) {
                 <button
                   key={preset}
                   type="button"
+                  className="rizq-preset-btn"
                   onClick={() => applyIncomePreset(preset)}
                   style={{
                     padding: '6px 12px',
                     borderRadius: '999px',
-                    border: `1px solid ${active ? 'var(--primary)' : 'var(--border)'}`,
+                    border: `1px solid ${active ? 'var(--primary)' : 'var(--border-strong)'}`,
                     background: active ? 'var(--primary-50)' : 'var(--bg-section)',
-                    color: active ? 'var(--primary)' : 'var(--text-muted)',
-                    fontSize: '0.73rem',
+                    color: active ? 'var(--primary)' : 'var(--text-body)',
+                    fontSize: '0.75rem',
                     fontWeight: 800,
                     cursor: 'pointer',
                     transition: 'all 0.15s',
@@ -1200,6 +1321,7 @@ export default function RizqPlannerTab({ standalone = false }) {
             })}
             <button
               type="button"
+              className="rizq-rent-toggle"
               onClick={() => setShowRentHelper((prev) => !prev)}
               style={{
                 display: 'inline-flex',
@@ -1207,10 +1329,10 @@ export default function RizqPlannerTab({ standalone = false }) {
                 gap: '5px',
                 padding: '6px 12px',
                 borderRadius: '999px',
-                border: `1px solid ${showRentHelper ? 'var(--primary)' : 'var(--border)'}`,
+                border: `1px solid ${showRentHelper ? 'var(--primary)' : 'var(--border-strong)'}`,
                 background: showRentHelper ? 'var(--primary-50)' : 'var(--bg-section)',
                 color: showRentHelper ? 'var(--primary)' : 'var(--text-dark)',
-                fontSize: '0.73rem',
+                fontSize: '0.75rem',
                 fontWeight: 700,
                 cursor: 'pointer',
               }}
@@ -1292,18 +1414,11 @@ export default function RizqPlannerTab({ standalone = false }) {
         )}
 
         {/* Two-column Body: Donut Chart + 8 Allocation Rows */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 310px), 1fr))',
-            gap: '34px',
-            alignItems: 'center',
-          }}
-        >
-          {/* Left: Donut Chart & Status */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '18px' }}>
-            <div style={{ position: 'relative', width: '220px', height: '220px' }}>
-              <svg width="220" height="220" viewBox="0 0 220 220" style={{ transform: 'rotate(-90deg)' }}>
+        <div className="rizq-body-grid">
+          {/* Left: Donut Chart, Status & Summary Mix */}
+          <div className="rizq-donut-col">
+            <div style={{ position: 'relative', width: '216px', height: '216px' }}>
+              <svg width="216" height="216" viewBox="0 0 220 220" style={{ display: 'block', transform: 'rotate(-90deg)' }}>
                 {/* Track background */}
                 <circle
                   cx="110"
@@ -1415,10 +1530,10 @@ export default function RizqPlannerTab({ standalone = false }) {
             <div
               style={{
                 width: '100%',
-                maxWidth: '285px',
+                maxWidth: '280px',
                 textAlign: 'center',
                 padding: '9px 14px',
-                borderRadius: '10px',
+                borderRadius: '12px',
                 fontSize: '0.78rem',
                 fontWeight: 700,
                 display: 'inline-flex',
@@ -1454,7 +1569,7 @@ export default function RizqPlannerTab({ standalone = false }) {
                 </>
               ) : (
                 <>
-                  <Info size={14} /> {pctDiff}% unallocated ({fmtNaira(income - plannedTotal)} remaining)
+                  <Info size={14} /> {pctDiff}% unallocated ({fmtNaira(income - plannedTotal)} left)
                 </>
               )}
             </div>
@@ -1463,9 +1578,9 @@ export default function RizqPlannerTab({ standalone = false }) {
               <button
                 type="button"
                 onClick={handleAutoBalance}
-                className="rizq-btn-lift no-print"
+                className="rizq-btn-lift rizq-chip-btn no-print"
                 style={{
-                  padding: '7px 14px',
+                  padding: '8px 14px',
                   borderRadius: '999px',
                   border: '1px solid var(--primary)',
                   background: 'var(--primary-50)',
@@ -1480,10 +1595,50 @@ export default function RizqPlannerTab({ standalone = false }) {
                   : 'Auto-balance shares to 100%'}
               </button>
             )}
+
+            {/* Compact Allocation Mix Snapshot */}
+            <div
+              style={{
+                width: '100%',
+                maxWidth: '280px',
+                background: 'var(--bg-alt)',
+                border: '1px solid var(--border)',
+                borderRadius: '14px',
+                padding: '12px 14px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+              }}
+            >
+              {[
+                { label: 'Essential living', pct: essentialsPct, amt: essentialsAmount, color: '#2563EB' },
+                { label: 'Savings & investing', pct: wealthPct, amt: wealthAmount, color: '#EC4899' },
+                { label: 'Sadaqa & lifestyle', pct: lifestyleGivingPct, amt: lifestyleGivingAmount, color: '#15803D' },
+              ].map((group) => (
+                <div
+                  key={group.label}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '8px',
+                    fontSize: '0.75rem',
+                  }}
+                >
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', color: 'var(--text-muted)', fontWeight: 600 }}>
+                    <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: group.color, flexShrink: 0 }} />
+                    {group.label}
+                  </span>
+                  <span style={{ color: 'var(--text-dark)', fontWeight: 700, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
+                    {group.pct}% · {fmtNaira(group.amt)}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Right: 8 Interactive Category Rows */}
-          <div>
+          <div className="rizq-rows-col">
             {suggestionPanel && (
               <div
                 className="animate-fade-in no-print"
@@ -1518,6 +1673,7 @@ export default function RizqPlannerTab({ standalone = false }) {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
                     <button
                       type="button"
+                      className="rizq-undo-btn"
                       onClick={() => applySuggestionVariant(suggestionPanel.baseAlloc, 'Reverted last allocation change.')}
                       style={{
                         padding: '3px 8px',
@@ -1534,6 +1690,7 @@ export default function RizqPlannerTab({ standalone = false }) {
                     </button>
                     <button
                       type="button"
+                      className="rizq-suggestion-dismiss"
                       onClick={() => setSuggestion(null)}
                       aria-label="Dismiss adjustment suggestion"
                       style={{
@@ -1561,11 +1718,12 @@ export default function RizqPlannerTab({ standalone = false }) {
                       <button
                         key={act.id}
                         type="button"
+                        className="rizq-chip-btn"
                         onClick={() => applySuggestionVariant(act.nextAlloc, act.toast)}
                         style={{
                           padding: '5px 10px',
                           borderRadius: '999px',
-                          border: '1px solid var(--border)',
+                          border: '1px solid var(--border-strong)',
                           background: 'var(--bg)',
                           color: 'var(--text-dark)',
                           fontSize: '0.72rem',
@@ -1602,51 +1760,55 @@ export default function RizqPlannerTab({ standalone = false }) {
                     onMouseEnter={() => setHoveredKey(cat.key)}
                     onMouseLeave={() => setHoveredKey(null)}
                     style={{
-                      borderBottom: '1px solid var(--border)',
-                      borderRadius: '8px',
-                      background: isActive ? 'var(--bg-section)' : 'transparent',
-                      transition: 'background 0.15s ease',
+                      background: isActive ? 'var(--bg-alt)' : 'transparent',
                     }}
                   >
                     <button
                       type="button"
+                      className="rizq-check-btn"
                       onClick={() => togglePaydayEnvelope(cat.key)}
                       aria-label={`Mark ${cat.label} moved for payday`}
                       title={isMoved ? 'Marked moved this month' : 'Check off once moved on payday'}
                       style={{
-                        gridArea: 'check',
-                        width: '20px',
-                        height: '20px',
-                        borderRadius: '6px',
                         border: `1.5px solid ${isMoved ? 'var(--primary)' : 'var(--border-strong)'}`,
                         background: isMoved ? 'var(--primary)' : 'transparent',
                         color: '#fff',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        padding: 0,
-                        flexShrink: 0,
                       }}
                     >
                       {isMoved && <Check size={12} strokeWidth={3} />}
                     </button>
 
-                    <div style={{ gridArea: 'label', display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+                    <div style={{ gridArea: 'label', display: 'flex', alignItems: 'center', gap: '11px', minWidth: 0 }}>
                       <span
+                        aria-hidden="true"
                         style={{
-                          width: '12px',
-                          height: '12px',
-                          borderRadius: '4px',
+                          width: '10px',
+                          height: '10px',
+                          borderRadius: '3px',
                           background: cat.color,
                           flexShrink: 0,
                         }}
                       />
                       <div style={{ minWidth: 0 }}>
-                        <div style={{ fontSize: '0.86rem', fontWeight: 700, color: isMoved ? 'var(--text-muted)' : 'var(--text-dark)', textDecoration: isMoved ? 'line-through' : 'none', lineHeight: 1.25 }}>
+                        <div
+                          style={{
+                            fontSize: '0.88rem',
+                            fontWeight: 700,
+                            color: isMoved ? 'var(--text-muted)' : 'var(--text-dark)',
+                            textDecoration: isMoved ? 'line-through' : 'none',
+                            lineHeight: 1.3,
+                          }}
+                        >
                           {cat.label}
                         </div>
-                        <div style={{ fontSize: '0.73rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                        <div
+                          style={{
+                            fontSize: '0.75rem',
+                            color: 'var(--text-muted)',
+                            marginTop: '2px',
+                            lineHeight: 1.35,
+                          }}
+                        >
                           {cat.subtitle}
                         </div>
                       </div>
@@ -1663,7 +1825,7 @@ export default function RizqPlannerTab({ standalone = false }) {
                         gridArea: 'lock',
                         border: `1px solid ${isLocked ? 'var(--gold-border)' : 'transparent'}`,
                         background: isLocked ? 'var(--gold-50)' : 'transparent',
-                        color: isLocked ? '#92400e' : 'var(--text-light)',
+                        color: isLocked ? 'var(--doubtful)' : 'var(--text-muted)',
                       }}
                     >
                       {isLocked ? <Lock size={13} /> : <Unlock size={13} />}
@@ -1802,10 +1964,10 @@ export default function RizqPlannerTab({ standalone = false }) {
                       aria-hidden="true"
                       style={{
                         position: 'absolute',
-                        left: '8px',
+                        left: '10px',
                         bottom: 0,
                         height: '2.5px',
-                        width: `calc(${Math.min(100, pct)}% - 16px)`,
+                        width: `calc((100% - 20px) * ${Math.min(100, pct) / 100})`,
                         minWidth: pct > 0 ? '4px' : 0,
                         background: cat.color,
                         opacity: isMoved ? 0.35 : 0.72,
@@ -1827,7 +1989,8 @@ export default function RizqPlannerTab({ standalone = false }) {
                 alignItems: 'center',
                 flexWrap: 'wrap',
                 gap: '10px',
-                paddingTop: '14px',
+                paddingTop: '16px',
+                borderTop: '1px solid var(--border)',
                 fontSize: '0.82rem',
               }}
             >
@@ -1842,7 +2005,7 @@ export default function RizqPlannerTab({ standalone = false }) {
                   <button
                     type="button"
                     onClick={handleAutoBalance}
-                    className="no-print"
+                    className="rizq-chip-btn no-print"
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
@@ -1895,10 +2058,11 @@ export default function RizqPlannerTab({ standalone = false }) {
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '8px',
-                marginTop: '10px',
-                padding: '10px 12px',
-                borderRadius: '10px',
-                background: 'var(--bg-section)',
+                marginTop: '12px',
+                padding: '11px 14px',
+                borderRadius: '12px',
+                background: 'var(--bg-alt)',
+                border: '1px solid var(--border)',
                 fontSize: '0.76rem',
                 color: 'var(--text-muted)',
               }}
@@ -1911,6 +2075,7 @@ export default function RizqPlannerTab({ standalone = false }) {
                 {movedPaydayStats.count > 0 && (
                   <button
                     type="button"
+                    className="rizq-clear-btn"
                     onClick={() => setCheckedCategories({})}
                     style={{
                       background: 'none',
@@ -2044,7 +2209,7 @@ export default function RizqPlannerTab({ standalone = false }) {
       {/* How the suggested split works */}
       <div
         style={{
-          background: 'var(--bg-section)',
+          background: 'var(--bg)',
           border: '1px solid var(--border)',
           borderRadius: '18px',
           padding: '22px 24px',
