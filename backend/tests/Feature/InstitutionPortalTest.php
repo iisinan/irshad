@@ -626,4 +626,95 @@ class InstitutionPortalTest extends TestCase
                 ],
             ]);
     }
+
+    public function test_institution_portfolio_auto_detects_fixed_income_equity_and_balanced_funds(): void
+    {
+        $this->seedSampleEquities();
+
+        $instUser = User::factory()->create([
+            'role' => 'institution',
+            'institution_name' => 'Amanah Asset Management',
+        ]);
+
+        // 1. Fixed Income CSV (FGN Sukuk + Mudarabah + Murabaha + Non-Interest Cash)
+        $fixedCsv = implode("\n", [
+            'Symbol,Name,Asset Class,Shariah Contract,Market Value,Maturity',
+            'FGN-SUKUK-2031,Federal Government Sukuk 2031,fixed_income,Sukuk Al-Ijarah,400000000,5 yr',
+            'MUDARABAH-01,Mudarabah Bank Placement,fixed_income,Profit-Sharing,350000000,90 days',
+            'MURABAHA-01,Murabaha Commodity Contract,fixed_income,Cost-Plus Trade,200000000,180 days',
+            'WADIAH-CASH,Non-Interest Cash Reserve,cash,Wadiah,50000000,Call',
+        ]);
+        $fixedFile = UploadedFile::fake()->createWithContent('islamic_fixed_income.csv', $fixedCsv);
+
+        $fixedRes = $this->actingAs($instUser, 'sanctum')
+            ->post('/api/v1/institution/screen-portfolio', ['file' => $fixedFile])
+            ->assertStatus(200)
+            ->assertJsonPath('data.fund_classification.type', 'fixed_income')
+            ->assertJsonPath('data.summary.fund_type', 'fixed_income')
+            ->assertJsonPath('data.summary.holdings_count', 4)
+            ->assertJsonPath('data.summary.compliant_count', 4)
+            ->assertJsonPath('data.summary.non_compliant_count', 0)
+            ->assertJsonPath('data.recommended_factsheet_meta.mandate_type', 'Islamic Fixed Income Fund');
+
+        $this->assertGreaterThanOrEqual(95.0, (float) $fixedRes->json('data.fund_classification.fixed_effective_pct'));
+
+        // 2. Balanced Fund CSV (60% Sukuk/Mudarabah + 40% DANGCEM/JAIZBANK Equities)
+        // DANGCEM price = 1469.90 => 1000 shares = 1,469,900 (~24.5%)
+        // JAIZBANK price = 7.10 => 131000 shares = 930,100 (~15.5%) -> total equities = 2,400,000 (40%)
+        // FGN Sukuk = 2,400,000 (40%) + Mudarabah = 1,200,000 (20%) -> total FI = 3,600,000 (60%)
+        $balancedCsv = implode("\n", [
+            'Symbol,Name,Shares,Market Value,Maturity',
+            'FGN-SUKUK-2031,Federal Government Sukuk,1,2400000,5 yr',
+            'MUDARABAH-90D,Mudarabah Placement,1,1200000,90 days',
+            'DANGCEM,Dangote Cement PLC,1000,,Equity',
+            'JAIZBANK,Jaiz Bank PLC,131000,,Equity',
+        ]);
+        $balancedFile = UploadedFile::fake()->createWithContent('amanah_balanced_60_40.csv', $balancedCsv);
+
+        $balancedRes = $this->actingAs($instUser, 'sanctum')
+            ->post('/api/v1/institution/screen-portfolio', ['file' => $balancedFile])
+            ->assertStatus(200)
+            ->assertJsonPath('data.fund_classification.type', 'balanced')
+            ->assertJsonPath('data.fund_classification.split_label', '60/40')
+            ->assertJsonPath('data.summary.fund_type', 'balanced')
+            ->assertJsonPath('data.summary.split_label', '60/40')
+            ->assertJsonPath('data.recommended_factsheet_meta.mandate_type', 'Balanced Islamic Fund (60/40)');
+
+        $this->assertEqualsWithDelta(60.0, (float) $balancedRes->json('data.fund_classification.fixed_effective_pct'), 0.2);
+        $this->assertEqualsWithDelta(40.0, (float) $balancedRes->json('data.fund_classification.equity_pct'), 0.2);
+
+        // Save balanced portfolio and verify factsheet_meta + summary_snapshot persist automatically
+        $saveRes = $this->actingAs($instUser, 'sanctum')
+            ->postJson('/api/v1/institution/portfolios', [
+                'name' => 'Amanah Balanced Fund',
+                'holdings_payload' => collect($balancedRes->json('data.holdings'))->map(fn ($h) => [
+                    'symbol' => $h['symbol'],
+                    'shares' => $h['shares'],
+                    'avg_price' => $h['current_price'],
+                    'market_value' => $h['market_value'],
+                    'asset_class' => $h['asset_class'],
+                    'shariah_contract' => $h['shariah_contract'],
+                    'maturity' => $h['maturity'],
+                    'label' => $h['name'],
+                    'sector' => $h['sector'],
+                ])->all(),
+            ])
+            ->assertStatus(200)
+            ->assertJsonPath('data.portfolio.summary_snapshot.fund_type', 'balanced')
+            ->assertJsonPath('data.portfolio.summary_snapshot.split_label', '60/40')
+            ->assertJsonPath('data.portfolio.factsheet_meta.fund_type', 'balanced')
+            ->assertJsonPath('data.portfolio.factsheet_meta.mandate_type', 'Balanced Islamic Fund (60/40)');
+
+        $this->assertNotEmpty($saveRes->json('data.portfolio.factsheet_meta.allocation_list'));
+
+        // 3. Equity Fund CSV (DANGCEM + JAIZBANK only)
+        $equityCsv = "Symbol,Shares\nDANGCEM,2000\nJAIZBANK,50000\n";
+        $equityFile = UploadedFile::fake()->createWithContent('halal_equity.csv', $equityCsv);
+
+        $this->actingAs($instUser, 'sanctum')
+            ->post('/api/v1/institution/screen-portfolio', ['file' => $equityFile])
+            ->assertStatus(200)
+            ->assertJsonPath('data.fund_classification.type', 'equity')
+            ->assertJsonPath('data.recommended_factsheet_meta.mandate_type', 'Screened Equity Mandate');
+    }
 }

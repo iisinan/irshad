@@ -399,7 +399,7 @@ export default function InstitutionalVerdictsTable({
                             )}
                           </div>
                           <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 230 }}>
-                            {h.name} · {h.sector}
+                            {h.name} · {h.asset_class && h.asset_class !== 'equity' ? (h.shariah_contract || h.sector) : h.sector}
                           </div>
                         </div>
                       </div>
@@ -419,12 +419,24 @@ export default function InstitutionalVerdictsTable({
                     </td>
 
                     <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)', textAlign: 'right', fontSize: '0.77rem', fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
-                      <span style={{ color: 'var(--text-muted)' }}>
-                        {h.debt_ratio ?? '—'}% / {h.cash_ratio ?? '—'}% /{' '}
-                      </span>
-                      <strong style={{ color: Number(h.impure_ratio) >= 5 ? 'var(--non-compliant)' : (Number(h.impure_ratio) > 0 ? '#b45309' : 'var(--halal)') }}>
-                        {Number(h.impure_ratio ?? 0).toFixed(2)}%
-                      </strong>
+                      {h.asset_class && h.asset_class !== 'equity' ? (
+                        <span style={{
+                          display: 'inline-block', padding: '3px 8px', borderRadius: 999,
+                          background: 'var(--bg-section)', border: '1px solid var(--border)',
+                          color: 'var(--text-dark)', fontSize: '0.7rem', fontWeight: 700,
+                        }}>
+                          {h.shariah_contract || (h.asset_class === 'cash' ? 'Cash / Deposit' : 'Fixed Income')}
+                        </span>
+                      ) : (
+                        <>
+                          <span style={{ color: 'var(--text-muted)' }}>
+                            {h.debt_ratio ?? '—'}% / {h.cash_ratio ?? '—'}% /{' '}
+                          </span>
+                          <strong style={{ color: Number(h.impure_ratio) >= 5 ? 'var(--non-compliant)' : (Number(h.impure_ratio) > 0 ? '#b45309' : 'var(--halal)') }}>
+                            {Number(h.impure_ratio ?? 0).toFixed(2)}%
+                          </strong>
+                        </>
+                      )}
                     </td>
 
                     <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)', textAlign: 'right', fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
@@ -464,11 +476,34 @@ export default function InstitutionalVerdictsTable({
                   {isExpanded && (
                     <tr>
                       <td colSpan={6} style={{ padding: '16px 20px', background: 'var(--bg-alt)', borderBottom: '1px solid var(--border-strong)' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 12, marginBottom: 14 }}>
-                          <RatioMeter label="Interest-Bearing Debt / Market Cap" value={h.debt_ratio} threshold={30} />
-                          <RatioMeter label="Cash & Interest Securities / Market Cap" value={h.cash_ratio} threshold={30} />
-                          <RatioMeter label="Impermissible Income / Revenue" value={h.impure_ratio} threshold={5} />
-                        </div>
+                        {h.asset_class && h.asset_class !== 'equity' ? (
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 10, marginBottom: 14 }}>
+                            <div style={{ padding: '10px 12px', borderRadius: 10, background: 'var(--bg)', border: '1px solid var(--border)' }}>
+                              <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Asset Sleeve</div>
+                              <div style={{ fontSize: '0.84rem', fontWeight: 800, color: 'var(--text-dark)', marginTop: 3 }}>
+                                {h.asset_class === 'cash' ? 'Cash / Money Market' : 'Fixed Income Instrument'}
+                              </div>
+                            </div>
+                            <div style={{ padding: '10px 12px', borderRadius: 10, background: 'var(--bg)', border: '1px solid var(--border)' }}>
+                              <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Contract Structure</div>
+                              <div style={{ fontSize: '0.84rem', fontWeight: 800, color: 'var(--primary)', marginTop: 3 }}>
+                                {h.shariah_contract || 'Not Specified'}
+                              </div>
+                            </div>
+                            <div style={{ padding: '10px 12px', borderRadius: 10, background: 'var(--bg)', border: '1px solid var(--border)' }}>
+                              <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Tenor / Maturity Band</div>
+                              <div style={{ fontSize: '0.84rem', fontWeight: 800, color: 'var(--text-dark)', marginTop: 3 }}>
+                                {h.maturity || h.maturity_bucket || '—'}
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 12, marginBottom: 14 }}>
+                            <RatioMeter label="Interest-Bearing Debt / Market Cap" value={h.debt_ratio} threshold={30} />
+                            <RatioMeter label="Cash & Interest Securities / Market Cap" value={h.cash_ratio} threshold={30} />
+                            <RatioMeter label="Impermissible Income / Revenue" value={h.impure_ratio} threshold={5} />
+                          </div>
+                        )}
 
                         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
                           <div style={{ flex: '1 1 380px', fontSize: '0.8rem', color: 'var(--text-body)', lineHeight: 1.55 }}>

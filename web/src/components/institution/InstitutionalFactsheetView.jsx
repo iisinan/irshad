@@ -175,8 +175,8 @@ export default function InstitutionalFactsheetView({
 
   const isLotus = activePresetId === 'lotus_etf';
   const isNorrenberger = activePresetId === 'norrenberger_fund';
-  const isBalanced = activePresetId === 'balanced_fund';
-  const isFixedOrBalanced = isNorrenberger || isBalanced;
+  const isBalancedPreset = activePresetId === 'balanced_fund';
+  const isPresetBalanced = isBalancedPreset;
 
   const lotus = useMemo(() => ({ ...LOTUS_FALLBACK_DATA, ...(lotusData || {}) }), [lotusData]);
   const norren = useMemo(() => ({ ...NORRENBERGER_FALLBACK_DATA, ...(norrenbergerData || {}) }), [norrenbergerData]);
@@ -184,15 +184,24 @@ export default function InstitutionalFactsheetView({
 
   const holdings = useMemo(() => {
     if (isLotus) return lotusData?.screening_result?.holdings || screened?.holdings || [];
-    if (isBalanced) return balancedData?.screening_result?.holdings || screened?.holdings || [];
+    if (isBalancedPreset) return balancedData?.screening_result?.holdings || screened?.holdings || [];
     return screened?.holdings || [];
-  }, [isLotus, isBalanced, lotusData?.screening_result?.holdings, balancedData?.screening_result?.holdings, screened?.holdings]);
+  }, [isLotus, isBalancedPreset, lotusData?.screening_result?.holdings, balancedData?.screening_result?.holdings, screened?.holdings]);
 
   const summary = useMemo(() => {
     if (isLotus) return lotusData?.screening_result?.summary || screened?.summary || {};
-    if (isBalanced) return balancedData?.screening_result?.summary || screened?.summary || {};
+    if (isBalancedPreset) return balancedData?.screening_result?.summary || screened?.summary || {};
     return screened?.summary || {};
-  }, [isLotus, isBalanced, lotusData?.screening_result?.summary, balancedData?.screening_result?.summary, screened?.summary]);
+  }, [isLotus, isBalancedPreset, lotusData?.screening_result?.summary, balancedData?.screening_result?.summary, screened?.summary]);
+
+  const uploadedDetectedType = activePresetId === 'uploaded'
+    ? (factsheetMeta?.fund_type || screened?.fund_classification?.type || summary?.fund_type || 'equity')
+    : null;
+  const isFixedUploaded = uploadedDetectedType === 'fixed_income';
+  const isBalancedUploaded = uploadedDetectedType === 'balanced';
+  const isUploadedMultiAsset = isFixedUploaded || isBalancedUploaded;
+  const isBalanced = isPresetBalanced || isBalancedUploaded;
+  const isFixedOrBalanced = isNorrenberger || isFixedUploaded || isBalanced;
 
   const sectors = useMemo(() => {
     if (isLotus) return lotus.sector_allocation || screened?.sector_allocation || [];
@@ -279,7 +288,7 @@ export default function InstitutionalFactsheetView({
       };
     }
 
-    if (isBalanced) {
+    if (isBalancedPreset) {
       return {
         institution_name: balanced.institution_name,
         fund_name: balanced.fund_name,
@@ -365,11 +374,19 @@ export default function InstitutionalFactsheetView({
     }
 
     const totalAum = Number(summary.total_aum || 0);
+    const rec = screened?.recommended_factsheet_meta || {};
     return {
       institution_name: institutionName || 'Irshad Institutional Shariah Desk',
-      fund_name: customFundName || 'Institutional Screened Equity Mandate',
-      subtitle: "Live AAOIFI Standard No. 21 screened institutional equity portfolio & purification schedule",
-      mandate_type: 'Screened Equity Mandate',
+      fund_name: customFundName || rec.fund_type_label || 'Institutional Shariah Mandate',
+      subtitle: isFixedUploaded
+        ? 'Certified Islamic fixed-income & Sukuk mandate oversight under SEC & AAOIFI standards'
+        : isBalancedUploaded
+          ? `Multi-asset ${rec.split_label || '60/40'} Shariah balanced portfolio combining Islamic fixed income and screened equities`
+          : 'Live AAOIFI Standard No. 21 screened institutional equity portfolio & purification schedule',
+      mandate_type: rec.mandate_type || 'Screened Equity Mandate',
+      bias: rec.bias || 'AAOIFI-Screened Halal Equities',
+      fund_type: rec.fund_type || 'equity',
+      split_label: rec.split_label || null,
       ticker: 'IRSHAD-MANDATE',
       isin: 'NG-INST-SCREEN',
       factsheet_date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
@@ -378,38 +395,44 @@ export default function InstitutionalFactsheetView({
       nav_per_unit: null,
       closing_price: null,
       units_in_issue: null,
-      expense_ratio_pct: 0.75,
-      management_fee: '0.75%',
-      holding_period: 'Three years or more',
-      last_distribution: 'Per corporate dividend calendar',
-      benchmark: 'NGX Lotus Islamic Index (NGXLII)',
-      rebalancing_frequency: 'Continuous / Pre-Trade',
-      risk_level: 4,
-      risk_label: 'Balanced Equity, 4 of 7',
-      volatility_3y_pct: 18.2,
-      purification_per_unit_input: null,
+      expense_ratio_pct: rec.expense_ratio_pct ?? 0.75,
+      management_fee: rec.management_fee || '0.75%',
+      holding_period: rec.holding_period || 'Three years or more',
+      last_distribution: isFixedUploaded ? 'Per Sukuk / placement distribution schedule' : 'Per corporate dividend calendar',
+      benchmark: rec.benchmark || 'NGX Lotus Islamic Index (NGXLII)',
+      rebalancing_frequency: rec.rebalancing_frequency || 'Continuous / Pre-Trade',
+      risk_level: rec.risk_level ?? 4,
+      risk_label: rec.risk_label || 'Balanced Equity, 4 of 7',
+      volatility_3y_pct: rec.volatility_3y_pct ?? 18.2,
+      purification_per_unit_input: isFixedUploaded ? 0 : null,
       zakat_per_unit_input: null,
       parties: {
         fund_manager: institutionName || 'Institutional Desk',
         sec_status: 'Institutional Compliance Mandate',
         shariah_board: 'Irshad Tech Ltd (AAOIFI Standard No. 21 Automated Engine)',
       },
-      fee_lines: [
+      fee_lines: rec.fee_lines || [
         { label: 'Management Fee', pct: 0.55 },
         { label: 'Custody & Shariah Compliance', pct: 0.20 },
       ],
-      objective: 'Achieve long-term ethical capital appreciation strictly within AAOIFI Standard No. 21 boundaries (<30% debt, <30% interest-bearing cash, <5% impermissible revenue) with automated dividend purification.',
-      commentary: Number(summary.non_compliant_count || 0) > 0
+      allocation_list: rec.allocation_list || screened?.sleeve_allocation || [],
+      maturity_profile: rec.maturity_profile || screened?.maturity_profile || [],
+      objective: rec.objective || 'Achieve long-term ethical capital appreciation strictly within AAOIFI Standard No. 21 boundaries (<30% debt, <30% interest-bearing cash, <5% impermissible revenue) with automated dividend purification.',
+      commentary: rec.commentary || (Number(summary.non_compliant_count || 0) > 0
         ? `Irshad detected ${summary.non_compliant_count} non-compliant position(s) totaling ${Number(summary.non_compliant_pct || 0).toFixed(1)}% of AUM. Remediation replacements have been identified.`
-        : 'All portfolio holdings satisfy AAOIFI qualitative business screens and quantitative debt, cash, and impermissible income thresholds.',
-      investor_profile: 'Built for Pension Fund Administrators (PFAs), Islamic asset managers, trustees, and institutional brokerage compliance desks.',
-      benefits: ['Live AAOIFI screening tied to NGX filings', 'Per-unit & total purification liability tracking', 'Indicative 2.5% zakat computation', 'Drift Watch alerts for threshold proximity'],
+        : 'All portfolio holdings satisfy AAOIFI qualitative business screens and quantitative debt, cash, and impermissible income thresholds.'),
+      investor_profile: rec.investor_profile || 'Built for Pension Fund Administrators (PFAs), Islamic asset managers, trustees, and institutional brokerage compliance desks.',
+      benefits: isFixedUploaded
+        ? ['Certified Sukuk & Mudarabah contract verification', 'Zero interest-bearing treasury exposure checks', 'Maturity & liquidity band monitoring', 'Indicative 2.5% zakat computation']
+        : isBalancedUploaded
+          ? ['Dual Sukuk income floor + halal equity upside', 'Automatic asset-mix band tracking', 'Equity-only dividend purification precision', 'Live AAOIFI & Drift Watch oversight']
+          : ['Live AAOIFI screening tied to NGX filings', 'Per-unit & total purification liability tracking', 'Indicative 2.5% zakat computation', 'Drift Watch alerts for threshold proximity'],
       contact: 'Irshad Institutional Desk · iirshad.com',
-      disclaimer: 'Ratios, verdicts, and purification figures reflect live NGX corporate disclosures evaluated under AAOIFI Standard No. 21 via Irshad Tech Ltd.',
+      disclaimer: 'Ratios, verdicts, and asset-class disclosures reflect uploaded institutional portfolio statements evaluated under AAOIFI Standard No. 21 via Irshad Tech Ltd.',
       shariah_board: 'Irshad Tech Ltd Automated AAOIFI Audit',
       approved_by: '',
     };
-  }, [isLotus, isBalanced, isNorrenberger, lotus, balanced, norren, institutionName, customFundName, summary]);
+  }, [isLotus, isBalancedPreset, isNorrenberger, isFixedUploaded, isBalancedUploaded, lotus, balanced, norren, institutionName, customFundName, summary, screened]);
 
   const meta = useMemo(() => ({ ...defaults, ...(factsheetMeta || {}) }), [defaults, factsheetMeta]);
 
@@ -454,16 +477,29 @@ export default function InstitutionalFactsheetView({
   }, [holdings]);
 
   const validation = useMemo(
-    () => computeFundValidation(meta, holdings, summary, isNorrenberger, isBalanced),
-    [meta, holdings, summary, isNorrenberger, isBalanced]
+    () => computeFundValidation(meta, holdings, summary, isNorrenberger || isFixedUploaded, isBalanced),
+    [meta, holdings, summary, isNorrenberger, isFixedUploaded, isBalanced]
   );
 
   // Build uniform 5 Hero KPI Cards matching 1.b & 2.b
   const heroKpis = useMemo(() => {
+    if (isUploadedMultiAsset) {
+      return [
+        { label: 'FUND SIZE', value: formatNaira(fundSizeVal || summary.total_aum || 0, true), highlight: false },
+        {
+          label: isBalancedUploaded ? 'ASSET SPLIT (FI / EQ)' : 'FIXED INCOME MIX',
+          value: meta.split_label || screened?.fund_classification?.split_label || (isBalancedUploaded ? '60/40' : '100% FI'),
+          highlight: false,
+        },
+        { label: 'SHARIAH PASS RATE', value: `${Number(summary.compliant_pct || 0).toFixed(1)}%`, highlight: false },
+        { label: 'EXPENSE RATIO', value: `${Number(meta.expense_ratio_pct || 0).toFixed(2)}%`, highlight: false },
+        { label: 'RISK RATING', value: meta.risk_label || `${meta.risk_level} of 7`, highlight: true },
+      ];
+    }
     if (isFixedOrBalanced) {
       return [
         { label: 'UNIT PRICE', value: navVal > 0 ? `₦${navVal.toFixed(2)}` : '₦108.27', highlight: false },
-        { label: 'YIELD, YEAR TO DATE', value: `${isBalanced ? balanced.ytd_yield : norren.ytd_yield}%`, highlight: false },
+        { label: 'YIELD, YEAR TO DATE', value: `${isBalancedPreset ? balanced.ytd_yield : norren.ytd_yield}%`, highlight: false },
         { label: 'FUND SIZE', value: fundSizeVal > 0 ? formatNaira(fundSizeVal, true) : '₦6.81bn', highlight: false },
         { label: 'TOTAL EXPENSE RATIO', value: `${Number(meta.expense_ratio_pct || 1.60).toFixed(2)}%`, highlight: false },
         { label: 'RISK RATING', value: meta.risk_label || `${meta.risk_level} of 7`, highlight: true },
@@ -493,13 +529,23 @@ export default function InstitutionalFactsheetView({
       { label: 'TOTAL PURIFICATION DUE', value: formatNaira(summary.total_purification_due || 0), highlight: false },
       { label: 'RISK RATING', value: meta.risk_label || `${meta.risk_level} of 7`, highlight: true },
     ];
-  }, [isFixedOrBalanced, isBalanced, balanced.ytd_yield, norren.ytd_yield, navVal, priceVal, premiumPct, fundSizeVal, meta, summary, top5Pct]);
+  }, [isUploadedMultiAsset, isBalancedUploaded, isFixedOrBalanced, isBalancedPreset, balanced.ytd_yield, norren.ytd_yield, navVal, priceVal, premiumPct, fundSizeVal, meta, summary, top5Pct, screened?.fund_classification?.split_label]);
 
   const activeAllocationList = useMemo(() => {
-    if (isBalanced) return balanced.allocation;
+    if (Array.isArray(meta.allocation_list) && meta.allocation_list.length > 0) return meta.allocation_list;
+    if (Array.isArray(screened?.sleeve_allocation) && screened.sleeve_allocation.length > 0 && isUploadedMultiAsset) return screened.sleeve_allocation;
+    if (isBalancedPreset) return balanced.allocation;
     if (isNorrenberger) return norren.allocation;
     return [];
-  }, [isBalanced, isNorrenberger, balanced.allocation, norren.allocation]);
+  }, [meta.allocation_list, screened?.sleeve_allocation, isUploadedMultiAsset, isBalancedPreset, isNorrenberger, balanced.allocation, norren.allocation]);
+
+  const activeMaturityProfile = useMemo(() => {
+    if (Array.isArray(meta.maturity_profile) && meta.maturity_profile.length > 0) return meta.maturity_profile;
+    if (Array.isArray(screened?.maturity_profile) && screened.maturity_profile.length > 0 && isUploadedMultiAsset) return screened.maturity_profile;
+    if (isBalancedPreset) return balanced.maturity_profile;
+    if (isNorrenberger) return norren.maturity_profile;
+    return [];
+  }, [meta.maturity_profile, screened?.maturity_profile, isUploadedMultiAsset, isBalancedPreset, isNorrenberger, balanced.maturity_profile, norren.maturity_profile]);
 
   if (!isFixedOrBalanced && !isLotus && holdings.length === 0) {
     return (
@@ -628,7 +674,7 @@ export default function InstitutionalFactsheetView({
           holdings={holdings}
           summary={summary}
           activePresetId={activePresetId}
-          isNorrenberger={isNorrenberger}
+          isNorrenberger={isNorrenberger || isFixedUploaded}
           isBalanced={isBalanced}
           onSaveMandate={onSaveMandate}
           isSaving={isSaving}
@@ -725,32 +771,58 @@ export default function InstitutionalFactsheetView({
             <>
               {isFixedOrBalanced ? (
                 <>
-                  {/* Balanced / Fixed-Income Row 1: Monthly Yield Chart + Fund Allocation Donut */}
+                  {/* Balanced / Fixed-Income Row 1: Monthly Yield (presets) OR Contract Summary (uploaded) + Fund Allocation Donut */}
                   <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
-                    <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16 }}>
-                      <div style={{ fontSize: '0.73rem', fontWeight: 800, letterSpacing: '0.6px', textTransform: 'uppercase', color: IRSHAD.forest, marginBottom: 10 }}>
-                        Monthly Yield Against Benchmark, 2026, %
+                    {isUploadedMultiAsset ? (
+                      <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                        <div>
+                          <div style={{ fontSize: '0.73rem', fontWeight: 800, letterSpacing: '0.6px', textTransform: 'uppercase', color: IRSHAD.forest, marginBottom: 10 }}>
+                            Asset Sleeve &amp; Contract Split
+                          </div>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 12 }}>
+                            {[
+                              { label: 'Fixed Income', value: `${Number(summary.fixed_income_pct || 0).toFixed(1)}%`, sub: formatNaira(summary.fixed_income_aum || 0, true) },
+                              { label: 'Equities', value: `${Number(summary.equity_pct || 0).toFixed(1)}%`, sub: formatNaira(summary.equity_aum || 0, true) },
+                              { label: 'Cash / MM', value: `${Number(summary.cash_pct || 0).toFixed(1)}%`, sub: formatNaira(summary.cash_aum || 0, true) },
+                            ].map((box) => (
+                              <div key={box.label} style={{ background: IRSHAD.canvas, border: `1px solid ${IRSHAD.border}`, borderRadius: 8, padding: '8px 10px' }}>
+                                <div style={{ fontSize: '0.62rem', fontWeight: 800, color: IRSHAD.slate, textTransform: 'uppercase' }}>{box.label}</div>
+                                <div style={{ fontSize: '1.05rem', fontWeight: 900, color: IRSHAD.forest, marginTop: 2 }}>{box.value}</div>
+                                <div style={{ fontSize: '0.66rem', color: IRSHAD.slate }}>{box.sub}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: IRSHAD.slate, lineHeight: 1.45 }}>
+                          {screened?.fund_classification?.reason || meta.commentary}
+                        </div>
                       </div>
-                      <div style={{ height: 195 }}>
-                        <ResponsiveContainer width="100%" height="100%">
-                          <BarChart
-                            data={isBalanced ? balanced.monthly_yield_2026 : norren.monthly_performance_2026}
-                            margin={{ top: 6, right: 6, left: -18, bottom: 0 }}
-                          >
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                            <XAxis dataKey="month" tick={{ fontSize: 10 }} />
-                            <YAxis domain={[0, 21]} tick={{ fontSize: 10 }} />
-                            <Tooltip formatter={(v) => `${v}%`} />
-                            <Legend wrapperStyle={{ fontSize: 11 }} />
-                            <Bar dataKey="yield" name="Fund yield" fill={IRSHAD.forest} radius={[3, 3, 0, 0]} />
-                            <Bar dataKey="benchmark" name={isBalanced ? 'Blended benchmark' : 'Benchmark'} fill={IRSHAD.gold} radius={[3, 3, 0, 0]} />
-                          </BarChart>
-                        </ResponsiveContainer>
+                    ) : (
+                      <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16 }}>
+                        <div style={{ fontSize: '0.73rem', fontWeight: 800, letterSpacing: '0.6px', textTransform: 'uppercase', color: IRSHAD.forest, marginBottom: 10 }}>
+                          Monthly Yield Against Benchmark, 2026, %
+                        </div>
+                        <div style={{ height: 195 }}>
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart
+                              data={isBalancedPreset ? balanced.monthly_yield_2026 : norren.monthly_performance_2026}
+                              margin={{ top: 6, right: 6, left: -18, bottom: 0 }}
+                            >
+                              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                              <XAxis dataKey="month" tick={{ fontSize: 10 }} />
+                              <YAxis domain={[0, 21]} tick={{ fontSize: 10 }} />
+                              <Tooltip formatter={(v) => `${v}%`} />
+                              <Legend wrapperStyle={{ fontSize: 11 }} />
+                              <Bar dataKey="yield" name="Fund yield" fill={IRSHAD.forest} radius={[3, 3, 0, 0]} />
+                              <Bar dataKey="benchmark" name={isBalancedPreset ? 'Blended benchmark' : 'Benchmark'} fill={IRSHAD.gold} radius={[3, 3, 0, 0]} />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+                        <div style={{ fontSize: '0.7rem', color: IRSHAD.slate, marginTop: 8 }}>
+                          Yield is the annualised income yield on NAV. Scale runs to 20%+.
+                        </div>
                       </div>
-                      <div style={{ fontSize: '0.7rem', color: IRSHAD.slate, marginTop: 8 }}>
-                        Yield is the annualised income yield on NAV. Scale runs to 20%+.
-                      </div>
-                    </div>
+                    )}
 
                     <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16 }}>
                       <div style={{ fontSize: '0.73rem', fontWeight: 800, letterSpacing: '0.6px', textTransform: 'uppercase', color: IRSHAD.forest, marginBottom: 10 }}>
@@ -772,8 +844,8 @@ export default function InstitutionalFactsheetView({
                             position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
                             alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', textAlign: 'center',
                           }}>
-                            <span style={{ fontSize: '1rem', fontWeight: 900, color: IRSHAD.forest }}>
-                              {isBalanced ? '60/40' : '100%'}
+                            <span style={{ fontSize: '0.95rem', fontWeight: 900, color: IRSHAD.forest }}>
+                              {meta.split_label || screened?.fund_classification?.split_label || (isBalanced ? '60/40' : '100%')}
                             </span>
                             <span style={{ fontSize: '0.6rem', color: IRSHAD.slate, fontWeight: 700, lineHeight: 1.2 }}>
                               {isBalanced ? 'fixed / equity' : 'Islamic FI'}
@@ -787,7 +859,7 @@ export default function InstitutionalFactsheetView({
                                 <span style={{ width: 9, height: 9, borderRadius: 2, background: IRSHAD_CHART_PALETTE[idx % IRSHAD_CHART_PALETTE.length], display: 'inline-block' }} />
                                 {row.security}
                               </span>
-                              <strong style={{ fontVariantNumeric: 'tabular-nums' }}>{row.current.toFixed(2)}%</strong>
+                              <strong style={{ fontVariantNumeric: 'tabular-nums' }}>{Number(row.current || 0).toFixed(2)}%</strong>
                             </div>
                           ))}
                         </div>
@@ -795,7 +867,7 @@ export default function InstitutionalFactsheetView({
                     </div>
                   </section>
 
-                  {/* Balanced / Fixed-Income Row 2: Maturity Profile + Distributions */}
+                  {/* Balanced / Fixed-Income Row 2: Maturity Profile + Distributions / Purification */}
                   <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
                     <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16 }}>
                       <div style={{ fontSize: '0.73rem', fontWeight: 800, letterSpacing: '0.6px', textTransform: 'uppercase', color: IRSHAD.forest, marginBottom: 10 }}>
@@ -804,7 +876,7 @@ export default function InstitutionalFactsheetView({
                       <div style={{ height: 170 }}>
                         <ResponsiveContainer width="100%" height="100%">
                           <BarChart
-                            data={isBalanced ? balanced.maturity_profile : norren.maturity_profile}
+                            data={activeMaturityProfile}
                             margin={{ top: 10, right: 8, left: -18, bottom: 0 }}
                           >
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
@@ -812,7 +884,7 @@ export default function InstitutionalFactsheetView({
                             <YAxis tick={{ fontSize: 10 }} />
                             <Tooltip formatter={(v) => `${v}%`} />
                             <Bar dataKey="pct" name="% Share" radius={[4, 4, 0, 0]}>
-                              {(isBalanced ? balanced.maturity_profile : norren.maturity_profile).map((entry) => (
+                              {activeMaturityProfile.map((entry) => (
                                 <Cell key={entry.bucket} fill={entry.bucket === 'Equity' ? IRSHAD.forest : IRSHAD.gold} />
                               ))}
                             </Bar>
@@ -821,63 +893,114 @@ export default function InstitutionalFactsheetView({
                       </div>
                       <div style={{ fontSize: '0.7rem', color: IRSHAD.slate, marginTop: 6 }}>
                         {isBalanced
-                          ? 'Fixed income is 60% of the fund, spread across three maturity bands. Equity has no maturity.'
-                          : 'Majority of Sukuk & Murabaha paper matures inside 12 months for daily liquidity.'}
+                          ? `Fixed income covers ${Number(summary.fixed_income_pct || 0) + Number(summary.cash_pct || 0) || 60}% of the fund across tenor bands. Equity has no maturity.`
+                          : 'Sukuk, Mudarabah & Murabaha tenor distribution across liquidity bands.'}
                       </div>
                     </div>
 
-                    <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                      <div>
-                        <div style={{ fontSize: '0.73rem', fontWeight: 800, letterSpacing: '0.6px', textTransform: 'uppercase', color: IRSHAD.forest, marginBottom: 10 }}>
-                          Distribution Per Unit (₦)
+                    {isUploadedMultiAsset ? (
+                      <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                        <div>
+                          <div style={{ fontSize: '0.73rem', fontWeight: 800, letterSpacing: '0.6px', textTransform: 'uppercase', color: IRSHAD.forest, marginBottom: 10 }}>
+                            {isBalancedUploaded ? 'Equity Sleeve & Purification Summary' : 'Fixed-Income Mandate Governance'}
+                          </div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: '0.76rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #EEF2F0', paddingBottom: 5 }}>
+                              <span style={{ color: IRSHAD.slate }}>Compliant Instruments</span>
+                              <strong>{summary.compliant_count || 0} of {summary.holdings_count || 0} ({Number(summary.compliant_pct || 0).toFixed(1)}%)</strong>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #EEF2F0', paddingBottom: 5 }}>
+                              <span style={{ color: IRSHAD.slate }}>Dividend Purification Due</span>
+                              <strong style={{ color: '#b45309' }}>{formatNaira(summary.total_purification_due || 0)}</strong>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #EEF2F0', paddingBottom: 5 }}>
+                              <span style={{ color: IRSHAD.slate }}>Indicative 2.5% Zakat Base</span>
+                              <strong>{formatNaira(summary.total_zakatable_amount || 0, true)}</strong>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                              <span style={{ color: IRSHAD.slate }}>Benchmark Target</span>
+                              <strong>{meta.benchmark}</strong>
+                            </div>
+                          </div>
                         </div>
-                        <div style={{ height: 155 }}>
-                          <ResponsiveContainer width="100%" height="100%">
-                            <LineChart
-                              data={isBalanced ? balanced.distribution_per_unit : norren.distribution_per_unit}
-                              margin={{ top: 8, right: 10, left: -14, bottom: 0 }}
-                            >
-                              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                              <XAxis dataKey="quarter" tick={{ fontSize: 10 }} />
-                              <YAxis domain={[2.5, 4.8]} tick={{ fontSize: 10 }} />
-                              <Tooltip formatter={(v) => `₦${v}`} />
-                              <Line type="monotone" dataKey="amount" name="Distribution (₦)" stroke={IRSHAD.forest} strokeWidth={2.6} dot={{ r: 4, fill: IRSHAD.forest }} />
-                            </LineChart>
-                          </ResponsiveContainer>
+                        <div style={{ fontSize: '0.7rem', color: IRSHAD.slate, borderTop: `1px solid ${IRSHAD.border}`, paddingTop: 8 }}>
+                          {isBalancedUploaded
+                            ? 'Purification applies exclusively to the equity sleeve dividends.'
+                            : 'Sukuk & non-interest placements require zero equity dividend purification.'}
                         </div>
                       </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: `1px solid ${IRSHAD.border}`, paddingTop: 10, fontSize: '0.78rem' }}>
-                        <span style={{ color: IRSHAD.slate, fontWeight: 600 }}>Trailing 12 months</span>
-                        <strong style={{ fontSize: '0.92rem', color: IRSHAD.forest }}>
-                          {isBalanced ? `₦${balanced.trailing_12m_distribution.toFixed(2)} per unit` : '₦14.81 per unit'}
-                        </strong>
+                    ) : (
+                      <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                        <div>
+                          <div style={{ fontSize: '0.73rem', fontWeight: 800, letterSpacing: '0.6px', textTransform: 'uppercase', color: IRSHAD.forest, marginBottom: 10 }}>
+                            Distribution Per Unit (₦)
+                          </div>
+                          <div style={{ height: 155 }}>
+                            <ResponsiveContainer width="100%" height="100%">
+                              <LineChart
+                                data={isBalancedPreset ? balanced.distribution_per_unit : norren.distribution_per_unit}
+                                margin={{ top: 8, right: 10, left: -14, bottom: 0 }}
+                              >
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                                <XAxis dataKey="quarter" tick={{ fontSize: 10 }} />
+                                <YAxis domain={[2.5, 4.8]} tick={{ fontSize: 10 }} />
+                                <Tooltip formatter={(v) => `₦${v}`} />
+                                <Line type="monotone" dataKey="amount" name="Distribution (₦)" stroke={IRSHAD.forest} strokeWidth={2.6} dot={{ r: 4, fill: IRSHAD.forest }} />
+                              </LineChart>
+                            </ResponsiveContainer>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: `1px solid ${IRSHAD.border}`, paddingTop: 10, fontSize: '0.78rem' }}>
+                          <span style={{ color: IRSHAD.slate, fontWeight: 600 }}>Trailing 12 months</span>
+                          <strong style={{ fontSize: '0.92rem', color: IRSHAD.forest }}>
+                            {isBalancedPreset ? `₦${balanced.trailing_12m_distribution.toFixed(2)} per unit` : '₦14.81 per unit'}
+                          </strong>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </section>
 
-                  {/* Balanced / Fixed-Income Row 3: Performance Strip + Risk Profile */}
+                  {/* Balanced / Fixed-Income Row 3: Performance Strip / Constituents + Risk Profile */}
                   <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-                    <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16 }}>
-                      <div style={{ fontSize: '0.73rem', fontWeight: 800, letterSpacing: '0.6px', textTransform: 'uppercase', color: IRSHAD.forest, marginBottom: 12 }}>
-                        Performance, % Return
+                    {isUploadedMultiAsset ? (
+                      <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16 }}>
+                        <div style={{ fontSize: '0.73rem', fontWeight: 800, letterSpacing: '0.6px', textTransform: 'uppercase', color: IRSHAD.forest, marginBottom: 10 }}>
+                          Top Portfolio Positions
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          {holdings.slice(0, 5).map((h) => (
+                            <div key={h.symbol} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.74rem', borderBottom: '1px solid #EEF2F0', paddingBottom: 4 }}>
+                              <span style={{ fontWeight: 700, color: '#111827' }}>
+                                {h.symbol} <span style={{ color: IRSHAD.slate, fontWeight: 500 }}>({h.shariah_contract || h.sector})</span>
+                              </span>
+                              <strong>{Number(h.weight_pct || 0).toFixed(1)}%</strong>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
-                        {(isBalanced
-                          ? balanced.performance_metrics
-                          : norren.historical_performance.map((h) => ({ label: h.period, value: `${h.yield}%` }))
-                        ).map((pm) => (
-                          <div key={pm.label}>
-                            <div style={{ fontSize: '0.63rem', fontWeight: 800, color: IRSHAD.slate, textTransform: 'uppercase' }}>{pm.label}</div>
-                            <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#111827', marginTop: 3 }}>{pm.value}</div>
-                          </div>
-                        ))}
+                    ) : (
+                      <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16 }}>
+                        <div style={{ fontSize: '0.73rem', fontWeight: 800, letterSpacing: '0.6px', textTransform: 'uppercase', color: IRSHAD.forest, marginBottom: 12 }}>
+                          Performance, % Return
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
+                          {(isBalancedPreset
+                            ? balanced.performance_metrics
+                            : norren.historical_performance.map((h) => ({ label: h.period, value: `${h.yield}%` }))
+                          ).map((pm) => (
+                            <div key={pm.label}>
+                              <div style={{ fontSize: '0.63rem', fontWeight: 800, color: IRSHAD.slate, textTransform: 'uppercase' }}>{pm.label}</div>
+                              <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#111827', marginTop: 3 }}>{pm.value}</div>
+                            </div>
+                          ))}
+                        </div>
+                        <div style={{ fontSize: '0.7rem', color: IRSHAD.slate, marginTop: 12 }}>
+                          {isBalancedPreset
+                            ? `Blended benchmark: 33.10 YTD, 38.70 for 1Y. Tracking difference: ${balanced.tracking_difference_ytd} YTD.`
+                            : `FGN 3-Year Sukuk benchmark outperformed by +99 bps YTD (17.72% vs 16.73%).`}
+                        </div>
                       </div>
-                      <div style={{ fontSize: '0.7rem', color: IRSHAD.slate, marginTop: 12 }}>
-                        {isBalanced
-                          ? `Blended benchmark: 33.10 YTD, 38.70 for 1Y. Tracking difference: ${balanced.tracking_difference_ytd} YTD.`
-                          : `FGN 3-Year Sukuk benchmark outperformed by +99 bps YTD (17.72% vs 16.73%).`}
-                      </div>
-                    </div>
+                    )}
 
                     <div style={{ background: '#FFFFFF', border: `1px solid ${IRSHAD.border}`, borderRadius: 12, padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                       <div>
@@ -1079,17 +1202,19 @@ export default function InstitutionalFactsheetView({
               {/* FULL-WIDTH SHARI'AH COMPLIANCE BANNER (Matching 1.b & 2.b) */}
               <ShariahComplianceBanner
                 guidanceText={meta.shariah_board || meta.parties?.shariah_board}
-                screensLabel={isNorrenberger ? 'Fixed income' : 'Screens'}
-                screensDetail={isNorrenberger
+                screensLabel={isNorrenberger || isFixedUploaded ? 'Fixed income' : 'Screens'}
+                screensDetail={isNorrenberger || isFixedUploaded
                   ? 'Certified FGN & Corporate Sukuk and non-interest bank Mudarabah/Murabaha placements only. No conventional interest bonds.'
                   : `AAOIFI thresholds: debt (<30%: ${healthMetrics.debt !== null ? `${healthMetrics.debt.toFixed(1)}%` : 'OK'}), cash (<30%: ${healthMetrics.cash !== null ? `${healthMetrics.cash.toFixed(1)}%` : 'OK'}), impure income (<5%: ${Number(healthMetrics.impure || 0).toFixed(2)}%).`}
                 purificationAmount={`₦${purificationPerUnit.toFixed(2)}`}
-                purificationNote={isBalanced
-                  ? 'Derived from the 40% equity sleeve only; donated to approved charities.'
-                  : 'Deducted/quantified under AAOIFI rules for disbursement to approved charities.'}
+                purificationNote={isFixedUploaded
+                  ? 'Fixed-income Sukuk & Mudarabah placements require zero equity dividend cleansing.'
+                  : isBalanced
+                    ? `Derived from the ${Number(summary.equity_pct || 40).toFixed(0)}% equity sleeve only; donated to approved charities.`
+                    : 'Deducted/quantified under AAOIFI rules for disbursement to approved charities.'}
                 zakatAmount={`₦${zakatPerUnit.toFixed(2)}`}
                 zakatNote="Indicative zakatable amount (2.5% basis). Each investor pays their own."
-                footerRuleText={isNorrenberger
+                footerRuleText={isNorrenberger || isFixedUploaded
                   ? 'Strict compliance with SEC Nigeria non-interest fund rules and certified Islamic contracts.'
                   : 'Excludes conventional banking and insurance, alcohol, gambling, pork, tobacco, weapons and adult entertainment. Jaiz Bank is a non-interest bank, the only one listed on NGX.'}
               />
@@ -1102,7 +1227,7 @@ export default function InstitutionalFactsheetView({
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 18px', fontSize: '0.75rem' }}>
                     {[
-                      ['Launched', isLotus ? lotus.launch_date : (isBalanced ? balanced.launch_date : (isNorrenberger ? norren.launch_date : meta.factsheet_date))],
+                      ['Launched', isLotus ? lotus.launch_date : (isBalancedPreset ? balanced.launch_date : (isNorrenberger ? norren.launch_date : meta.factsheet_date))],
                       ['Management fee', meta.management_fee],
                       ['Units in issue', unitsVal > 0 ? `${(unitsVal / 1e6).toFixed(1)} million` : `${holdings.length} positions`],
                       ['Last distribution', meta.last_distribution],
@@ -1253,9 +1378,9 @@ export default function InstitutionalFactsheetView({
                         ))}
                       </tbody>
                     </table>
-                  ) : isFixedOrBalanced ? (
+                  ) : (isBalancedPreset || isNorrenberger) ? (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
-                      {(isBalanced
+                      {(isBalancedPreset
                         ? balanced.performance_metrics
                         : norren.historical_performance.map((h) => ({ label: `${h.period} Yield`, value: `${h.yield}% (Bmk ${h.benchmark}%)` }))
                       ).map((row) => (

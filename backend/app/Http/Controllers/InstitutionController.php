@@ -360,6 +360,12 @@ class InstitutionController extends Controller
                     'symbol' => $h['symbol'] ?? $h['ticker'] ?? '',
                     'shares' => (float) ($h['shares'] ?? $h['units'] ?? $h['quantity'] ?? 0),
                     'avg_price' => isset($h['average_buy_price']) ? (float) $h['average_buy_price'] : null,
+                    'market_value' => isset($h['market_value']) ? (float) $h['market_value'] : null,
+                    'target_weight' => isset($h['weight_pct']) ? (float) $h['weight_pct'] : null,
+                    'asset_class' => $h['asset_class'] ?? null,
+                    'shariah_contract' => $h['shariah_contract'] ?? null,
+                    'maturity' => $h['maturity'] ?? null,
+                    'sector' => $h['sector'] ?? null,
                     'label' => $h['company_name'] ?? $h['name'] ?? null,
                 ])->toArray();
             }
@@ -378,6 +384,12 @@ class InstitutionController extends Controller
                 'symbol' => $h['symbol'] ?? $h['ticker'] ?? '',
                 'shares' => (float) ($h['shares'] ?? $h['units'] ?? $h['quantity'] ?? 0),
                 'avg_price' => isset($h['average_buy_price']) ? (float) $h['average_buy_price'] : null,
+                'market_value' => isset($h['market_value']) ? (float) $h['market_value'] : null,
+                'target_weight' => isset($h['weight_pct']) ? (float) $h['weight_pct'] : null,
+                'asset_class' => $h['asset_class'] ?? null,
+                'shariah_contract' => $h['shariah_contract'] ?? null,
+                'maturity' => $h['maturity'] ?? null,
+                'sector' => $h['sector'] ?? null,
                 'label' => $h['company_name'] ?? $h['name'] ?? null,
             ])->toArray();
         } else {
@@ -385,6 +397,11 @@ class InstitutionController extends Controller
                 'holdings' => 'required|array|min:1',
                 'holdings.*.symbol' => 'required|string|max:64',
                 'holdings.*.shares' => 'required|numeric|min:0',
+                'holdings.*.market_value' => 'nullable|numeric|min:0',
+                'holdings.*.target_weight' => 'nullable|numeric|min:0|max:100',
+                'holdings.*.asset_class' => 'nullable|string|max:40',
+                'holdings.*.shariah_contract' => 'nullable|string|max:80',
+                'holdings.*.maturity' => 'nullable|string|max:60',
             ]);
             $rows = $request->input('holdings', []);
         }
@@ -436,29 +453,34 @@ class InstitutionController extends Controller
         ]);
 
         $evaluated = $this->evaluateHoldingsArray($validated['holdings_payload']);
+        $recommendedMeta = $evaluated['recommended_factsheet_meta'] ?? [];
+        $incomingMeta = is_array($validated['factsheet_meta'] ?? null) ? $validated['factsheet_meta'] : [];
 
         if (! empty($validated['id'])) {
             $portfolio = InstitutionalPortfolio::where('user_id', Auth::id())
                 ->findOrFail($validated['id']);
+            $existingMeta = is_array($portfolio->factsheet_meta) ? $portfolio->factsheet_meta : [];
+            $mergedMeta = array_merge($recommendedMeta, $existingMeta, $incomingMeta);
             $portfolio->update([
                 'name' => $validated['name'],
                 'fund_code' => $validated['fund_code'] ?? $portfolio->fund_code,
-                'benchmark' => $validated['benchmark'] ?? $portfolio->benchmark,
+                'benchmark' => $validated['benchmark'] ?? ($mergedMeta['benchmark'] ?? $portfolio->benchmark),
                 'currency' => $validated['currency'] ?? $portfolio->currency,
                 'holdings_payload' => $validated['holdings_payload'],
                 'summary_snapshot' => $evaluated['summary'],
-                'factsheet_meta' => $validated['factsheet_meta'] ?? $portfolio->factsheet_meta,
+                'factsheet_meta' => $mergedMeta,
             ]);
         } else {
+            $mergedMeta = array_merge($recommendedMeta, $incomingMeta);
             $portfolio = InstitutionalPortfolio::create([
                 'user_id' => Auth::id(),
                 'name' => $validated['name'],
                 'fund_code' => $validated['fund_code'] ?? null,
-                'benchmark' => $validated['benchmark'] ?? 'NGX Lotus Islamic Index (NGXLII)',
+                'benchmark' => $validated['benchmark'] ?? ($mergedMeta['benchmark'] ?? 'NGX Lotus Islamic Index (NGXLII)'),
                 'currency' => $validated['currency'] ?? 'NGN',
                 'holdings_payload' => $validated['holdings_payload'],
                 'summary_snapshot' => $evaluated['summary'],
-                'factsheet_meta' => $validated['factsheet_meta'] ?? [],
+                'factsheet_meta' => $mergedMeta,
             ]);
         }
 
@@ -477,7 +499,161 @@ class InstitutionController extends Controller
     }
 
     /**
-     * Evaluate a list of holdings against live Company, AaoifiScreening, and Dividend tables.
+     * Classify an individual row into equity, fixed_income, or cash sleeve with Shariah contract context.
+     */
+    protected function classifyInstrumentRow(array $row, ?Company $company): array
+    {
+        $rawAsset = strtolower(trim((string) ($row['asset_class'] ?? $row['type'] ?? $row['category'] ?? '')));
+        $rawContract = trim((string) ($row['shariah_contract'] ?? $row['contract'] ?? ''));
+        $rawSector = trim((string) ($row['sector'] ?? ''));
+        $haystack = strtolower(trim(implode(' ', [
+            (string) ($row['input_symbol'] ?? $row['symbol'] ?? ''),
+            (string) ($row['label'] ?? $company?->name ?? ''),
+            $rawAsset,
+            $rawContract,
+            $rawSector,
+        ])));
+
+        if ($company && ! in_array($company->asset_class, ['sukuk', 'bond', 'fixed_income', 'money_market', 'cash'], true)) {
+            $isNonFixedHint = $rawAsset === '' || str_contains($rawAsset, 'equit') || str_contains($rawAsset, 'stock') || str_contains($rawAsset, 'share');
+            if ($isNonFixedHint && ! preg_match('/\b(sukuk|ijarah|mudarabah|murabaha|wakalah|t-bill|treasury|bond|debenture|fixed income)\b/i', $haystack)) {
+                return [
+                    'asset_class' => 'equity',
+                    'shariah_contract' => $rawContract ?: 'Screened Common Equity',
+                    'sleeve_bucket' => 'Halal Equities',
+                    'status' => null,
+                    'reason' => null,
+                ];
+            }
+        }
+
+        // Islamic Fixed Income instruments
+        if (preg_match('/\b(sukuk|ijarah|al-ijarah|mudarabah|murabaha|wakalah|istisna|salam|ta\'?awun|non[\s\-]?interest\s+cp|islamic\s+cp|islamic\s+fixed)\b/i', $haystack)) {
+            $contract = $rawContract;
+            $bucket = 'Islamic Fixed Income';
+            if (preg_match('/\b(fgn\s*sukuk|federal\s*gov(?:ernment)?\s*sukuk|sovereign\s*sukuk)\b/i', $haystack)) {
+                $bucket = 'FGN Sukuk';
+                $contract = $contract ?: 'Sukuk Al-Ijarah';
+            } elseif (preg_match('/\bmudarabah\b/i', $haystack)) {
+                $bucket = 'Mudarabah Placements';
+                $contract = $contract ?: 'Profit-Sharing (Mudarabah)';
+            } elseif (preg_match('/\bmurabaha\b/i', $haystack)) {
+                $bucket = 'Murabaha Contracts';
+                $contract = $contract ?: 'Cost-Plus Trade (Murabaha)';
+            } elseif (preg_match('/\bwakalah\b/i', $haystack)) {
+                $bucket = 'Wakalah / Ijarah Sukuk';
+                $contract = $contract ?: 'Sukuk Al-Wakalah';
+            } elseif (preg_match('/\bijarah\b/i', $haystack)) {
+                $bucket = 'Ijarah Sukuk';
+                $contract = $contract ?: 'Sukuk Al-Ijarah';
+            } else {
+                $bucket = 'Corporate Sukuk';
+                $contract = $contract ?: 'Certified Sukuk';
+            }
+
+            return [
+                'asset_class' => 'fixed_income',
+                'shariah_contract' => $contract,
+                'sleeve_bucket' => $bucket,
+                'status' => 'halal',
+                'reason' => "Classified as {$bucket} ({$contract}) — asset-backed Islamic fixed-income instrument.",
+            ];
+        }
+
+        // Conventional Interest-Bearing Fixed Income instruments (flagged Riba)
+        if (preg_match('/\b(t[\s\-]?bill|treasury\s*bill|ntb|omo\s*bill|fgn\s*bond|eurobond|sovereign\s*bond|corporate\s*bond|debenture|commercial\s*paper|term\s*deposit|fixed\s*deposit|promissory\s*note|repo)\b/i', $haystack)
+            || ($rawAsset !== '' && preg_match('/\b(bond|debt|t-bill|treasury)\b/i', $rawAsset) && ! str_contains($haystack, 'sukuk'))
+        ) {
+            return [
+                'asset_class' => 'fixed_income',
+                'shariah_contract' => $rawContract ?: 'Conventional Debt / Interest',
+                'sleeve_bucket' => 'Conventional Bonds / T-Bills',
+                'status' => 'non-compliant',
+                'reason' => 'Conventional interest-bearing (Riba) debt security — fails AAOIFI Shariah Standard No. 21 qualitative screen.',
+            ];
+        }
+
+        // Cash / Money Market / Non-Interest Bank Balances
+        if (preg_match('/\b(wadiah|qard|non[\s\-]?interest\s+cash|islamic\s+cash|jaiz\s+deposit|taj\s+deposit|cash|money\s*market|call\s*account)\b/i', $haystack)
+            || in_array($rawAsset, ['cash', 'money_market', 'money market'], true)
+        ) {
+            $isNonInterest = preg_match('/\b(non[\s\-]?interest|wadiah|qard|islamic|jaiz|taj|lotus|altbank|murabaha|mudarabah)\b/i', $haystack);
+            return [
+                'asset_class' => 'cash',
+                'shariah_contract' => $rawContract ?: ($isNonInterest ? 'Wadiah / Non-Interest Deposit' : 'Unverified Bank Cash / MM'),
+                'sleeve_bucket' => $isNonInterest ? 'Non-Interest Cash' : 'Cash & Money Market',
+                'status' => $isNonInterest ? 'halal' : 'doubtful',
+                'reason' => $isNonInterest
+                    ? 'Non-interest cash / Wadiah placement — compliant liquidity reserve.'
+                    : 'Cash or money market balance requires confirmation that it is held in a non-interest (Wadiah/Mudarabah) account.',
+            ];
+        }
+
+        // Generic Fixed Income hint with no Sukuk/Conventional keyword yet
+        if (in_array($rawAsset, ['fixed_income', 'fixed income', 'fi', 'sukuk'], true)) {
+            $hasHalalContract = preg_match('/\b(sukuk|ijarah|mudarabah|murabaha|wakalah|islamic|halal|non[\s\-]?interest)\b/i', $rawContract);
+            return [
+                'asset_class' => 'fixed_income',
+                'shariah_contract' => $rawContract ?: 'Fixed Income Instrument',
+                'sleeve_bucket' => $hasHalalContract ? 'Islamic Fixed Income' : 'Fixed Income (Review Contract)',
+                'status' => $hasHalalContract ? 'halal' : 'doubtful',
+                'reason' => $hasHalalContract
+                    ? "Verified {$rawContract} fixed-income placement."
+                    : 'Fixed-income holding detected; verify underlying Shariah contract (Sukuk / Murabaha / Mudarabah).',
+            ];
+        }
+
+        return [
+            'asset_class' => 'equity',
+            'shariah_contract' => $rawContract ?: ($company ? 'Screened Common Equity' : 'Unmapped Position'),
+            'sleeve_bucket' => $company ? 'Equities' : 'Unmapped Equities',
+            'status' => null,
+            'reason' => null,
+        ];
+    }
+
+    protected function inferMaturityBucket(?string $rawMaturity, string $assetClass, string $sleeveBucket): string
+    {
+        if ($assetClass === 'equity') {
+            return 'Equity';
+        }
+        if ($assetClass === 'cash') {
+            return '<1 yr';
+        }
+
+        $text = strtolower(trim((string) $rawMaturity));
+        if ($text !== '') {
+            if (preg_match('/(\d+)\s*(?:d|day|days|wk|week)/i', $text, $m)) {
+                $days = (int) $m[1];
+                return $days <= 365 ? '<1 yr' : ($days <= 1095 ? '1 to 3 yr' : '>3 yr');
+            }
+            if (preg_match('/(\d+)\s*(?:mo|mos|month|months)/i', $text, $m)) {
+                $months = (int) $m[1];
+                return $months <= 12 ? '<1 yr' : ($months <= 36 ? '1 to 3 yr' : '>3 yr');
+            }
+            if (preg_match('/(\d+(?:\.\d+)?)\s*(?:y|yr|yrs|year|years)/i', $text, $m)) {
+                $yrs = (float) $m[1];
+                return $yrs < 1.0 ? '<1 yr' : ($yrs <= 3.0 ? '1 to 3 yr' : '>3 yr');
+            }
+            if (preg_match('/\b(20\d{2})\b/', $text, $m)) {
+                $diffYears = (int) $m[1] - (int) now()->year;
+                return $diffYears <= 1 ? '<1 yr' : ($diffYears <= 3 ? '1 to 3 yr' : '>3 yr');
+            }
+        }
+
+        if (str_contains($sleeveBucket, 'Mudarabah') || str_contains($sleeveBucket, 'Murabaha') || str_contains($sleeveBucket, 'Cash')) {
+            return '<1 yr';
+        }
+        if (str_contains($sleeveBucket, 'Corporate')) {
+            return '1 to 3 yr';
+        }
+
+        return '>3 yr';
+    }
+
+    /**
+     * Evaluate a list of holdings against live Company, AaoifiScreening, and Dividend tables,
+     * plus classify fund mandate type (Equity, Fixed Income, or Balanced e.g. 60/40).
      */
     public function evaluateHoldingsArray(array $rows): array
     {
@@ -513,6 +689,9 @@ class InstitutionController extends Controller
 
         $evaluated = [];
         $totalAum = 0.0;
+        $equityAum = 0.0;
+        $fixedIncomeAum = 0.0;
+        $cashAum = 0.0;
         $compliantAum = 0.0;
         $doubtfulAum = 0.0;
         $nonCompliantAum = 0.0;
@@ -522,32 +701,135 @@ class InstitutionController extends Controller
         $nonCompliantCount = 0;
         $doubtfulCount = 0;
         $purifyRequiredCount = 0;
+        $equityCount = 0;
+        $fixedIncomeCount = 0;
+        $cashCount = 0;
         $sectorTotals = [];
+        $sleeveTotals = [];
+        $maturityTotals = [
+            '<1 yr' => 0.0,
+            '1 to 3 yr' => 0.0,
+            '>3 yr' => 0.0,
+            'Equity' => 0.0,
+        ];
+        $sleeveWeightFallbacks = [];
+        $equityWeightFallback = 0.0;
+        $fixedWeightFallback = 0.0;
+        $cashWeightFallback = 0.0;
 
         foreach ($normalizedRows as $row) {
             $sym = $row['resolved_symbol'];
             $company = $companies->get($sym);
             $shares = max(0.0, (float) ($row['shares'] ?? $row['units'] ?? 0));
             $avgPrice = isset($row['avg_price']) ? (float) $row['avg_price'] : null;
+            $explicitMv = isset($row['market_value']) ? (float) $row['market_value'] : 0.0;
+            $targetWeight = isset($row['target_weight']) ? (float) $row['target_weight'] : null;
+            $rawMaturity = isset($row['maturity']) ? trim((string) $row['maturity']) : null;
 
-            if (! $company) {
+            $instrument = $this->classifyInstrumentRow($row, $company);
+            $assetClass = $instrument['asset_class'];
+
+            if (! $company || $assetClass !== 'equity') {
                 $fallbackPrice = $avgPrice ?? 0.0;
-                $mv = $shares * $fallbackPrice;
+                $mv = ($shares > 0 && $fallbackPrice > 0)
+                    ? ($shares * $fallbackPrice)
+                    : ($explicitMv > 0 ? $explicitMv : 0.0);
+                if ($mv > 0 && $shares <= 0) {
+                    $shares = 1.0;
+                    $fallbackPrice = $mv;
+                } elseif ($shares > 0 && $fallbackPrice <= 0 && $mv > 0) {
+                    $fallbackPrice = round($mv / $shares, 2);
+                }
+
+                $status = $instrument['status'] ?? 'unmapped';
+                $isHalal = $status === 'halal';
+                $isNonCompliant = $status === 'non-compliant';
+
+                if ($assetClass === 'fixed_income') {
+                    $fixedIncomeAum += $mv;
+                    $fixedIncomeCount++;
+                    if ($targetWeight !== null) {
+                        $fixedWeightFallback += $targetWeight;
+                    }
+                } elseif ($assetClass === 'cash') {
+                    $cashAum += $mv;
+                    $cashCount++;
+                    if ($targetWeight !== null) {
+                        $cashWeightFallback += $targetWeight;
+                    }
+                } else {
+                    $equityAum += $mv;
+                    $equityCount++;
+                    if ($targetWeight !== null) {
+                        $equityWeightFallback += $targetWeight;
+                    }
+                }
+
+                if ($isHalal) {
+                    $compliantAum += $mv;
+                    $compliantCount++;
+                } elseif ($isNonCompliant) {
+                    $nonCompliantAum += $mv;
+                    $nonCompliantCount++;
+                } elseif ($status === 'unmapped') {
+                    $unmappedAum += $mv;
+                    $doubtfulAum += $mv;
+                    $doubtfulCount++;
+                } else {
+                    $doubtfulAum += $mv;
+                    $doubtfulCount++;
+                }
+
                 $totalAum += $mv;
-                $unmappedAum += $mv;
-                $sectorName = $row['sector'] ?? 'Unclassified';
+                $sectorName = ! empty($row['sector'])
+                    ? (string) $row['sector']
+                    : ($assetClass === 'equity' ? 'Unclassified' : $instrument['sleeve_bucket']);
                 $sectorTotals[$sectorName] = ($sectorTotals[$sectorName] ?? 0) + $mv;
+
+                $sleeveKey = $instrument['sleeve_bucket'];
+                if (! isset($sleeveTotals[$sleeveKey])) {
+                    $sleeveTotals[$sleeveKey] = [
+                        'security' => $sleeveKey,
+                        'shariah_contract' => $instrument['shariah_contract'],
+                        'asset_sleeve' => $assetClass,
+                        'value' => 0.0,
+                        'weight_fallback' => 0.0,
+                        'count' => 0,
+                        'has_non_compliant' => false,
+                        'has_doubtful' => false,
+                    ];
+                }
+                $sleeveTotals[$sleeveKey]['value'] += $mv;
+                $sleeveTotals[$sleeveKey]['weight_fallback'] += (float) ($targetWeight ?? 0);
+                $sleeveTotals[$sleeveKey]['count']++;
+                if ($isNonCompliant) {
+                    $sleeveTotals[$sleeveKey]['has_non_compliant'] = true;
+                } elseif (! $isHalal) {
+                    $sleeveTotals[$sleeveKey]['has_doubtful'] = true;
+                }
+                if ($targetWeight !== null) {
+                    $sleeveWeightFallbacks[$sleeveKey] = ($sleeveWeightFallbacks[$sleeveKey] ?? 0) + $targetWeight;
+                }
+
+                $matBucket = $this->inferMaturityBucket($rawMaturity, $assetClass, $sleeveKey);
+                $maturityTotals[$matBucket] = ($maturityTotals[$matBucket] ?? 0) + ($mv > 0 ? $mv : (float) ($targetWeight ?? 0));
 
                 $evaluated[] = [
                     'symbol' => $sym,
                     'input_symbol' => $row['input_symbol'],
                     'name' => $row['label'] ?? $sym,
                     'sector' => $sectorName,
+                    'asset_class' => $assetClass,
+                    'shariah_contract' => $instrument['shariah_contract'],
+                    'sleeve_bucket' => $sleeveKey,
+                    'maturity' => $rawMaturity,
+                    'maturity_bucket' => $matBucket,
+                    'is_fixed_income' => $assetClass === 'fixed_income',
                     'shares' => $shares,
-                    'current_price' => $fallbackPrice,
+                    'current_price' => round($fallbackPrice, 2),
                     'market_value' => round($mv, 2),
-                    'status' => 'unmapped',
-                    'is_halal' => false,
+                    'status' => $status,
+                    'is_halal' => $isHalal,
                     'purification_required' => false,
                     'purification_per_unit' => 0,
                     'purification_due' => 0,
@@ -556,10 +838,10 @@ class InstitutionController extends Controller
                     'cash_ratio' => null,
                     'trailing_dividend_per_share' => 0,
                     'total_dividends' => 0,
-                    'reporting_period' => null,
-                    'business_summary' => 'Ticker not yet matched to an NGX listed issuer in Irshad.',
+                    'reporting_period' => $assetClass !== 'equity' ? ($rawMaturity ?: ucfirst(str_replace('_', ' ', $assetClass))) : null,
+                    'business_summary' => $instrument['reason'] ?? 'Ticker not yet matched to an NGX listed issuer in Irshad.',
                     'is_near_threshold' => false,
-                    'target_weight' => $row['target_weight'] ?? null,
+                    'target_weight' => $targetWeight,
                 ];
                 continue;
             }
@@ -569,7 +851,10 @@ class InstitutionController extends Controller
                 $price = $avgPrice;
             }
 
-            $mv = $shares * $price;
+            $mv = ($shares > 0 && $price > 0) ? ($shares * $price) : ($explicitMv > 0 ? $explicitMv : 0.0);
+            if ($mv > 0 && $shares <= 0 && $price > 0) {
+                $shares = round($mv / $price, 4);
+            }
             $screening = $company->aaoifiScreening;
             $rawStatus = strtolower((string) ($company->current_status ?? $screening?->final_status ?? 'doubtful'));
             $isHalal = in_array($rawStatus, ['halal', 'compliant'], true);
@@ -609,6 +894,12 @@ class InstitutionController extends Controller
             $purificationDue = $isHalal ? ($shares * $purificationPerUnit) : 0.0;
             $purificationRequired = $isHalal && ($impureRatio > 0 || $purificationDue > 0);
 
+            $equityAum += $mv;
+            $equityCount++;
+            if ($targetWeight !== null) {
+                $equityWeightFallback += $targetWeight;
+            }
+
             if ($isHalal) {
                 $compliantAum += $mv;
                 $compliantCount++;
@@ -630,6 +921,29 @@ class InstitutionController extends Controller
             $sectorLabel = ucwords(strtolower(trim((string) ($row['sector'] ?? ($company->sector ?: 'Equities')))));
             $sectorTotals[$sectorLabel] = ($sectorTotals[$sectorLabel] ?? 0) + $mv;
 
+            $sleeveKey = $isHalal ? 'Halal Equities' : ($isNonCompliant ? 'Non-Compliant Equities' : 'Doubtful Equities');
+            if (! isset($sleeveTotals[$sleeveKey])) {
+                $sleeveTotals[$sleeveKey] = [
+                    'security' => $sleeveKey,
+                    'shariah_contract' => $isHalal ? 'Screened Common Equity' : 'Review Required',
+                    'asset_sleeve' => 'equity',
+                    'value' => 0.0,
+                    'weight_fallback' => 0.0,
+                    'count' => 0,
+                    'has_non_compliant' => false,
+                    'has_doubtful' => false,
+                ];
+            }
+            $sleeveTotals[$sleeveKey]['value'] += $mv;
+            $sleeveTotals[$sleeveKey]['weight_fallback'] += (float) ($targetWeight ?? 0);
+            $sleeveTotals[$sleeveKey]['count']++;
+            if ($isNonCompliant) {
+                $sleeveTotals[$sleeveKey]['has_non_compliant'] = true;
+            } elseif (! $isHalal) {
+                $sleeveTotals[$sleeveKey]['has_doubtful'] = true;
+            }
+            $maturityTotals['Equity'] += ($mv > 0 ? $mv : (float) ($targetWeight ?? 0));
+
             $bizSummary = is_array($screening?->business_reasoning)
                 ? ($screening->business_reasoning['summary'] ?? $company->activity_reason ?? null)
                 : ($company->activity_reason ?? null);
@@ -645,6 +959,12 @@ class InstitutionController extends Controller
                 'input_symbol' => $row['input_symbol'],
                 'name' => $row['label'] ?? $company->name,
                 'sector' => $sectorLabel,
+                'asset_class' => 'equity',
+                'shariah_contract' => $instrument['shariah_contract'],
+                'sleeve_bucket' => $sleeveKey,
+                'maturity' => $rawMaturity,
+                'maturity_bucket' => 'Equity',
+                'is_fixed_income' => false,
                 'shares' => $shares,
                 'current_price' => round($price, 2),
                 'price_change_pct' => (float) ($company->price_change_pct ?? 0),
@@ -664,7 +984,7 @@ class InstitutionController extends Controller
                 'source_url' => $screening?->financial_data_used['source_url'] ?? null,
                 'business_summary' => $bizSummary,
                 'is_near_threshold' => $isNearThreshold,
-                'target_weight' => $row['target_weight'] ?? null,
+                'target_weight' => $targetWeight,
                 'logo_url' => $company->logo_url,
             ];
         }
@@ -784,6 +1104,123 @@ class InstitutionController extends Controller
             $evaluated
         ))));
 
+        // Build fund classification (Fixed Income vs Equity vs Balanced e.g. 60/40)
+        $weightDenom = $totalAum > 0
+            ? $totalAum
+            : max(0.0, $equityWeightFallback + $fixedWeightFallback + $cashWeightFallback);
+
+        $equityPct = $weightDenom > 0
+            ? round((($totalAum > 0 ? $equityAum : $equityWeightFallback) / $weightDenom) * 100, 1)
+            : 0.0;
+        $fixedPct = $weightDenom > 0
+            ? round((($totalAum > 0 ? $fixedIncomeAum : $fixedWeightFallback) / $weightDenom) * 100, 1)
+            : 0.0;
+        $cashPct = $weightDenom > 0
+            ? round((($totalAum > 0 ? $cashAum : $cashWeightFallback) / $weightDenom) * 100, 1)
+            : 0.0;
+        $fixedEffectivePct = round($fixedPct + $cashPct, 1);
+
+        if ($fixedIncomeCount > 0 && ($fixedEffectivePct >= 80.0 || $equityPct <= 15.0)) {
+            $fundType = 'fixed_income';
+            $splitLabel = $cashPct >= 1.0 ? round($fixedPct) . '/' . round($cashPct) . ' FI/Cash' : '100% FI';
+            $fundTypeLabel = $nonCompliantCount > 0 ? 'Mixed Fixed Income Fund' : 'Islamic Fixed Income Fund';
+            $shortLabel = 'Fixed Income';
+            $classReason = "Detected {$fixedEffectivePct}% Sukuk, Islamic money market & fixed-income instruments with {$equityPct}% equities.";
+        } elseif (($fixedIncomeCount > 0 || $cashCount > 0) && $equityPct > 15.0 && $equityPct < 80.0 && $fixedEffectivePct >= 20.0) {
+            $fundType = 'balanced';
+            $fixedInt = (int) round($fixedEffectivePct);
+            $equityInt = max(0, 100 - $fixedInt);
+            $splitLabel = "{$fixedInt}/{$equityInt}";
+            $fundTypeLabel = "Balanced Islamic Fund ({$splitLabel})";
+            $shortLabel = "Balanced ({$splitLabel})";
+            $classReason = "Detected {$fixedEffectivePct}% fixed-income/money-market sleeve paired with {$equityPct}% equities ({$splitLabel} Balanced Fund).";
+        } else {
+            $fundType = 'equity';
+            $splitLabel = $cashPct >= 1.0 ? round($equityPct) . '/' . round($cashPct) . ' Eq/Cash' : '100% Equity';
+            $fundTypeLabel = 'Screened Equity Fund';
+            $shortLabel = 'Equity Fund';
+            $classReason = $cashPct > 0
+                ? "Detected {$equityPct}% equity holdings with {$cashPct}% liquidity reserve."
+                : "Detected 100% equity positions screened under AAOIFI Standard No. 21.";
+        }
+
+        $fundClassification = [
+            'type' => $fundType,
+            'label' => $fundTypeLabel,
+            'short_label' => $shortLabel,
+            'split_label' => $splitLabel,
+            'equity_pct' => $equityPct,
+            'fixed_income_pct' => $fixedPct,
+            'cash_pct' => $cashPct,
+            'fixed_effective_pct' => $fixedEffectivePct,
+            'equity_count' => $equityCount,
+            'fixed_income_count' => $fixedIncomeCount,
+            'cash_count' => $cashCount,
+            'confidence' => ($fixedIncomeCount + $equityCount) > 0 ? 'high' : 'medium',
+            'reason' => $classReason,
+        ];
+
+        $sleeveAllocation = [];
+        foreach ($sleeveTotals as $sBucket) {
+            $val = $sBucket['value'];
+            $pct = $totalAum > 0
+                ? round(($val / $totalAum) * 100, 2)
+                : ($weightDenom > 0 ? round(($sBucket['weight_fallback'] / $weightDenom) * 100, 2) : 0.0);
+
+            if ($sBucket['asset_sleeve'] === 'equity') {
+                $tMin = $fundType === 'balanced' ? 30 : 75;
+                $tMax = $fundType === 'balanced' ? 50 : 100;
+            } elseif ($sBucket['asset_sleeve'] === 'cash') {
+                $tMin = 0;
+                $tMax = 15;
+            } else {
+                $tMin = 0;
+                $tMax = $fundType === 'fixed_income' ? 70 : 60;
+            }
+
+            $outOfBand = $pct < $tMin || $pct > $tMax;
+            $statusStr = $sBucket['has_non_compliant']
+                ? 'Review Required'
+                : ($sBucket['has_doubtful'] ? 'Verify Contract' : ($outOfBand ? 'Monitor Band' : 'Within Mandate'));
+
+            $sleeveAllocation[] = [
+                'security' => $sBucket['security'],
+                'shariah_contract' => $sBucket['shariah_contract'],
+                'asset_sleeve' => $sBucket['asset_sleeve'],
+                'current' => $pct,
+                'market_value' => round($val, 2),
+                'holdings_count' => $sBucket['count'],
+                'target_min' => $tMin,
+                'target_max' => $tMax,
+                'target_label' => "{$tMin}% - {$tMax}%",
+                'status' => $statusStr,
+            ];
+        }
+        usort($sleeveAllocation, fn ($a, $b) => $b['current'] <=> $a['current']);
+
+        $maturityProfile = [];
+        $matDenom = array_sum($maturityTotals);
+        foreach (['<1 yr', '1 to 3 yr', '>3 yr', 'Equity'] as $bucket) {
+            if ($bucket === 'Equity' && ($maturityTotals['Equity'] ?? 0) <= 0) {
+                continue;
+            }
+            $bucketPct = $matDenom > 0 ? round(($maturityTotals[$bucket] / $matDenom) * 100, 1) : 0.0;
+            if ($bucketPct > 0 || $bucket !== 'Equity') {
+                $maturityProfile[] = ['bucket' => $bucket, 'pct' => $bucketPct];
+            }
+        }
+
+        // Compliant pct when weight-only payload has 0 AUM
+        $effectiveCompliantPct = $totalAum > 0
+            ? round(($compliantAum / $totalAum) * 100, 2)
+            : (count($evaluated) > 0 ? round(($compliantCount / count($evaluated)) * 100, 2) : 0.0);
+        $effectiveNonCompliantPct = $totalAum > 0
+            ? round(($nonCompliantAum / $totalAum) * 100, 2)
+            : (count($evaluated) > 0 ? round(($nonCompliantCount / count($evaluated)) * 100, 2) : 0.0);
+        $effectiveDoubtfulPct = $totalAum > 0
+            ? round(($doubtfulAum / $totalAum) * 100, 2)
+            : (count($evaluated) > 0 ? round(($doubtfulCount / count($evaluated)) * 100, 2) : 0.0);
+
         $summary = [
             'holdings_count' => count($evaluated),
             'compliant_count' => $compliantCount,
@@ -797,12 +1234,21 @@ class InstitutionController extends Controller
             'weighted_cash_ratio' => $cashWeightDenom > 0 ? round($cashWeightedSum / $cashWeightDenom, 2) : null,
             'weighted_impure_ratio' => $impureWeightDenom > 0 ? round($impureWeightedSum / $impureWeightDenom, 2) : 0,
             'total_aum' => round($totalAum, 2),
+            'equity_aum' => round($equityAum, 2),
+            'fixed_income_aum' => round($fixedIncomeAum, 2),
+            'cash_aum' => round($cashAum, 2),
+            'fund_type' => $fundType,
+            'fund_type_label' => $fundTypeLabel,
+            'split_label' => $splitLabel,
+            'equity_pct' => $equityPct,
+            'fixed_income_pct' => $fixedPct,
+            'cash_pct' => $cashPct,
             'compliant_aum' => round($compliantAum, 2),
-            'compliant_pct' => $totalAum > 0 ? round(($compliantAum / $totalAum) * 100, 2) : 0,
+            'compliant_pct' => $effectiveCompliantPct,
             'non_compliant_aum' => round($nonCompliantAum, 2),
-            'non_compliant_pct' => $totalAum > 0 ? round(($nonCompliantAum / $totalAum) * 100, 2) : 0,
+            'non_compliant_pct' => $effectiveNonCompliantPct,
             'doubtful_aum' => round($doubtfulAum, 2),
-            'doubtful_pct' => $totalAum > 0 ? round(($doubtfulAum / $totalAum) * 100, 2) : 0,
+            'doubtful_pct' => $effectiveDoubtfulPct,
             'unmapped_aum' => round($unmappedAum, 2),
             'total_purification_due' => round($totalPurification, 2),
             'weighted_purification_per_unit' => $totalUnits > 0 ? round($totalPurification / $totalUnits, 4) : 0,
@@ -812,11 +1258,16 @@ class InstitutionController extends Controller
             'screened_at' => now()->toISOString(),
         ];
 
-        $smartBrief = $this->buildSmartBrief($evaluated, $sectorAllocation, $rebalancingSuggestions, $summary);
+        $smartBrief = $this->buildSmartBrief($evaluated, $sectorAllocation, $rebalancingSuggestions, $summary, $fundClassification);
+        $recommendedFactsheetMeta = $this->buildRecommendedFactsheetMeta($summary, $smartBrief, $fundClassification, $sleeveAllocation, $maturityProfile);
 
         return [
             'holdings' => $evaluated,
             'sector_allocation' => $sectorAllocation,
+            'sleeve_allocation' => $sleeveAllocation,
+            'maturity_profile' => $maturityProfile,
+            'fund_classification' => $fundClassification,
+            'recommended_factsheet_meta' => $recommendedFactsheetMeta,
             'rebalancing_suggestions' => $rebalancingSuggestions,
             'summary' => $summary,
             'smart_brief' => $smartBrief,
@@ -831,7 +1282,8 @@ class InstitutionController extends Controller
         array $evaluated,
         array $sectorAllocation,
         array $rebalancingSuggestions,
-        array $summary
+        array $summary,
+        array $fundClassification = []
     ): array {
         $nonCompliant = (int) ($summary['non_compliant_count'] ?? 0);
         $doubtful = (int) ($summary['doubtful_count'] ?? 0);
@@ -839,6 +1291,8 @@ class InstitutionController extends Controller
         $compliantPct = (float) ($summary['compliant_pct'] ?? 0);
         $top5Pct = (float) ($summary['top_5_concentration_pct'] ?? 0);
         $holdingsCount = (int) ($summary['holdings_count'] ?? 0);
+        $fundType = $fundClassification['type'] ?? ($summary['fund_type'] ?? 'equity');
+        $splitLabel = $fundClassification['split_label'] ?? ($summary['split_label'] ?? '100%');
 
         $readiness = ($nonCompliant > 0 || $doubtful > 0)
             ? 'REMEDIATION_REQUIRED'
@@ -847,7 +1301,7 @@ class InstitutionController extends Controller
         // Concentration warnings
         $warnings = [];
         foreach ($evaluated as $h) {
-            if ((float) ($h['weight_pct'] ?? 0) >= 20.0) {
+            if ((float) ($h['weight_pct'] ?? 0) >= 20.0 && ($h['asset_class'] ?? 'equity') === 'equity') {
                 $warnings[] = [
                     'type' => 'single_name',
                     'message' => "{$h['symbol']} carries {$h['weight_pct']}% single-name weight (>= 20% prudence threshold).",
@@ -855,7 +1309,7 @@ class InstitutionController extends Controller
             }
         }
         foreach ($sectorAllocation as $sec) {
-            if ((float) ($sec['weight_pct'] ?? 0) >= 40.0) {
+            if ((float) ($sec['weight_pct'] ?? 0) >= 40.0 && $fundType === 'equity') {
                 $warnings[] = [
                     'type' => 'sector',
                     'message' => "{$sec['sector']} represents {$sec['weight_pct']}% of AUM (>= 40% sector ceiling).",
@@ -863,8 +1317,15 @@ class InstitutionController extends Controller
             }
         }
 
-        // Dynamic SEC 1–7 risk classification based on diversification & concentration
-        if ($holdingsCount <= 4 || $top5Pct >= 80) {
+        // Dynamic SEC 1–7 risk classification based on asset mix, diversification & concentration
+        if ($fundType === 'fixed_income') {
+            $riskLevel = $nonCompliant > 0 ? 3 : 2;
+            $riskLabel = "Conservative Islamic Fixed Income, {$riskLevel} of 7";
+        } elseif ($fundType === 'balanced') {
+            $equityPct = (float) ($fundClassification['equity_pct'] ?? 40.0);
+            $riskLevel = $equityPct >= 55.0 ? 4 : 3;
+            $riskLabel = "Moderate Balanced ({$splitLabel}), {$riskLevel} of 7";
+        } elseif ($holdingsCount <= 4 || $top5Pct >= 80) {
             $riskLevel = 6;
             $riskLabel = 'High Growth / Concentrated, 6 of 7';
         } elseif ($top5Pct >= 60 || $holdingsCount <= 8) {
@@ -875,7 +1336,7 @@ class InstitutionController extends Controller
             $riskLabel = 'Balanced Diversified Equity, 4 of 7';
         }
 
-        // Build 1-click Auto-Align-to-Halal rebalance plan
+        // Build 1-click Auto-Align-to-Halal rebalance plan (preserving fixed-income/cash sleeves cleanly)
         $swapMap = [];
         $swaps = [];
         foreach ($rebalancingSuggestions as $sug) {
@@ -905,6 +1366,7 @@ class InstitutionController extends Controller
                         'symbol' => $repSym,
                         'shares' => 0,
                         'avg_price' => (float) $rep['latest_price'],
+                        'asset_class' => 'equity',
                     ];
                 }
                 $proposedHoldingsMap[$repSym]['shares'] += (int) $rep['estimated_units'];
@@ -914,6 +1376,13 @@ class InstitutionController extends Controller
                         'symbol' => $sym,
                         'shares' => 0,
                         'avg_price' => (float) $h['current_price'],
+                        'label' => $h['name'] ?? $sym,
+                        'sector' => $h['sector'] ?? null,
+                        'asset_class' => $h['asset_class'] ?? 'equity',
+                        'shariah_contract' => $h['shariah_contract'] ?? null,
+                        'maturity' => $h['maturity'] ?? null,
+                        'market_value' => ($h['asset_class'] ?? 'equity') !== 'equity' ? ($h['market_value'] ?? null) : null,
+                        'target_weight' => $h['target_weight'] ?? null,
                     ];
                 }
                 $proposedHoldingsMap[$sym]['shares'] += (float) $h['shares'];
@@ -925,10 +1394,18 @@ class InstitutionController extends Controller
         $leadSector = $sectorAllocation[0]['sector'] ?? 'Equities';
         $leadSectorPct = $sectorAllocation[0]['weight_pct'] ?? 0;
         $purifFormatted = '₦' . number_format((float) ($summary['total_purification_due'] ?? 0), 2);
-        $commentary = "Across {$holdingsCount} evaluated holdings led by {$leadSector} ({$leadSectorPct}%) and core positions {$topTickers}, {$compliantPct}% of portfolio AUM satisfies AAOIFI Standard No. 21 screening.";
-        if ($nonCompliant > 0) {
-            $commentary .= " {$nonCompliant} non-compliant holding(s) have been flagged for divestment into verified Halal sector peers.";
+        if ($fundType === 'fixed_income') {
+            $commentary = "Classified as an Islamic Fixed Income mandate ({$splitLabel}) across {$holdingsCount} holdings led by {$leadSector} ({$leadSectorPct}%), with {$compliantPct}% of AUM verified under Shariah non-interest contracts.";
+        } elseif ($fundType === 'balanced') {
+            $fiPct = $fundClassification['fixed_effective_pct'] ?? 60.0;
+            $eqPct = $fundClassification['equity_pct'] ?? 40.0;
+            $commentary = "Classified as a {$splitLabel} Balanced Fund combining {$fiPct}% fixed-income/money-market placements with {$eqPct}% screened equities ({$compliantPct}% overall compliance; equity purification: {$purifFormatted}).";
         } else {
+            $commentary = "Across {$holdingsCount} evaluated holdings led by {$leadSector} ({$leadSectorPct}%) and core positions {$topTickers}, {$compliantPct}% of portfolio AUM satisfies AAOIFI Standard No. 21 screening.";
+        }
+        if ($nonCompliant > 0) {
+            $commentary .= " {$nonCompliant} non-compliant holding(s) have been flagged for divestment into verified Halal alternatives.";
+        } elseif ($fundType === 'equity') {
             $commentary .= " Aggregate purification liability stands at {$purifFormatted}.";
         }
         if ($nearCount > 0) {
@@ -954,9 +1431,86 @@ class InstitutionController extends Controller
         ];
     }
 
+    protected function buildRecommendedFactsheetMeta(
+        array $summary,
+        array $smartBrief,
+        array $fundClassification,
+        array $sleeveAllocation,
+        array $maturityProfile
+    ): array {
+        $type = $fundClassification['type'] ?? 'equity';
+        $split = $fundClassification['split_label'] ?? '100%';
+        $eqPct = (float) ($fundClassification['equity_pct'] ?? 100.0);
+        $fiPct = (float) ($fundClassification['fixed_effective_pct'] ?? 0.0);
+        $totalAum = (float) ($summary['total_aum'] ?? 0);
+        $riskLevel = (int) ($smartBrief['risk_classification']['level'] ?? 4);
+        $riskLabel = (string) ($smartBrief['risk_classification']['label'] ?? "Balanced Growth, {$riskLevel} of 7");
+
+        if ($type === 'fixed_income') {
+            $mandateType = 'Islamic Fixed Income Fund';
+            $bias = 'Fixed Income (Sukuk & Non-Interest Placements)';
+            $benchmark = '3-year FGN Sukuk (Moving Average)';
+            $volatility = 3.4;
+            $holdingPeriod = 'Minimum 90-180 days';
+            $rebalancing = 'Monthly';
+            $feeLines = [['label' => 'Management Fee', 'pct' => 1.50], ['label' => 'Custody, Trustee & Audit', 'pct' => 0.40]];
+            $expenseRatio = 1.90;
+            $objective = 'Preserve institutional capital and generate steady non-interest income through certified FGN/Corporate Sukuk, Mudarabah, and Murabaha placements overseen under SEC & AAOIFI standards.';
+            $investorProfile = 'Suitable for institutional treasuries, Takaful operators, corporate cash desks, and capital-preservation mandates seeking SEC-regulated Shariah returns.';
+        } elseif ($type === 'balanced') {
+            $fiInt = (int) round($fiPct);
+            $eqInt = max(0, 100 - $fiInt);
+            $mandateType = "Balanced Islamic Fund ({$split})";
+            $bias = "{$fiInt}% Islamic Fixed Income / {$eqInt}% Halal Equities";
+            $benchmark = "Blended ({$eqInt}% NGXLII / {$fiInt}% FGN Sukuk)";
+            $volatility = round(max(5.5, min(18.0, 3.4 + ($eqPct * 0.19))), 1);
+            $holdingPeriod = 'Three years or more';
+            $rebalancing = 'Monthly / Quarterly';
+            $feeLines = [['label' => 'Management Fee', 'pct' => 1.25], ['label' => 'Custody & Shariah Advisory', 'pct' => 0.35]];
+            $expenseRatio = 1.60;
+            $objective = "Deliver balanced capital growth and regular income by pairing {$eqInt}% AAOIFI-screened halal equities with {$fiInt}% certified Sukuk and non-interest money market instruments.";
+            $investorProfile = 'Built for institutions, endowments, and Pension Fund Administrators (PFAs) seeking equity upside alongside a steady non-interest income floor.';
+        } else {
+            $mandateType = 'Screened Equity Mandate';
+            $bias = 'AAOIFI-Screened Halal Equities';
+            $benchmark = 'NGX Lotus Islamic Index (NGXLII)';
+            $top5 = (float) ($summary['top_5_concentration_pct'] ?? 60.0);
+            $volatility = round(min(32.0, max(12.5, 11.0 + ($top5 * 0.18))), 1);
+            $holdingPeriod = $riskLevel >= 5 ? 'Five years or more' : 'Three years or more';
+            $rebalancing = 'Continuous / Pre-Trade';
+            $feeLines = [['label' => 'Management Fee', 'pct' => 0.55], ['label' => 'Custody & Shariah Compliance', 'pct' => 0.20]];
+            $expenseRatio = 0.75;
+            $objective = 'Achieve competitive long-term capital growth strictly within AAOIFI Standard No. 21 boundaries (<30% debt, <30% interest-bearing cash, <5% non-permissible income) with automated dividend purification.';
+            $investorProfile = 'Built for Pension Fund Administrators (PFAs), Islamic asset managers, trustees, and institutional equity compliance desks.';
+        }
+
+        return [
+            'fund_type' => $type,
+            'fund_type_label' => $fundClassification['label'] ?? $mandateType,
+            'split_label' => $split,
+            'mandate_type' => $mandateType,
+            'bias' => $bias,
+            'benchmark' => $benchmark,
+            'risk_level' => $riskLevel,
+            'risk_label' => $riskLabel,
+            'volatility_3y_pct' => $volatility,
+            'holding_period' => $holdingPeriod,
+            'rebalancing_frequency' => $rebalancing,
+            'fund_size_ngn' => $totalAum > 0 ? round($totalAum, 2) : null,
+            'fee_lines' => $feeLines,
+            'expense_ratio_pct' => $expenseRatio,
+            'management_fee' => number_format((float) ($feeLines[0]['pct'] ?? $expenseRatio), 2) . '%',
+            'allocation_list' => $sleeveAllocation,
+            'maturity_profile' => $maturityProfile,
+            'objective' => $objective,
+            'commentary' => $smartBrief['suggested_commentary'] ?? '',
+            'investor_profile' => $investorProfile,
+        ];
+    }
+
     /**
      * Lightweight deterministic CSV parser for institutional portfolio templates.
-     * Supports columns like Symbol/Ticker, Shares/Units/Quantity, Price/AvgCost, Name.
+     * Supports Equity, Fixed Income (Sukuk/Mudarabah/Murabaha/Cash), and Balanced multi-asset templates.
      */
     protected function parseInstitutionalCsv(string $filePath): array
     {
@@ -981,18 +1535,44 @@ class InstitutionController extends Controller
                 $assoc[$col] = isset($data[$idx]) ? trim((string) $data[$idx]) : '';
             }
 
-            $sym = $assoc['symbol'] ?? $assoc['ticker'] ?? $assoc['stock'] ?? $assoc['security'] ?? $assoc['asset'] ?? null;
+            $sym = $assoc['symbol'] ?? $assoc['ticker'] ?? $assoc['stock'] ?? $assoc['security'] ?? $assoc['asset'] ?? $assoc['instrument'] ?? $assoc['code'] ?? null;
             $sharesRaw = $assoc['shares'] ?? $assoc['units'] ?? $assoc['quantity'] ?? $assoc['qty'] ?? $assoc['volume'] ?? null;
             $priceRaw = $assoc['price'] ?? $assoc['avg_price'] ?? $assoc['cost'] ?? $assoc['unit_price'] ?? null;
-            $label = $assoc['name'] ?? $assoc['company'] ?? $assoc['security_name'] ?? null;
+            $mvRaw = $assoc['market_value'] ?? $assoc['market value'] ?? $assoc['value'] ?? $assoc['amount'] ?? $assoc['principal'] ?? $assoc['aum'] ?? null;
+            $weightRaw = $assoc['weight'] ?? $assoc['weight_pct'] ?? $assoc['weight (%)'] ?? $assoc['allocation'] ?? $assoc['allocation (%)'] ?? $assoc['%'] ?? null;
+            $assetClass = $assoc['asset_class'] ?? $assoc['asset class'] ?? $assoc['type'] ?? $assoc['category'] ?? $assoc['instrument_type'] ?? $assoc['sleeve'] ?? null;
+            $contract = $assoc['shariah_contract'] ?? $assoc['shariah contract'] ?? $assoc['contract'] ?? $assoc['structure'] ?? null;
+            $maturity = $assoc['maturity'] ?? $assoc['tenor'] ?? $assoc['maturity_date'] ?? null;
+            $sector = $assoc['sector'] ?? $assoc['industry'] ?? null;
+            $label = $assoc['name'] ?? $assoc['company'] ?? $assoc['security_name'] ?? $assoc['description'] ?? null;
 
             if ($sym) {
                 $shares = (float) preg_replace('/[^0-9.]/', '', (string) ($sharesRaw ?? '0'));
-                $price = $priceRaw !== null ? (float) preg_replace('/[^0-9.]/', '', (string) $priceRaw) : null;
+                $price = $priceRaw !== null && $priceRaw !== '' ? (float) preg_replace('/[^0-9.]/', '', (string) $priceRaw) : null;
+                $mv = $mvRaw !== null && $mvRaw !== '' ? (float) preg_replace('/[^0-9.]/', '', (string) $mvRaw) : null;
+                $weight = $weightRaw !== null && $weightRaw !== '' ? (float) preg_replace('/[^0-9.]/', '', (string) $weightRaw) : null;
+
+                if ($shares <= 0 && $mv && $mv > 0) {
+                    if ($price && $price > 0) {
+                        $shares = round($mv / $price, 4);
+                    } else {
+                        $shares = 1;
+                        $price = $mv;
+                    }
+                } elseif ($shares <= 0 && (! $weight || $weight <= 0)) {
+                    $shares = 1000;
+                }
+
                 $rows[] = [
                     'symbol' => $sym,
-                    'shares' => $shares > 0 ? $shares : 1000,
+                    'shares' => $shares,
                     'avg_price' => ($price && $price > 0) ? $price : null,
+                    'market_value' => ($mv && $mv > 0) ? $mv : null,
+                    'target_weight' => ($weight && $weight > 0) ? $weight : null,
+                    'asset_class' => $assetClass ?: null,
+                    'shariah_contract' => $contract ?: null,
+                    'maturity' => $maturity ?: null,
+                    'sector' => $sector ?: null,
                     'label' => $label ?: null,
                 ];
             }
@@ -1029,14 +1609,15 @@ class InstitutionController extends Controller
         $presetId = (string) ($validated['preset_id'] ?? '');
         $mandateType = (string) ($validated['mandate_type'] ?? '');
 
-        $isFixed = $presetId === 'norrenberger_fund' || stripos($mandateType, 'fixed income') !== false;
-        $isBalanced = $presetId === 'balanced_fund' || stripos($mandateType, 'balanced') !== false;
-
         $holdingsInput = $validated['holdings'] ?? [];
         $evaluated = ! empty($holdingsInput) ? $this->evaluateHoldingsArray($holdingsInput) : null;
         $summary = $evaluated['summary'] ?? [];
         $smartBrief = $evaluated['smart_brief'] ?? [];
         $evaluatedHoldings = $evaluated['holdings'] ?? [];
+        $detectedType = $evaluated['fund_classification']['type'] ?? null;
+
+        $isFixed = $presetId === 'norrenberger_fund' || stripos($mandateType, 'fixed income') !== false || $detectedType === 'fixed_income';
+        $isBalanced = $presetId === 'balanced_fund' || stripos($mandateType, 'balanced') !== false || $detectedType === 'balanced';
 
         // 1. Fund Size & Units Derivation
         $fundSize = (float) ($summary['total_aum'] ?? 0);
@@ -1055,19 +1636,21 @@ class InstitutionController extends Controller
             ? $this->generateSmartTicker($fundName, $institutionName)
             : $rawTicker;
 
+        $recMeta = $evaluated['recommended_factsheet_meta'] ?? [];
+
         // 3. SEC Risk Rating & 3Y Volatility Estimate
         if ($isFixed) {
-            $riskLevel = 2;
-            $riskLabel = 'Conservative, 2 of 7';
-            $volatility = 3.4;
-            $holdingPeriod = 'Minimum 90-180 days';
-            $benchmark = '3-year FGN Sukuk (Moving Average)';
+            $riskLevel = (int) ($recMeta['risk_level'] ?? 2);
+            $riskLabel = (string) ($recMeta['risk_label'] ?? 'Conservative, 2 of 7');
+            $volatility = (float) ($recMeta['volatility_3y_pct'] ?? 3.4);
+            $holdingPeriod = (string) ($recMeta['holding_period'] ?? 'Minimum 90-180 days');
+            $benchmark = (string) ($recMeta['benchmark'] ?? '3-year FGN Sukuk (Moving Average)');
         } elseif ($isBalanced) {
-            $riskLevel = 4;
-            $riskLabel = 'Moderate, 4 of 7';
-            $volatility = 11.8;
-            $holdingPeriod = 'Three years or more';
-            $benchmark = 'Blended (40% NGXLII / 60% FGN Sukuk)';
+            $riskLevel = (int) ($recMeta['risk_level'] ?? 4);
+            $riskLabel = (string) ($recMeta['risk_label'] ?? 'Moderate, 4 of 7');
+            $volatility = (float) ($recMeta['volatility_3y_pct'] ?? 11.8);
+            $holdingPeriod = (string) ($recMeta['holding_period'] ?? 'Three years or more');
+            $benchmark = (string) ($recMeta['benchmark'] ?? 'Blended (40% NGXLII / 60% FGN Sukuk)');
         } else {
             $riskLevel = (int) ($smartBrief['risk_classification']['level'] ?? 4);
             $riskLabel = (string) ($smartBrief['risk_classification']['label'] ?? "Balanced Growth, {$riskLevel} of 7");
@@ -1160,6 +1743,10 @@ class InstitutionController extends Controller
             'autofill' => [
                 'ticker' => $ticker,
                 'factsheet_date' => now()->format('jS F, Y'),
+                'fund_type' => $recMeta['fund_type'] ?? ($isFixed ? 'fixed_income' : ($isBalanced ? 'balanced' : 'equity')),
+                'mandate_type' => $recMeta['mandate_type'] ?? ($isFixed ? 'Islamic Fixed Income Fund' : ($isBalanced ? 'Balanced Islamic Fund (60/40)' : 'Screened Equity Mandate')),
+                'bias' => $recMeta['bias'] ?? null,
+                'split_label' => $recMeta['split_label'] ?? null,
                 'fund_size_ngn' => $fundSize > 0 ? round($fundSize, 2) : null,
                 'nav_per_unit' => $nav > 0 ? $nav : null,
                 'units_in_issue' => $derivedUnits,
@@ -1175,9 +1762,11 @@ class InstitutionController extends Controller
                 'purification_per_unit_input' => round($purifPerUnit, 4),
                 'zakat_per_unit_input' => round($zakatPerUnit, 2),
                 'shariah_board' => 'Irshad Tech Ltd (AAOIFI Standard No. 21 Certified Screening)',
-                'objective' => $objective,
+                'allocation_list' => $recMeta['allocation_list'] ?? null,
+                'maturity_profile' => $recMeta['maturity_profile'] ?? null,
+                'objective' => $recMeta['objective'] ?? $objective,
                 'commentary' => $commentary,
-                'investor_profile' => $investorProfile,
+                'investor_profile' => $recMeta['investor_profile'] ?? $investorProfile,
                 'suggested_events' => array_slice($autoEvents, 0, 10),
             ],
             'filled_fields' => $filledFields,

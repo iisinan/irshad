@@ -19,7 +19,8 @@ export default function InstitutionalPurificationPanel({
   );
 
   const isLotus = activePresetId === 'lotus_etf';
-  const isBalanced = activePresetId === 'balanced_fund';
+  const isBalanced = activePresetId === 'balanced_fund' || screened?.fund_classification?.type === 'balanced';
+  const isFixedIncome = activePresetId === 'norrenberger_fund' || screened?.fund_classification?.type === 'fixed_income';
   const totalUnitsHeld = useMemo(
     () => holdings.reduce((acc, h) => acc + Number(h.shares || 0), 0),
     [holdings]
@@ -123,7 +124,11 @@ export default function InstitutionalPurificationPanel({
               Institutional Dividend &amp; Fund-Level Purification
             </h2>
             <p style={{ margin: '6px 0 0', fontSize: '0.84rem', color: 'var(--text-muted)', maxWidth: 700, lineHeight: 1.55 }}>
-              Irshad isolates non-permissible revenue (interest earned on bank deposits &amp; conventional securities) from each portfolio company&apos;s audited Q2/Q3 filings and computes both <strong>Fund-Level Deductions</strong> and <strong>Per-Unit Unitholder Disclosure Rates</strong>.
+              {isFixedIncome
+                ? 'Islamic Fixed Income instruments (Sukuk, Mudarabah, Murabaha, Wadiah) do not earn corporate equity dividends, so dividend purification is ₦0.00.'
+                : isBalanced && activePresetId === 'uploaded'
+                  ? `Balanced Fund purification applies strictly to the ${Number(summary.equity_pct || 0).toFixed(1)}% equity sleeve; fixed-income & non-interest placements require zero dividend cleansing.`
+                  : <>Irshad isolates non-permissible revenue (interest earned on bank deposits &amp; conventional securities) from each portfolio company&apos;s audited Q2/Q3 filings and computes both <strong>Fund-Level Deductions</strong> and <strong>Per-Unit Unitholder Disclosure Rates</strong>.</>}
             </p>
           </div>
 

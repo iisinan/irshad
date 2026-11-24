@@ -504,7 +504,9 @@ class StatementParserService
             elseif (str_contains($rowStr, 'cscs')) $broker = 'CSCS Clearing';
 
             $detected = $this->detectColumns($row);
-            if (isset($detected['symbol']) && (isset($detected['shares']) || isset($detected['price']))) {
+            if (isset($detected['symbol']) && (
+                isset($detected['shares']) || isset($detected['price']) || isset($detected['market_value']) || isset($detected['weight'])
+            )) {
                 $headerIdx = $rIdx;
                 $colMap = $detected;
                 break;
@@ -533,7 +535,7 @@ class StatementParserService
             if ($rawSym === '' || is_numeric($rawSym)) {
                 continue;
             }
-            if (preg_match('/^(total|subtotal|sub-total|balance|grand total|cash|portfolio value)/i', $rawSym)) {
+            if (preg_match('/^(total|subtotal|sub-total|grand total|portfolio value|net asset value|opening balance|closing balance)/i', $rawSym)) {
                 continue;
             }
 
@@ -545,15 +547,54 @@ class StatementParserService
                 ? $this->cleanNumber($row[$colMap['price']])
                 : 0.0;
 
+            $marketValue = isset($colMap['market_value']) && isset($row[$colMap['market_value']])
+                ? $this->cleanNumber($row[$colMap['market_value']])
+                : 0.0;
+
+            $weightPct = isset($colMap['weight']) && isset($row[$colMap['weight']])
+                ? $this->cleanNumber($row[$colMap['weight']])
+                : null;
+
+            $assetClass = isset($colMap['asset_class']) && isset($row[$colMap['asset_class']])
+                ? trim((string) $row[$colMap['asset_class']])
+                : null;
+
+            $contract = isset($colMap['shariah_contract']) && isset($row[$colMap['shariah_contract']])
+                ? trim((string) $row[$colMap['shariah_contract']])
+                : null;
+
+            $maturity = isset($colMap['maturity']) && isset($row[$colMap['maturity']])
+                ? trim((string) $row[$colMap['maturity']])
+                : null;
+
+            $sector = isset($colMap['sector']) && isset($row[$colMap['sector']])
+                ? trim((string) $row[$colMap['sector']])
+                : null;
+
             $date = isset($colMap['date']) && isset($row[$colMap['date']])
                 ? $this->cleanDate((string) $row[$colMap['date']])
                 : null;
 
-            if ($shares > 0) {
+            if ($shares <= 0 && $marketValue > 0) {
+                if ($price > 0) {
+                    $shares = round($marketValue / $price, 4);
+                } else {
+                    $shares = 1.0;
+                    $price = $marketValue;
+                }
+            }
+
+            if ($shares > 0 || $marketValue > 0 || ($weightPct !== null && $weightPct > 0)) {
                 $holdings[] = [
                     'symbol_or_name' => $rawSym,
                     'shares' => $shares,
                     'average_buy_price' => $price,
+                    'market_value' => $marketValue > 0 ? $marketValue : null,
+                    'weight_pct' => ($weightPct !== null && $weightPct > 0) ? $weightPct : null,
+                    'asset_class' => $assetClass ?: null,
+                    'shariah_contract' => $contract ?: null,
+                    'maturity' => $maturity ?: null,
+                    'sector' => $sector ?: null,
                     'purchase_date' => $date,
                 ];
             }
@@ -929,6 +970,39 @@ class StatementParserService
                 continue;
             }
 
+            // Match percentage lines e.g. "FGN Sukuk 36%" or "ARADEL 12.5%"
+            if (preg_match('/^([A-Z][A-Za-z0-9\.\&\/\-\s]{1,42}?)\s+(\d{1,3}(?:\.\d+)?)\s*%$/', $clean, $pm)) {
+                $sym = trim($pm[1]);
+                $wt = (float) $pm[2];
+                if ($sym !== '' && $wt > 0) {
+                    $holdings[] = [
+                        'symbol_or_name' => $sym,
+                        'shares' => 0.0,
+                        'average_buy_price' => 0.0,
+                        'market_value' => null,
+                        'weight_pct' => $wt,
+                        'purchase_date' => null,
+                    ];
+                }
+                continue;
+            }
+
+            // Match e.g. "FGN Sukuk ₦350,000,000" (direct Naira valuation)
+            if (preg_match('/^([A-Z][A-Za-z0-9\.\&\/\-\s]{1,42}?)\s+(?:₦|NGN)\s*([\d,]+(?:\.\d+)?)$/i', $clean, $nm)) {
+                $sym = trim($nm[1]);
+                $val = $this->cleanNumber($nm[2]);
+                if ($sym !== '' && $val > 0) {
+                    $holdings[] = [
+                        'symbol_or_name' => $sym,
+                        'shares' => 1.0,
+                        'average_buy_price' => $val,
+                        'market_value' => $val,
+                        'purchase_date' => null,
+                    ];
+                }
+                continue;
+            }
+
             // Match e.g. "DANGCEM 50,000 285.00" or "DANGCEM - 50000" or "MTN Nigeria 120,000 units"
             if (preg_match('/^([A-Z][A-Z0-9\.\& ]{1,36}?)\s+([\d,]{2,}(?:\.\d+)?)(?:\s+(?:units|shares|qty))?(?:\s+(?:@|₦|NGN|N|\$)?\s*([\d,]+(?:\.\d+)?))?/i', $clean, $m)) {
                 $sym = trim($m[1]);
@@ -1066,14 +1140,19 @@ class StatementParserService
 
     protected function geminiExtractionPrompt(): string
     {
-        return 'You are an expert investment statement parser. Analyze this portfolio statement, blotter, spreadsheet export, or screenshot from any brokerage or asset manager. Extract ALL equity/stock holdings and share/unit positions. Return ONLY a valid JSON object matching this schema without markdown codeblocks:
+        return 'You are an expert institutional investment statement parser. Analyze this portfolio statement, factsheet, blotter, spreadsheet export, or screenshot from any brokerage, asset manager, PFA, or custodian. Extract ALL positions across Equities, Fixed Income (Sukuk, Bonds, Mudarabah, Murabaha, Wakalah, Ijarah, Commercial Paper, T-Bills), and Cash / Money Market. Return ONLY a valid JSON object matching this schema without markdown codeblocks:
 {
-  "broker_name": "detected broker or institution name or unknown",
+  "broker_name": "detected institution, fund manager, or broker name or unknown",
   "holdings": [
     {
-      "symbol_or_name": "exact ticker or company name",
+      "symbol_or_name": "exact ticker, bond/sukuk code, or security name",
+      "asset_class": "equity | fixed_income | cash",
+      "shariah_contract": "Screened Equity | Sukuk Al-Ijarah | Sukuk Al-Wakalah | Mudarabah | Murabaha | Wadiah | Conventional Fixed Income | null",
       "shares": 1000,
       "average_buy_price": 50.25,
+      "market_value": 50250.00,
+      "weight_pct": 12.5,
+      "maturity": "e.g. 2029 or 180 days or null",
       "purchase_date": "YYYY-MM-DD or null"
     }
   ]
@@ -1272,34 +1351,50 @@ class StatementParserService
             $cleanRaw = trim(preg_replace('/\b(plc|ltd|limited|holdings|group|holding)\b/i', '', $rawUpper));
 
             $matchedCompany = null;
+            $explicitAssetClass = strtolower(trim((string) ($item['asset_class'] ?? '')));
+            $looksFixedIncomeOrCash = in_array($explicitAssetClass, ['fixed_income', 'fixed income', 'sukuk', 'bond', 'money_market', 'cash'], true)
+                || preg_match('/\b(sukuk|ijarah|mudarabah|murabaha|wakalah|istisna|salam|t-bill|tbill|treasury|ntb|bond|eurobond|debenture|commercial\s*paper|term\s*deposit|fixed\s*deposit|money\s*market|wadiah|qard|fixed\s*income)\b/i', $rawUpper);
 
-            // 1. Exact symbol match
-            if (isset($symbolMap[$rawUpper])) {
-                $matchedCompany = $symbolMap[$rawUpper];
-            }
-            // 2. Alias lookup
-            elseif (isset($this->aliases[$rawUpper]) && isset($symbolMap[$this->aliases[$rawUpper]])) {
-                $matchedCompany = $symbolMap[$this->aliases[$rawUpper]];
-            } elseif (isset($this->aliases[$cleanRaw]) && isset($symbolMap[$this->aliases[$cleanRaw]])) {
-                $matchedCompany = $symbolMap[$this->aliases[$cleanRaw]];
-            }
-            // 3. Exact clean company name match
-            elseif (isset($nameMap[$cleanRaw])) {
-                $matchedCompany = $nameMap[$cleanRaw];
-            }
-            // 4. Substring search across tickers and names
-            else {
-                foreach ($symbolMap as $sym => $comp) {
-                    if (str_contains($cleanRaw, $sym) || str_contains($sym, $cleanRaw)) {
-                        $matchedCompany = $comp;
-                        break;
+            if (! $looksFixedIncomeOrCash) {
+                // 1. Exact symbol match
+                if (isset($symbolMap[$rawUpper])) {
+                    $matchedCompany = $symbolMap[$rawUpper];
+                }
+                // 2. Alias lookup
+                elseif (isset($this->aliases[$rawUpper]) && isset($symbolMap[$this->aliases[$rawUpper]])) {
+                    $matchedCompany = $symbolMap[$this->aliases[$rawUpper]];
+                } elseif (isset($this->aliases[$cleanRaw]) && isset($symbolMap[$this->aliases[$cleanRaw]])) {
+                    $matchedCompany = $symbolMap[$this->aliases[$cleanRaw]];
+                }
+                // 3. Exact clean company name match
+                elseif (isset($nameMap[$cleanRaw])) {
+                    $matchedCompany = $nameMap[$cleanRaw];
+                }
+                // 4. Substring search across tickers and names
+                else {
+                    foreach ($symbolMap as $sym => $comp) {
+                        if (strlen($sym) >= 3 && strlen($cleanRaw) >= 3 && (str_contains($cleanRaw, $sym) || str_contains($sym, $cleanRaw))) {
+                            $matchedCompany = $comp;
+                            break;
+                        }
                     }
                 }
             }
 
             $shares = (float) ($item['shares'] ?? 0);
             $avgBuyPrice = (float) ($item['average_buy_price'] ?? 0);
+            $marketValue = (float) ($item['market_value'] ?? 0);
+            $weightPct = isset($item['weight_pct']) ? (float) $item['weight_pct'] : null;
             $purchaseDate = !empty($item['purchase_date']) ? $this->cleanDate($item['purchase_date']) : null;
+
+            if ($shares <= 0 && $marketValue > 0) {
+                if ($avgBuyPrice > 0) {
+                    $shares = round($marketValue / $avgBuyPrice, 4);
+                } else {
+                    $shares = 1.0;
+                    $avgBuyPrice = $marketValue;
+                }
+            }
 
             $groupKey = $matchedCompany
                 ? 'comp_' . $matchedCompany->id
@@ -1311,6 +1406,12 @@ class StatementParserService
                     'raw_symbol' => $raw,
                     'total_shares' => 0.0,
                     'total_cost' => 0.0,
+                    'total_market_value' => 0.0,
+                    'weight_pct' => $weightPct,
+                    'asset_class' => $item['asset_class'] ?? null,
+                    'shariah_contract' => $item['shariah_contract'] ?? null,
+                    'maturity' => $item['maturity'] ?? null,
+                    'sector' => $item['sector'] ?? null,
                     'earliest_date' => $purchaseDate,
                     'fallback_price' => $avgBuyPrice,
                 ];
@@ -1320,6 +1421,9 @@ class StatementParserService
                 $aggregated[$groupKey]['total_shares'] += $shares;
                 $costPrice = $avgBuyPrice > 0 ? $avgBuyPrice : (float) ($matchedCompany?->latest_price ?? 0);
                 $aggregated[$groupKey]['total_cost'] += ($shares * $costPrice);
+            }
+            if ($marketValue > 0) {
+                $aggregated[$groupKey]['total_market_value'] += $marketValue;
             }
 
             if ($purchaseDate) {
@@ -1337,11 +1441,13 @@ class StatementParserService
             $raw = $entry['raw_symbol'];
             $shares = $entry['total_shares'];
             $totalCost = $entry['total_cost'];
+            $entryMv = $entry['total_market_value'];
+            $entryWeight = $entry['weight_pct'];
             $date = $entry['earliest_date'] ?? now()->format('Y-m-d');
 
-            if ($shares <= 0) continue;
+            if ($shares <= 0 && $entryMv <= 0 && ($entryWeight === null || $entryWeight <= 0)) continue;
 
-            $weightedPrice = $totalCost > 0 ? round($totalCost / $shares, 2) : $entry['fallback_price'];
+            $weightedPrice = ($shares > 0 && $totalCost > 0) ? round($totalCost / $shares, 2) : $entry['fallback_price'];
 
             if ($matchedCompany) {
                 $matchedCount++;
@@ -1353,6 +1459,12 @@ class StatementParserService
                     'shares' => $shares,
                     'average_buy_price' => $weightedPrice > 0 ? $weightedPrice : (float) ($matchedCompany->latest_price ?? 0),
                     'current_price' => (float) ($matchedCompany->latest_price ?? 0),
+                    'market_value' => $entryMv > 0 ? round($entryMv, 2) : null,
+                    'weight_pct' => $entryWeight,
+                    'asset_class' => $entry['asset_class'] ?: 'equity',
+                    'shariah_contract' => $entry['shariah_contract'],
+                    'maturity' => $entry['maturity'],
+                    'sector' => $entry['sector'],
                     'purchase_date' => $date,
                     'status' => strtolower($status),
                     'logo_url' => $matchedCompany->logo_url,
@@ -1362,11 +1474,17 @@ class StatementParserService
             } else {
                 $reconciled[] = [
                     'company_id' => null,
-                    'symbol' => strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $raw), 0, 10)),
+                    'symbol' => strtoupper(substr(preg_replace('/[^A-Za-z0-9\-]/', '', $raw), 0, 18)),
                     'company_name' => $raw,
                     'shares' => $shares,
                     'average_buy_price' => $weightedPrice,
-                    'current_price' => $weightedPrice > 0 ? $weightedPrice : 0.0,
+                    'current_price' => $weightedPrice > 0 ? $weightedPrice : ($entryMv > 0 && $shares > 0 ? round($entryMv / $shares, 2) : 0.0),
+                    'market_value' => $entryMv > 0 ? round($entryMv, 2) : null,
+                    'weight_pct' => $entryWeight,
+                    'asset_class' => $entry['asset_class'],
+                    'shariah_contract' => $entry['shariah_contract'],
+                    'maturity' => $entry['maturity'],
+                    'sector' => $entry['sector'],
                     'purchase_date' => $date,
                     'status' => 'doubtful',
                     'logo_url' => null,
@@ -1460,12 +1578,36 @@ PY;
             if (!isset($map['date']) && preg_match('/\b(date|trade\s*date|transaction\s*date|purchase\s*date|value\s*date|settlement\s*date|time)\b/i', $h)) {
                 $map['date'] = $idx;
             }
+            // Asset Class / Instrument Type / Sleeve
+            elseif (!isset($map['asset_class']) && preg_match('/\b(asset\s*class|instrument\s*type|security\s*type|mandate\s*sleeve|sleeve|category|type)\b/i', $h)) {
+                $map['asset_class'] = $idx;
+            }
+            // Shariah Contract / Structure
+            elseif (!isset($map['shariah_contract']) && preg_match('/\b(shariah\s*contract|contract|structure|mode)\b/i', $h)) {
+                $map['shariah_contract'] = $idx;
+            }
+            // Maturity / Tenor
+            elseif (!isset($map['maturity']) && preg_match('/\b(maturity|tenor|maturity\s*date|duration)\b/i', $h)) {
+                $map['maturity'] = $idx;
+            }
+            // Sector / Industry
+            elseif (!isset($map['sector']) && preg_match('/\b(sector|industry|asset\s*group)\b/i', $h)) {
+                $map['sector'] = $idx;
+            }
+            // Weight (%) / Allocation
+            elseif (!isset($map['weight']) && preg_match('/^(weight(\s*\(%\))?|allocation(\s*\(%\))?|share\s*\(%\)|%)$|\b(weight\s*pct|weight\s*%|allocation\s*%)\b/i', $h)) {
+                $map['weight'] = $idx;
+            }
+            // Market Value / Principal / Amount (check after value date!)
+            elseif (!isset($map['market_value']) && preg_match('/\b(market\s*value|current\s*value|valuation|principal|face\s*value|amount|aum|value)\b/i', $h)) {
+                $map['market_value'] = $idx;
+            }
             // Price match (average cost, unit cost, buy price, market price, closing price)
             elseif (!isset($map['price']) && preg_match('/\b(average|avg|cost|unit\s*cost|unit\s*price|buy\s*price|market\s*price|closing\s*price|buy|price|rate|consideration)\b/i', $h)) {
                 $map['price'] = $idx;
             }
             // Shares / Quantity / Shareholding
-            elseif (!isset($map['shares']) && preg_match('/\b(shares|shareholding|qty|quantity|units|units\s*held|volume|vol|balance|holdings|position)\b/i', $h)) {
+            elseif (!isset($map['shares']) && preg_match('/\b(shares|shareholding|qty|quantity|units|units\s*held|volume|vol|holdings|position)\b/i', $h)) {
                 $map['shares'] = $idx;
             }
             // Symbol / Ticker / Security Name / Company

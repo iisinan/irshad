@@ -199,6 +199,46 @@ export default function InstitutionalDashboard({ demoMode = false }) {
     return 'Universal Auto-Detect';
   };
 
+  const buildAutoMetaFromScreen = (data, fundLabel) => {
+    const rec = data?.recommended_factsheet_meta;
+    if (!rec) return null;
+    return {
+      ...rec,
+      fund_name: fundLabel || rec.fund_type_label || 'Institutional Shariah Mandate',
+      institution_name: user?.institution_name || user?.name || 'Irshad Institutional Desk',
+    };
+  };
+
+  const applyDetectedFundTypeOverride = (nextType) => {
+    const cls = activeScreened?.fund_classification || {};
+    const split = cls.split_label || '60/40';
+    const fiPct = Math.round(Number(cls.fixed_effective_pct ?? 60));
+    const eqPct = Math.max(0, 100 - fiPct);
+    const labelMap = {
+      fixed_income: {
+        fund_type: 'fixed_income',
+        mandate_type: 'Islamic Fixed Income Fund',
+        bias: 'Fixed Income (Sukuk & Non-Interest Placements)',
+        benchmark: '3-year FGN Sukuk (Moving Average)',
+      },
+      balanced: {
+        fund_type: 'balanced',
+        mandate_type: `Balanced Islamic Fund (${split})`,
+        bias: `${fiPct}% Islamic Fixed Income / ${eqPct}% Halal Equities`,
+        benchmark: `Blended (${eqPct}% NGXLII / ${fiPct}% FGN Sukuk)`,
+      },
+      equity: {
+        fund_type: 'equity',
+        mandate_type: 'Screened Equity Mandate',
+        bias: 'AAOIFI-Screened Halal Equities',
+        benchmark: 'NGX Lotus Islamic Index (NGXLII)',
+      },
+    };
+    const patch = labelMap[nextType] || labelMap.equity;
+    setFactsheetMeta((prev) => ({ ...(prev || {}), ...patch }));
+    toastSuccess(`Mandate set to ${patch.mandate_type}`);
+  };
+
   const handleFileUpload = async (file, password = '') => {
     if (!file) return;
     setIsScreening(true);
@@ -227,23 +267,27 @@ export default function InstitutionalDashboard({ demoMode = false }) {
       }
 
       if (res?.data) {
+        const nextFundName = file.name.replace(/\.[^.]+$/, '');
         setCustomScreened(res.data);
-        setCustomFundName(file.name.replace(/\.[^.]+$/, ''));
+        setCustomFundName(nextFundName);
+        setFactsheetMeta(buildAutoMetaFromScreen(res.data, nextFundName));
         setSelectedSavedId(null);
         setActivePresetId('uploaded');
         setActiveTab('screening');
         setPendingEncryptedFile(null);
         setPdfPassword('');
         setShowUploadDrawer(false);
+        const fundCls = res.data.fund_classification;
         setUploadMeta({
           fileName: file.name,
           detectedFormat: res.data.detected_format_label || inferLocalFileBadge(file),
           broker: res.data.broker_detected || null,
           method: res.data.extraction_method || 'deterministic',
+          fundClassification: fundCls || null,
           status: 'done',
         });
         toastSuccess(
-          `Detected ${res.data.detected_format_label || 'document'} — screened ${res.data.summary?.holdings_count || 0} holdings`
+          `Detected ${fundCls?.short_label || res.data.detected_format_label || 'portfolio'} — screened ${res.data.summary?.holdings_count || 0} positions`
         );
       }
     } catch (err) {
@@ -270,21 +314,27 @@ export default function InstitutionalDashboard({ demoMode = false }) {
     try {
       const res = await screenInstitutionPortfolio({ raw_text: rawPasteText }, isAuthenticatedInstitution);
       if (res?.data) {
+        const nextFundName = res.data.fund_classification?.label || 'Screened Institutional Blotter';
         setCustomScreened(res.data);
-        setCustomFundName('Screened Institutional Blotter');
+        setCustomFundName(nextFundName);
+        setFactsheetMeta(buildAutoMetaFromScreen(res.data, nextFundName));
         setSelectedSavedId(null);
         setActivePresetId('uploaded');
         setActiveTab('screening');
         setShowPasteBox(false);
         setShowUploadDrawer(false);
+        const fundCls = res.data.fund_classification;
         setUploadMeta({
           fileName: 'Pasted Portfolio Text',
           detectedFormat: res.data.detected_format_label || 'Pasted Text / Blotter',
           broker: res.data.broker_detected || null,
           method: res.data.extraction_method || 'deterministic',
+          fundClassification: fundCls || null,
           status: 'done',
         });
-        toastSuccess(`Screened ${res.data.summary?.holdings_count || 0} holdings from pasted text`);
+        toastSuccess(
+          `Detected ${fundCls?.short_label || 'portfolio'} — screened ${res.data.summary?.holdings_count || 0} positions`
+        );
       }
     } catch (err) {
       toastError(err?.response?.data?.message || 'Could not detect holdings in pasted text.');
@@ -303,18 +353,25 @@ export default function InstitutionalDashboard({ demoMode = false }) {
     URL.revokeObjectURL(url);
   };
 
+  const serializeHoldingPayload = (h) => ({
+    symbol: h.symbol,
+    shares: h.shares,
+    avg_price: h.current_price,
+    market_value: h.market_value ?? null,
+    target_weight: h.target_weight ?? null,
+    asset_class: h.asset_class || 'equity',
+    shariah_contract: h.shariah_contract || null,
+    maturity: h.maturity || null,
+    label: h.name,
+    sector: h.sector,
+  });
+
   const handleSaveCurrentMandate = async () => {
     if (!isAuthenticatedInstitution) {
       toastError('Sign in with an Institutional account to save mandates.');
       return;
     }
-    const payloadHoldings = (activeScreened?.holdings || []).map((h) => ({
-      symbol: h.symbol,
-      shares: h.shares,
-      avg_price: h.current_price,
-      label: h.name,
-      sector: h.sector,
-    }));
+    const payloadHoldings = (activeScreened?.holdings || []).map(serializeHoldingPayload);
     if (payloadHoldings.length === 0) return;
 
     setIsSaving(true);
@@ -422,7 +479,7 @@ export default function InstitutionalDashboard({ demoMode = false }) {
   const handleRemoveHolding = async (symbol) => {
     const nextHoldings = (activeScreened?.holdings || [])
       .filter((h) => h.symbol !== symbol)
-      .map((h) => ({ symbol: h.symbol, shares: h.shares, avg_price: h.current_price }));
+      .map(serializeHoldingPayload);
     await reevaluateHoldings(nextHoldings, 'Rebalanced');
     appendRemediationEvent({
       symbol,
@@ -443,10 +500,11 @@ export default function InstitutionalDashboard({ demoMode = false }) {
             symbol: replacement.symbol,
             shares: replacement.estimated_units,
             avg_price: replacement.latest_price,
+            asset_class: 'equity',
           });
         }
       } else {
-        nextHoldings.push({ symbol: h.symbol, shares: h.shares, avg_price: h.current_price });
+        nextHoldings.push(serializeHoldingPayload(h));
       }
     });
     if (!swapped) return;
@@ -476,7 +534,13 @@ export default function InstitutionalDashboard({ demoMode = false }) {
   };
 
   const summary = activeScreened?.summary || {};
+  const fundClassification = activeScreened?.fund_classification || null;
+  const uploadedFundType = activePresetId === 'uploaded'
+    ? (factsheetMeta?.fund_type || fundClassification?.type || summary?.fund_type || 'equity')
+    : (activePresetId === 'norrenberger_fund' ? 'fixed_income' : (activePresetId === 'balanced_fund' ? 'balanced' : 'equity'));
+  const uploadedSleeves = activeScreened?.sleeve_allocation || [];
   const isNorrenbergerActive = activePresetId === 'norrenberger_fund';
+  const isUploadedMultiAsset = activePresetId === 'uploaded' && (uploadedFundType === 'fixed_income' || uploadedFundType === 'balanced') && uploadedSleeves.length > 0;
   const hasHoldings = (activeScreened?.holdings || []).length > 0;
   const nearThresholdHoldings = useMemo(
     () => (activeScreened?.holdings || []).filter((h) => h.is_near_threshold),
@@ -742,13 +806,23 @@ export default function InstitutionalDashboard({ demoMode = false }) {
         <section className="no-print" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 14, marginBottom: 18 }}>
           <div style={{ background: 'var(--bg)', borderRadius: 16, padding: '16px 20px', border: '1px solid var(--border)' }}>
             <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
-              {isNorrenbergerActive ? 'Fund Size (Oct 2026)' : 'Portfolio Value'}
+              {isNorrenbergerActive
+                ? 'Fund Size (Oct 2026)'
+                : (uploadedFundType === 'fixed_income'
+                  ? 'Fixed Income Fund Size'
+                  : (uploadedFundType === 'balanced' ? `Balanced Fund (${fundClassification?.split_label || summary?.split_label || '60/40'})` : 'Portfolio Value'))}
             </div>
             <div style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-dark)', marginTop: 4 }}>
               {isNorrenbergerActive ? '₦6.81bn' : (loadingPresets ? '...' : formatNaira(summary.total_aum, true))}
             </div>
             <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: 3 }}>
-              {isNorrenbergerActive ? 'Unit Price: ₦108.27 · YTD Yield: 17.72%' : `${summary.holdings_count || 0} holdings screened`}
+              {isNorrenbergerActive
+                ? 'Unit Price: ₦108.27 · YTD Yield: 17.72%'
+                : (uploadedFundType === 'balanced'
+                  ? `${Number(summary.fixed_income_pct || 0) + Number(summary.cash_pct || 0)}% Fixed Income · ${Number(summary.equity_pct || 0)}% Equity (${summary.holdings_count || 0} rows)`
+                  : (uploadedFundType === 'fixed_income'
+                    ? `${summary.holdings_count || 0} fixed-income instruments screened`
+                    : `${summary.holdings_count || 0} holdings screened`))}
             </div>
           </div>
 
@@ -773,19 +847,27 @@ export default function InstitutionalDashboard({ demoMode = false }) {
 
           <div style={{ background: 'var(--bg)', borderRadius: 16, padding: '16px 20px', border: '1px solid var(--border)' }}>
             <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
-              {isNorrenbergerActive ? 'Mandate Watch' : 'Purification Due'}
+              {isNorrenbergerActive
+                ? 'Mandate Watch'
+                : (uploadedFundType === 'fixed_income' ? 'Asset Mix & Mandate' : 'Purification Due')}
             </div>
-            <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#b45309', marginTop: 4 }}>
+            <div style={{ fontSize: '1.6rem', fontWeight: 900, color: uploadedFundType === 'fixed_income' && !isNorrenbergerActive ? 'var(--primary)' : '#b45309', marginTop: 4 }}>
               {isNorrenbergerActive
                 ? '1 Band Watch'
-                : (activePresetId === 'lotus_etf' ? '₦0.46 / unit' : formatNaira(summary.total_purification_due || 0, true))}
+                : (uploadedFundType === 'fixed_income'
+                  ? (fundClassification?.split_label || '100% FI')
+                  : (activePresetId === 'lotus_etf' ? '₦0.46 / unit' : formatNaira(summary.total_purification_due || 0, true)))}
             </div>
             <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: 3 }}>
               {isNorrenbergerActive
                 ? 'FGN Sukuk at 21.79% vs 30%-100% band'
-                : (activePresetId === 'lotus_etf'
-                    ? `FY25 ETF rate · Live total: ${formatNaira(summary.total_purification_due || 0, true)}`
-                    : `${summary.purify_required_count || 0} holdings need dividend cleansing`)}
+                : (uploadedFundType === 'fixed_income'
+                  ? 'Certified Sukuk / Non-Interest placements'
+                  : (uploadedFundType === 'balanced'
+                    ? `Applies strictly to ${Number(summary.equity_pct || 0)}% equity sleeve`
+                    : (activePresetId === 'lotus_etf'
+                      ? `FY25 ETF rate · Live total: ${formatNaira(summary.total_purification_due || 0, true)}`
+                      : `${summary.purify_required_count || 0} holdings need dividend cleansing`)))}
             </div>
           </div>
         </section>
@@ -833,25 +915,74 @@ export default function InstitutionalDashboard({ demoMode = false }) {
       <div role="tabpanel" aria-labelledby="inst-tab-screening" hidden={activeTab !== 'screening'}>
         {activeTab === 'screening' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {/* Detected Document Banner (after upload/paste) */}
-            {uploadMeta?.status === 'done' && activePresetId === 'uploaded' && (
+            {/* Detected Document & Auto-Classified Fund Type Banner */}
+            {activePresetId === 'uploaded' && hasHoldings && (uploadMeta?.status === 'done' || fundClassification) && (
               <div style={{
-                display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 10,
-                padding: '10px 16px', borderRadius: 12,
+                display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 12,
+                padding: '12px 16px', borderRadius: 14,
                 background: 'rgba(15, 118, 110, 0.08)', border: '1px solid rgba(15, 118, 110, 0.25)',
                 fontSize: '0.78rem', color: 'var(--text-dark)',
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                  <Sparkles size={15} color="#0F766E" />
-                  <span>
-                    <strong>Detected:</strong> {uploadMeta.detectedFormat}
-                    {uploadMeta.broker ? ` · Source: ${uploadMeta.broker}` : ''}
-                    {uploadMeta.method && uploadMeta.method !== 'deterministic' ? ' · AI Extraction' : ''}
-                  </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                  <Sparkles size={15} color="#0F766E" style={{ flexShrink: 0 }} />
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                      <span>
+                        <strong>Auto-Detected Fund Type:</strong>{' '}
+                        <span style={{ color: '#0F766E', fontWeight: 800 }}>
+                          {factsheetMeta?.mandate_type || fundClassification?.label || 'Screened Portfolio'}
+                        </span>
+                      </span>
+                      {fundClassification?.split_label && (
+                        <span style={{
+                          padding: '2px 8px', borderRadius: 999,
+                          background: 'var(--bg)', border: '1px solid rgba(15, 118, 110, 0.35)',
+                          fontSize: '0.7rem', fontWeight: 800, color: '#0F766E',
+                        }}>
+                          {fundClassification.split_label}
+                        </span>
+                      )}
+                      {uploadMeta?.detectedFormat && (
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.74rem' }}>
+                          · {uploadMeta.detectedFormat}
+                          {uploadMeta.broker ? ` (${uploadMeta.broker})` : ''}
+                          {uploadMeta.method && uploadMeta.method !== 'deterministic' ? ' · AI Extraction' : ''}
+                        </span>
+                      )}
+                    </div>
+                    {fundClassification?.reason && (
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 2 }}>
+                        {fundClassification.reason}
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                  {uploadMeta.fileName}
-                </span>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                  {[
+                    { id: 'equity', label: 'Equity Fund' },
+                    { id: 'balanced', label: 'Balanced' },
+                    { id: 'fixed_income', label: 'Fixed Income' },
+                  ].map((opt) => {
+                    const active = uploadedFundType === opt.id;
+                    return (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => applyDetectedFundTypeOverride(opt.id)}
+                        style={{
+                          padding: '4px 10px', borderRadius: 999,
+                          border: `1px solid ${active ? '#0F766E' : 'var(--border)'}`,
+                          background: active ? '#0F766E' : 'var(--bg)',
+                          color: active ? '#fff' : 'var(--text-muted)',
+                          fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer',
+                        }}
+                      >
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
 
@@ -1028,8 +1159,8 @@ export default function InstitutionalDashboard({ demoMode = false }) {
               </div>
             )}
 
-            {/* Fixed Income & Balanced Contract Sleeve Audit Table (Norrenberger & Balanced 60/40) */}
-            {(isNorrenbergerActive || activePresetId === 'balanced_fund') && (
+            {/* Uploaded Fixed Income / Balanced Sleeve Breakdown OR Preset Contract Audit Table */}
+            {(isNorrenbergerActive || activePresetId === 'balanced_fund' || isUploadedMultiAsset) && (
               <div style={{
                 background: 'var(--bg)', borderRadius: 18, padding: '18px 20px',
                 border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 14,
@@ -1039,10 +1170,14 @@ export default function InstitutionalDashboard({ demoMode = false }) {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, fontSize: '0.96rem', color: 'var(--primary)' }}>
                       <CheckCircle2 size={17} /> {activePresetId === 'balanced_fund'
                         ? '60/40 Balanced Fund — Contract & Equity Sleeve Mandate Audit (₦6.81bn)'
-                        : 'Fixed Income & Sukuk Mandate Audit (₦6.81bn)'}
+                        : isNorrenbergerActive
+                          ? 'Fixed Income & Sukuk Mandate Audit (₦6.81bn)'
+                          : `${fundClassification?.label || 'Multi-Asset Shariah Mandate'} — Sleeve Allocation (${formatNaira(summary.total_aum || 0, true)})`}
                     </div>
                     <p style={{ margin: '4px 0 0', fontSize: '0.79rem', color: 'var(--text-muted)' }}>
-                      Contract allocation vs prospectus Shariah mandate bands (October 2026).
+                      {isUploadedMultiAsset
+                        ? 'Automatically grouped across Equity, Fixed Income (Sukuk/Mudarabah/Murabaha), and Cash contracts.'
+                        : 'Contract allocation vs prospectus Shariah mandate bands (October 2026).'}
                     </p>
                   </div>
                   <button
@@ -1069,26 +1204,31 @@ export default function InstitutionalDashboard({ demoMode = false }) {
                       </tr>
                     </thead>
                     <tbody>
-                      {(activePresetId === 'balanced_fund'
-                        ? (presets?.balanced_fund?.allocation || BALANCED_FALLBACK_DATA.allocation)
-                        : (presets?.norrenberger_fund?.allocation || NORRENBERGER_FALLBACK_DATA.allocation)
+                      {(isUploadedMultiAsset
+                        ? uploadedSleeves
+                        : activePresetId === 'balanced_fund'
+                          ? (presets?.balanced_fund?.allocation || BALANCED_FALLBACK_DATA.allocation)
+                          : (presets?.norrenberger_fund?.allocation || NORRENBERGER_FALLBACK_DATA.allocation)
                       ).map((row) => {
                         const outOfBand = row.current < row.target_min || row.current > row.target_max;
-                        const estVal = (row.current / 100) * 6810000000;
+                        const isIssue = row.status === 'Review Required' || row.status === 'Verify Contract';
+                        const estVal = isUploadedMultiAsset
+                          ? Number(row.market_value || 0)
+                          : (row.current / 100) * 6810000000;
                         return (
                           <tr key={row.security} style={{ borderBottom: '1px solid var(--border)' }}>
                             <td style={{ padding: '11px 12px', fontWeight: 800, color: 'var(--text-dark)' }}>{row.security}</td>
                             <td style={{ padding: '11px 12px', color: 'var(--text-body)' }}>{row.shariah_contract}</td>
-                            <td style={{ padding: '11px 12px', textAlign: 'right', fontWeight: 800 }}>{row.current.toFixed(2)}%</td>
+                            <td style={{ padding: '11px 12px', textAlign: 'right', fontWeight: 800 }}>{Number(row.current || 0).toFixed(2)}%</td>
                             <td style={{ padding: '11px 12px', textAlign: 'right', fontWeight: 700 }}>{formatNaira(estVal, true)}</td>
                             <td style={{ padding: '11px 12px', textAlign: 'right', color: 'var(--text-muted)' }}>{row.target_label}</td>
                             <td style={{ padding: '11px 12px', textAlign: 'center' }}>
                               <span style={{
                                 padding: '4px 10px', borderRadius: 999, fontSize: '0.7rem', fontWeight: 800,
-                                background: outOfBand ? 'rgba(245, 158, 11, 0.14)' : 'var(--halal-bg)',
-                                color: outOfBand ? '#b45309' : 'var(--halal)',
+                                background: isIssue ? 'var(--non-compliant-bg)' : (outOfBand ? 'rgba(245, 158, 11, 0.14)' : 'var(--halal-bg)'),
+                                color: isIssue ? 'var(--non-compliant)' : (outOfBand ? '#b45309' : 'var(--halal)'),
                               }}>
-                                {outOfBand ? 'Below Band' : 'Compliant'}
+                                {isUploadedMultiAsset ? row.status : (outOfBand ? 'Below Band' : 'Compliant')}
                               </span>
                             </td>
                           </tr>
