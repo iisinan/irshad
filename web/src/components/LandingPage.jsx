@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   ArrowRight,
   BarChart2,
-  Building2,
   Calculator,
   CheckCircle2,
   FileDigit,
@@ -429,8 +428,8 @@ export default function LandingPage() {
 
               <p className="lp-hero-lead">
                 Irshad screens Nigerian equities against rigorous AAOIFI rules, calculates exact
-                dividend purification &amp; Zakat, and gives both individual investors and
-                institutions source-backed certainty.
+                dividend purification &amp; Zakat, and gives conscious Muslim investors source-backed
+                certainty.
               </p>
 
               <div className="lp-countdown-slot">
@@ -443,9 +442,6 @@ export default function LandingPage() {
                 </Link>
                 <Link to="/shariah" className="lp-btn lp-btn-secondary">
                   Shariah Methodology
-                </Link>
-                <Link to="/institution/demo" className="lp-btn lp-btn-gold">
-                  Institutional Demo
                 </Link>
               </div>
 
@@ -777,8 +773,8 @@ export default function LandingPage() {
                 <div className="lp-section-kicker">Why Irshad</div>
                 <h2 className="lp-section-title">Built for serious Islamic investing</h2>
                 <p className="lp-section-desc">
-                  Institutional-grade AAOIFI compliance, dividend purification, and planning tools
-                  designed around Nigerian equities.
+                  Automated AAOIFI compliance, dividend purification, and planning tools designed
+                  around Nigerian equities.
                 </p>
               </div>
               <Link to="/register" className="lp-text-link">
@@ -809,14 +805,14 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── RETAIL & INSTITUTIONAL AUDIENCES ────────────────── */}
+      {/* ── PORTFOLIO & PLANNING WORKSPACES ────────────────── */}
       <section className="lp-band" style={{ paddingBlockStart: 0 }}>
         <div className="lp-container">
           <Reveal>
             <div className="lp-section-head">
               <div>
-                <div className="lp-section-kicker">Tailored Workspaces</div>
-                <h2 className="lp-section-title">From personal wealth to fund mandates</h2>
+                <div className="lp-section-kicker">Wealth Tools</div>
+                <h2 className="lp-section-title">Everything you need to invest halal</h2>
               </div>
             </div>
 
@@ -824,10 +820,10 @@ export default function LandingPage() {
               <div className="lp-audience-card">
                 <div>
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: 'var(--primary)', fontWeight: 700, fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.6rem' }}>
-                    <TrendingUp size={15} aria-hidden="true" /> Individual Investors
+                    <Shield size={15} aria-hidden="true" /> Portfolio &amp; Purification
                   </div>
                   <h3 className="lp-feature-title" style={{ fontSize: '1.3rem' }}>
-                    Screen, compound, and purify your portfolio
+                    Screen, track, and cleanse your holdings
                   </h3>
                   <ul className="lp-audience-list">
                     <li>
@@ -836,7 +832,7 @@ export default function LandingPage() {
                     </li>
                     <li>
                       <CheckCircle2 size={16} aria-hidden="true" />
-                      <span>Plan recurring monthly investments with the built-in Rizq Compounder.</span>
+                      <span>Automated annual equity Zakat calculation built into your portfolio dashboard.</span>
                     </li>
                     <li>
                       <CheckCircle2 size={16} aria-hidden="true" />
@@ -857,29 +853,29 @@ export default function LandingPage() {
               <div className="lp-audience-card lp-audience-card--inst">
                 <div>
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: 'var(--gold)', fontWeight: 700, fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.6rem' }}>
-                    <Building2 size={15} aria-hidden="true" /> Asset Managers &amp; Funds
+                    <TrendingUp size={15} aria-hidden="true" /> Monthly Rizq Planner
                   </div>
                   <h3 className="lp-feature-title" style={{ fontSize: '1.3rem' }}>
-                    Smart institutional fund screening &amp; oversight
+                    Compound halal wealth on autopilot
                   </h3>
                   <ul className="lp-audience-list">
                     <li>
                       <CheckCircle2 size={16} aria-hidden="true" />
-                      <span>Upload fund holdings — auto-detects Fixed Income, Equity, or Balanced Fund structures.</span>
+                      <span>Plan recurring monthly NGX contributions anchored to Shariah-compliant equities.</span>
                     </li>
                     <li>
                       <CheckCircle2 size={16} aria-hidden="true" />
-                      <span>Run mandate compliance checks, pre-trade verification, and purification schedules.</span>
+                      <span>Compare dividend reinvestment schedules and long-term compounding milestones.</span>
                     </li>
                     <li>
                       <CheckCircle2 size={16} aria-hidden="true" />
-                      <span>Generate auditable Shariah governance summaries backed by primary filings.</span>
+                      <span>Invest alongside curated halal baskets with transparent AAOIFI screening backing.</span>
                     </li>
                   </ul>
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
-                  <Link to="/institution/demo" className="lp-btn lp-btn-gold">
-                    Explore Institutional Demo <ArrowRight size={16} aria-hidden="true" />
+                  <Link to="/rizq-planner" className="lp-btn lp-btn-gold">
+                    Open Rizq Planner <ArrowRight size={16} aria-hidden="true" />
                   </Link>
                 </div>
               </div>
