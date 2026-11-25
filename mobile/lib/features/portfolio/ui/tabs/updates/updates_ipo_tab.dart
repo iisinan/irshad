@@ -138,8 +138,8 @@ class _UpdatesIpoTabState extends State<UpdatesIpoTab> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('IPO Center', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.3)),
-              Text('Upcoming Initial Public Offerings & Shariah analysis', style: TextStyle(fontSize: 12, color: context.textMuted)),
+              Text('PO Center', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: context.textDark, letterSpacing: -0.3)),
+              Text('Upcoming Public Offerings & Shariah analysis', style: TextStyle(fontSize: 12, color: context.textMuted)),
             ],
           ),
         ),

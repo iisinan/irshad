@@ -146,9 +146,9 @@ export default function UpdatesTab({ unreadCount = 0 }) {
     },
     {
       id: 'ipo',
-      label: 'IPO',
+      label: 'PO',
       icon: Rocket,
-      description: 'Upcoming Initial Public Offerings & Shariah analysis',
+      description: 'Upcoming Public Offerings & Shariah analysis',
     },
     {
       id: 'dividends',

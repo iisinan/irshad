@@ -53,7 +53,7 @@ class _UpdateTabState extends State<UpdateTab> {
     {'id': 'resources', 'label': 'Resources', 'icon': Icons.menu_book_rounded},
     {'id': 'guide', 'label': 'Navigation Guide', 'icon': Icons.explore_outlined},
     {'id': 'compliance', 'label': 'Quarterly Compliance Brief', 'icon': Icons.shield_outlined},
-    {'id': 'ipo', 'label': 'IPO', 'icon': Icons.rocket_launch_outlined},
+    {'id': 'ipo', 'label': 'PO', 'icon': Icons.rocket_launch_outlined},
     {'id': 'dividends', 'label': 'Dividends', 'icon': Icons.star_outline},
   ];
 

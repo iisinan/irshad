@@ -541,8 +541,8 @@ export default function UpdatesIPO() {
           <Rocket size={24} />
         </div>
         <div>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-dark)', margin: '0 0 4px 0', letterSpacing: '-0.3px' }}>IPO Center</h2>
-          <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>Upcoming Initial Public Offerings & Shariah analysis</p>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-dark)', margin: '0 0 4px 0', letterSpacing: '-0.3px' }}>PO Center</h2>
+          <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>Upcoming Public Offerings & Shariah analysis</p>
         </div>
       </div>
 
@@ -557,7 +557,7 @@ export default function UpdatesIPO() {
         ))}
         {ipoList.length === 0 && (
           <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-muted)', background: 'var(--bg-section)', borderRadius: '16px', border: '1px dashed var(--border)' }}>
-            No upcoming IPOs found.
+            No upcoming Public Offerings found.
           </div>
         )}
       </div>
