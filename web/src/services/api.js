@@ -604,6 +604,36 @@ export const escalateChatConversation = async (conversationId, note = '') => {
   return response.data;
 };
 
+export const resumeChatWithAi = async (conversationId) => {
+  const response = await api.post(`/chat/conversations/${conversationId}/resume-ai`);
+  return response.data;
+};
+
+export const fetchAdminChatConversations = async (filter = 'all') => {
+  const response = await api.get('/admin/chat/conversations', { params: { filter } });
+  return response.data;
+};
+
+export const fetchAdminChatConversation = async (conversationId) => {
+  const response = await api.get(`/admin/chat/conversations/${conversationId}`);
+  return response.data;
+};
+
+export const replyAdminChatConversation = async (conversationId, reply, notifyEmail = true) => {
+  const response = await api.post(`/admin/chat/conversations/${conversationId}/reply`, {
+    reply,
+    notify_email: notifyEmail,
+  });
+  window.dispatchEvent(new Event('suggestions-updated'));
+  return response.data;
+};
+
+export const updateAdminChatStatus = async (conversationId, status) => {
+  const response = await api.post(`/admin/chat/conversations/${conversationId}/status`, { status });
+  window.dispatchEvent(new Event('suggestions-updated'));
+  return response.data;
+};
+
 // ==========================================
 // INSTITUTIONAL PORTAL & DEMO PRESETS
 // ==========================================

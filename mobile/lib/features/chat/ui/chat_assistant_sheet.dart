@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:irshad_mobile/core/theme/app_theme.dart';
@@ -38,6 +39,9 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
   bool _isSending = false;
   bool _isLoadingHistory = false;
   bool _isEscalating = false;
+  bool _confirmEscalate = false;
+  bool _isResumingAi = false;
+  Timer? _pollTimer;
 
   Map<String, dynamic>? _activeConversation;
   List<Map<String, dynamic>> _messages = [];
@@ -93,7 +97,45 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _pollTimer = Timer.periodic(const Duration(seconds: 4), (_) => _pollActiveConversation());
+  }
+
+  Future<void> _pollActiveConversation() async {
+    if (!mounted || _showingHistory || _isSending) return;
+    final convId = _activeConversation?['id'] as int?;
+    if (convId == null) return;
+
+    try {
+      final data = await _chatService.fetchConversation(convId);
+      final rawMsgs = data['messages'] as List<dynamic>? ?? [];
+      final nextMsgs = rawMsgs.map((m) => Map<String, dynamic>.from(m as Map)).toList();
+      final nextConv = Map<String, dynamic>.from(data['conversation'] as Map);
+
+      if (!mounted) return;
+      final prevLastId = _messages.isNotEmpty ? _messages.last['id'] : null;
+      final nextLastId = nextMsgs.isNotEmpty ? nextMsgs.last['id'] : null;
+      final statusChanged = _activeConversation?['status'] != nextConv['status'];
+      final msgsChanged = _messages.length != nextMsgs.length || prevLastId != nextLastId;
+
+      if (statusChanged || msgsChanged) {
+        setState(() {
+          _activeConversation = nextConv;
+          if (msgsChanged) {
+            _messages = nextMsgs;
+          }
+        });
+        if (msgsChanged) {
+          _scrollToBottom();
+        }
+      }
+    } catch (_) {}
+  }
+
+  @override
   void dispose() {
+    _pollTimer?.cancel();
     _inputController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -158,6 +200,7 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
       _activeConversation = null;
       _messages = [];
       _showingHistory = false;
+      _confirmEscalate = false;
     });
   }
 
@@ -186,16 +229,18 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
       final convId = _activeConversation?['id'] as int?;
       final res = await _chatService.sendMessage(text, conversationId: convId);
       final userMsg = Map<String, dynamic>.from(res['user_message'] as Map);
-      final assistantMsg = Map<String, dynamic>.from(res['assistant_message'] as Map);
+      final rawAssistant = res['assistant_message'];
+      final assistantMsg = rawAssistant is Map ? Map<String, dynamic>.from(rawAssistant) : null;
       final conv = Map<String, dynamic>.from(res['conversation'] as Map);
 
       if (mounted) {
         setState(() {
           _activeConversation = conv;
+          _confirmEscalate = false;
           _messages = [
             ..._messages.where((m) => m['id'] != tempId),
             userMsg,
-            assistantMsg,
+            ?assistantMsg,
           ];
         });
         _scrollToBottom();
@@ -232,7 +277,8 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
 
   Future<void> _escalateToSupport() async {
     final convId = _activeConversation?['id'] as int?;
-    if (convId == null || _isEscalating || _activeConversation?['status'] == 'escalated') {
+    final status = _activeConversation?['status'];
+    if (convId == null || _isEscalating || status == 'escalated' || status == 'admin_joined') {
       return;
     }
 
@@ -242,9 +288,10 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
       if (mounted) {
         setState(() {
           _activeConversation = {...?_activeConversation, 'status': 'escalated'};
+          _confirmEscalate = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sent to Irshad Support Team!')),
+          const SnackBar(content: Text('Admin alerted — replies will appear here.')),
         );
       }
     } catch (_) {
@@ -255,6 +302,32 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
       }
     } finally {
       if (mounted) setState(() => _isEscalating = false);
+    }
+  }
+
+  Future<void> _resumeAi() async {
+    final convId = _activeConversation?['id'] as int?;
+    if (convId == null || _isResumingAi) return;
+
+    setState(() => _isResumingAi = true);
+    try {
+      final data = await _chatService.resumeAiConversation(convId);
+      final rawMsgs = data['messages'] as List<dynamic>? ?? [];
+      if (mounted) {
+        setState(() {
+          _activeConversation = Map<String, dynamic>.from(data['conversation'] as Map);
+          _messages = rawMsgs.map((m) => Map<String, dynamic>.from(m as Map)).toList();
+        });
+        _scrollToBottom();
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not switch back to AI.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isResumingAi = false);
     }
   }
 
@@ -368,23 +441,76 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    if (_activeConversation?['status'] == 'escalated')
+                    if (_activeConversation?['status'] == 'admin_joined') ...[
+                      Row(
+                        children: [
+                          Icon(Icons.support_agent_rounded, color: context.halal, size: 16),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Admin joined — live chat',
+                            style: TextStyle(color: context.halal, fontSize: 12, fontWeight: FontWeight.w700),
+                          ),
+                        ],
+                      ),
+                      TextButton(
+                        onPressed: _isResumingAi ? null : _resumeAi,
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: Text(
+                          _isResumingAi ? 'Switching...' : 'Resume AI',
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: context.textMuted),
+                        ),
+                      ),
+                    ] else if (_activeConversation?['status'] == 'escalated')
                       Row(
                         children: [
                           Icon(Icons.check_circle_rounded, color: context.primary, size: 16),
                           const SizedBox(width: 6),
                           Text(
-                            'Sent to Irshad Support Team',
+                            'Admin notified — replies appear here',
                             style: TextStyle(color: context.primary, fontSize: 12, fontWeight: FontWeight.w700),
                           ),
                         ],
                       )
-                    else ...[
+                    else if (_confirmEscalate) ...[
+                      Text('Alert Irshad admin?', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: context.textDark)),
+                      Row(
+                        children: [
+                          TextButton(
+                            onPressed: _isEscalating ? null : () => setState(() => _confirmEscalate = false),
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            child: Text('Cancel', style: TextStyle(fontSize: 12, color: context.textMuted)),
+                          ),
+                          const SizedBox(width: 4),
+                          ElevatedButton(
+                            onPressed: _isEscalating ? null : _escalateToSupport,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: context.primary,
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              elevation: 0,
+                            ),
+                            child: Text(
+                              _isEscalating ? 'Sending...' : 'Confirm',
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ] else ...[
                       Text('Need a human admin?', style: TextStyle(fontSize: 12, color: context.textMuted)),
                       OutlinedButton.icon(
-                        onPressed: _isEscalating ? null : _escalateToSupport,
+                        onPressed: _isEscalating ? null : () => setState(() => _confirmEscalate = true),
                         icon: const Icon(Icons.support_agent_rounded, size: 15),
-                        label: Text(_isEscalating ? 'Sending...' : 'Send to Support'),
+                        label: const Text('Send to Support'),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                           visualDensity: VisualDensity.compact,
@@ -412,7 +538,9 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
                         textInputAction: TextInputAction.send,
                         onSubmitted: (_) => _sendMessage(),
                         decoration: InputDecoration(
-                          hintText: 'Ask a question...',
+                          hintText: _activeConversation?['status'] == 'admin_joined'
+                              ? 'Reply directly to Irshad Admin...'
+                              : 'Ask a question...',
                           hintStyle: TextStyle(color: context.textMuted, fontSize: 14),
                           filled: true,
                           fillColor: context.bgAlt,
@@ -500,16 +628,22 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    if (conv['status'] == 'escalated')
+                    if (conv['status'] == 'escalated' || conv['status'] == 'admin_joined')
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: context.primary.withValues(alpha: 0.12),
+                          color: conv['status'] == 'admin_joined'
+                              ? context.halal.withValues(alpha: 0.14)
+                              : context.primary.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(999),
                         ),
                         child: Text(
-                          'Escalated',
-                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: context.primary),
+                          conv['status'] == 'admin_joined' ? 'Admin Live' : 'Needs Admin',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            color: conv['status'] == 'admin_joined' ? context.halal : context.primary,
+                          ),
                         ),
                       ),
                   ],
@@ -603,15 +737,39 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
         }
 
         final msg = _messages[index];
-        final isUser = msg['role'] == 'user';
+        final role = msg['role']?.toString() ?? 'assistant';
+        if (role == 'system') {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                decoration: BoxDecoration(
+                  color: context.bgAlt,
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: context.divider),
+                ),
+                child: Text(
+                  msg['content']?.toString() ?? '',
+                  style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: context.textMuted),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          );
+        }
+
+        final isUser = role == 'user';
+        final isAdmin = role == 'admin';
         final metadata = msg['metadata'] is Map ? Map<String, dynamic>.from(msg['metadata'] as Map) : <String, dynamic>{};
+        final adminLabel = metadata['admin_name']?.toString() ?? 'Irshad Admin';
         final citedSymbols = (metadata['cited_symbols'] as List<dynamic>? ?? []).map((e) => e.toString()).toList();
         final followups = _filterFollowups(metadata['suggested_followups'] as List<dynamic>?);
         final upgradeRequired = metadata['upgrade_required'] == true;
         final requiredTier = metadata['required_tier']?.toString();
         final upgradeFeature = metadata['upgrade_feature']?.toString();
         final rawContent = msg['content']?.toString() ?? '';
-        final assistantContent = isUser ? rawContent : _sanitizeAssistantReply(rawContent, upgradeRequired);
+        final assistantContent = (isUser || isAdmin) ? rawContent : _sanitizeAssistantReply(rawContent, upgradeRequired);
         final isLastMessage = index == _messages.length - 1;
         final msgId = msg['id'];
 
@@ -620,18 +778,47 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
           child: Column(
             crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
             children: [
+              if (isAdmin)
+                Padding(
+                  padding: const EdgeInsets.only(left: 4, bottom: 4),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.support_agent_rounded, size: 13, color: context.questionable),
+                      const SizedBox(width: 4),
+                      Text(
+                        '$adminLabel · Support',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: context.questionable,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               Container(
                 constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.8),
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
-                  color: isUser ? context.primary : context.bgAlt,
+                  color: isUser
+                      ? context.primary
+                      : isAdmin
+                          ? context.questionableBg
+                          : context.bgAlt,
                   borderRadius: BorderRadius.only(
                     topLeft: const Radius.circular(14),
                     topRight: const Radius.circular(14),
                     bottomLeft: Radius.circular(isUser ? 14 : 4),
                     bottomRight: Radius.circular(isUser ? 4 : 14),
                   ),
-                  border: isUser ? null : Border.all(color: context.divider),
+                  border: isUser
+                      ? null
+                      : Border.all(
+                          color: isAdmin
+                              ? context.questionable.withValues(alpha: 0.45)
+                              : context.divider,
+                        ),
                 ),
                 child: isUser
                     ? Text(
@@ -709,7 +896,7 @@ class _ChatAssistantSheetState extends State<ChatAssistantSheet> {
                   }).toList(),
                 ),
               ],
-              if (!isUser && msgId is int)
+              if (role == 'assistant' && msgId is int)
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [

@@ -48,8 +48,12 @@ class SuggestionController extends Controller
     // Admin methods
     public function unreadCount(): JsonResponse
     {
-        $count = Suggestion::where('status', 'unread')->where('is_admin_reply', false)->count();
-        return response()->json(['count' => $count]);
+        $unreadSuggestions = Suggestion::where('status', 'unread')->where('is_admin_reply', false)->count();
+        $attentionChats = \App\Models\ChatConversation::where('status', 'escalated')
+            ->whereDoesntHave('suggestions', fn ($q) => $q->where('status', 'unread')->where('is_admin_reply', false))
+            ->count();
+
+        return response()->json(['count' => $unreadSuggestions + $attentionChats]);
     }
 
     public function index(): JsonResponse
@@ -154,10 +158,31 @@ class SuggestionController extends Controller
         // Store the admin reply as a chat message
         Suggestion::create([
             'user_id' => $user->id,
+            'chat_conversation_id' => $suggestion->chat_conversation_id,
             'message' => $replyMessage,
             'is_admin_reply' => true,
             'status' => 'read'
         ]);
+
+        if ($suggestion->chat_conversation_id) {
+            $conv = \App\Models\ChatConversation::find($suggestion->chat_conversation_id);
+            if ($conv) {
+                $admin = $request->user();
+                \App\Models\ChatMessage::create([
+                    'conversation_id' => $conv->id,
+                    'role' => 'admin',
+                    'content' => trim((string) $replyMessage),
+                    'metadata' => [
+                        'admin_id' => $admin?->id,
+                        'admin_name' => $admin?->name ?? $admin?->first_name ?? 'Irshad Admin',
+                    ],
+                ]);
+                $conv->update([
+                    'status' => 'admin_joined',
+                    'last_message_at' => now(),
+                ]);
+            }
+        }
 
         $suggestion->update(['status' => 'read']);
 

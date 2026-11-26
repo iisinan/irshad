@@ -11,7 +11,9 @@ use App\Services\ChatbotContextService;
 use App\Services\ChatbotService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class ChatController extends Controller
@@ -136,6 +138,29 @@ class ChatController extends Controller
             'content' => $cleanMessage,
         ]);
 
+        // When a human admin has already joined the thread, keep the live human chat uninterrupted.
+        if ($conversation->status === 'admin_joined') {
+            $conversation->update(['last_message_at' => now()]);
+            $conversation->loadMissing('messages');
+            $this->ensureEscalationTicket($conversation, $user, '', false);
+
+            return response()->json([
+                'conversation' => [
+                    'id' => $conversation->id,
+                    'title' => $conversation->title,
+                    'status' => $conversation->status,
+                    'last_message_at' => $conversation->last_message_at,
+                ],
+                'user_message' => $userMessage,
+                'assistant_message' => null,
+                'waiting_for_admin' => true,
+            ], 201);
+        }
+
+        if ($conversation->status === 'closed') {
+            $conversation->update(['status' => 'active']);
+        }
+
         $quickResult = $chatbotService->quickPrecheck($cleanMessage, false);
         if ($quickResult !== null) {
             $contextBundle = [
@@ -157,9 +182,19 @@ class ChatController extends Controller
             'metadata' => $metadata,
         ]);
 
-        $conversation->update([
-            'last_message_at' => now(),
-        ]);
+        $needsHumanSupport = (bool) ($aiResult['needs_human_support'] ?? false);
+        $updateFields = ['last_message_at' => now()];
+
+        if ($needsHumanSupport && $conversation->status !== 'escalated') {
+            $updateFields['status'] = 'escalated';
+        }
+
+        $conversation->update($updateFields);
+
+        if ($needsHumanSupport || $conversation->status === 'escalated') {
+            $conversation->loadMissing('messages');
+            $this->ensureEscalationTicket($conversation, $user, '', $needsHumanSupport);
+        }
 
         return response()->json([
             'conversation' => [
@@ -170,6 +205,7 @@ class ChatController extends Controller
             ],
             'user_message' => $userMessage,
             'assistant_message' => $assistantMessage,
+            'waiting_for_admin' => $conversation->status === 'escalated',
         ], 201);
     }
 
@@ -202,48 +238,345 @@ class ChatController extends Controller
             ->with('messages')
             ->findOrFail($conversationId);
 
-        if ($conversation->status === 'escalated') {
+        $note = trim((string) ($validated['note'] ?? ''));
+
+        if ($conversation->status === 'escalated' && $note === '') {
             return response()->json([
                 'message' => 'This conversation has already been sent to Irshad Support.',
                 'status' => 'escalated',
             ]);
         }
 
+        $suggestion = $this->ensureEscalationTicket($conversation, $user, $note, true);
+
+        if (! in_array($conversation->status, ['escalated', 'admin_joined'], true)) {
+            $conversation->update(['status' => 'escalated']);
+        }
+
+        return response()->json([
+            'message' => 'Sent to the Irshad Support Team. An admin can reply directly in this chat.',
+            'status' => $conversation->status,
+            'suggestion_id' => $suggestion->id,
+        ]);
+    }
+
+    public function resumeAi(Request $request, int $conversationId): JsonResponse
+    {
+        $conversation = ChatConversation::where('user_id', $request->user()->id)
+            ->findOrFail($conversationId);
+
+        if ($conversation->status !== 'active') {
+            $conversation->update([
+                'status' => 'active',
+                'last_message_at' => now(),
+            ]);
+
+            ChatMessage::create([
+                'conversation_id' => $conversation->id,
+                'role' => 'system',
+                'content' => 'Returned conversation to Ask Irshad AI.',
+            ]);
+        }
+
+        $conversation->load('messages');
+
+        return response()->json([
+            'conversation' => [
+                'id' => $conversation->id,
+                'title' => $conversation->title,
+                'status' => $conversation->status,
+                'last_message_at' => $conversation->last_message_at,
+            ],
+            'messages' => $conversation->messages,
+        ]);
+    }
+
+    // ─── Admin Live Chat Methods ────────────────────────────────────────────
+
+    public function adminConversations(Request $request): JsonResponse
+    {
+        $filter = (string) $request->query('filter', 'all');
+
+        $query = ChatConversation::with(['user:id,name,email', 'latestMessage'])
+            ->withCount('messages');
+
+        if ($filter === 'attention') {
+            $query->whereIn('status', ['escalated', 'admin_joined']);
+        } elseif ($filter === 'closed') {
+            $query->where('status', 'closed');
+        }
+
+        $items = $query
+            ->orderByDesc('last_message_at')
+            ->orderByDesc('id')
+            ->limit(60)
+            ->get()
+            ->map(function (ChatConversation $conv) {
+                $latest = $conv->latestMessage;
+                $needsAttention = $conv->status === 'escalated'
+                    || ($conv->status === 'admin_joined' && $latest?->role === 'user');
+
+                $lastAdminId = (int) (ChatMessage::where('conversation_id', $conv->id)
+                    ->where('role', 'admin')
+                    ->max('id') ?? 0);
+
+                $unreadUserMessages = $needsAttention
+                    ? ChatMessage::where('conversation_id', $conv->id)
+                        ->where('role', 'user')
+                        ->where('id', '>', $lastAdminId)
+                        ->count()
+                    : 0;
+
+                return [
+                    'id' => $conv->id,
+                    'title' => $conv->title,
+                    'status' => $conv->status,
+                    'needs_attention' => $needsAttention,
+                    'unread_count' => $unreadUserMessages,
+                    'messages_count' => $conv->messages_count,
+                    'last_message_at' => $conv->last_message_at,
+                    'created_at' => $conv->created_at,
+                    'preview' => $latest ? Str::limit((string) $latest->content, 110) : '',
+                    'latest_role' => $latest?->role,
+                    'user' => $conv->user ? [
+                        'id' => $conv->user->id,
+                        'name' => $conv->user->name ?? 'User',
+                        'email' => $conv->user->email,
+                    ] : null,
+                ];
+            })
+            ->sortByDesc(fn (array $item) => [
+                $item['status'] === 'escalated' ? 3 : ($item['needs_attention'] ? 2 : ($item['status'] === 'admin_joined' ? 1 : 0)),
+                $item['last_message_at']?->timestamp ?? 0,
+                $item['id'],
+            ])
+            ->values();
+
+        return response()->json(['data' => $items]);
+    }
+
+    public function adminShow(int $id): JsonResponse
+    {
+        $conversation = ChatConversation::with(['user:id,name,email', 'messages'])
+            ->findOrFail($id);
+
+        Suggestion::where('chat_conversation_id', $conversation->id)
+            ->where('status', 'unread')
+            ->where('is_admin_reply', false)
+            ->update(['status' => 'read']);
+
+        return response()->json([
+            'conversation' => [
+                'id' => $conversation->id,
+                'title' => $conversation->title,
+                'status' => $conversation->status,
+                'last_message_at' => $conversation->last_message_at,
+                'user' => $conversation->user ? [
+                    'id' => $conversation->user->id,
+                    'name' => $conversation->user->name ?? 'User',
+                    'email' => $conversation->user->email,
+                ] : null,
+            ],
+            'messages' => $conversation->messages,
+        ]);
+    }
+
+    public function adminReply(Request $request, int $id): JsonResponse
+    {
+        $validated = $request->validate([
+            'reply' => 'required|string|min:1|max:2000',
+            'notify_email' => 'nullable|boolean',
+        ]);
+
+        $conversation = ChatConversation::with('user')->findOrFail($id);
+        $admin = $request->user();
+        $cleanReply = trim($validated['reply']);
+        $adminName = $admin?->name ?? $admin?->first_name ?? 'Irshad Admin';
+
+        if ($conversation->status !== 'admin_joined') {
+            ChatMessage::create([
+                'conversation_id' => $conversation->id,
+                'role' => 'system',
+                'content' => "{$adminName} joined the conversation.",
+            ]);
+        }
+
+        $adminMessage = ChatMessage::create([
+            'conversation_id' => $conversation->id,
+            'role' => 'admin',
+            'content' => $cleanReply,
+            'metadata' => [
+                'admin_id' => $admin?->id,
+                'admin_name' => $adminName,
+            ],
+        ]);
+
+        $conversation->update([
+            'status' => 'admin_joined',
+            'last_message_at' => now(),
+        ]);
+
+        Suggestion::where('chat_conversation_id', $conversation->id)
+            ->where('status', 'unread')
+            ->update(['status' => 'read']);
+
+        if ($conversation->user) {
+            Suggestion::create([
+                'user_id' => $conversation->user->id,
+                'chat_conversation_id' => $conversation->id,
+                'message' => $cleanReply,
+                'is_admin_reply' => true,
+                'status' => 'read',
+            ]);
+        }
+
+        $emailed = false;
+        $shouldEmail = $request->boolean('notify_email', true)
+            && $conversation->user?->email
+            && Cache::add("chat_admin_reply_email:{$conversation->id}", 1, now()->addMinutes(10));
+
+        if ($shouldEmail) {
+            try {
+                $user = $conversation->user;
+                $chatUrl = rtrim((string) config('app.frontend_url'), '/').'/portfolio';
+                Mail::raw(
+                    "As-salamu alaykum {$user->name},\n\nAn Irshad Admin replied to your chat (\"{$conversation->title}\"):\n\n\"{$cleanReply}\"\n\nOpen Ask Irshad in the app or web ({$chatUrl}) to continue the live conversation.\n\nJazakallah Khair,\nThe Irshad Team",
+                    function ($message) use ($user) {
+                        $message->to($user->email)->subject('Irshad Support Replied to Your Chat');
+                    }
+                );
+                $emailed = true;
+            } catch (\Throwable $e) {
+                Log::warning('Failed to email user after admin chat reply: '.$e->getMessage());
+            }
+        }
+
+        $conversation->load('messages');
+
+        return response()->json([
+            'message' => $emailed ? 'Reply sent to live chat and user notified by email.' : 'Reply sent to live chat.',
+            'emailed' => $emailed,
+            'conversation' => [
+                'id' => $conversation->id,
+                'title' => $conversation->title,
+                'status' => $conversation->status,
+                'last_message_at' => $conversation->last_message_at,
+            ],
+            'admin_message' => $adminMessage,
+            'messages' => $conversation->messages,
+        ], 201);
+    }
+
+    public function adminUpdateStatus(Request $request, int $id): JsonResponse
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:active,escalated,admin_joined,closed',
+        ]);
+
+        $conversation = ChatConversation::findOrFail($id);
+        $nextStatus = $validated['status'];
+
+        if ($conversation->status !== $nextStatus) {
+            $conversation->update([
+                'status' => $nextStatus,
+                'last_message_at' => now(),
+            ]);
+
+            if ($nextStatus === 'active') {
+                ChatMessage::create([
+                    'conversation_id' => $conversation->id,
+                    'role' => 'system',
+                    'content' => 'Support handoff completed — Ask Irshad AI is ready to assist again.',
+                ]);
+            } elseif ($nextStatus === 'closed') {
+                ChatMessage::create([
+                    'conversation_id' => $conversation->id,
+                    'role' => 'system',
+                    'content' => 'Support conversation marked resolved by admin.',
+                ]);
+            }
+        }
+
+        if (in_array($nextStatus, ['active', 'closed'], true)) {
+            Suggestion::where('chat_conversation_id', $conversation->id)
+                ->where('status', 'unread')
+                ->update(['status' => 'read']);
+        }
+
+        $conversation->load('messages');
+
+        return response()->json([
+            'conversation' => [
+                'id' => $conversation->id,
+                'title' => $conversation->title,
+                'status' => $conversation->status,
+                'last_message_at' => $conversation->last_message_at,
+            ],
+            'messages' => $conversation->messages,
+        ]);
+    }
+
+    private function ensureEscalationTicket(
+        ChatConversation $conversation,
+        User $user,
+        string $note = '',
+        bool $notifyAdmins = true
+    ): Suggestion {
         $recentTranscript = $conversation->messages
             ->slice(-6)
-            ->map(fn (ChatMessage $m) => ($m->role === 'user' ? 'User' : 'Irshad AI').': '.Str::limit(trim($m->content), 350))
+            ->map(function (ChatMessage $m) {
+                $speaker = match ($m->role) {
+                    'user' => 'User',
+                    'admin' => 'Irshad Admin',
+                    'system' => 'System',
+                    default => 'Irshad AI',
+                };
+
+                return "{$speaker}: ".Str::limit(trim($m->content), 350);
+            })
             ->implode("\n");
 
-        $note = trim((string) ($validated['note'] ?? ''));
         $compiledMessage = "[AI Chat Escalation: {$conversation->title}]\n";
         if ($note !== '') {
             $compiledMessage .= "User Note: {$note}\n";
         }
         $compiledMessage .= "\nRecent Chat Transcript:\n{$recentTranscript}";
+        $finalMessage = Str::limit($compiledMessage, 1950);
 
-        $suggestion = Suggestion::create([
-            'user_id' => $user->id,
-            'chat_conversation_id' => $conversation->id,
-            'message' => Str::limit($compiledMessage, 1950),
-            'status' => 'unread',
-        ]);
+        $existing = Suggestion::where('chat_conversation_id', $conversation->id)
+            ->where('is_admin_reply', false)
+            ->latest('id')
+            ->first();
 
-        $conversation->update(['status' => 'escalated']);
+        $wasRecentlyNotified = $existing !== null && ! $notifyAdmins;
 
-        try {
-            $admins = User::where('role', 'admin')->get();
-            foreach ($admins as $admin) {
-                $admin->notify(new AdminSuggestionNotification($suggestion));
-            }
-        } catch (\Throwable $e) {
-            Log::warning('Failed to queue admin escalation email: '.$e->getMessage());
+        if ($existing) {
+            $existing->update([
+                'message' => $finalMessage,
+                'status' => 'unread',
+            ]);
+            $suggestion = $existing;
+        } else {
+            $suggestion = Suggestion::create([
+                'user_id' => $user->id,
+                'chat_conversation_id' => $conversation->id,
+                'message' => $finalMessage,
+                'status' => 'unread',
+            ]);
         }
 
-        return response()->json([
-            'message' => 'Sent to the Irshad Support Team. We will follow up by email.',
-            'status' => 'escalated',
-            'suggestion_id' => $suggestion->id,
-        ]);
+        if ($notifyAdmins && ! $wasRecentlyNotified && Cache::add("chat_admin_email_alert:{$conversation->id}", 1, now()->addMinutes(10))) {
+            try {
+                $admins = User::where('role', 'admin')->get();
+                foreach ($admins as $admin) {
+                    $admin->notify(new AdminSuggestionNotification($suggestion));
+                }
+            } catch (\Throwable $e) {
+                Log::warning('Failed to queue admin escalation email: '.$e->getMessage());
+            }
+        }
+
+        return $suggestion;
     }
 
     /**

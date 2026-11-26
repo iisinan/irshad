@@ -88,7 +88,10 @@ class ChatbotService
         $geminiResult = $this->askGemini($systemInstruction, $history, $userMessage);
         if ($geminiResult !== null) {
             $output = $this->sanitizeOutput($geminiResult, $contextBundle, 'gemini');
-            if ($canCacheFaq && ! empty($output['reply']) && ! ($output['upgrade_required'] ?? false)) {
+            if (! ($output['needs_human_support'] ?? false) && $this->detectExplicitAdminSupportRequest($userMessage)) {
+                $output['needs_human_support'] = true;
+            }
+            if ($canCacheFaq && ! empty($output['reply']) && ! ($output['upgrade_required'] ?? false) && ! ($output['needs_human_support'] ?? false)) {
                 Cache::put($cacheKey, $output, 21600);
             }
 
@@ -98,7 +101,10 @@ class ChatbotService
         $groqResult = $this->askGroq($systemInstruction, $history, $userMessage);
         if ($groqResult !== null) {
             $output = $this->sanitizeOutput($groqResult, $contextBundle, 'groq');
-            if ($canCacheFaq && ! empty($output['reply']) && ! ($output['upgrade_required'] ?? false)) {
+            if (! ($output['needs_human_support'] ?? false) && $this->detectExplicitAdminSupportRequest($userMessage)) {
+                $output['needs_human_support'] = true;
+            }
+            if ($canCacheFaq && ! empty($output['reply']) && ! ($output['upgrade_required'] ?? false) && ! ($output['needs_human_support'] ?? false)) {
                 Cache::put($cacheKey, $output, 21600);
             }
 
@@ -108,7 +114,10 @@ class ChatbotService
         $perplexityResult = $this->askPerplexity($systemInstruction, $history, $userMessage);
         if ($perplexityResult !== null) {
             $output = $this->sanitizeOutput($perplexityResult, $contextBundle, 'perplexity');
-            if ($canCacheFaq && ! empty($output['reply']) && ! ($output['upgrade_required'] ?? false)) {
+            if (! ($output['needs_human_support'] ?? false) && $this->detectExplicitAdminSupportRequest($userMessage)) {
+                $output['needs_human_support'] = true;
+            }
+            if ($canCacheFaq && ! empty($output['reply']) && ! ($output['upgrade_required'] ?? false) && ! ($output['needs_human_support'] ?? false)) {
                 Cache::put($cacheKey, $output, 21600);
             }
 
@@ -213,7 +222,7 @@ class ChatbotService
     {
         $supportRule = $isPublic
             ? '4. If the user asks about personal billing, account recovery, missing stocks, or direct human help, set `"needs_human_support": true` and invite them to sign in or email support@irshad.app.'
-            : '4. If the user asks about billing disputes, double charges, missing stocks, broken features, account recovery, or explicitly asks to talk to a human/admin, set `"needs_human_support": true` and advise them they can tap **Send to Support Team** to route this chat to Irshad admins.';
+            : '4. If the user asks about billing disputes, double charges, missing stocks, broken features, account recovery, or explicitly asks to talk to a human/admin, set `"needs_human_support": true` and let them know an Irshad admin has been alerted and can reply directly in this chat.';
 
         return <<<PROMPT
 You are **Ask Irshad**, a strict domain-limited AI assistant for **Irshad** (an AAOIFI-aligned Nigerian Exchange / NGX Halal stock screening, portfolio purification, and Zakat platform).
@@ -597,8 +606,10 @@ PROMPT;
         }
 
         return $messages->take(10)->map(fn ($msg) => [
-            'role' => $msg->role === 'assistant' ? 'assistant' : 'user',
-            'content' => (string) $msg->content,
+            'role' => in_array($msg->role, ['assistant', 'admin'], true) ? 'assistant' : 'user',
+            'content' => $msg->role === 'admin'
+                ? '[Irshad Admin]: '.(string) $msg->content
+                : (string) $msg->content,
         ])->values()->all();
     }
 
@@ -849,6 +860,14 @@ PROMPT;
         ];
     }
 
+    private function detectExplicitAdminSupportRequest(string $userMessage): bool
+    {
+        return preg_match(
+            '/\b(speak\s+(?:to|with)\s+(?:an?\s+)?(?:admin|human|agent|support|person|someone)|talk\s+(?:to|with)\s+(?:an?\s+)?(?:admin|human|agent|support|person|someone)|connect\s+(?:me\s+)?(?:to|with)\s+(?:an?\s+)?(?:admin|human|support)|live\s+(?:support|agent|admin)|human\s+(?:support|help|admin)|need\s+(?:billing\s+or\s+)?account\s+help|billing\s+(?:issue|dispute|error|problem)|double\s+charge|charged\s+twice|billed\s+twice|refund|missing\s+stock)\b/i',
+            $userMessage
+        ) === 1;
+    }
+
     /**
      * Resilient deterministic local answer engine so the chatboard always answers accurately even when all LLM tokens are exhausted.
      */
@@ -913,7 +932,7 @@ PROMPT;
             $lines[] = "Here is what I can help with directly right now:";
             $lines[] = '- **NGX Stock Screening:** Ask about a ticker/company for its AAOIFI status and ratios.';
             $lines[] = '- **Zakat, Hawl & Purification:** Ask how AAOIFI Standard No. 21, Hawl tracking, or dividend cleansing work.';
-            $lines[] = '- **Account & Support Help:** Share your issue or tap **Send to Support Team** below.';
+            $lines[] = '- **Account & Support Help:** Share details of your issue below and an admin will join this thread.';
             $needsSupport = true;
         }
 
@@ -927,7 +946,7 @@ PROMPT;
         if ($needsSupport) {
             $lines[] = $isPublic
                 ? "\nNeed direct assistance? Sign in or email **support@irshad.app**."
-                : "\nNeed direct help from an admin? Tap **Send to Support Team** below.";
+                : "\nI've flagged this chat for the **Irshad Support Team** — an admin can chip in and reply right here in this chat.";
         }
 
         return [

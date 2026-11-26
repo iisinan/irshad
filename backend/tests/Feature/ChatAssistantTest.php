@@ -716,4 +716,77 @@ class ChatAssistantTest extends TestCase
                 && str_contains($system, 'MTN Nigeria Communications (MTNN)');
         });
     }
+
+    public function test_needs_human_support_auto_escalates_and_admin_can_chip_in_live(): void
+    {
+        Notification::fake();
+        \Illuminate\Support\Facades\Mail::fake();
+        Config::set('services.gemini.key', '');
+
+        $admin = User::factory()->create(['name' => 'Support Lead', 'role' => 'admin']);
+        $user = User::factory()->create(['name' => 'Amina Investor', 'email' => 'amina@example.com']);
+
+        // 1. User sends a message needing human admin attention -> auto-escalates & alerts admin
+        Sanctum::actingAs($user);
+        $first = $this->postJson('/api/v1/chat/message', [
+            'message' => 'I was double charged and need billing or account help.',
+        ])->assertStatus(201)
+            ->assertJsonPath('conversation.status', 'escalated')
+            ->assertJsonPath('assistant_message.metadata.needs_human_support', true)
+            ->assertJsonPath('waiting_for_admin', true);
+
+        $convId = $first->json('conversation.id');
+        Notification::assertSentTo($admin, AdminSuggestionNotification::class);
+
+        // Non-admin user cannot access admin chat endpoints
+        $this->getJson('/api/v1/admin/chat/conversations')->assertStatus(403);
+        $this->postJson("/api/v1/admin/chat/conversations/{$convId}/reply", [
+            'reply' => 'Unauthorized',
+        ])->assertStatus(403);
+
+        // 2. Admin sees the thread in inbox and chips in directly inside the same conversation
+        Sanctum::actingAs($admin);
+        $this->getJson('/api/v1/admin/chat/conversations?filter=attention')
+            ->assertOk()
+            ->assertJsonPath('data.0.id', $convId)
+            ->assertJsonPath('data.0.needs_attention', true);
+
+        $replyRes = $this->postJson("/api/v1/admin/chat/conversations/{$convId}/reply", [
+            'reply' => 'As-salamu alaykum Amina, I see the duplicate transaction and initiated a refund.',
+            'notify_email' => true,
+        ])->assertStatus(201)
+            ->assertJsonPath('conversation.status', 'admin_joined')
+            ->assertJsonPath('admin_message.role', 'admin')
+            ->assertJsonPath('admin_message.metadata.admin_name', 'Support Lead');
+
+        // 3. User replies back in the same thread -> AI does NOT interrupt while admin is live
+        Sanctum::actingAs($user);
+        $followUp = $this->postJson('/api/v1/chat/message', [
+            'conversation_id' => $convId,
+            'message' => 'Thank you! Should I see it on my card today?',
+        ])->assertStatus(201)
+            ->assertJsonPath('conversation.status', 'admin_joined')
+            ->assertJsonPath('user_message.role', 'user')
+            ->assertJsonPath('assistant_message', null)
+            ->assertJsonPath('waiting_for_admin', true);
+
+        // User fetches conversation and sees system notice + admin bubble + follow-up
+        $thread = $this->getJson("/api/v1/chat/conversations/{$convId}")
+            ->assertOk()
+            ->assertJsonPath('conversation.status', 'admin_joined');
+        $roles = array_column($thread->json('messages'), 'role');
+        $this->assertEquals(['user', 'assistant', 'system', 'admin', 'user'], $roles);
+
+        // 4. User or Admin hands thread back to AI -> AI resumes cleanly
+        $this->postJson("/api/v1/chat/conversations/{$convId}/resume-ai")
+            ->assertOk()
+            ->assertJsonPath('conversation.status', 'active');
+
+        $aiResume = $this->postJson('/api/v1/chat/message', [
+            'conversation_id' => $convId,
+            'message' => 'How does AAOIFI screening work?',
+        ])->assertStatus(201)
+            ->assertJsonPath('conversation.status', 'active')
+            ->assertJsonPath('assistant_message.role', 'assistant');
+    }
 }

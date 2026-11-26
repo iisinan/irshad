@@ -28,14 +28,22 @@ class AdminSuggestionNotification extends Notification implements ShouldQueue
     {
         $userName = $this->suggestion->user ? ($this->suggestion->user->name ?? $this->suggestion->user->first_name) : 'A user';
         $userEmail = $this->suggestion->user ? $this->suggestion->user->email : 'No email provided';
+        $convId = $this->suggestion->chat_conversation_id;
+        $inboxUrl = rtrim((string) config('app.frontend_url'), '/').'/admin/inbox'.($convId ? '?conversation_id='.$convId : '');
+        $subject = $convId
+            ? 'Chat Needs Admin Attention — Irshad'
+            : 'New Suggestion Received for Irshad';
+        $intro = $convId
+            ? "**{$userName} ({$userEmail})** started an AI chat that needs admin attention. You can jump right into this thread and reply live."
+            : "A new suggestion or feedback has been submitted by **{$userName} ({$userEmail})**.";
 
         $mail = (new MailMessage)
-            ->subject('New Suggestion Received for Irshad')
+            ->subject($subject)
             ->greeting('As-salamu alaykum, Admin!')
-            ->line('A new suggestion or feedback has been submitted by **' . $userName . ' (' . $userEmail . ')**.')
-            ->line('**Suggestion Details:**')
+            ->line($intro)
+            ->line('**Details:**')
             ->line($this->suggestion->message)
-            ->action('View Admin Inbox', config('app.frontend_url') . '/admin/inbox')
+            ->action($convId ? 'Reply in Live Chat' : 'View Admin Inbox', $inboxUrl)
             ->line('Jazakallah Khair,')
             ->salutation('The Irshad System');
 

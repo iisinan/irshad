@@ -25,6 +25,7 @@ import {
   sendPublicChatMessage,
   submitChatFeedback,
   escalateChatConversation,
+  resumeChatWithAi,
 } from '../services/api';
 import { toastSuccess, toastError } from '../utils/toast';
 
@@ -49,6 +50,8 @@ export default function ChatWidget() {
   const [sending, setSending] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [escalating, setEscalating] = useState(false);
+  const [confirmEscalate, setConfirmEscalate] = useState(false);
+  const [resumingAi, setResumingAi] = useState(false);
   const messagesEndRef = useRef(null);
 
   const userId = user?.id ?? null;
@@ -56,6 +59,7 @@ export default function ChatWidget() {
     setActiveConversation(null);
     setConversations([]);
     setMessages([]);
+    setConfirmEscalate(false);
     setView('chat');
   }, [userId]);
 
@@ -64,6 +68,35 @@ export default function ChatWidget() {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, open, view]);
+
+  // Poll active conversation when open so live admin replies appear right in chat
+  useEffect(() => {
+    if (!open || view !== 'chat' || !isAuthenticated || !activeConversation?.id) return undefined;
+
+    const convId = activeConversation.id;
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetchChatConversation(convId);
+        const nextMsgs = res.messages || [];
+        const nextConv = res.conversation;
+        setMessages((prev) => {
+          const prevLastId = prev[prev.length - 1]?.id;
+          const nextLastId = nextMsgs[nextMsgs.length - 1]?.id;
+          if (prev.length === nextMsgs.length && prevLastId === nextLastId) return prev;
+          return nextMsgs;
+        });
+        if (nextConv) {
+          setActiveConversation((prev) =>
+            prev && prev.status === nextConv.status ? prev : nextConv
+          );
+        }
+      } catch {
+        // Ignore transient poll errors
+      }
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [open, view, isAuthenticated, activeConversation?.id]);
 
   const loadConversations = async () => {
     try {
@@ -121,9 +154,11 @@ export default function ChatWidget() {
       if (isAuthenticated) {
         const res = await sendChatMessage(text, activeConversation?.id ?? null);
         setActiveConversation(res.conversation);
+        setConfirmEscalate(false);
         setMessages((prev) => {
           const withoutTemp = prev.filter((m) => m.id !== optimisticUserMsg.id);
-          return [...withoutTemp, res.user_message, res.assistant_message];
+          const additions = [res.user_message, res.assistant_message].filter(Boolean);
+          return [...withoutTemp, ...additions];
         });
       } else {
         const recentHistory = messages
@@ -168,17 +203,32 @@ export default function ChatWidget() {
 
   const handleEscalate = async () => {
     if (!activeConversation?.id || escalating) return;
-    if (activeConversation.status === 'escalated') return;
+    if (activeConversation.status === 'escalated' || activeConversation.status === 'admin_joined') return;
 
     try {
       setEscalating(true);
       await escalateChatConversation(activeConversation.id);
       setActiveConversation((prev) => (prev ? { ...prev, status: 'escalated' } : prev));
-      toastSuccess('Conversation sent to Irshad Support Team!');
+      setConfirmEscalate(false);
+      toastSuccess('Admin alerted — replies will appear right here in chat.');
     } catch (err) {
       toastError(err?.response?.data?.message || 'Could not escalate conversation.');
     } finally {
       setEscalating(false);
+    }
+  };
+
+  const handleResumeAi = async () => {
+    if (!activeConversation?.id || resumingAi) return;
+    try {
+      setResumingAi(true);
+      const res = await resumeChatWithAi(activeConversation.id);
+      setActiveConversation(res.conversation);
+      setMessages(res.messages || []);
+    } catch (err) {
+      toastError(err?.response?.data?.message || 'Could not switch back to AI.');
+    } finally {
+      setResumingAi(false);
     }
   };
 
@@ -379,18 +429,18 @@ export default function ChatWidget() {
                       <span style={{ fontWeight: 700, fontSize: '0.86rem', color: 'var(--text-dark)' }}>
                         {conv.title}
                       </span>
-                      {conv.status === 'escalated' && (
+                      {(conv.status === 'escalated' || conv.status === 'admin_joined') && (
                         <span
                           style={{
                             fontSize: '0.66rem',
                             fontWeight: 700,
                             padding: '2px 7px',
                             borderRadius: '999px',
-                            background: 'var(--primary-50)',
-                            color: 'var(--primary)',
+                            background: conv.status === 'admin_joined' ? 'var(--halal-bg)' : 'var(--gold-50)',
+                            color: conv.status === 'admin_joined' ? 'var(--halal)' : 'var(--gold)',
                           }}
                         >
-                          Escalated
+                          {conv.status === 'admin_joined' ? 'Admin Live' : 'Needs Admin'}
                         </span>
                       )}
                     </div>
@@ -466,8 +516,30 @@ export default function ChatWidget() {
                   </div>
                 ) : (
                   messages.map((msg) => {
+                    if (msg.role === 'system') {
+                      return (
+                        <div
+                          key={msg.id}
+                          style={{
+                            alignSelf: 'center',
+                            fontSize: '0.72rem',
+                            fontWeight: 600,
+                            color: 'var(--text-muted)',
+                            background: 'var(--bg-section)',
+                            border: '1px solid var(--border)',
+                            padding: '4px 10px',
+                            borderRadius: '999px',
+                          }}
+                        >
+                          {msg.content}
+                        </div>
+                      );
+                    }
+
                     const isUser = msg.role === 'user';
+                    const isAdmin = msg.role === 'admin';
                     const meta = msg.metadata || {};
+                    const adminLabel = meta.admin_name || 'Irshad Admin';
                     const citedSymbols = meta.cited_symbols || [];
                     const resources = meta.matched_resources || [];
                     const followups = meta.suggested_followups || [];
@@ -484,6 +556,25 @@ export default function ChatWidget() {
                           gap: '6px',
                         }}
                       >
+                        {isAdmin && (
+                          <div
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              fontSize: '0.68rem',
+                              fontWeight: 800,
+                              color: 'var(--gold)',
+                              paddingLeft: '4px',
+                              letterSpacing: '0.3px',
+                              textTransform: 'uppercase',
+                            }}
+                          >
+                            <Headphones size={11} />
+                            <span>{adminLabel} · Support</span>
+                          </div>
+                        )}
+
                         <div
                           style={{
                             maxWidth: '88%',
@@ -491,9 +582,17 @@ export default function ChatWidget() {
                             borderRadius: '14px',
                             borderBottomRightRadius: isUser ? '4px' : '14px',
                             borderBottomLeftRadius: !isUser ? '4px' : '14px',
-                            background: isUser ? 'var(--primary)' : 'var(--bg-section)',
+                            background: isUser
+                              ? 'var(--primary)'
+                              : isAdmin
+                                ? 'var(--gold-50)'
+                                : 'var(--bg-section)',
                             color: isUser ? '#fff' : 'var(--text-dark)',
-                            border: isUser ? 'none' : '1px solid var(--border)',
+                            border: isUser
+                              ? 'none'
+                              : isAdmin
+                                ? '1px solid var(--gold-border)'
+                                : '1px solid var(--border)',
                             fontSize: '0.85rem',
                             lineHeight: 1.5,
                           }}
@@ -628,7 +727,7 @@ export default function ChatWidget() {
                           </div>
                         )}
 
-                        {!isUser && typeof msg.id === 'number' && (
+                        {msg.role === 'assistant' && typeof msg.id === 'number' && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingLeft: '4px' }}>
                             <button
                               type="button"
@@ -697,19 +796,94 @@ export default function ChatWidget() {
                       gap: '8px',
                     }}
                   >
-                    {activeConversation.status === 'escalated' ? (
+                    {activeConversation.status === 'admin_joined' ? (
+                      <>
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
+                            color: 'var(--halal)',
+                          }}
+                        >
+                          <Headphones size={14} />
+                          <span>Admin joined — live chat</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleResumeAi}
+                          disabled={resumingAi}
+                          style={{
+                            padding: '4px 9px',
+                            borderRadius: '8px',
+                            border: '1px solid var(--border)',
+                            background: 'var(--bg)',
+                            color: 'var(--text-muted)',
+                            fontSize: '0.71rem',
+                            fontWeight: 700,
+                            cursor: resumingAi ? 'not-allowed' : 'pointer',
+                          }}
+                        >
+                          {resumingAi ? 'Switching...' : 'Resume AI'}
+                        </button>
+                      </>
+                    ) : activeConversation.status === 'escalated' ? (
                       <div
                         style={{
                           display: 'flex',
                           alignItems: 'center',
                           gap: '6px',
-                          fontSize: '0.76rem',
+                          fontSize: '0.75rem',
                           fontWeight: 700,
-                          color: 'var(--primary)',
+                          color: 'var(--gold)',
                         }}
                       >
                         <CheckCircle2 size={14} />
-                        <span>Sent to Irshad Support Team</span>
+                        <span>Admin notified — replies appear here</span>
+                      </div>
+                    ) : confirmEscalate ? (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '8px' }}>
+                        <span style={{ fontSize: '0.73rem', fontWeight: 700, color: 'var(--text-dark)' }}>
+                          Alert an Irshad admin?
+                        </span>
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          <button
+                            type="button"
+                            onClick={() => setConfirmEscalate(false)}
+                            disabled={escalating}
+                            style={{
+                              padding: '4px 9px',
+                              borderRadius: '7px',
+                              border: '1px solid var(--border)',
+                              background: 'var(--bg)',
+                              color: 'var(--text-muted)',
+                              fontSize: '0.72rem',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                            }}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleEscalate}
+                            disabled={escalating}
+                            style={{
+                              padding: '4px 10px',
+                              borderRadius: '7px',
+                              border: 'none',
+                              background: 'var(--primary)',
+                              color: '#fff',
+                              fontSize: '0.72rem',
+                              fontWeight: 700,
+                              cursor: escalating ? 'not-allowed' : 'pointer',
+                            }}
+                          >
+                            {escalating ? 'Sending...' : 'Confirm'}
+                          </button>
+                        </div>
                       </div>
                     ) : (
                       <>
@@ -718,7 +892,7 @@ export default function ChatWidget() {
                         </span>
                         <button
                           type="button"
-                          onClick={handleEscalate}
+                          onClick={() => setConfirmEscalate(true)}
                           disabled={escalating}
                           style={{
                             display: 'inline-flex',
@@ -735,7 +909,7 @@ export default function ChatWidget() {
                           }}
                         >
                           <Headphones size={13} />
-                          <span>{escalating ? 'Sending...' : 'Send to Support'}</span>
+                          <span>Send to Support</span>
                         </button>
                       </>
                     )}
@@ -796,7 +970,11 @@ export default function ChatWidget() {
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask a question..."
+                  placeholder={
+                    activeConversation?.status === 'admin_joined'
+                      ? 'Reply directly to Irshad Admin...'
+                      : 'Ask a question...'
+                  }
                   disabled={sending}
                   maxLength={1000}
                   style={{

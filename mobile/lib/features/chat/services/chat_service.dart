@@ -39,4 +39,9 @@ class ChatService {
     final response = await ApiService().post('chat/conversations/$conversationId/escalate', payload);
     return Map<String, dynamic>.from(response.data as Map);
   }
+
+  Future<Map<String, dynamic>> resumeAiConversation(int conversationId) async {
+    final response = await ApiService().post('chat/conversations/$conversationId/resume-ai', {});
+    return Map<String, dynamic>.from(response.data as Map);
+  }
 }

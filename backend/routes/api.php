@@ -255,6 +255,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/chat/message', [ChatController::class, 'sendMessage'])->middleware('throttle:20,1');
         Route::post('/chat/messages/{messageId}/feedback', [ChatController::class, 'feedback']);
         Route::post('/chat/conversations/{conversationId}/escalate', [ChatController::class, 'escalate']);
+        Route::post('/chat/conversations/{conversationId}/resume-ai', [ChatController::class, 'resumeAi']);
 
 
                 // Utils
@@ -377,12 +378,17 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // ── Admin Routes ─────────────────────────────────────────────────────
         Route::middleware(AdminMiddleware::class)->group(function () {
-            // Admin Suggestions
+            // Admin Suggestions & Live AI Chat Handoff
             Route::get('/admin/suggestions/unread-count', [SuggestionController::class, 'unreadCount']);
             Route::get('/admin/suggestions', [SuggestionController::class, 'index']);
             Route::put('/admin/suggestions/{id}/status', [SuggestionController::class, 'updateStatus']);
             Route::post('/admin/suggestions/{id}/reply', [SuggestionController::class, 'reply']);
             Route::delete('/admin/suggestions/{id}', [SuggestionController::class, 'destroy']);
+
+            Route::get('/admin/chat/conversations', [ChatController::class, 'adminConversations']);
+            Route::get('/admin/chat/conversations/{id}', [ChatController::class, 'adminShow']);
+            Route::post('/admin/chat/conversations/{id}/reply', [ChatController::class, 'adminReply']);
+            Route::post('/admin/chat/conversations/{id}/status', [ChatController::class, 'adminUpdateStatus']);
 
             // User Management
             Route::get('/admin/users', [AdminController::class, 'getUsers']);
